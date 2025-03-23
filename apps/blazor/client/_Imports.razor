@@ -1,0 +1,34 @@
+﻿@using System.Net.Http
+@using System.Net.Http.Json
+@using AMIS.Blazor.Infrastructure.Preferences
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Routing
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.AspNetCore.Components.Web.Virtualization
+@using Microsoft.AspNetCore.Components.WebAssembly.Http
+@using Microsoft.JSInterop
+@using AMIS.Blazor.Client
+@using AMIS.Blazor.Client.Layout
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Client.Components.General
+@using AMIS.Blazor.Client.Components.Dialogs
+@using AMIS.Blazor.Client.Components.Common
+@using AMIS.Blazor.Client.Components.EntityTable
+@using AMIS.Blazor.Infrastructure.Auth
+@using MudBlazor
+@using Blazored.LocalStorage
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Blazor.Client.Components.ThemeManager;
+
+@using AMIS.Blazor.Client.Pages.Auth
+
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize]
+
+@inject NavigationManager Navigation
+@inject ISnackbar Toast
+@inject IDialogService DialogService
+@inject IConfiguration Config
+@inject IClientPreferenceManager ClientPreferences
