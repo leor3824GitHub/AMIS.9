@@ -7,7 +7,7 @@ using MediatR;
 
 namespace AMIS.WebApi.Catalog.Application.Categories.Get.v1;
 public sealed class GetCategoryHandler(
-    [FromKeyedServices("catalog:categorys")] IReadRepository<Category> repository,
+    [FromKeyedServices("catalog:categories")] IReadRepository<Category> repository,
     ICacheService cache)
     : IRequestHandler<GetCategoryRequest, CategoryResponse>
 {

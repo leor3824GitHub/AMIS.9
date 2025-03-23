@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AMIS.WebApi.Catalog.Application.Categories.Search.v1;
 public sealed class SearchCategorysHandler(
-    [FromKeyedServices("catalog:categorys")] IReadRepository<Category> repository)
+    [FromKeyedServices("catalog:categories")] IReadRepository<Category> repository)
     : IRequestHandler<SearchCategorysCommand, PagedList<CategoryResponse>>
 {
     public async Task<PagedList<CategoryResponse>> Handle(SearchCategorysCommand request, CancellationToken cancellationToken)

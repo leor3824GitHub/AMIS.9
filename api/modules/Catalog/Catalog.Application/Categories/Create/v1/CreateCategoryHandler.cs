@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace AMIS.WebApi.Catalog.Application.Categories.Create.v1;
 public sealed class CreateCategoryHandler(
     ILogger<CreateCategoryHandler> logger,
-    [FromKeyedServices("catalog:categorys")] IRepository<Category> repository)
+    [FromKeyedServices("catalog:categories")] IRepository<Category> repository)
     : IRequestHandler<CreateCategoryCommand, CreateCategoryResponse>
 {
     public async Task<CreateCategoryResponse> Handle(CreateCategoryCommand request, CancellationToken cancellationToken)
