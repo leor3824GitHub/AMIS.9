@@ -9,6 +9,6 @@ public class GetProductSpecs : Specification<Product, ProductResponse>
     {
         Query
             .Where(p => p.Id == id)
-            .Include(p => p.Brand);
+            .Include(p => p.Category);
     }
 }

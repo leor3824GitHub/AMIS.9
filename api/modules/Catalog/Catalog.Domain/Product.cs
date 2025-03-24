@@ -7,29 +7,29 @@ public class Product : AuditableEntity, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
     public string? Description { get; private set; }
-    public decimal Price { get; private set; }
-    public Guid? BrandId { get; private set; }
-    public virtual Brand Brand { get; private set; } = default!;
+    public decimal SKU { get; private set; }
+    public Guid? CategoryId { get; private set; }
+    public virtual Category Category { get; private set; } = default!;
 
     private Product() { }
 
-    private Product(Guid id, string name, string? description, decimal price, Guid? brandId)
+    private Product(Guid id, string name, string? description, decimal sku, Guid? categoryId)
     {
         Id = id;
         Name = name;
         Description = description;
-        Price = price;
-        BrandId = brandId;
+        SKU = sku;
+        CategoryId = categoryId;
 
         QueueDomainEvent(new ProductCreated { Product = this });
     }
 
-    public static Product Create(string name, string? description, decimal price, Guid? brandId)
+    public static Product Create(string name, string? description, decimal sku, Guid? categoryId)
     {
-        return new Product(Guid.NewGuid(), name, description, price, brandId);
+        return new Product(Guid.NewGuid(), name, description, sku, categoryId);
     }
 
-    public Product Update(string? name, string? description, decimal? price, Guid? brandId)
+    public Product Update(string? name, string? description, decimal? sku, Guid? categoryId)
     {
         bool isUpdated = false;
 
@@ -45,15 +45,15 @@ public class Product : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (price.HasValue && Price != price.Value)
+        if (sku.HasValue && SKU != sku.Value)
         {
-            Price = price.Value;
+            SKU = sku.Value;
             isUpdated = true;
         }
 
-        if (brandId.HasValue && brandId.Value != Guid.Empty && BrandId != brandId.Value)
+        if (categoryId.HasValue && categoryId.Value != Guid.Empty && CategoryId != categoryId.Value)
         {
-            BrandId = brandId.Value;
+            CategoryId = categoryId.Value;
             isUpdated = true;
         }
 

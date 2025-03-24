@@ -13,42 +13,47 @@ public class Inventory : AuditableEntity, IAggregateRoot
 
     private Inventory() { }
 
-    private Inventory(Guid id, string name, string? description, decimal price, Guid? brandId)
+    private Inventory(Guid id, Guid? productId, string? location, decimal qty, decimal avePrice)
     {
         Id = id;
-        ProductId = id;
-        Location = name;
-        Qty = price;
-        AvePrice = price;
-        Inventory = new Inventory { Name = name, Description = description, Price = price, BrandId = brandId };
+        ProductId = productId;
+        Location = location;
+        Qty = qty;
+        AvePrice = avePrice;
 
         QueueDomainEvent(new InventoryUpdated { Inventory = this });
     }
 
-    public static Inventory Create(string name, string? description, decimal price, Guid? brandId)
+    public static Inventory Create(Guid? productId, string? location, decimal qty, decimal avePrice)
     {
-        return new Inventory(Guid.NewGuid(), name, description, price, brandId);
+        return new Inventory(Guid.NewGuid(), productId, location, qty, avePrice);
     }
 
-    public Inventory Update(string? name, string? description, decimal? price, Guid? brandId)
+    public Inventory Update(Guid? productId, string? location, decimal qty, decimal avePrice)
     {
         bool isUpdated = false;
 
-        if (!string.Equals(Product.Description, description, StringComparison.OrdinalIgnoreCase))
+        if (ProductId != productId)
         {
-            Inventory.Description = description;
+            ProductId = productId;
             isUpdated = true;
         }
 
-        if (price.HasValue && Product.Price != price.Value)
+        if (!string.Equals(Location, location, StringComparison.OrdinalIgnoreCase))
         {
-            Inventory.Price = price.Value;
+            Location = location;
             isUpdated = true;
         }
 
-        if (brandId.HasValue && brandId.Value != Guid.Empty && Inventory.BrandId != brandId.Value)
+        if (Qty != qty)
         {
-            Inventory.BrandId = brandId.Value;
+            Qty = qty;
+            isUpdated = true;
+        }
+
+        if (AvePrice != avePrice)
+        {
+            AvePrice = avePrice;
             isUpdated = true;
         }
 

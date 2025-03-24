@@ -4,6 +4,6 @@ namespace AMIS.WebApi.Catalog.Application.Products.Update.v1;
 public sealed record UpdateProductCommand(
     Guid Id,
     string? Name,
-    decimal Price,
+    decimal SKU,
     string? Description = null,
-    Guid? BrandId = null) : IRequest<UpdateProductResponse>;
+    Guid? CategoryId = null) : IRequest<UpdateProductResponse>;
