@@ -20,7 +20,7 @@ public static class GetCategoryEndpoint
             .WithSummary("gets brand by id")
             .WithDescription("gets brand by id")
             .Produces<CategoryResponse>()
-            .RequirePermission("Permissions.Categorys.View")
+            .RequirePermission("Permissions.Categories.View")
             .MapToApiVersion(1);
     }
 }

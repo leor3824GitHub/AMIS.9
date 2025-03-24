@@ -9,8 +9,18 @@
     }
     <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Modules</MudText>
     <MudNavGroup Title="Catalog" Icon="@Icons.Material.Filled.AddBox">
-         <MudNavLink Href="/catalog/products" Icon="@Icons.Material.Filled.ShoppingBag" Class="fsh-nav-child">Products</MudNavLink>
-        <MudNavLink Href="/catalog/brands" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Brands</MudNavLink>
+        @if (_canViewProducts)
+        {
+            <MudNavLink Href="/catalog/products" Icon="@Icons.Material.Filled.ShoppingBag" Class="fsh-nav-child">Products</MudNavLink>
+        }
+        @if (_canViewBrands)
+        {
+            <MudNavLink Href="/catalog/brands" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Brands</MudNavLink>
+        }
+        @if (_canViewCategories)
+        {
+            <MudNavLink Href="/catalog/categories" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Categories</MudNavLink>
+        }
     </MudNavGroup>
     <MudNavLink Href="/todos" Icon="@Icons.Material.Filled.Checklist" Class="fsh-nav-child">Todos</MudNavLink>
     @if (CanViewAdministrationGroup)

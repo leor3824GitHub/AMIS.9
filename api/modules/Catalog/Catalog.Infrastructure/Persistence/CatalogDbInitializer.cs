@@ -30,5 +30,27 @@ internal sealed class CatalogDbInitializer(
             await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             logger.LogInformation("[{Tenant}] seeding default catalog data", context.TenantInfo!.Identifier);
         }
+
+        // Add more seed data here
+        const string BName = "Epson";
+        const string BDescription = "Epson";
+        if (await context.Brands.FirstOrDefaultAsync(t => t.Name == Name, cancellationToken).ConfigureAwait(false) is null)
+        {
+            var brand = Brand.Create(BName, BDescription);
+            await context.Brands.AddAsync(brand, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            logger.LogInformation("[{Tenant}] seeding default catalog data", context.TenantInfo!.Identifier);
+        }
+
+        // Add more seed data here
+        const string CName = "Folder";
+        const string CDescription = "Folders";
+        if (await context.Categories.FirstOrDefaultAsync(t => t.Name == Name, cancellationToken).ConfigureAwait(false) is null)
+        {
+            var category = Category.Create(CName, CDescription);
+            await context.Categories.AddAsync(category, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            logger.LogInformation("[{Tenant}] seeding default catalog data", context.TenantInfo!.Identifier);
+        }
     }
 }

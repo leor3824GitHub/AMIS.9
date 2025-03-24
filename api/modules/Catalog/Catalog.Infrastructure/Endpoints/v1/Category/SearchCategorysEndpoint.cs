@@ -24,7 +24,7 @@ public static class SearchCategorysEndpoint
             .WithSummary("Gets a list of brands")
             .WithDescription("Gets a list of brands with pagination and filtering support")
             .Produces<PagedList<CategoryResponse>>()
-            .RequirePermission("Permissions.Categorys.View")
+            .RequirePermission("Permissions.Categories.View")
             .MapToApiVersion(1);
     }
 }

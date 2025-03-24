@@ -21,7 +21,7 @@ public static class UpdateCategoryEndpoint
             .WithSummary("update a category")
             .WithDescription("update a category")
             .Produces<UpdateCategoryResponse>()
-            .RequirePermission("Permissions.Categorys.Update")
+            .RequirePermission("Permissions.Categories.Update")
             .MapToApiVersion(1);
     }
 }

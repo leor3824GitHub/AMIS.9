@@ -20,7 +20,7 @@ public static class DeleteCategoryEndpoint
             .WithSummary("deletes brand by id")
             .WithDescription("deletes brand by id")
             .Produces(StatusCodes.Status204NoContent)
-            .RequirePermission("Permissions.Categorys.Delete")
+            .RequirePermission("Permissions.Categories.Delete")
             .MapToApiVersion(1);
     }
 }
