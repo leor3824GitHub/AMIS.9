@@ -52,6 +52,14 @@ public static class FshPermissions
         new("Delete Categories", FshActions.Delete, FshResources.Categories),
         new("Export Categories", FshActions.Export, FshResources.Categories),
 
+        //inventories
+        new("View Inventories", FshActions.View, FshResources.Inventories, IsBasic: true),
+        new("Search Inventories", FshActions.Search, FshResources.Inventories, IsBasic: true),
+        new("Create Inventories", FshActions.Create, FshResources.Inventories),
+        new("Update Inventories", FshActions.Update, FshResources.Inventories),
+        new("Delete Inventories", FshActions.Delete, FshResources.Inventories),
+        new("Export Inventories", FshActions.Export, FshResources.Inventories),
+
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
         new("Search Todos", FshActions.Search, FshResources.Todos, IsBasic: true),
