@@ -92,6 +92,14 @@ public static class FshPermissions
         new("Delete Employees", FshActions.Delete, FshResources.Employees),
         new("Export Employees", FshActions.Export, FshResources.Employees),
 
+        //issuances
+        new("View Issuances", FshActions.View, FshResources.Employees, IsBasic: true),
+        new("Search Issuances", FshActions.Search, FshResources.Issuances, IsBasic: true),
+        new("Create Issuances", FshActions.Create, FshResources.Issuances),
+        new("Update Issuances", FshActions.Update, FshResources.Issuances),
+        new("Delete Issuances", FshActions.Delete, FshResources.Issuances),
+        new("Export Issuances", FshActions.Export, FshResources.Issuances),
+
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
         new("Search Todos", FshActions.Search, FshResources.Todos, IsBasic: true),

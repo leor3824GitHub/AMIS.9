@@ -5,31 +5,34 @@ using AMIS.WebApi.Catalog.Domain.Events;
 namespace AMIS.WebApi.Catalog.Domain;
 public class Issuance : AuditableEntity, IAggregateRoot
 {
-    public Guid? ProductId { get; private set; }
-    public string? Location { get; private set; }
+    public Guid ProductId { get; private set; }
+    public Guid EmployeeId { get; private set; }
     public decimal Qty { get; private set; }
-    public decimal AvePrice { get; private set; }
+    public string Unit { get; private set; } = string.Empty; // Initialize with a default value
+    public decimal UnitPrice { get; private set; }
     public virtual Product Product { get; private set; } = default!;
+    public virtual Employee Employee { get; private set; } = default!;
 
     private Issuance() { }
 
-    private Issuance(Guid id, Guid? productId, string? location, decimal qty, decimal avePrice)
+    private Issuance(Guid id, Guid productId, Guid employeeId, decimal qty, string unit, decimal unitPrice)
     {
         Id = id;
         ProductId = productId;
-        Location = location;
+        EmployeeId = employeeId;
         Qty = qty;
-        AvePrice = avePrice;
+        Unit = unit;
+        UnitPrice = unitPrice;
 
         QueueDomainEvent(new IssuanceUpdated { Issuance = this });
     }
 
-    public static Issuance Create(Guid? productId, string? location, decimal qty, decimal avePrice)
+    public static Issuance Create(Guid productId, Guid employeeId, decimal qty, string unit, decimal unitPrice)
     {
-        return new Issuance(Guid.NewGuid(), productId, location, qty, avePrice);
+        return new Issuance(Guid.NewGuid(), productId, employeeId, qty, unit, unitPrice);
     }
 
-    public Issuance Update(Guid? productId, string? location, decimal qty, decimal avePrice)
+    public Issuance Update(Guid productId, Guid employeeId, decimal qty, string unit, decimal unitPrice)
     {
         bool isUpdated = false;
 
@@ -39,9 +42,9 @@ public class Issuance : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (!string.Equals(Location, location, StringComparison.OrdinalIgnoreCase))
+        if (EmployeeId != employeeId)
         {
-            Location = location;
+            EmployeeId = employeeId;
             isUpdated = true;
         }
 
@@ -51,9 +54,15 @@ public class Issuance : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (AvePrice != avePrice)
+        if (!string.Equals(Unit, unit, StringComparison.OrdinalIgnoreCase))
         {
-            AvePrice = avePrice;
+            Unit = unit;
+            isUpdated = true;
+        }
+
+        if (UnitPrice != unitPrice)
+        {
+            UnitPrice = unitPrice;
             isUpdated = true;
         }
 

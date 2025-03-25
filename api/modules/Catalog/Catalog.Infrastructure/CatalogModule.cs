@@ -66,12 +66,19 @@ public static class CatalogModule
             purchaseItemGroup.MapPurchaseItemUpdateEndpoint();
             purchaseItemGroup.MapPurchaseItemDeleteEndpoint();
 
-            var employeeItemGroup = app.MapGroup("employees").WithTags("employees");
-            employeeItemGroup.MapEmployeeCreationEndpoint();
-            employeeItemGroup.MapGetEmployeeEndpoint();
-            employeeItemGroup.MapGetEmployeeListEndpoint();
-            employeeItemGroup.MapEmployeeUpdateEndpoint();
-            employeeItemGroup.MapEmployeeDeleteEndpoint();
+            var employeeGroup = app.MapGroup("employees").WithTags("employees");
+            employeeGroup.MapEmployeeCreationEndpoint();
+            employeeGroup.MapGetEmployeeEndpoint();
+            employeeGroup.MapGetEmployeeListEndpoint();
+            employeeGroup.MapEmployeeUpdateEndpoint();
+            employeeGroup.MapEmployeeDeleteEndpoint();
+
+            var issuanceGroup = app.MapGroup("issuances").WithTags("issuances");
+            issuanceGroup.MapIssuanceCreationEndpoint();
+            issuanceGroup.MapGetIssuanceEndpoint();
+            issuanceGroup.MapGetIssuanceListEndpoint();
+            issuanceGroup.MapIssuanceUpdateEndpoint();
+            issuanceGroup.MapIssuanceDeleteEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -100,6 +107,10 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
         builder.Services.AddKeyedScoped<IReadRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
+
+        builder.Services.AddKeyedScoped<IRepository<Issuance>, CatalogRepository<Issuance>>("catalog:issuances");
+        builder.Services.AddKeyedScoped<IReadRepository<Issuance>, CatalogRepository<Issuance>>("catalog:issuances");
+
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)
