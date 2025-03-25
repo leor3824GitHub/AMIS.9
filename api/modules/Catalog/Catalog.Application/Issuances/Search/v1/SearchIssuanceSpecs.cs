@@ -11,8 +11,6 @@ public class SearchIssuanceSpecs : EntitiesByPaginationFilterSpec<Issuance, Issu
         : base(command) =>
         Query
             .Include(p => p.Employee)
-            .Include(p => p.Product)
-            .OrderBy(c => c.Product.Name, !command.HasOrderBy())
-            .Where(p => p.ProductId == command.ProductId!.Value, command.ProductId.HasValue)
+            .OrderBy(c => c.Employee.Name, !command.HasOrderBy())
             .Where(p => p.EmployeeId == command.EmployeeId!.Value, command.EmployeeId.HasValue);
 }

@@ -5,42 +5,33 @@ using AMIS.WebApi.Catalog.Domain.Events;
 namespace AMIS.WebApi.Catalog.Domain;
 public class Issuance : AuditableEntity, IAggregateRoot
 {
-    public Guid ProductId { get; private set; }
     public Guid EmployeeId { get; private set; }
-    public decimal Qty { get; private set; }
-    public string Unit { get; private set; } = string.Empty; // Initialize with a default value
-    public decimal UnitPrice { get; private set; }
-    public virtual Product Product { get; private set; } = default!;
+    public DateTime IssuanceDate { get; private set; }
+    public decimal TotalAmount { get; private set; }
+    public string? Status { get; private set; }
     public virtual Employee Employee { get; private set; } = default!;
 
     private Issuance() { }
 
-    private Issuance(Guid id, Guid productId, Guid employeeId, decimal qty, string unit, decimal unitPrice)
+    private Issuance(Guid id, Guid employeeId, decimal totalAmount, string? status)
     {
         Id = id;
-        ProductId = productId;
         EmployeeId = employeeId;
-        Qty = qty;
-        Unit = unit;
-        UnitPrice = unitPrice;
+        IssuanceDate = DateTime.UtcNow;
+        TotalAmount = totalAmount;
+        Status = status;
 
         QueueDomainEvent(new IssuanceUpdated { Issuance = this });
     }
 
-    public static Issuance Create(Guid productId, Guid employeeId, decimal qty, string unit, decimal unitPrice)
+    public static Issuance Create(Guid employeeId, decimal totalAmount, string? status)
     {
-        return new Issuance(Guid.NewGuid(), productId, employeeId, qty, unit, unitPrice);
+        return new Issuance(Guid.NewGuid(), employeeId, totalAmount, status);
     }
 
-    public Issuance Update(Guid productId, Guid employeeId, decimal qty, string unit, decimal unitPrice)
+    public Issuance Update(Guid employeeId, DateTime issuanceDate, decimal totalAmount, string? status)
     {
         bool isUpdated = false;
-
-        if (ProductId != productId)
-        {
-            ProductId = productId;
-            isUpdated = true;
-        }
 
         if (EmployeeId != employeeId)
         {
@@ -48,21 +39,15 @@ public class Issuance : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (Qty != qty)
+        if (IssuanceDate != issuanceDate)
         {
-            Qty = qty;
+            IssuanceDate = issuanceDate;
             isUpdated = true;
         }
 
-        if (!string.Equals(Unit, unit, StringComparison.OrdinalIgnoreCase))
+        if (TotalAmount != totalAmount)
         {
-            Unit = unit;
-            isUpdated = true;
-        }
-
-        if (UnitPrice != unitPrice)
-        {
-            UnitPrice = unitPrice;
+            TotalAmount = totalAmount;
             isUpdated = true;
         }
 

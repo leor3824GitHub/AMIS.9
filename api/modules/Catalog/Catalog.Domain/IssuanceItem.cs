@@ -3,41 +3,43 @@ using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
 
 namespace AMIS.WebApi.Catalog.Domain;
-public class PurchaseItem : AuditableEntity, IAggregateRoot
+public class IssuanceItem : AuditableEntity, IAggregateRoot
 {
-    public Guid PurchaseId { get; private set; }
+    public Guid IssuanceId { get; private set; }
     public Guid ProductId { get; private set; }
     public decimal Qty { get; private set; }
+    public string Unit { get; private set; } = string.Empty;
     public decimal UnitPrice { get; private set; }
     public string? Status { get; private set; }
     public virtual Product Product { get; private set; } = default!;
 
-    private PurchaseItem() { }
+    private IssuanceItem() { }
 
-    private PurchaseItem(Guid id, Guid purchaseId, Guid productId, decimal qty, decimal unitPrice, string? status)
+    private IssuanceItem(Guid id, Guid issuanceId, Guid productId, decimal qty, string unit, decimal unitPrice, string? status)
     {
         Id = id;
-        PurchaseId = purchaseId;
+        IssuanceId = issuanceId;
         ProductId = productId;
         Qty = qty;
+        Unit = unit;
         UnitPrice = unitPrice;
         Status = status;
 
-        QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = this });
+        QueueDomainEvent(new IssuanceItemUpdated { IssuanceItem = this });
     }
 
-    public static PurchaseItem Create(Guid purchaseId, Guid productId, decimal qty, decimal unitPrice, string? status)
+    public static IssuanceItem Create(Guid issuanceId, Guid productId, decimal qty, string unit, decimal unitPrice, string? status)
     {
-        return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, status);
+        return new IssuanceItem(Guid.NewGuid(), issuanceId, productId, qty, unit, unitPrice, status);
     }
 
-    public PurchaseItem Update(Guid purchaseId, Guid productId, decimal qty, decimal unitPrice, string? status)
+    public IssuanceItem Update(Guid issuanceId, Guid productId, decimal qty, string unit, decimal unitPrice, string? status)
     {
         bool isUpdated = false;
 
-        if (PurchaseId != purchaseId)
+        if (IssuanceId != issuanceId)
         {
-            PurchaseId = purchaseId;
+            IssuanceId = issuanceId;
             isUpdated = true;
         }
 
@@ -50,6 +52,12 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
         if (Qty != qty)
         {
             Qty = qty;
+            isUpdated = true;
+        }
+
+        if (!string.Equals(Unit, unit, StringComparison.OrdinalIgnoreCase))
+        {
+            Unit = unit;
             isUpdated = true;
         }
 
@@ -67,7 +75,7 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
 
         if (isUpdated)
         {
-            QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = this });
+            QueueDomainEvent(new IssuanceItemUpdated { IssuanceItem = this });
         }
 
         return this;

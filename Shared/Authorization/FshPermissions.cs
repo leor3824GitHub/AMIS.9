@@ -93,7 +93,7 @@ public static class FshPermissions
         new("Export Employees", FshActions.Export, FshResources.Employees),
 
         //issuances
-        new("View Issuances", FshActions.View, FshResources.Employees, IsBasic: true),
+        new("View Issuances", FshActions.View, FshResources.Issuances, IsBasic: true),
         new("Search Issuances", FshActions.Search, FshResources.Issuances, IsBasic: true),
         new("Create Issuances", FshActions.Create, FshResources.Issuances),
         new("Update Issuances", FshActions.Update, FshResources.Issuances),
