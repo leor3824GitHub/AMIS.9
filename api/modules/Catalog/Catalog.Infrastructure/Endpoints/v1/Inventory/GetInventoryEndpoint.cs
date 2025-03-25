@@ -18,7 +18,7 @@ public static class GetInventoryEndpoint
             })
             .WithName(nameof(GetInventoryEndpoint))
             .WithSummary("gets inventory by id")
-            .WithDescription("gets prodct by id")
+            .WithDescription("gets inventory by id")
             .Produces<InventoryResponse>()
             .RequirePermission("Permissions.Inventories.View")
             .MapToApiVersion(1);
