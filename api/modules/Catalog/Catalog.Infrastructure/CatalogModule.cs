@@ -39,11 +39,11 @@ public static class CatalogModule
             categoryGroup.MapCategoryDeleteEndpoint();
 
             var inventoryGroup = app.MapGroup("inventories").WithTags("inventories");
-            inventoryGroup.MapCategoryCreationEndpoint();
-            inventoryGroup.MapGetCategoryEndpoint();
-            inventoryGroup.MapGetCategoryListEndpoint();
-            inventoryGroup.MapCategoryUpdateEndpoint();
-            inventoryGroup.MapCategoryDeleteEndpoint();
+            inventoryGroup.MapInventoryCreationEndpoint();
+            inventoryGroup.MapGetInventoryEndpoint();
+            inventoryGroup.MapGetInventoryListEndpoint();
+            inventoryGroup.MapInventoryUpdateEndpoint();
+            inventoryGroup.MapInventoryDeleteEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
