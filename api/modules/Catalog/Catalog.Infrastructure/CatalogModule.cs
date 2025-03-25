@@ -44,6 +44,13 @@ public static class CatalogModule
             inventoryGroup.MapGetInventoryListEndpoint();
             inventoryGroup.MapInventoryUpdateEndpoint();
             inventoryGroup.MapInventoryDeleteEndpoint();
+
+            var supplierGroup = app.MapGroup("suppliers").WithTags("suppliers");
+            supplierGroup.MapSupplierCreationEndpoint();
+            supplierGroup.MapGetSupplierEndpoint();
+            supplierGroup.MapGetSupplierListEndpoint();
+            supplierGroup.MapSupplierUpdateEndpoint();
+            supplierGroup.MapSupplierDeleteEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -60,6 +67,9 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<Inventory>, CatalogRepository<Inventory>>("catalog:inventories");
         builder.Services.AddKeyedScoped<IReadRepository<Inventory>, CatalogRepository<Inventory>>("catalog:inventories");
+
+        builder.Services.AddKeyedScoped<IRepository<Supplier>, CatalogRepository<Supplier>>("catalog:suppliers");
+        builder.Services.AddKeyedScoped<IReadRepository<Supplier>, CatalogRepository<Supplier>>("catalog:suppliers");
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)

@@ -34,7 +34,7 @@ internal sealed class CatalogDbInitializer(
         // Add more seed data here
         const string BName = "Epson";
         const string BDescription = "Epson";
-        if (await context.Brands.FirstOrDefaultAsync(t => t.Name == Name, cancellationToken).ConfigureAwait(false) is null)
+        if (await context.Brands.FirstOrDefaultAsync(t => t.Name == BName, cancellationToken).ConfigureAwait(false) is null)
         {
             var brand = Brand.Create(BName, BDescription);
             await context.Brands.AddAsync(brand, cancellationToken);
@@ -45,7 +45,7 @@ internal sealed class CatalogDbInitializer(
         // Add more seed data here
         const string CName = "Folder";
         const string CDescription = "Folders";
-        if (await context.Categories.FirstOrDefaultAsync(t => t.Name == Name, cancellationToken).ConfigureAwait(false) is null)
+        if (await context.Categories.FirstOrDefaultAsync(t => t.Name == CName, cancellationToken).ConfigureAwait(false) is null)
         {
             var category = Category.Create(CName, CDescription);
             await context.Categories.AddAsync(category, cancellationToken);

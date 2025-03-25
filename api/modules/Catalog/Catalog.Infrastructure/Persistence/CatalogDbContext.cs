@@ -21,6 +21,7 @@ public sealed class CatalogDbContext : FshDbContext
     public DbSet<Brand> Brands { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<Inventory> Inventories { get; set; } = null!;
+    public DbSet<Supplier> Suppliers { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
