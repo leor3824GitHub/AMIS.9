@@ -8,5 +8,9 @@ public class SearchSuppliersCommand : PaginationFilter, IRequest<PagedList<Suppl
 {
     public string? Name { get; set; }
     public string? Address { get; set; }
+    public string? TIN { get; set; }
+    public bool IsVAT { get; set; }
+    public string? ContactNo { get; set; }
+    public string? Emailadd { get; set; }
 
 }

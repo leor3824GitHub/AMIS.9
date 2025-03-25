@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AMIS.WebApi.Catalog.Application.Suppliers.Search.v1;
 public sealed class SearchSuppliersHandler(
-    [FromKeyedServices("catalog:brands")] IReadRepository<Supplier> repository)
+    [FromKeyedServices("catalog:suppliers")] IReadRepository<Supplier> repository)
     : IRequestHandler<SearchSuppliersCommand, PagedList<SupplierResponse>>
 {
     public async Task<PagedList<SupplierResponse>> Handle(SearchSuppliersCommand request, CancellationToken cancellationToken)
