@@ -84,6 +84,14 @@ public static class FshPermissions
         new("Delete PurchaseItems", FshActions.Delete, FshResources.PurchaseItems),
         new("Export PurchaseItems", FshActions.Export, FshResources.PurchaseItems),
 
+        //employees
+        new("View Employees", FshActions.View, FshResources.Employees, IsBasic: true),
+        new("Search Employees", FshActions.Search, FshResources.Employees, IsBasic: true),
+        new("Create Employees", FshActions.Create, FshResources.Employees),
+        new("Update Employees", FshActions.Update, FshResources.Employees),
+        new("Delete Employees", FshActions.Delete, FshResources.Employees),
+        new("Export Employees", FshActions.Export, FshResources.Employees),
+
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
         new("Search Todos", FshActions.Search, FshResources.Todos, IsBasic: true),

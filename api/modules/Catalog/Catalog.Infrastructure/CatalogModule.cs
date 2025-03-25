@@ -65,6 +65,13 @@ public static class CatalogModule
             purchaseItemGroup.MapGetPurchaseItemListEndpoint();
             purchaseItemGroup.MapPurchaseItemUpdateEndpoint();
             purchaseItemGroup.MapPurchaseItemDeleteEndpoint();
+
+            var employeeItemGroup = app.MapGroup("employees").WithTags("employees");
+            employeeItemGroup.MapEmployeeCreationEndpoint();
+            employeeItemGroup.MapGetEmployeeEndpoint();
+            employeeItemGroup.MapGetEmployeeListEndpoint();
+            employeeItemGroup.MapEmployeeUpdateEndpoint();
+            employeeItemGroup.MapEmployeeDeleteEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -90,6 +97,9 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
         builder.Services.AddKeyedScoped<IReadRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
+
+        builder.Services.AddKeyedScoped<IRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
+        builder.Services.AddKeyedScoped<IReadRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)

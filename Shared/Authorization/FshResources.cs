@@ -15,6 +15,7 @@ public static class FshResources
     public const string Suppliers = nameof(Suppliers);
     public const string Purchases = nameof(Purchases);
     public const string PurchaseItems = nameof(PurchaseItems);
+    public const string Employees = nameof(Employees);
     public const string Todos = nameof(Todos);
     public const string AuditTrails = nameof(AuditTrails);
 }
