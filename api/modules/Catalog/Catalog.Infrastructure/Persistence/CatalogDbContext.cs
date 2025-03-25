@@ -23,6 +23,7 @@ public sealed class CatalogDbContext : FshDbContext
     public DbSet<Inventory> Inventories { get; set; } = null!;
     public DbSet<Supplier> Suppliers { get; set; } = null!;
     public DbSet<Purchase> Purchases { get; set; } = null!;
+    public DbSet<PurchaseItem> PurchaseItems { get; set; } = null!;
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

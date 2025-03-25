@@ -58,6 +58,13 @@ public static class CatalogModule
             purchaseGroup.MapGetPurchaseListEndpoint();
             purchaseGroup.MapPurchaseUpdateEndpoint();
             purchaseGroup.MapPurchaseDeleteEndpoint();
+
+            var purchaseItemGroup = app.MapGroup("purchaseItems").WithTags("purchaseItems");
+            purchaseItemGroup.MapPurchaseItemCreationEndpoint();
+            purchaseItemGroup.MapGetPurchaseItemEndpoint();
+            purchaseItemGroup.MapGetPurchaseItemListEndpoint();
+            purchaseItemGroup.MapPurchaseItemUpdateEndpoint();
+            purchaseItemGroup.MapPurchaseItemDeleteEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -80,6 +87,9 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<Purchase>, CatalogRepository<Purchase>>("catalog:purchases");
         builder.Services.AddKeyedScoped<IReadRepository<Purchase>, CatalogRepository<Purchase>>("catalog:purchases");
+
+        builder.Services.AddKeyedScoped<IRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
+        builder.Services.AddKeyedScoped<IReadRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)
