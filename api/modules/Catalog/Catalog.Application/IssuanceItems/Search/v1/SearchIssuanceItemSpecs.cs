@@ -12,6 +12,5 @@ public class SearchIssuanceItemSpecs : EntitiesByPaginationFilterSpec<IssuanceIt
         Query
             .Include(p => p.Product)
             .OrderBy(c => c.Product.Name, !command.HasOrderBy())
-            .Where(p => command.IssuanceId.HasValue && p.IssuanceId == command.IssuanceId.Value)
-            .Where(p => command.ProductId.HasValue && p.ProductId == command.ProductId.Value);
+            .Where(p => p.IssuanceId == command.IssuanceId!.Value, command.IssuanceId.HasValue);
 }

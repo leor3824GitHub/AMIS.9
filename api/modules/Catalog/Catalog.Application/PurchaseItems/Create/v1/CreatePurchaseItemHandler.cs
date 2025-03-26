@@ -1,5 +1,6 @@
 ﻿using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Application.Inventories.Get.v1;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,12 +18,13 @@ public sealed class CreatePurchaseItemHandler(
 
         //create purchase item
         var purchaseItem = PurchaseItem.Create(request.PurchaseId!, request.ProductId!, request.Qty, request.UnitPrice, request.Status);
+
         await repository.AddAsync(purchaseItem, cancellationToken);
         logger.LogInformation("purchaseItem created {PurchaseItemId}", purchaseItem.Id);
 
         //check if inventory exists
-
-        var inventory = await inventoryRepository.GetByIdAsync(request.ProductId, cancellationToken);
+        var spec = new GetInventoryProductIdSpecs(request.ProductId);
+        var inventory = await inventoryRepository.FirstOrDefaultAsync(spec, cancellationToken);
 
         if (inventory == null)
         {

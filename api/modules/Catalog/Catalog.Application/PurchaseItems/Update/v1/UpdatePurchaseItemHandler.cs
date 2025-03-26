@@ -32,7 +32,7 @@ public sealed class UpdatePurchaseItemHandler(
         logger.LogInformation("Purchase item with Id {PurchaseItemId} updated successfully.", purchaseItem.Id);
 
         // Fetch inventory, return an error response if not found GetPurchaseItemProductIdSpecs
-        var spec = new GetInventorySpecs(productId);
+        var spec = new GetInventoryProductIdSpecs(productId);
         var inventory = await inventoryRepository.FirstOrDefaultAsync(spec, cancellationToken);
         if (inventory == null)
         {
