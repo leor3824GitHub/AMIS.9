@@ -13,26 +13,23 @@ public class Inventory : AuditableEntity, IAggregateRoot
 
     private Inventory() { }
 
-    private Inventory(Guid id, Guid? productId, string? location, decimal qty, decimal purchasePrice)
+    private Inventory(Guid id, Guid? productId, string? location, decimal qty, decimal avePrice)
     {
         Id = id;
         ProductId = productId;
         Location = location;
         Qty = qty;
-        AvePrice = purchasePrice;
+        AvePrice = avePrice;
 
         QueueDomainEvent(new InventoryUpdated { Inventory = this });
     }
 
-    public static Inventory Create(Guid? productId, string? location, decimal qty, decimal purchasePrice)
+    public static Inventory Create(Guid? productId, string? location, decimal qty, decimal avePrice)
     {
-        if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
-        if (purchasePrice <= 0) throw new ArgumentException("Purchase price must be greater than zero.");
-
-        return new Inventory(Guid.NewGuid(), productId, location, qty, purchasePrice);
+        return new Inventory(Guid.NewGuid(), productId, location, qty, avePrice);
     }
 
-    public Inventory Update(Guid? productId, string? location, decimal qty, decimal purchasePrice)
+    public Inventory Update(Guid? productId, string? location, decimal qty, decimal avePrice)
     {
         bool isUpdated = false;
 
@@ -54,9 +51,9 @@ public class Inventory : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (AvePrice != purchasePrice)
+        if (AvePrice != avePrice)
         {
-            AvePrice = purchasePrice;
+            AvePrice = avePrice;
             isUpdated = true;
         }
 
