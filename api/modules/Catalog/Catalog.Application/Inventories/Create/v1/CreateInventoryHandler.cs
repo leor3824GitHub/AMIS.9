@@ -13,7 +13,7 @@ public sealed class CreateInventoryHandler(
     public async Task<CreateInventoryResponse> Handle(CreateInventoryCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var inventory = Inventory.Create(request.ProductId, request.Location, request.Qty, request.AvePrice);
+        var inventory = Inventory.Create(request.ProductId, request.Qty, request.AvePrice);
         await repository.AddAsync(inventory, cancellationToken);
         logger.LogInformation("inventory created {InventoryId}", inventory.Id);
         return new CreateInventoryResponse(inventory.Id);

@@ -13,7 +13,7 @@ public sealed class CreateProductHandler(
     public async Task<CreateProductResponse> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var product = Product.Create(request.Name!, request.Description, request.SKU, request.CategoryId);
+        var product = Product.Create(request.Name!, request.Description, request.SKU, request.CategoryId, request.Location, request.Unit);
         await repository.AddAsync(product, cancellationToken);
         logger.LogInformation("product created {ProductId}", product.Id);
         return new CreateProductResponse(product.Id);

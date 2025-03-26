@@ -7,4 +7,4 @@ public sealed record UpdateIssuanceCommand(
     Guid EmployeeId,
     DateTime IssuanceDate,
     decimal TotalAmount,
-    string Status) : IRequest<UpdateIssuanceResponse>;
+    bool IsClosed) : IRequest<UpdateIssuanceResponse>;

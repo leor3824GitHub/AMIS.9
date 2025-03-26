@@ -6,6 +6,6 @@ public sealed record UpdatePurchaseItemCommand(
     Guid Id,
     Guid PurchaseId,
     Guid ProductId,
-    decimal Qty,
+    int Qty,
     decimal UnitPrice,
     string? Status = "Pending") : IRequest<UpdatePurchaseItemResponse>;

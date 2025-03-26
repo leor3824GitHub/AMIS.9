@@ -10,26 +10,30 @@ public class Product : AuditableEntity, IAggregateRoot
     public decimal SKU { get; private set; }
     public Guid? CategoryId { get; private set; }
     public virtual Category Category { get; private set; } = default!;
+    public string? Location { get; private set; }
+    public string Unit { get; private set; } = string.Empty;
 
     private Product() { }
 
-    private Product(Guid id, string name, string? description, decimal sku, Guid? categoryId)
+    private Product(Guid id, string name, string? description, decimal sku, Guid? categoryId, string? location, string unit)
     {
         Id = id;
         Name = name;
         Description = description;
         SKU = sku;
         CategoryId = categoryId;
+        Location = location;
+        Unit = unit;
 
         QueueDomainEvent(new ProductCreated { Product = this });
     }
 
-    public static Product Create(string name, string? description, decimal sku, Guid? categoryId)
+    public static Product Create(string name, string? description, decimal sku, Guid? categoryId, string? location, string unit)
     {
-        return new Product(Guid.NewGuid(), name, description, sku, categoryId);
+        return new Product(Guid.NewGuid(), name, description, sku, categoryId, location, unit);
     }
 
-    public Product Update(string? name, string? description, decimal? sku, Guid? categoryId)
+    public Product Update(string? name, string? description, decimal? sku, Guid? categoryId, string? location, string? unit)
     {
         bool isUpdated = false;
 
@@ -54,6 +58,18 @@ public class Product : AuditableEntity, IAggregateRoot
         if (categoryId.HasValue && categoryId.Value != Guid.Empty && CategoryId != categoryId.Value)
         {
             CategoryId = categoryId.Value;
+            isUpdated = true;
+        }
+
+        if (!string.Equals(Location, location, StringComparison.OrdinalIgnoreCase))
+        {
+            Location = location;
+            isUpdated = true;
+        }
+
+        if (!string.Equals(Unit, unit, StringComparison.OrdinalIgnoreCase))
+        {
+            Unit = unit;
             isUpdated = true;
         }
 

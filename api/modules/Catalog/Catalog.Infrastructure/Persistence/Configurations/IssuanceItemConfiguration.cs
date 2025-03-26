@@ -10,7 +10,7 @@ internal sealed class IssuanceItemConfiguration : IEntityTypeConfiguration<Issua
     {
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.ProductId).IsRequired()
-        builder.Property(x => x.Iss).IsRequired();
+        builder.Property(x => x.ProductId).IsRequired();
+        builder.Property(x => x.IssuanceId).IsRequired();
     }
 }

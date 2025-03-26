@@ -79,6 +79,13 @@ public static class CatalogModule
             issuanceGroup.MapGetIssuanceListEndpoint();
             issuanceGroup.MapIssuanceUpdateEndpoint();
             issuanceGroup.MapIssuanceDeleteEndpoint();
+
+            var issuanceItemGroup = app.MapGroup("issuanceItems").WithTags("issuanceItems");
+            issuanceItemGroup.MapIssuanceItemCreationEndpoint();
+            issuanceItemGroup.MapGetIssuanceItemEndpoint();
+            issuanceItemGroup.MapGetIssuanceItemListEndpoint();
+            issuanceItemGroup.MapIssuanceItemUpdateEndpoint();
+            issuanceItemGroup.MapIssuanceItemDeleteEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -110,6 +117,9 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<Issuance>, CatalogRepository<Issuance>>("catalog:issuances");
         builder.Services.AddKeyedScoped<IReadRepository<Issuance>, CatalogRepository<Issuance>>("catalog:issuances");
+
+        builder.Services.AddKeyedScoped<IRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
+        builder.Services.AddKeyedScoped<IReadRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
 
         return builder;
     }

@@ -6,44 +6,40 @@ namespace AMIS.WebApi.Catalog.Domain;
 public class Inventory : AuditableEntity, IAggregateRoot
 {
     public Guid? ProductId { get; private set; }
-    public string? Location { get; private set; }
-    public decimal Qty { get; private set; }
+    public int Qty { get; private set; }
     public decimal AvePrice { get; private set; }
-    public string? Unit { get; private set; }
     public virtual Product Product { get; private set; } = default!;
 
     private Inventory() { }
 
-    private Inventory(Guid id, Guid? productId, string? location, decimal qty, decimal avePrice, string? unit)
+    private Inventory(Guid id, Guid? productId, int qty, decimal purchasePrice)
     {
         Id = id;
         ProductId = productId;
-        Location = location;
         Qty = qty;
-        AvePrice = avePrice;
-        Unit = unit;
+        AvePrice = purchasePrice;
 
         QueueDomainEvent(new InventoryUpdated { Inventory = this });
     }
 
-    public static Inventory Create(Guid? productId, string? location, decimal qty, decimal avePrice, string? unit)
+    public static Inventory Create(Guid? productId, int qty, decimal purchasePrice)
     {
-        return new Inventory(Guid.NewGuid(), productId, location, qty, avePrice, unit);
+        if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
+        if (purchasePrice <= 0) throw new ArgumentException("Purchase price must be greater than zero.");
+
+        return new Inventory(Guid.NewGuid(), productId, qty, purchasePrice);
     }
 
-    public Inventory Update(Guid? productId, string? location, decimal qty, decimal avePrice, string? unit)
+    public Inventory Update(Guid? productId, int qty, decimal purchasePrice)
     {
+        if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
+        if (purchasePrice <= 0) throw new ArgumentException("Purchase price must be greater than zero.");
+
         bool isUpdated = false;
 
         if (ProductId != productId)
         {
             ProductId = productId;
-            isUpdated = true;
-        }
-
-        if (!string.Equals(Location, location, StringComparison.OrdinalIgnoreCase))
-        {
-            Location = location;
             isUpdated = true;
         }
 
@@ -53,15 +49,9 @@ public class Inventory : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (AvePrice != avePrice)
+        if (AvePrice != purchasePrice)
         {
-            AvePrice = avePrice;
-            isUpdated = true;
-        }
-
-        if (!string.Equals(Unit, unit, StringComparison.OrdinalIgnoreCase))
-        {
-            Unit = unit;
+            AvePrice = purchasePrice;
             isUpdated = true;
         }
 
@@ -73,16 +63,35 @@ public class Inventory : AuditableEntity, IAggregateRoot
         return this;
     }
 
-    public void AddStock(int qty, decimal unitPrice)
+    public void AddStock(int qty, decimal purchasePrice)
     {
         if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
-
-        // Update Average Price and Quantity for this specific inventory record
-        AvePrice = ((AvePrice * Qty) + (unitPrice * qty)) / (Qty + qty);
+        // Calculate the average price
+        AvePrice = ((AvePrice * Qty) + (purchasePrice * qty)) / (Qty + qty);
         Qty += qty;
     }
 
-    public void RemoveStock(int qty)
+    public void UpdateStock(int oldQty, int newQty, decimal purchasePrice)
+    {
+        if (oldQty < 0) throw new ArgumentException("Old quantity must be zero or greater.");
+        if (newQty <= 0) throw new ArgumentException("New quantity must be greater than zero.");
+        if (purchasePrice <= 0) throw new ArgumentException("Purchase price must be greater than zero.");
+
+        // Calculate the total quantity and average price
+        int totalQty = Qty - oldQty + newQty;
+        AvePrice = ((AvePrice * Qty) - (AvePrice * oldQty) + (purchasePrice * newQty)) / totalQty;
+        Qty = totalQty;
+    }
+
+    public void UpdateStock(int qty)
+    {
+        if (qty < 0) throw new ArgumentException("Old quantity must be zero or greater.");
+
+        // add stock from deleted issuance item
+        Qty += qty;
+    }
+
+    public void DeductStock(int qty)
     {
         if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
         if (Qty < qty) throw new InvalidOperationException("Not enough stock available.");

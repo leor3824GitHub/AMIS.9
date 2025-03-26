@@ -13,7 +13,7 @@ public sealed class CreateIssuanceHandler(
     public async Task<CreateIssuanceResponse> Handle(CreateIssuanceCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var issuance = Issuance.Create(request.EmployeeId, request.TotalAmount, request.Status);
+        var issuance = Issuance.Create(request.EmployeeId, request.IssuanceDate, request.TotalAmount);
         await repository.AddAsync(issuance, cancellationToken);
         logger.LogInformation("issuance created {IssuanceId}", issuance.Id);
         return new CreateIssuanceResponse(issuance.Id);

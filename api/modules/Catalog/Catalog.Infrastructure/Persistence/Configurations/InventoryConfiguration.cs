@@ -10,7 +10,6 @@ internal sealed class InventoryConfiguration : IEntityTypeConfiguration<Inventor
     {
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Location).HasMaxLength(100);
         builder.Property(x => x.ProductId).IsRequired();
     }
 }

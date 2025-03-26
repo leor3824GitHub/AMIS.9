@@ -16,7 +16,7 @@ public sealed class UpdateInventoryHandler(
         ArgumentNullException.ThrowIfNull(request);
         var inventory = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = inventory ?? throw new InventoryNotFoundException(request.Id);
-        var updatedInventory = inventory.Update(request.ProductId, request.Location, request.Qty, request.AvePrice);
+        var updatedInventory = inventory.Update(request.ProductId, request.Qty, request.AvePrice);
         await repository.UpdateAsync(updatedInventory, cancellationToken);
         logger.LogInformation("inventory with id : {InventoryId} updated.", inventory.Id);
         return new UpdateInventoryResponse(inventory.Id);

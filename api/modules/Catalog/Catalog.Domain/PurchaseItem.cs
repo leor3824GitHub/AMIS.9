@@ -7,14 +7,14 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
 {
     public Guid PurchaseId { get; private set; }
     public Guid ProductId { get; private set; }
-    public decimal Qty { get; private set; }
+    public int Qty { get; private set; }
     public decimal UnitPrice { get; private set; }
     public string? Status { get; private set; }
     public virtual Product Product { get; private set; } = default!;
 
     private PurchaseItem() { }
 
-    private PurchaseItem(Guid id, Guid purchaseId, Guid productId, decimal qty, decimal unitPrice, string? status)
+    private PurchaseItem(Guid id, Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
     {
         Id = id;
         PurchaseId = purchaseId;
@@ -26,12 +26,12 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
         QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = this });
     }
 
-    public static PurchaseItem Create(Guid purchaseId, Guid productId, decimal qty, decimal unitPrice, string? status)
+    public static PurchaseItem Create(Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
     {
         return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, status);
     }
 
-    public PurchaseItem Update(Guid purchaseId, Guid productId, decimal qty, decimal unitPrice, string? status)
+    public PurchaseItem Update(Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
     {
         bool isUpdated = false;
 

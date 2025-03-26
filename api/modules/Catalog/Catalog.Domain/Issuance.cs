@@ -8,28 +8,28 @@ public class Issuance : AuditableEntity, IAggregateRoot
     public Guid EmployeeId { get; private set; }
     public DateTime IssuanceDate { get; private set; }
     public decimal TotalAmount { get; private set; }
-    public string? Status { get; private set; }
+    public bool IsClosed { get; private set; }
     public virtual Employee Employee { get; private set; } = default!;
 
     private Issuance() { }
 
-    private Issuance(Guid id, Guid employeeId, decimal totalAmount, string? status)
+    private Issuance(Guid id, Guid employeeId, DateTime issuanceDate, decimal totalAmount)
     {
         Id = id;
         EmployeeId = employeeId;
-        IssuanceDate = DateTime.UtcNow;
+        IssuanceDate = issuanceDate;
         TotalAmount = totalAmount;
-        Status = status;
+        IsClosed = false;
 
         QueueDomainEvent(new IssuanceUpdated { Issuance = this });
     }
 
-    public static Issuance Create(Guid employeeId, decimal totalAmount, string? status)
+    public static Issuance Create(Guid employeeId, DateTime issuanceDate, decimal totalAmount)
     {
-        return new Issuance(Guid.NewGuid(), employeeId, totalAmount, status);
+        return new Issuance(Guid.NewGuid(), employeeId, issuanceDate, totalAmount);
     }
 
-    public Issuance Update(Guid employeeId, DateTime issuanceDate, decimal totalAmount, string? status)
+    public Issuance Update(Guid employeeId, DateTime issuanceDate, decimal totalAmount, bool isClosed)
     {
         bool isUpdated = false;
 
@@ -48,6 +48,11 @@ public class Issuance : AuditableEntity, IAggregateRoot
         if (TotalAmount != totalAmount)
         {
             TotalAmount = totalAmount;
+            isUpdated = true;
+        }
+        if (IsClosed != isClosed)
+        {
+            IsClosed = isClosed;
             isUpdated = true;
         }
 
