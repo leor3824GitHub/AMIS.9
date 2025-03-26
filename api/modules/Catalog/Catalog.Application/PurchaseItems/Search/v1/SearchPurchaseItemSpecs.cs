@@ -10,7 +10,6 @@ public class SearchPurchaseItemSpecs : EntitiesByPaginationFilterSpec<PurchaseIt
     public SearchPurchaseItemSpecs(SearchPurchaseItemsCommand command)
         : base(command) =>
         Query
-            .Include(p => p.Purchase)
             .Include(p => p.Product)
             .OrderBy(c => c.Product.Name, !command.HasOrderBy())
             .Where(p => command.PurchaseId.HasValue && p.PurchaseId == command.PurchaseId.Value)

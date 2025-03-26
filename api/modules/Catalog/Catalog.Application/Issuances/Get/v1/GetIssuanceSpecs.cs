@@ -9,7 +9,6 @@ public class GetIssuanceSpecs : Specification<Issuance, IssuanceResponse>
     {
         Query
             .Where(p => p.Id == id)
-            .Include(p => p.Product)
             .Include(p => p.Employee);
     }
 }

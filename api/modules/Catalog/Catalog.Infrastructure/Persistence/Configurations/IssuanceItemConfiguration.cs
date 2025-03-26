@@ -4,12 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations;
-internal sealed class IssuanceConfiguration : IEntityTypeConfiguration<Issuance>
+internal sealed class IssuanceItemConfiguration : IEntityTypeConfiguration<IssuanceItem>
 {
-    public void Configure(EntityTypeBuilder<Issuance> builder)
+    public void Configure(EntityTypeBuilder<IssuanceItem> builder)
     {
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.EmployeeId).IsRequired();
+        builder.Property(x => x.ProductId).IsRequired()
+        builder.Property(x => x.Iss).IsRequired();
     }
 }

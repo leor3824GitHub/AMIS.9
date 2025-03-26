@@ -6,6 +6,5 @@ namespace AMIS.WebApi.Catalog.Application.Issuances.Search.v1;
 
 public class SearchIssuancesCommand : PaginationFilter, IRequest<PagedList<IssuanceResponse>>
 {
-    public Guid? ProductId { get; set; }
     public Guid? EmployeeId { get; set; }
 }

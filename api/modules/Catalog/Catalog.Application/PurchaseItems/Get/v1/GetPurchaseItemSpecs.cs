@@ -9,7 +9,6 @@ public class GetPurchaseItemSpecs : Specification<PurchaseItem, PurchaseItemResp
     {
         Query
             .Where(p => p.Id == id)
-            .Include(p => p.Purchase)
             .Include(p => p.Product);
     }
 }

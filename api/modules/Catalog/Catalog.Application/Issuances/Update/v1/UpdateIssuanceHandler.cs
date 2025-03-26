@@ -16,7 +16,7 @@ public sealed class UpdateIssuanceHandler(
         ArgumentNullException.ThrowIfNull(request);
         var issuance = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = issuance ?? throw new IssuanceNotFoundException(request.Id);
-        var updatedIssuance = issuance.Update(request.ProductId, request.EmployeeId, request.Qty, request.Unit, request.UnitPrice);
+        var updatedIssuance = issuance.Update(request.EmployeeId, request.IssuanceDate, request.TotalAmount, request.Status);
         await repository.UpdateAsync(updatedIssuance, cancellationToken);
         logger.LogInformation("issuance with id : {IssuanceId} updated.", issuance.Id);
         return new UpdateIssuanceResponse(issuance.Id);

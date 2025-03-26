@@ -5,7 +5,6 @@ public class CreateIssuanceCommandValidator : AbstractValidator<CreateIssuanceCo
 {
     public CreateIssuanceCommandValidator()
     {
-        RuleFor(p => p.ProductId).NotEmpty();
         RuleFor(p => p.EmployeeId).NotEmpty();
     }
 }
