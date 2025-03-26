@@ -1,5 +1,5 @@
 using AMIS.Framework.Core.Persistence;
-using AMIS.WebApi.Catalog.Application.PurchaseItems.Update.v1;
+using AMIS.WebApi.Catalog.Application.Inventories.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Exceptions;
 using MediatR;
@@ -22,19 +22,21 @@ public sealed class UpdatePurchaseItemHandler(
             ?? throw new PurchaseItemNotFoundException(request.Id);
 
         int oldQty = purchaseItem.Qty;
+        var productId = purchaseItem.ProductId;
 
         // Update purchase item
         var updatedPurchaseItem = purchaseItem.Update(
             request.PurchaseId, request.ProductId, request.Qty, request.UnitPrice, request.Status);
 
         await repository.UpdateAsync(updatedPurchaseItem, cancellationToken);
-        logger.LogInformation("Purchase item with ID {PurchaseItemId} updated successfully.", purchaseItem.Id);
+        logger.LogInformation("Purchase item with Id {PurchaseItemId} updated successfully.", purchaseItem.Id);
 
-        // Fetch inventory, return an error response if not found
-        var inventory = await inventoryRepository.GetByIdAsync(request.ProductId, cancellationToken);
-        if (inventory is null)
+        // Fetch inventory, return an error response if not found GetPurchaseItemProductIdSpecs
+        var spec = new GetInventorySpecs(productId);
+        var inventory = await inventoryRepository.FirstOrDefaultAsync(spec, cancellationToken);
+        if (inventory == null)
         {
-            logger.LogWarning("Inventory not found for Product ID {ProductId}.", request.ProductId);
+            logger.LogWarning("Inventory not found for Product ID {ProductId}.", productId);
             return new UpdatePurchaseItemResponse(Id: null, Success: false, ErrorMessage: "Inventory not found.");
         }
 
