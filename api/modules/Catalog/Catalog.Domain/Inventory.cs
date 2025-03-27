@@ -58,7 +58,7 @@ public class Inventory : AuditableEntity, IAggregateRoot
 
         return this;
     }
-
+    // add Qty, calculate aveprice and assigned it to AvePrice
     public void AddStock(int qty, decimal purchasePrice)
     {
         ValidateStock(qty, purchasePrice);
@@ -69,7 +69,7 @@ public class Inventory : AuditableEntity, IAggregateRoot
 
         QueueDomainEvent(new InventoryUpdated { Inventory = this });
     }
-
+    // edit Qty, remove oldqty and add newqty, calculate aveprice
     public void UpdateStock(int oldQty, int newQty, decimal purchasePrice)
     {
         ValidateStock(newQty, purchasePrice);
@@ -81,7 +81,7 @@ public class Inventory : AuditableEntity, IAggregateRoot
 
         QueueDomainEvent(new InventoryUpdated { Inventory = this });
     }
-
+    // add Qty only
     public void UpdateStock(int qty)
     {
         if (qty < 0) throw new ArgumentException("Quantity must be zero or greater.");
@@ -89,7 +89,7 @@ public class Inventory : AuditableEntity, IAggregateRoot
         Qty += qty;
         QueueDomainEvent(new InventoryUpdated { Inventory = this });
     }
-
+    // deduct Qty only
     public void DeductStock(int qty)
     {
         if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
@@ -99,7 +99,7 @@ public class Inventory : AuditableEntity, IAggregateRoot
 
         QueueDomainEvent(new InventoryUpdated { Inventory = this });
     }
-
+    // deduct Qty, calculate aveprice and assign it to AvePrice
     public void DeductStock(int qty, decimal unitPrice)
     {
         ValidateStock(qty, unitPrice);

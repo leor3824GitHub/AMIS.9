@@ -1,4 +1,5 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Application.Inventories.Get.v1;
 using AMIS.WebApi.Catalog.Application.IssuanceItems.Create.v1;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Exceptions;
@@ -20,13 +21,14 @@ public sealed class UpdateIssuanceItemHandler(
         //update issuance item
         var issuanceItem = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = issuanceItem ?? throw new IssuanceItemNotFoundException(request.Id);
-        var oldqty = issuanceItem.Qty;
+        
         var updatedIssuanceItem = issuanceItem.Update(request.IssuanceId, request.ProductId, request.Qty, request.UnitPrice, request.Status);
         await repository.UpdateAsync(updatedIssuanceItem, cancellationToken);
         logger.LogInformation("issuanceItem with id : {IssuanceItemId} updated.", issuanceItem.Id);
 
         //check if inventory exists
-        var inventory = await inventoryRepository.GetByIdAsync(request.ProductId, cancellationToken);
+        var spec = new GetInventoryProductIdSpecs(request.ProductId);
+        var inventory = await inventoryRepository.FirstOrDefaultAsync(spec, cancellationToken);
 
         if (inventory == null)
         {
@@ -36,10 +38,10 @@ public sealed class UpdateIssuanceItemHandler(
         }
 
         // Deduct stock from inventory
-        inventory.UpdateStock(oldqty,request.Qty, request.UnitPrice);
+        inventory.UpdateStock(issuanceItem.Qty, request.Qty, request.UnitPrice);
         await inventoryRepository.UpdateAsync(inventory, cancellationToken);
         logger.LogInformation("Inventory updated for ProductId {ProductId}, updated {Qty} units.", request.ProductId, request.Qty);
 
-        return new UpdateIssuanceItemResponse(Id: issuanceItem.Id);
+        return new UpdateIssuanceItemResponse(Id: issuanceItem.Id, Success: true, ErrorMessage: null);
     }
 }
