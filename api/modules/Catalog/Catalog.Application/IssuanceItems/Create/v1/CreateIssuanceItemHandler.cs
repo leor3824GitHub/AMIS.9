@@ -14,6 +14,8 @@ public sealed class CreateIssuanceItemHandler(
 {
     public async Task<CreateIssuanceItemResponse> Handle(CreateIssuanceItemCommand request, CancellationToken cancellationToken)
     {
+        Guid? issuanceItemId = Guid.Empty;
+
         ArgumentNullException.ThrowIfNull(request);
 
         //check if inventory exists
@@ -31,17 +33,30 @@ public sealed class CreateIssuanceItemHandler(
             logger.LogWarning("Not enough stock for ProductId {ProductId}", request.ProductId);
             return new CreateIssuanceItemResponse(null, false, "Not enough stock.");
         }
-        // Create issuance item
-        var issuanceItem = IssuanceItem.Create(request.IssuanceId!, request.ProductId!, request.Qty, request.UnitPrice, request.Status);
-        await repository.AddAsync(issuanceItem, cancellationToken);
-        logger.LogInformation("IssuanceItem created with Id {IssuanceItemId}", issuanceItem.Id);
-                    
-        // Deduct stock
-        inventory.DeductStock(request.Qty);
-        await inventoryRepository.UpdateAsync(inventory, cancellationToken);
-        logger.LogInformation("Inventory updated for ProductId {ProductId}, deducted {Qty} units.", request.ProductId, request.Qty);
+        try
+        {
+            // Create issuance item
+            var issuanceItem = IssuanceItem.Create(request.IssuanceId!, request.ProductId!, request.Qty, request.UnitPrice, request.Status);
+            await repository.AddAsync(issuanceItem, cancellationToken);
+            issuanceItemId = issuanceItem.Id;
 
-        return new CreateIssuanceItemResponse(issuanceItem.Id, true, null);
+            logger.LogInformation("IssuanceItem created with Id {IssuanceItemId}", issuanceItem.Id);
+
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error creating issuance item.");
+            return new CreateIssuanceItemResponse(null, false, "Error creating issuance item.");
+        }
+        finally
+        {
+        // Deduct stock
+            inventory.DeductStock(request.Qty);
+            await inventoryRepository.UpdateAsync(inventory, cancellationToken);
+            logger.LogInformation("Inventory updated for ProductId {ProductId}, deducted {Qty} units.", request.ProductId, request.Qty);
+            
+        }
+        return new CreateIssuanceItemResponse(issuanceItemId, true, null);
     }
 
 
