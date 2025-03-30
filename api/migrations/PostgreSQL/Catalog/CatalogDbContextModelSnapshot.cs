@@ -341,6 +341,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
@@ -355,7 +358,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal>("SKU")
+                    b.Property<decimal>("Sku")
                         .HasColumnType("numeric");
 
                     b.Property<string>("TenantId")
@@ -404,6 +407,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("SupplierId")

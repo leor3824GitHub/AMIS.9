@@ -1,3 +1,4 @@
+using AMIS.Framework.Core.Storage.File.Features;
 using MediatR;
 
 namespace AMIS.WebApi.Catalog.Application.Products.Update.v1;
@@ -8,4 +9,6 @@ public sealed record UpdateProductCommand(
     string Location,
     string Unit,
     string? Description = null,
-    Guid? CategoryId = null) : IRequest<UpdateProductResponse>;
+    FileUploadCommand? Image = null,
+    Guid? CategoryId = null,
+    bool DeleteCurrentImage = false) : IRequest<UpdateProductResponse>;

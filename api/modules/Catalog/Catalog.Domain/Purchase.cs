@@ -9,7 +9,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     public Guid SupplierId { get; private set; }
     public DateTime PurchaseDate { get; private set; }
     public decimal TotalAmount { get; private set; }
-    public PurchaseStatus Status { get; private set; }
+    public string Status { get; private set; }
     public virtual Supplier Supplier { get; private set; } = default!;
 
     private Purchase() { }
@@ -20,7 +20,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
         SupplierId = supplierId;
         PurchaseDate = purchaseDate;
         TotalAmount = totalAmount;
-        Status = PurchaseStatus.InProgress;
+        Status = "InProgress";
 
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -30,7 +30,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
         return new Purchase(Guid.NewGuid(), supplierId, purchaseDate, totalAmount);
     }
 
-    public Purchase Update(Guid supplierId, DateTime purchaseDate, decimal totalAmount, PurchaseStatus? status)
+    public Purchase Update(Guid supplierId, DateTime purchaseDate, decimal totalAmount, string? status)
     {
         bool isUpdated = false;
 
@@ -52,9 +52,9 @@ public class Purchase : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (status.HasValue && Status != status.Value) // Safely handle nullable enum
+        if (!string.IsNullOrEmpty(status) && Status != status) // Safely handle nullable string
         {
-            Status = status.Value;
+            Status = status;
             isUpdated = true;
         }
 

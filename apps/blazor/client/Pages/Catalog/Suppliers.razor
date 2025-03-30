@@ -1,8 +1,8 @@
-﻿@page "/catalog/brands"
+﻿@page "/catalog/suppliers"
 
-<PageHeader Title="Brands" Header="Brands" SubHeader="Manage your Brands." />
+<PageHeader Title="Suppliers" Header="Suppliers" SubHeader="Manage your Suppliers." />
 
-<EntityTable @ref="_table" TEntity="BrandResponse" TId="Guid" TRequest="BrandViewModel" Context="@Context">
+<EntityTable @ref="_table" TEntity="SupplierResponse" TId="Guid" TRequest="SupplierViewModel" Context="@Context">
 
     <AdvancedSearchContent>
         <!-- Add any advanced search content here if needed -->
@@ -12,16 +12,22 @@
         @if (!Context.AddEditModal.IsCreate)
         {
             <MudItem xs="12" md="6">
-                <MudTextField Value="context.Id" Underline=false ReadOnly Label="Brand Id" />
+                <MudTextField Value="context.Id" Underline=false ReadOnly Label="Supplier Id" />
             </MudItem>
         }
         <MudItem xs="12" md="6">
             <MudTextField Label="Name" For="@(() => context.Name)" @bind-Value="context.Name" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField Label="Description" For="@(() => context.Description)" @bind-Value="context.Description" />
+            <MudTextField Label="Address" For="@(() => context.Address)" @bind-Value="context.Address" />
         </MudItem>
-       @*  <MudItem xs="12" md="12">
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Tin" For="@(() => context.Tin)" @bind-Value="context.Tin" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudCheckBox Label="IsVAT" For="@(() => context.IsVAT)" @bind-Value="context.IsVAT" />
+        </MudItem>
+        @* <MudItem xs="12" md="12">
             <MudItem>
                 <div>
                     @if(!Context.AddEditModal.IsCreate)
@@ -37,8 +43,8 @@
                         </MudButton>
                     }
                 </div>
-            </MudItem> *@
-        @* </MudItem> *@
+            </MudItem>
+        </MudItem> *@
     </EditFormContent>
 
 </EntityTable>

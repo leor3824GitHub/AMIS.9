@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20250326023801_Update Catalog Various Tables")]
-    partial class UpdateCatalogVariousTables
+    [Migration("20250330004053_add catalog schema")]
+    partial class addcatalogschema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -207,9 +207,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<string>("Unit")
-                        .HasColumnType("text");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ProductId");
@@ -240,6 +237,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid>("EmployeeId")
                         .HasColumnType("uuid");
 
+                    b.Property<bool>("IsClosed")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime>("IssuanceDate")
                         .HasColumnType("timestamp with time zone");
 
@@ -248,9 +248,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
 
                     b.Property<string>("TenantId")
                         .IsRequired()
@@ -299,8 +296,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("Qty")
-                        .HasColumnType("numeric");
+                    b.Property<int>("Qty")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .HasColumnType("text");
@@ -310,10 +307,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
 
-                    b.Property<string>("Unit")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<decimal>("UnitPrice")
                         .HasColumnType("numeric");
 
@@ -321,7 +314,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("IssuanceItem", "catalog");
+                    b.ToTable("IssuanceItems", "catalog");
 
                     b.HasAnnotation("Finbuckle:MultiTenant", true);
                 });
@@ -365,13 +358,17 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<decimal>("SKU")
+                    b.Property<decimal>("Sku")
                         .HasColumnType("numeric");
 
                     b.Property<string>("TenantId")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -410,6 +407,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("Status")
+                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<Guid>("SupplierId")
@@ -462,8 +460,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid>("PurchaseId")
                         .HasColumnType("uuid");
 
-                    b.Property<decimal>("Qty")
-                        .HasColumnType("numeric");
+                    b.Property<int>("Qty")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Status")
                         .HasColumnType("text");

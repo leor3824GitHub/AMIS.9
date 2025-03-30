@@ -1,8 +1,8 @@
-﻿@page "/catalog/brands"
+﻿@page "/catalog/employees"
 
-<PageHeader Title="Brands" Header="Brands" SubHeader="Manage your Brands." />
+<PageHeader Title="Employees" Header="Employees" SubHeader="Manage your Employees." />
 
-<EntityTable @ref="_table" TEntity="BrandResponse" TId="Guid" TRequest="BrandViewModel" Context="@Context">
+<EntityTable @ref="_table" TEntity="EmployeeResponse" TId="Guid" TRequest="EmployeeViewModel" Context="@Context">
 
     <AdvancedSearchContent>
         <!-- Add any advanced search content here if needed -->
@@ -12,16 +12,22 @@
         @if (!Context.AddEditModal.IsCreate)
         {
             <MudItem xs="12" md="6">
-                <MudTextField Value="context.Id" Underline=false ReadOnly Label="Brand Id" />
+                <MudTextField Value="context.Id" Underline=false ReadOnly Label="Employee Id" />
             </MudItem>
         }
         <MudItem xs="12" md="6">
             <MudTextField Label="Name" For="@(() => context.Name)" @bind-Value="context.Name" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField Label="Description" For="@(() => context.Description)" @bind-Value="context.Description" />
+            <MudTextField Label="Designation" For="@(() => context.Designation)" @bind-Value="context.Designation" />
         </MudItem>
-       @*  <MudItem xs="12" md="12">
+        <MudItem xs="12" md="6">
+            <MudTextField Label="ResponsibilityCode" For="@(() => context.ResponsibilityCode)" @bind-Value="context.ResponsibilityCode" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="UserId" For="@(() => context.UserId)" @bind-Value="context.UserId" />
+        </MudItem>
+        @* <MudItem xs="12" md="12">
             <MudItem>
                 <div>
                     @if(!Context.AddEditModal.IsCreate)
@@ -37,8 +43,8 @@
                         </MudButton>
                     }
                 </div>
-            </MudItem> *@
-        @* </MudItem> *@
+            </MudItem>
+        </MudItem> *@
     </EditFormContent>
 
 </EntityTable>

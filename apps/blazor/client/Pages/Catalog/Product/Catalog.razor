@@ -1,0 +1,70 @@
+﻿@page "/catalog/product/catalog"
+@* @inject NavigationManager Nav *@
+@* @inject IApiClient _client *@
+@* @attribute [StreamRendering] *@
+
+<PageTitle>AdventureWorks</PageTitle>
+
+<SectionContent SectionName="page-header-title">Ready for a new adventure?</SectionContent>
+<SectionContent SectionName="page-header-subtitle">Start the season with the latest in clothing and equipment.</SectionContent>
+
+<div class="product">
+    @* <ProductSearch CategoryId="@CategoryId" ItemTypeId="@ItemTypeId" /> *@
+
+    @if (_products is null || !_products.Any())
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <div>
+            <div class="product-items">
+                @foreach (var item in _products)
+                {
+                    <ProductListItem Item="@item" />
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Inject]
+    protected IApiClient _client { get; set; } = default!;
+
+    // [SupplyParameterFromQuery]
+    // public int? Page { get; set; }
+
+    // [SupplyParameterFromQuery(Name = "category")]
+    // public int? CategoryId { get; set; }
+
+    // [SupplyParameterFromQuery(Name = "type")]
+    // public int? ItemTypeId { get; set; }
+
+    // Use a more explicit type for the list
+    private List<ProductResponse> _products = new();
+
+    // Improved initialization with error handling and async logic
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await _client.SearchProductsEndpointAsync("1", new SearchProductsCommand
+            {
+                // CategoryId = CategoryId,
+                // ItemTypeId = ItemTypeId,
+                // Page = Page ?? 1  // Ensure a default page value
+            });
+
+            if (response?.Items != null)
+            {
+                _products = response.Items.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Log or handle the error accordingly (optional)
+            Console.Error.WriteLine($"Error fetching products: {ex.Message}");
+        }
+    }
+}

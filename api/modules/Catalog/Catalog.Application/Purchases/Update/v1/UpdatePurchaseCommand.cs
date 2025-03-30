@@ -6,6 +6,6 @@ public sealed record UpdatePurchaseCommand(
     Guid Id,
     Guid SupplierId,
     DateTime PurchaseDate,
-    PurchaseStatus Status,
+    string Status,
     decimal TotalAmount = 0) : IRequest<UpdatePurchaseResponse>;
 //In-progress', 'Partially', 'Cancelled

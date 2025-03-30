@@ -1,0 +1,186 @@
+﻿@page "/productstable"
+@using AMIS.Blazor.Client.Components.Dialogs
+@using AMIS.Blazor.Client.Components
+@using AMIS.Shared.Authorization
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using MudBlazor
+@using Mapster
+@inject IApiClient productclient
+@inject IAuthorizationService AuthService
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudContainer>
+    <!-- Header Section with Search and Create New Product -->
+    <MudGrid>
+        <MudItem xs="12" md="6">
+            <MudTextField @bind-Value="searchString" Label="Search Products" Adornment="Adornment.Start" Icon="mdi:magnify" FullWidth="true" />
+        </MudItem>
+
+        <MudItem xs="12" md="6">
+            <MudButton OnClick="OnCreate" Color="Color.Primary" StartIcon="mdi:plus" FullWidth="true">
+                Create Product
+            </MudButton>
+        </MudItem>
+    </MudGrid>
+
+    <!-- Product Cards Display -->
+    <MudGrid>
+        @if (_entityList?.Any() == true)
+        {
+            @foreach (var product in _entityList)
+            {
+                <MudItem xs="12" sm="6" md="4" lg="3">
+                    <MudCard>
+                        @* <MudCardMedia Image="@product.Name" Alt="Product Image" Height="200px" /> *@
+                        <MudCardContent>
+                            <MudText Typo="Typo.h6">@product.Name</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Secondary">@product.Category</MudText>
+                            <MudText Typo="Typo.h5">@string.Format("{0:C}", product.Unit)</MudText>
+                            <MudText Typo="Typo.body2" Color="Color.Primary">@product.Sku.ToString() Sku</MudText>
+                        </MudCardContent>
+                        <MudCardActions>
+                            <MudButton Color="Color.Primary" OnClick="@(e => OnEdit(product))" StartIcon="mdi:pencil">Edit</MudButton>
+                            <MudButton Color="Color.Error" OnClick="@(e => OnDelete(product))" StartIcon="mdi:delete">Delete</MudButton>
+                        </MudCardActions>
+                    </MudCard>
+                </MudItem>
+            }
+        }
+        else
+        {
+            <MudItem xs="12">
+                <MudText>No products available</MudText>
+            </MudItem>
+        }
+    </MudGrid>
+</MudContainer>
+
+@code {
+    private List<BrandResponse> _brands = new();
+    private HashSet<ProductResponse> _selectedItems = new();
+
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private string searchString = "";
+    private bool _loading;
+    private int _totalItems;
+    private IEnumerable<ProductResponse>? _entityList;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        // Permission checks can go here, for now using sample permissions.
+        await LoadBrandsAsync();
+        await LoadProductsAsync();
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        _loading = true;
+
+        // Constructing search filter for products
+        var productFilter = new SearchProductsCommand
+            {
+                PageSize = 10,  // You can modify this according to your requirements.
+                PageNumber = 1, // For simplicity, we'll load the first page.
+                AdvancedSearch = new()
+                {
+                    Fields = new[] { "name" },
+                    Keyword = searchString
+                }
+            };
+
+        var result = await productclient.SearchProductsEndpointAsync("1", productFilter);
+        if (result != null)
+        {
+            _totalItems = result.TotalCount;
+            _entityList = result.Items;
+        }
+        else
+        {
+            _totalItems = 0;
+            _entityList = new List<ProductResponse>();
+        }
+
+        _loading = false;
+    }
+
+    private async Task ShowEditFormDialog(string title, UpdateProductCommand command, bool isCreate)
+    {
+        var parameters = new DialogParameters
+        {
+            { nameof(ProductDialog.Model), command },
+            { nameof(ProductDialog.IsCreate), isCreate }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<ProductDialog>(title, parameters, options);
+        var state = await dialog.Result;
+
+        if (!state.Canceled)
+        {
+            await LoadProductsAsync(); // Reload products after an action (edit/create)
+            _selectedItems.Clear();
+        }
+    }
+
+    private async Task OnCreate()
+    {
+        var model = new UpdateProductCommand();
+        await ShowEditFormDialog("Create new Product", model, true);
+    }
+
+    private async Task OnEdit(ProductResponse dto)
+    {
+        var command = dto.Adapt<UpdateProductCommand>();
+        await ShowEditFormDialog("Edit Product", command, false);
+    }
+
+    private async Task OnDelete(ProductResponse dto)
+    {
+        var productId = dto.Id;
+        var deleteContent = $"You're sure you want to delete Product with id '{productId}'?";
+        var parameters = new DialogParameters
+        {
+            { nameof(DeleteConfirmation.ContentText), deleteContent }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
+        var result = await dialog.Result;
+
+        if (!result!.Canceled)
+        {
+            await ApiHelper.ExecuteCallGuardedAsync(
+                () => productclient.DeleteProductEndpointAsync("1", productId.Value),
+                Snackbar);
+
+            await LoadProductsAsync(); // Reload products after deletion
+        }
+    }
+
+    private async Task OnRefresh()
+    {
+        await LoadProductsAsync(); // Reload products
+        _selectedItems.Clear();
+    }
+
+    private async Task LoadBrandsAsync()
+    {
+        if (_brands.Count == 0)
+        {
+            var response = await productclient.SearchBrandsEndpointAsync("1", new SearchBrandsCommand());
+            if (response?.Items != null)
+            {
+                _brands = response.Items.ToList();
+            }
+        }
+    }
+
+    private Task OnSearch(string text)
+    {
+        searchString = text;
+        return LoadProductsAsync(); // Reload products when search changes
+    }
+}

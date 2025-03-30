@@ -21,6 +21,14 @@
         {
             <MudNavLink Href="/catalog/categories" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Categories</MudNavLink>
         }
+        @if (_canViewSuppliers)
+        {
+            <MudNavLink Href="/catalog/suppliers" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Suppliers</MudNavLink>
+        }
+        @if (_canViewEmployees)
+        {
+            <MudNavLink Href="/catalog/employees" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Employees</MudNavLink>
+        }
     </MudNavGroup>
     <MudNavLink Href="/todos" Icon="@Icons.Material.Filled.Checklist" Class="fsh-nav-child">Todos</MudNavLink>
     @if (CanViewAdministrationGroup)
