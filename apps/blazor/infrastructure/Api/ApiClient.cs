@@ -8566,7 +8566,7 @@ namespace AMIS.Blazor.Infrastructure.Api
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        public System.Guid Id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("name")]
         public string Name { get; set; }
@@ -10192,7 +10192,7 @@ namespace AMIS.Blazor.Infrastructure.Api
         public FileUploadCommand Image { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("categoryId")]
-        public System.Guid? CategoryId { get; set; }
+        public System.Guid CategoryId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("deleteCurrentImage")]
         public bool DeleteCurrentImage { get; set; }

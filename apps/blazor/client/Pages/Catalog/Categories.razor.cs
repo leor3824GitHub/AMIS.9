@@ -27,7 +27,7 @@ public partial class Categories
                 new(category => category.Description, "Description", "Description")
             },
             enableAdvancedSearch: true,
-            idFunc: category => category.Id!.Value,
+            idFunc: category => category.Id,
             searchFunc: async filter =>
             {
                 var categoryFilter = filter.Adapt<SearchCategorysCommand>();

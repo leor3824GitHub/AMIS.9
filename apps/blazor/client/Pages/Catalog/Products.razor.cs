@@ -76,11 +76,6 @@ public partial class Products
         }
     }
 
-    //private async Task UploadFiles(InputFileChangeEventArgs e)
-    //{
-    //    if (file != null)
-    //    {
-    //        string? extension = Path.GetExtension(file.Name);
     //        if (!AppConstants.SupportedImageFormats.Contains(extension.ToLower(System.Globalization.CultureInfo.CurrentCulture)))
     //        {
     //            Snackbar.Add("Image Format Not Supported.", Severity.Error);
@@ -88,7 +83,7 @@ public partial class Products
     //        }
 
     //        Context.AddEditModal.RequestModel.ImageExtension = extension;
-    //        var imageFile = await file.RequestImageFileAsync(AppConstants.StandardImageFormat, AppConstants.MaxImageWidth, AppConstants.MaxImageHeight);
+    //        var imageFile = await e.File.RequestImageFileAsync(AppConstants.StandardImageFormat, AppConstants.MaxImageWidth, AppConstants.MaxImageHeight);
     //        byte[]? buffer = new byte[imageFile.Size];
     //        await imageFile.OpenReadStream(AppConstants.MaxAllowedSize).ReadExactlyAsync(buffer);
     //        Context.AddEditModal.RequestModel.ImageInBytes = $"data:{AppConstants.StandardImageFormat};base64,{Convert.ToBase64String(buffer)}";
@@ -98,26 +93,26 @@ public partial class Products
     private async Task UploadFiles(InputFileChangeEventArgs e)
     {
         _uploadErrorMessage = string.Empty;
-        var file = e.File;
-        if (file == null)
+       
+        if (e.File == null)
         {
-            Snackbar.Add("No file selected.", Severity.Error);
+            Snackbar.Add("No e.File selected.", Severity.Error);
             return;
         }
 
-        string? extension = Path.GetExtension(file.Name);
+        string? extension = Path.GetExtension(e.File.Name);
 
-        // Check if the file has a supported image format
+        // Check if the e.File has a supported image format
         if (!AppConstants.SupportedImageFormats.Contains(extension.ToLower()))
         {
             Snackbar.Add("Image format not supported.", Severity.Error);
             return;
         }
 
-        // File size validation (5MB max)
-        if (file.Size > AppConstants.MaxAllowedSize)
+        // e.File size validation (5MB max)
+        if (e.File.Size > AppConstants.MaxAllowedSize)
         {
-            Snackbar.Add("File size exceeds the maximum allowed size.", Severity.Error);
+            Snackbar.Add("e.File size exceeds the maximum allowed size.", Severity.Error);
             return;
         }
 
@@ -129,10 +124,10 @@ public partial class Products
             _isUploading = true;
             string? fileName = $"{Context.AddEditModal.RequestModel.Name}-{Guid.NewGuid():N}";
             fileName = fileName[..Math.Min(fileName.Length, 90)];
-            // Request the image file to be resized (if necessary) to fit within the specified max width and height
-            var imageFile = await file.RequestImageFileAsync(AppConstants.StandardImageFormat, AppConstants.MaxImageWidth, AppConstants.MaxImageHeight);
+            // Request the image e.File to be resized (if necessary) to fit within the specified max width and height
+            var imageFile = await e.File.RequestImageFileAsync(AppConstants.StandardImageFormat, AppConstants.MaxImageWidth, AppConstants.MaxImageHeight);
 
-            // Read the file's bytes into a buffer
+            // Read the e.File's bytes into a buffer
             byte[] buffer = new byte[imageFile.Size];
             await imageFile.OpenReadStream(AppConstants.MaxAllowedSize).ReadAsync(buffer);
             string? base64String = $"data:{AppConstants.StandardImageFormat};base64,{Convert.ToBase64String(buffer)}";
@@ -144,7 +139,7 @@ public partial class Products
         }
         catch (Exception ex)
         {
-            // Handle any exceptions that occur during the file upload process
+            // Handle any exceptions that occur during the e.File upload process
             Snackbar.Add($"An error occurred while uploading the image: {ex.Message}", Severity.Error);
         }
         finally

@@ -4,20 +4,18 @@
 <PageHeader Title="Products" Header="Products" SubHeader="Manage your Products." />
 
 <EntityTable @ref="_table" TEntity="ProductResponse" TId="Guid" TRequest="ProductViewModel" Context="@Context">
-
-   <AdvancedSearchContent>
-       @* <MudSelect T="Guid?" Label="Category" @bind-Value="SearchCategoryId">
-           <MudSelectItem T="Guid?" Value="null">All Brands</MudSelectItem>
-           @foreach (var category in _categories)
-           {
-               <MudSelectItem T="Guid?" Value="category.Id">@category.Name</MudSelectItem>
-           }
-       </MudSelect> *@
-      @*  <MudSlider T="decimal" @bind-Value="SearchMinimumRate" Min="0" Max="9999" Step="100">Minimum Rate: @_searchMinimumRate.ToString()</MudSlider>
-       <MudSlider T="decimal" @bind-Value="SearchMaximumRate" Min="0" Max="9999" Step="100">Maximum Rate: @_searchMaximumRate.ToString()</MudSlider> *@
-   </AdvancedSearchContent>
-
-   <EditFormContent>
+    @* <AdvancedSearchContent>
+        <MudSelect T="Guid?" Label="Brand" @bind-Value="SearchBrandId">
+            <MudSelectItem T="Guid?" Value="null">All Brands</MudSelectItem>
+            @foreach (var brand in _brands)
+            {
+                <MudSelectItem T="Guid?" Value="brand.Id">@brand.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudSlider T="decimal" @bind-value="SearchMinimumRate" Min="0" Max="9999" Step="100">Minimum Rate: @_searchMinimumRate.ToString()</MudSlider>
+        <MudSlider T="decimal" @bind-value="SearchMaximumRate" Min="0" Max="9999" Step="100">Maximum Rate: @_searchMaximumRate.ToString()</MudSlider>
+    </AdvancedSearchContent> *@
+<EditFormContent>
        @if (!Context.AddEditModal.IsCreate)
        {
            <MudItem xs="12" md="6">
@@ -40,10 +38,10 @@
            <MudTextField Label="Location" For="@(() => context.Location)" @bind-Value="context.Location" />
        </MudItem>
        <MudItem xs="12" md="6">
-           <MudSelect T="Guid?" Label="Category" @bind-Value="context.CategoryId">
+           <MudSelect T="Guid" Label="Category" @bind-Value="context.CategoryId">
                @foreach (var category in _categories)
                {
-                   <MudSelectItem T="Guid?" Value="category.Id">@category.Name</MudSelectItem>
+                   <MudSelectItem T="Guid" Value="category.Id">@category.Name</MudSelectItem>
                }
            </MudSelect>
        </MudItem>

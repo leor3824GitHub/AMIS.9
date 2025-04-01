@@ -1,17 +1,16 @@
 ﻿@page "/products2"
 
 <MudDataGrid ServerData="ServerReload"
-             MultiSelection="true"
-             @bind-SelectedItems="_selectedItems"
-             @bind-SelectedItem="_currentDto"
-             ColumnResizeMode="ResizeMode.Column"
-             Hover="true"
-             Loading="@_loading" @ref="_table">
+              MultiSelection="true"
+              @bind-SelectedItems="_selectedItems"
+              @bind-SelectedItem="_currentDto"
+              ColumnResizeMode="ResizeMode.Column"
+              Hover="true"
+              Loading="@_loading" @ref="_table">
     <ToolBarContent>
         <div class="d-flex align-start flex-grow-1">
             <MudText Typo="Typo.h6">Product List</MudText>
             <MudSpacer />
-
             <div class="d-flex flex-column">
                 <div class="d-flex gap-1">
                     <MudHidden Breakpoint="Breakpoint.SmAndDown">
@@ -53,102 +52,59 @@
                                 Delete
                             </MudButton>
                         }
-                        @*  @if (_canExport)
-                        {
-                            <MudLoadingButton Loading="_exporting" Variant="Variant.Outlined" Color="Color.Primary"
-                                              Disabled="@_loading"
-                                              OnClick="OnExport"
-                                              StartIcon="@Icons.Custom.FileFormats.FileExcel"
-                                              Size="Size.Small">
-                                @ConstantString.Export
-                            </MudLoadingButton>
-                            <MudLoadingButton Loading="_pdfExporting" Variant="Variant.Outlined" Color="Color.Primary"
-                                              Disabled="@_loading"
-                                              OnClick="OnExportPDF"
-                                              StartIcon="@Icons.Custom.FileFormats.FilePdf"
-                                              Size="Size.Small">
-                                @ConstantString.ExportPDF
-                            </MudLoadingButton>
-                        } *@
-                        @* @if (_canImport)
-                        {
-                            <MudFileUpload T="IBrowserFile" FilesChanged="OnImportData" Accept=".xlsx">
-                                <ActivatorContent>
-                                    <MudButton Size="Size.Small"
-                                               Variant="Variant.Outlined"
-                                               Color="Color.Primary"
-                                               Disabled="@_loading"
-                                               StartIcon="@Icons.Material.Filled.Upload">
-                                        @if (_uploading)
-                                        {
-                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                            @ConstantString.Uploading
-                                        }
-                                        else
-                                        {
-                                            @ConstantString.Import
-                                        }
-                                    </MudButton>
-                                </ActivatorContent>
-                            </MudFileUpload>
-                        } *@
                     </MudHidden>
-                    @*  <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
-                        @if (_canCreate)
-                        {
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       Size="Size.Small"
-                                       Disabled="@_loading"
-                                       OnClick="OnCreate"
-                                       IconColor="Color.Surface">
-                                @ConstantString.New
-                            </MudButton>
-                        }
-                        @if (_canDelete)
-                        {
-                            <MudButton Variant="Variant.Outlined" Color="Color.Error"
-                                       StartIcon="@Icons.Material.Filled.Delete"
-                                       Disabled="@(!(_selectedItems.Count > 0))"
-                                       Size="Size.Small"
-                                       OnClick="OnDeleteChecked"
-                                       IconColor="Color.Surface">
-                                @ConstantString.Delete
-                            </MudButton>
-                        }
-                    </MudHidden> *@
                 </div>
                 @if (_canSearch)
                 {
                     <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
                                   AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
                 }
-
             </div>
         </div>
     </ToolBarContent>
+
     <Columns>
         <SelectColumn T="ProductResponse" />
-        @* <PropertyColumn Property="x => x.Id" Title="Id" /> *@
+
+        <TemplateColumn Title="Image">
+            <CellTemplate>
+                <img src="@context.Item.ImagePath" alt="Product Image"
+                     style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #ccc;" />
+            </CellTemplate>
+        </TemplateColumn>
+
         <PropertyColumn Property="x => x.Name" />
         <PropertyColumn Property="x => x.Description" />
         <PropertyColumn Property="x => x.Unit" />
         <PropertyColumn Property="x => x.Sku" />
         <PropertyColumn Property="x => x.Location" />
+
+        <!-- ✅ FIXED: Move MudSelect inside TemplateColumn -->
+        <TemplateColumn Title="Category">
+            <CellTemplate>
+                <MudSelect T="Guid" Label="Category" @bind-Value="context.Item.Category.Id">
+                    @foreach (var category in _categories)
+                    {
+                        <MudSelectItem T="Guid" Value="@category.Id">@category.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </CellTemplate>
+        </TemplateColumn>
+
         <TemplateColumn>
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
                          Dense="true"
                          IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
-
                     <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
-
                     <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
                 </MudMenu>
             </CellTemplate>
         </TemplateColumn>
     </Columns>
+
     <PagerContent>
         <MudDataGridPager />
     </PagerContent>
 </MudDataGrid>
+
