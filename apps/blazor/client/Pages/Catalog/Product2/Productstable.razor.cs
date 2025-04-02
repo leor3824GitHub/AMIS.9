@@ -13,7 +13,6 @@ using Mapster;
 namespace AMIS.Blazor.Client.Pages.Catalog.Product2;
 public partial class Productstable
 {
-    private List<BrandResponse> _brands = new();
     private MudDataGrid<ProductResponse> _table = default!;
     private HashSet<ProductResponse> _selectedItems = new();
 
@@ -21,12 +20,13 @@ public partial class Productstable
     protected Task<AuthenticationState> AuthState { get; set; } = default!;
     [Inject]
     protected IAuthorizationService AuthService { get; set; } = default!;
-
     [Inject]
     protected IApiClient productclient { get; set; } = default!;
     [Inject]
     private ISnackbar? Snackbar { get; set; }
     private ProductResponse _currentDto = new();
+    private List<CategoryResponse> _categories = new List<CategoryResponse>();
+
     private string searchString = "";
     private bool _loading;
     private string successMessage = "";
@@ -38,7 +38,6 @@ public partial class Productstable
     private bool _canCreate;
     private bool _canUpdate;
     private bool _canDelete;
-    //private bool _canExport;
 
     protected override async Task OnInitializedAsync()
     {
@@ -47,10 +46,22 @@ public partial class Productstable
         _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.Products);
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.Products);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Products);
-        //_canExport = await AuthService.HasPermissionAsync(user, FshActions.Export, FshResources.Products);
 
-        //await LoadBrandsAsync();
+        await LoadCategoriesAsync();
     }
+
+    private async Task LoadCategoriesAsync()
+    {
+        if (_categories.Count == 0)
+        {
+            var response = await productclient.SearchCategorysEndpointAsync("1", new SearchCategorysCommand());
+            if (response?.Items != null)
+            {
+                _categories = response.Items.ToList();
+            }
+        }
+    }
+
     private async Task<GridData<ProductResponse>> ServerReload(GridState<ProductResponse> state)
     {
         _loading = true;
@@ -65,23 +76,34 @@ public partial class Productstable
             }
         };
 
-        var result = await productclient.SearchProductsEndpointAsync("1", productFilter);
-
-        if (result != null)
+        try
         {
-            _totalItems = result.TotalCount;
-            _entityList = result.Items;
+            var result = await productclient.SearchProductsEndpointAsync("1", productFilter);
+
+            if (result != null)
+            {
+                _totalItems = result.TotalCount;
+                _entityList = result.Items;
+            }
+            else
+            {
+                _totalItems = 0;
+                _entityList = new List<ProductResponse>();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            _totalItems = 0;
-            _entityList = new List<ProductResponse>();
+            Snackbar?.Add($"Error loading data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
         }
 
-        _loading = false;
         return new GridData<ProductResponse> { TotalItems = _totalItems, Items = _entityList };
     }
-    private async Task ShowEditFormDialog(string title, UpdateProductCommand command, bool IsCreate)
+
+    private async Task ShowEditFormDialog(string title, ProductViewModel command, bool IsCreate)
     {
         var parameters = new DialogParameters
         {
@@ -101,25 +123,28 @@ public partial class Productstable
 
     private async Task OnCreate()
     {
-        var model = new UpdateProductCommand();
-
+        var model = _currentDto.Adapt<ProductViewModel>();
         await ShowEditFormDialog("Create new Item", model, true);
     }
+
     private async Task OnClone()
     {
         var copy = _selectedItems.First();
         if (copy != null)
         {
-            var command = new Mapper().Map<ProductResponse, UpdateProductCommand>(copy);
+            //var command = new Mapper().Map<ProductResponse, ProductViewModel>(copy);
+            var command = copy.Adapt<ProductViewModel>();
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
             await ShowEditFormDialog("Clone an Item", command, true);
         }
     }
+
     private async Task OnEdit(ProductResponse dto)
     {
-        var command = dto.Adapt<UpdateProductCommand>();
+        var command = dto.Adapt<ProductViewModel>();
         await ShowEditFormDialog("Edit the Item", command, false);
     }
+
     private async Task OnDelete(ProductResponse dto)
     {
         var productId = dto.Id;
@@ -142,29 +167,47 @@ public partial class Productstable
             await _table.ReloadServerData();
         }
     }
+
     private async Task OnDeleteChecked()
     {
-        var productId = _selectedItems.First().Id;
-        _ = productId ?? throw new InvalidOperationException("IdFunc can't be null!");
+        var productIds = _selectedItems
+       .Select(item => item.Id)
+       .Where(id => id.HasValue)
+       .Select(id => id.Value)
+       .ToList();
 
-        string deleteContent = "You're sure you want to delete {0} with id '{1}'?";
+        if (productIds.Count == 0)
+        {
+            Snackbar?.Add("No items selected for deletion.", Severity.Warning);
+            return;
+        }
+
+        string deleteContent = "Are you sure you want to delete the selected products?";
         var parameters = new DialogParameters
         {
-            { nameof(DeleteConfirmation.ContentText), string.Format(deleteContent, "Product", _selectedItems.First().Id) }
+            { nameof(DeleteConfirmation.ContentText), deleteContent }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
         var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
         var result = await dialog.Result;
-        if (!result!.Canceled && productId.HasValue)
+        if (!result!.Canceled)
         {
-            await ApiHelper.ExecuteCallGuardedAsync(
-                () => productclient.DeleteProductEndpointAsync("1", productId.Value),
-                Toast);
+            try
+            {
+                await ApiHelper.ExecuteCallGuardedAsync(
+                    () => productclient.DeleteProductsEndpointAsync("1", productIds),
+                    Snackbar);
 
-            await _table.ReloadServerData();
-            _selectedItems.Clear();
+                await _table.ReloadServerData();
+                _selectedItems.Clear();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Error deleting products: {ex.Message}", Severity.Error);
+            }
         }
     }
+
     private async Task OnRefresh()
     {
         await _table.ReloadServerData();
@@ -175,18 +218,6 @@ public partial class Productstable
     {
         searchString = text;
         return _table.ReloadServerData();
-    }
-
-    private async Task LoadBrandsAsync()
-    {
-        if (_brands.Count == 0)
-        {
-            var response = await productclient.SearchBrandsEndpointAsync("1", new SearchBrandsCommand());
-            if (response?.Items != null)
-            {
-                _brands = response.Items.ToList();
-            }
-        }
     }
 
     // Advanced Search
@@ -223,4 +254,10 @@ public partial class Productstable
             _ = _table.ReloadServerData();
         }
     }
+}
+public class ProductViewModel : UpdateProductCommand
+{
+    public string? ImagePath { get; set; }
+    public string? ImageInBytes { get; set; }
+    public string? ImageExtension { get; set; }
 }

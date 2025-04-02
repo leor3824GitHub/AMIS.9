@@ -23,6 +23,7 @@ public static class CatalogModule
             productGroup.MapGetProductListEndpoint();
             productGroup.MapProductUpdateEndpoint();
             productGroup.MapProductDeleteEndpoint();
+            productGroup.MapProductsDeleteEndpoint();
 
             var brandGroup = app.MapGroup("brands").WithTags("brands");
             brandGroup.MapBrandCreationEndpoint();
