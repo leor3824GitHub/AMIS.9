@@ -129,12 +129,30 @@
     </ToolBarContent>
     <Columns>
         <SelectColumn T="ProductResponse" />
-        @* <PropertyColumn Property="x => x.Id" Title="Id" /> *@
+        <TemplateColumn Title="Image">
+            <CellTemplate>
+                <img src="@context.Item.ImagePath" alt="Product Image"
+                     style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #ccc;" />
+            </CellTemplate>
+        </TemplateColumn>
+
         <PropertyColumn Property="x => x.Name" />
         <PropertyColumn Property="x => x.Description" />
         <PropertyColumn Property="x => x.Unit" />
         <PropertyColumn Property="x => x.Sku" />
         <PropertyColumn Property="x => x.Location" />
+
+        <!-- ✅ FIXED: Move MudSelect inside TemplateColumn -->
+        <TemplateColumn Title="Category">
+            <CellTemplate>
+                <MudSelect T="Guid" Label="Category" @bind-Value="context.Item.CategoryId">
+                    @foreach (var category in _categories)
+                    {
+                        <MudSelectItem T="Guid" Value="@category.Id">@category.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </CellTemplate>
+        </TemplateColumn>
         <TemplateColumn>
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
