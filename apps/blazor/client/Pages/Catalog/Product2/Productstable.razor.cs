@@ -238,3 +238,9 @@ public partial class Productstable
         }
     }
 }
+public class ProductViewModel : UpdateProductCommand
+{
+    public string? ImagePath { get; set; }
+    public string? ImageInBytes { get; set; }
+    public string? ImageExtension { get; set; }
+}
