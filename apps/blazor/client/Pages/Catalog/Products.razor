@@ -40,7 +40,7 @@
            <MudTextField Label="Location" For="@(() => context.Location)" @bind-Value="context.Location" />
        </MudItem>
        <MudItem xs="12" md="6">
-           <MudSelect T="Guid?" Label="Category" @bind-Value="context.CategoryId">
+           <MudSelect T="Guid" Label="Category" @bind-Value="context.CategoryId">
                @foreach (var category in _categories)
                {
                    <MudSelectItem T="Guid?" Value="category.Id">@category.Name</MudSelectItem>

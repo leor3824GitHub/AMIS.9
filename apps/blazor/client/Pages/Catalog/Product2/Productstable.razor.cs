@@ -27,6 +27,8 @@ public partial class Productstable
     [Inject]
     private ISnackbar? Snackbar { get; set; }
     private ProductResponse _currentDto = new();
+    private List<CategoryResponse> _categories = new List<CategoryResponse>();
+
     private string searchString = "";
     private bool _loading;
     private string successMessage = "";
@@ -49,8 +51,20 @@ public partial class Productstable
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Products);
         //_canExport = await AuthService.HasPermissionAsync(user, FshActions.Export, FshResources.Products);
 
-        //await LoadBrandsAsync();
+        await LoadCategoriesAsync();
     }
+    private async Task LoadCategoriesAsync()
+    {
+        if (_categories.Count == 0)
+        {
+            var response = await productclient.SearchCategorysEndpointAsync("1", new SearchCategorysCommand());
+            if (response?.Items != null)
+            {
+                _categories = response.Items.ToList();
+            }
+        }
+    }
+
     private async Task<GridData<ProductResponse>> ServerReload(GridState<ProductResponse> state)
     {
         _loading = true;

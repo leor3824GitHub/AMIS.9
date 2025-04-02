@@ -53,70 +53,9 @@
                                 Delete
                             </MudButton>
                         }
-                        @*  @if (_canExport)
-                        {
-                            <MudLoadingButton Loading="_exporting" Variant="Variant.Outlined" Color="Color.Primary"
-                                              Disabled="@_loading"
-                                              OnClick="OnExport"
-                                              StartIcon="@Icons.Custom.FileFormats.FileExcel"
-                                              Size="Size.Small">
-                                @ConstantString.Export
-                            </MudLoadingButton>
-                            <MudLoadingButton Loading="_pdfExporting" Variant="Variant.Outlined" Color="Color.Primary"
-                                              Disabled="@_loading"
-                                              OnClick="OnExportPDF"
-                                              StartIcon="@Icons.Custom.FileFormats.FilePdf"
-                                              Size="Size.Small">
-                                @ConstantString.ExportPDF
-                            </MudLoadingButton>
-                        } *@
-                        @* @if (_canImport)
-                        {
-                            <MudFileUpload T="IBrowserFile" FilesChanged="OnImportData" Accept=".xlsx">
-                                <ActivatorContent>
-                                    <MudButton Size="Size.Small"
-                                               Variant="Variant.Outlined"
-                                               Color="Color.Primary"
-                                               Disabled="@_loading"
-                                               StartIcon="@Icons.Material.Filled.Upload">
-                                        @if (_uploading)
-                                        {
-                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                            @ConstantString.Uploading
-                                        }
-                                        else
-                                        {
-                                            @ConstantString.Import
-                                        }
-                                    </MudButton>
-                                </ActivatorContent>
-                            </MudFileUpload>
-                        } *@
+
                     </MudHidden>
-                    @*  <MudHidden Breakpoint="Breakpoint.SmAndDown" Invert="true">
-                        @if (_canCreate)
-                        {
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       Size="Size.Small"
-                                       Disabled="@_loading"
-                                       OnClick="OnCreate"
-                                       IconColor="Color.Surface">
-                                @ConstantString.New
-                            </MudButton>
-                        }
-                        @if (_canDelete)
-                        {
-                            <MudButton Variant="Variant.Outlined" Color="Color.Error"
-                                       StartIcon="@Icons.Material.Filled.Delete"
-                                       Disabled="@(!(_selectedItems.Count > 0))"
-                                       Size="Size.Small"
-                                       OnClick="OnDeleteChecked"
-                                       IconColor="Color.Surface">
-                                @ConstantString.Delete
-                            </MudButton>
-                        }
-                    </MudHidden> *@
+
                 </div>
                 @if (_canSearch)
                 {
@@ -142,13 +81,12 @@
         <PropertyColumn Property="x => x.Sku" />
         <PropertyColumn Property="x => x.Location" />
 
-        <!-- ✅ FIXED: Move MudSelect inside TemplateColumn -->
         <TemplateColumn Title="Category">
             <CellTemplate>
                 <MudSelect T="Guid" Label="Category" @bind-Value="context.Item.CategoryId">
                     @foreach (var category in _categories)
                     {
-                        <MudSelectItem T="Guid" Value="@category.Id">@category.Name</MudSelectItem>
+                        <MudSelectItem T="Guid?" Value="@category.Id">@category.Name</MudSelectItem>
                     }
                 </MudSelect>
             </CellTemplate>
