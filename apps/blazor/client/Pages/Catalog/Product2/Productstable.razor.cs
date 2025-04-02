@@ -132,8 +132,8 @@ public partial class Productstable
         var copy = _selectedItems.First();
         if (copy != null)
         {
-            //var command = new Mapper().Map<ProductResponse, ProductViewModel>(copy);
-            var command = copy.Adapt<ProductViewModel>();
+            var command = new Mapper().Map<ProductResponse, ProductViewModel>(copy);
+            //var command = copy.Adapt<ProductViewModel>();
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
             await ShowEditFormDialog("Clone an Item", command, true);
         }
