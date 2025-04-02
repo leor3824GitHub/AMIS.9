@@ -95,7 +95,7 @@ public partial class Productstable
         _loading = false;
         return new GridData<ProductResponse> { TotalItems = _totalItems, Items = _entityList };
     }
-    private async Task ShowEditFormDialog(string title, UpdateProductCommand command, bool IsCreate)
+    private async Task ShowEditFormDialog(string title, ProductViewModel command, bool IsCreate)
     {
         var parameters = new DialogParameters
         {
@@ -115,7 +115,7 @@ public partial class Productstable
 
     private async Task OnCreate()
     {
-        var model = new UpdateProductCommand();
+        var model = new ProductViewModel();
 
         await ShowEditFormDialog("Create new Item", model, true);
     }
@@ -124,14 +124,14 @@ public partial class Productstable
         var copy = _selectedItems.First();
         if (copy != null)
         {
-            var command = new Mapper().Map<ProductResponse, UpdateProductCommand>(copy);
+            var command = new Mapper().Map<ProductResponse, ProductViewModel>(copy);
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
             await ShowEditFormDialog("Clone an Item", command, true);
         }
     }
     private async Task OnEdit(ProductResponse dto)
     {
-        var command = dto.Adapt<UpdateProductCommand>();
+        var command = dto.Adapt<ProductViewModel>();
         await ShowEditFormDialog("Edit the Item", command, false);
     }
     private async Task OnDelete(ProductResponse dto)
@@ -191,19 +191,7 @@ public partial class Productstable
         return _table.ReloadServerData();
     }
 
-    private async Task LoadBrandsAsync()
-    {
-        if (_brands.Count == 0)
-        {
-            var response = await productclient.SearchBrandsEndpointAsync("1", new SearchBrandsCommand());
-            if (response?.Items != null)
-            {
-                _brands = response.Items.ToList();
-            }
-        }
-    }
-
-    // Advanced Search
+      // Advanced Search
 
     private Guid? _searchBrandId;
     private Guid? SearchBrandId

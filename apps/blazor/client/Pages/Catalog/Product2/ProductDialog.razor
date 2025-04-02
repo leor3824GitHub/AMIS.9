@@ -9,12 +9,12 @@
                     <MudTextField @bind-Value="Model.Name" Label="Name" For="@(() => Model.Name)" />
                 </MudItem>
                 <MudItem xs="12" md="6">
-                    @* <MudSelect T="Guid" Label="Category" @bind-Value="Model.CategoryId">
+                    <MudSelect T="Guid" Label="Category" @bind-Value="Model.CategoryId">
                         @foreach (var category in _categories)
                         {
                             <MudSelectItem T="Guid" Value="category.Id">@category.Name</MudSelectItem>
                         }
-                    </MudSelect> *@
+                    </MudSelect>
                 </MudItem>
                 <MudItem xs="12">
                     <MudTextField @bind-Value="Model.Description" Label="Description" For="@(() => Model.Description)" />
