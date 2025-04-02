@@ -1,4 +1,5 @@
-﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+﻿
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
     <MudDialog>
         <DialogContent>
             <DataAnnotationsValidator />
@@ -7,20 +8,66 @@
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Name" Label="Name" For="@(() => Model.Name)" />
                 </MudItem>
-                <MudItem xs="12" sm="6">
+                <MudItem xs="12" md="6">
+                    <MudSelect T="Guid" Label="Category" @bind-Value="Model.CategoryId">
+                        @foreach (var category in _categories)
+                        {
+                            <MudSelectItem T="Guid?" Value="category.Id">@category.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12">
                     <MudTextField @bind-Value="Model.Description" Label="Description" For="@(() => Model.Description)" />
                 </MudItem>
-                <MudItem xs="12" sm="6">
+                <MudItem xs="12" sm="6" md="3">
                     <MudTextField @bind-Value="Model.Unit" Label="Unit" For="@(() => Model.Unit)" />
                 </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudNumericField @bind-Value="Model.Sku" Label="Sku" For="@(() => Model.Sku)" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
+                <MudItem xs="12" sm="6" md="3">
                     <MudTextField @bind-Value="Model.Location" Label="Location" For="@(() => Model.Location)" />
                 </MudItem>
                 <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="Model.CategoryId" Label="CategoryId" For="@(() => Model.CategoryId)" />
+                    <MudNumericField @bind-Value="Model.Sku" Label="Sku" For="@(() => Model.Sku)" />
+                </MudItem>                
+                
+                <MudItem xs="12">
+                    @if (!string.IsNullOrEmpty(Model.ImagePath))
+                    {
+                        <MudAvatar Square="true" Style="height: 300px; width: 300px; overflow: hidden;">
+                            <MudImage Src="@Model.ImagePath" Style="width: 100%; height: 100%; object-fit: cover;" />
+                        </MudAvatar>
+                    }
+                    else if (Model.Image != null && !string.IsNullOrEmpty(Model.Image.Data))
+                    {
+                        <MudAvatar Square="true" Style="height: 300px; width: 300px; overflow: hidden;">
+                            <MudImage Src="@Model.Image.Data" Style="width: 100%; height: 100%; object-fit: cover;" />
+                        </MudAvatar>
+                    }
+                    else
+                    {
+                        <MudAvatar Square="true" Style="height: 300px; width: 300px; background-color: lightgray;">
+                            <MudIcon Icon="@Icons.Material.Filled.Image" Color="Color.Primary" />
+                        </MudAvatar>
+                    }
+                </MudItem>
+                <MudItem Class="d-flex justify-center">
+                    <InputFile id="fileInput" OnChange="@UploadFiles" hidden accept=".jpg,.jpeg,.png" />
+                    <div style="padding-bottom:20px">
+                        <MudButton DropShadow="false" HtmlTag="label" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.CloudUpload" for="fileInput">
+                            Upload
+                        </MudButton>
+                        @if (!string.IsNullOrEmpty(Model.ImagePath) || (Model.Image != null && !string.IsNullOrEmpty(Model.Image.Data)))
+                        {
+                            <MudButton HtmlTag="label" DropShadow="false" Variant="Variant.Filled" Color="Color.Info" Size="Size.Small" Target="_blank"
+                                       StartIcon="@Icons.Material.Filled.RemoveRedEye" Href="@Model.ImagePath" Style="margin-left: 5px;">
+                                View
+                            </MudButton>
+                            <MudButton HtmlTag="label" DisableElevation Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                                       StartIcon="@Icons.Material.Filled.Delete" OnClick="SetDeleteCurrentImageFlag" Style="margin-left: 5px;">
+                                Clear
+                            </MudButton>
+                        }
+                    </div>
                 </MudItem>
             </MudGrid>
         </DialogContent>
@@ -30,5 +77,3 @@
         </DialogActions>
     </MudDialog>
 </EditForm>
-
-
