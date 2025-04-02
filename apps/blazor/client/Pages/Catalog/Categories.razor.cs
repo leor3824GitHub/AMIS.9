@@ -9,7 +9,7 @@ namespace AMIS.Blazor.Client.Pages.Catalog;
 public partial class Categories
 {
     [Inject]
-    protected IApiClient _client { get; set; } = default!;
+    protected IApiClient Client { get; set; } = default!;
 
     protected EntityServerTableContext<CategoryResponse, Guid, CategoryViewModel> Context { get; set; } = default!;
 
@@ -31,18 +31,18 @@ public partial class Categories
             searchFunc: async filter =>
             {
                 var categoryFilter = filter.Adapt<SearchCategorysCommand>();
-                var result = await _client.SearchCategorysEndpointAsync("1", categoryFilter);
+                var result = await Client.SearchCategorysEndpointAsync("1", categoryFilter);
                 return result.Adapt<PaginationResponse<CategoryResponse>>();
             },
             createFunc: async category =>
             {
-                await _client.CreateCategoryEndpointAsync("1", category.Adapt<CreateCategoryCommand>());
+                await Client.CreateCategoryEndpointAsync("1", category.Adapt<CreateCategoryCommand>());
             },
             updateFunc: async (id, category) =>
             {
-                await _client.UpdateCategoryEndpointAsync("1", id, category.Adapt<UpdateCategoryCommand>());
+                await Client.UpdateCategoryEndpointAsync("1", id, category.Adapt<UpdateCategoryCommand>());
             },
-            deleteFunc: async id => await _client.DeleteCategoryEndpointAsync("1", id));
+            deleteFunc: async id => await Client.DeleteCategoryEndpointAsync("1", id));
 }
 
 public class CategoryViewModel : UpdateCategoryCommand

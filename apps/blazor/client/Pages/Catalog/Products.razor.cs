@@ -53,11 +53,22 @@ public partial class Products
             },
             createFunc: async prod =>
             {
+                if (!string.IsNullOrEmpty(prod.ImageInBytes))
+                {
+                    prod.Image = new FileUploadCommand() { Data = prod.ImageInBytes, Extension = prod.ImageExtension ?? string.Empty, Name = $"{prod.Description}_{Guid.NewGuid():N}" };
+                }
                 await _client.CreateProductEndpointAsync("1", prod.Adapt<CreateProductCommand>());
+                prod.ImageInBytes = string.Empty;
             },
             updateFunc: async (id, prod) =>
             {
+                if (!string.IsNullOrEmpty(prod.ImageInBytes))
+                {
+                    prod.DeleteCurrentImage = true;
+                    prod.Image = new FileUploadCommand() { Data = prod.ImageInBytes, Extension = prod.ImageExtension ?? string.Empty, Name = $"{prod.Description}_{Guid.NewGuid():N}" };
+                }
                 await _client.UpdateProductEndpointAsync("1", id, prod.Adapt<UpdateProductCommand>());
+                prod.ImageInBytes = string.Empty;
             },
             deleteFunc: async id => await _client.DeleteProductEndpointAsync("1", id));
 

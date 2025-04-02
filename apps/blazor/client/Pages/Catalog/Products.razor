@@ -48,7 +48,6 @@
            </MudSelect>
        </MudItem>
         <MudItem xs="12" md="12">
-            <MudItem>
                 @if (!string.IsNullOrEmpty(context.ImagePath))
                 {
                     <MudAvatar Square="true" Style="height: auto; width: auto; max-height: 100%">
@@ -59,30 +58,34 @@
                 {
                     <MudAvatar Image="@(string.IsNullOrEmpty(context.ImagePath) ? string.Empty : Config[ConfigNames.ApiBaseUrl] + context.ImagePath)" Square="true" Style="height: auto; width: auto; max-height: 100%" />
                 }
-            </MudItem>
-            <MudCardActions Class="d-flex justify-center">
-                <InputFile id="fileInput" OnChange="UploadFiles" hidden accept=".jpg,.jpeg,.png" />
+        </MudItem>
+            <MudItem Class="d-flex justify-center"> 
+                <InputFile id="fileInput" OnChange="@UploadFiles" hidden accept=".jpg,.jpeg,.png" />
                 <div style="padding-bottom:20px">
                     <MudButton DropShadow="false" HtmlTag="label" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
                                StartIcon="@Icons.Material.Filled.CloudUpload" for="fileInput">
-                        Upload Profile Picture
+                        Upload
                     </MudButton>
-                    @if (!string.IsNullOrEmpty(context.ImagePath))
+                    @if(!Context.AddEditModal.IsCreate && (!string.IsNullOrEmpty(context.ImagePath)))
                     {
-                        <MudButton HtmlTag="label" DropShadow="false" Variant="Variant.Filled" Color="Color.Info" Size="Size.Small" Target="_blank"
-                                   StartIcon="@Icons.Material.Filled.RemoveRedEye" Href="@context.ImagePath" Style="margin-left: 5px;">
-                            View
-                        </MudButton>
+                    <MudButton HtmlTag="label" DropShadow="false" Variant="Variant.Filled" Color="Color.Info" Size="Size.Small" Target="_blank"
+                                StartIcon="@Icons.Material.Filled.RemoveRedEye" Href="@context.ImagePath" Style="margin-left: 5px;">
+                        View
+                    </MudButton>
 
-                        <MudButton HtmlTag="label" DropShadow="false" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
-                                   StartIcon="@Icons.Material.Filled.Delete" OnClick="ClearImageInBytes" Style="margin-left: 5px;">
-                            Delete
+                    <MudButton HtmlTag="label" DropShadow="false" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Delete" OnClick="ClearImageInBytes" Style="margin-left: 5px;">
+                        Delete
+                    </MudButton>
+                    }
+                    @if (!string.IsNullOrEmpty(context.ImageInBytes))
+                    {
+                        <MudButton HtmlTag="label" DisableElevation OnClick="@ClearImageInBytes" Variant="Variant.Filled" Color="Color.Warning" Size="Size.Small" Target="_blank"
+                                   StartIcon="@Icons.Material.Filled.Clear" Style="margin-left: 5px;">
+                            Clear
                         </MudButton>
                     }
-
                 </div>
-
-            </MudCardActions>
             </MudItem>
    </EditFormContent>
 
