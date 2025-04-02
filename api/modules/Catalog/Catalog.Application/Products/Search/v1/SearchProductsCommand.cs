@@ -7,4 +7,5 @@ namespace AMIS.WebApi.Catalog.Application.Products.Search.v1;
 public class SearchProductsCommand : PaginationFilter, IRequest<PagedList<ProductResponse>>
 {
     public Guid? CategoryId { get; set; }
+    public string? Name { get; set; }
 }

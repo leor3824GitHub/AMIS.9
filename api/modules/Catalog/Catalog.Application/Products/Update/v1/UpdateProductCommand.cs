@@ -4,11 +4,11 @@ using MediatR;
 namespace AMIS.WebApi.Catalog.Application.Products.Update.v1;
 public sealed record UpdateProductCommand(
     Guid Id,
-    string? Name,
+    string Name,
     decimal SKU,
     string Location,
     string Unit,
+    Guid CategoryId,
     string? Description = null,
-    FileUploadCommand? Image = null,
-    Guid? CategoryId = null,
+    FileUploadCommand? Image = null,    
     bool DeleteCurrentImage = false) : IRequest<UpdateProductResponse>;
