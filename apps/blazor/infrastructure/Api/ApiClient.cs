@@ -9390,6 +9390,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("imagePath")]
         public string ImagePath { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("categoryid")]
+        public System.Guid? CategoryId { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("category")]
         public CategoryResponse Category { get; set; }
 

@@ -70,9 +70,16 @@ public partial class ProductDialog
             }
         }
     }
-    private void OnCategoryChanged(List<CategoryResponse> Category)
+    //private void OnCategoryChanged(List<CategoryResponse> Category)
+    //{
+    //    _categories = Category;
+    //}
+    protected override async Task OnParametersSetAsync()
     {
-        _categories = Category;
+        if (Model != null && Model.CategoryId == null && _categories.Count != 0)
+        {
+            Model.CategoryId = _categories.FirstOrDefault()?.Id;
+        }
     }
     protected override async Task OnInitializedAsync()
     {

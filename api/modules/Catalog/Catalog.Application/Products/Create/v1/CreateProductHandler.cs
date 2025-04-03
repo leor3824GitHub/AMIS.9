@@ -1,4 +1,5 @@
-﻿using AMIS.Framework.Core.Persistence;
+﻿using System.Runtime.CompilerServices;
+using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Core.Storage;
 using AMIS.Framework.Core.Storage.File;
 using AMIS.WebApi.Catalog.Domain;
@@ -16,8 +17,16 @@ public sealed class CreateProductHandler(
     public async Task<CreateProductResponse> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+        string imagepath = string.Empty;
+
         var productImagePath = await storageService.UploadAsync<Product>(request.Image, FileType.Image, cancellationToken);
-        var product = Product.Create(request.Name!, request.Description, request.SKU, request.Location, request.Unit, productImagePath.ToString(), request.CategoryId);
+
+        if (productImagePath is not null)
+        {
+            imagepath = productImagePath.ToString();
+        }
+    
+        var product = Product.Create(request.Name!, request.Description, request.SKU, request.Location, request.Unit, imagepath, request.CategoryId);
         await repository.AddAsync(product, cancellationToken);
         logger.LogInformation("product created {ProductId}", product.Id);
         return new CreateProductResponse(product.Id);
