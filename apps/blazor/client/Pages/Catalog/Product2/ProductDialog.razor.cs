@@ -19,11 +19,11 @@ public partial class ProductDialog
    
     [Parameter] public Action? Refresh { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
+    [Parameter] public List<CategoryResponse> _categories { get; set; }
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     private string? _successMessage;
-
-    private List<CategoryResponse> _categories = [];
-    private List<CategoryResponse> category { get; set; } = default!;
+        
+    //private List<CategoryResponse> category { get; set; } = default!;
 
     private MudForm? _form;
     private bool _uploading;
@@ -79,17 +79,6 @@ public partial class ProductDialog
         if (Model != null && Model.CategoryId == null && _categories.Count != 0)
         {
             Model.CategoryId = _categories.FirstOrDefault()?.Id;
-        }
-    }
-    protected override async Task OnInitializedAsync()
-    {
-        if (_categories.Count == 0)
-        {
-            var response = await ProductClient.SearchCategorysEndpointAsync("1", new SearchCategorysCommand());
-            if (response?.Items != null)
-            {
-                _categories = response.Items.ToList();
-            }
         }
     }
     private async Task UploadFiles(InputFileChangeEventArgs e)

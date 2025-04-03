@@ -103,12 +103,13 @@ public partial class Productstable
         return new GridData<ProductResponse> { TotalItems = _totalItems, Items = _entityList };
     }
 
-    private async Task ShowEditFormDialog(string title, ProductViewModel command, bool IsCreate)
+    private async Task ShowEditFormDialog(string title, ProductViewModel command, bool IsCreate, List<CategoryResponse> categories)
     {
         var parameters = new DialogParameters
         {
             { nameof(ProductDialog.Model), command },
-            { nameof(ProductDialog.IsCreate), IsCreate }
+            { nameof(ProductDialog.IsCreate), IsCreate },
+            { nameof(ProductDialog._categories), categories }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<ProductDialog>(title, parameters, options);
@@ -124,7 +125,7 @@ public partial class Productstable
     private async Task OnCreate()
     {
         var model = _currentDto.Adapt<ProductViewModel>();
-        await ShowEditFormDialog("Create new Item", model, true);
+        await ShowEditFormDialog("Create new Item", model, true, _categories);
     }
 
     private async Task OnClone()
@@ -135,14 +136,15 @@ public partial class Productstable
             var command = new Mapper().Map<ProductResponse, ProductViewModel>(copy);
             //var command = copy.Adapt<ProductViewModel>();
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
-            await ShowEditFormDialog("Clone an Item", command, true);
+            await ShowEditFormDialog("Clone an Item", command, true, _categories);
         }
     }
 
     private async Task OnEdit(ProductResponse dto)
     {
+        
         var command = dto.Adapt<ProductViewModel>();
-        await ShowEditFormDialog("Edit the Item", command, false);
+        await ShowEditFormDialog("Edit the Item", command, false, _categories);
     }
 
     private async Task OnDelete(ProductResponse dto)
