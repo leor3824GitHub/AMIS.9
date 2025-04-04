@@ -35,7 +35,7 @@ public sealed class UpdateProductHandler(
 
         var productImagePath = request.Image is not null
             ? (await storageService.UploadAsync<Product>(request.Image, FileType.Image, cancellationToken)).ToString()
-            : null;
+            : product.ImagePath;
 
         var updatedProduct = product.Update(request.Name, request.Description, request.SKU, request.Location, request.Unit, productImagePath, request.CategoryId);
         await repository.UpdateAsync(updatedProduct, cancellationToken);
