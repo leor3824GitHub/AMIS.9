@@ -3,11 +3,7 @@
 <PageHeader Title="Brands" Header="Brands" SubHeader="Manage your Brands." />
 
 <EntityTable @ref="_table" TEntity="BrandResponse" TId="Guid" TRequest="BrandViewModel" Context="@Context">
-
-    <AdvancedSearchContent>
-        <!-- Add any advanced search content here if needed -->
-    </AdvancedSearchContent>
-
+        
     <EditFormContent>
         @if (!Context.AddEditModal.IsCreate)
         {

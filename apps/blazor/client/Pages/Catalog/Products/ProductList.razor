@@ -1,0 +1,116 @@
+﻿@page "/productlist"
+@using AMIS.Blazor.Client.Pages.Catalog.Products
+@inject IApiClient ProductClient
+@using MudBlazor
+
+@if (_loading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else
+{
+    <MudGrid Class="mt-4">
+        <MudItem xs="12" sm="6" md="3">
+            <MudSelect T="Guid?" Label="Select Category" @bind-Value="selectedCategoryId">
+                <MudSelectItem T="Guid?" Value="null">All Categories</MudSelectItem>
+                @foreach (var category in _categories)
+                {
+                    <MudSelectItem T="Guid?" Value="@category.Id">@category.Name</MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" sm="6" md="3">
+            <MudTextField @bind-Value="searchText" Label="Search" Adornment="Adornment.Start" AdornmentIcon="Icons.Material.Filled.Search" />
+        </MudItem>
+        </MudGrid>
+        <MudGrid Class="mt-4">
+        @foreach (var product in FilteredProducts)
+        {
+            <MudItem xs="12" sm="6" md="4" lg="3">
+                <MudCard Class="pa-3" Elevation="4">
+                    <MudCardMedia Image="@product.ImagePath" Height="200" />
+                    <MudCardContent>
+                        <MudText Typo="Typo.h6">@Truncate(product.Name, 20)</MudText>
+                        <MudText Typo="Typo.body2">@Truncate(product.Description, 70)</MudText>
+                        @* <MudText Typo="Typo.h6" Class="mt-2">@string.Format("${0}", product.Price)</MudText> *@
+                    </MudCardContent>
+                    <MudCardActions>
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => AddToCart(product))">Add to Cart</MudButton>
+                    </MudCardActions>
+                </MudCard>
+            </MudItem>
+        }
+    </MudGrid>
+}
+
+<MudDialogProvider />
+<MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="GoToCheckout">Checkout</MudButton>
+
+@code {
+    private List<CategoryResponse> _categories = new();
+    private IEnumerable<ProductResponse> _entityList = new List<ProductResponse>();
+    private bool _loading = true;
+    private string searchText = string.Empty;
+    private List<ProductResponse> cartItems = new List<ProductResponse>();
+    private Guid? selectedCategoryId = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategoriesAsync();
+        await LoadProductsAsync();
+        _loading = false;
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        var response = await ProductClient.SearchCategorysEndpointAsync("1", new SearchCategorysCommand());
+        if (response?.Items != null)
+        {
+            _categories = response.Items.ToList();
+        }
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        var response = await ProductClient.SearchProductsEndpointAsync("1", new SearchProductsCommand());
+        if (response?.Items != null)
+        {
+            _entityList = response.Items;
+        }
+    }
+
+    private void AddToCart(ProductResponse product)
+    {
+        cartItems.Add(product);
+    }
+
+    private void GoToCheckout()
+    {
+        // Handle checkout logic (redirect to another page, show dialog, etc.)
+    }
+
+    private IEnumerable<ProductResponse> FilteredProducts
+    {
+        get
+        {
+            var filteredProducts = _entityList;
+
+            if (selectedCategoryId.HasValue)
+            {
+                filteredProducts = filteredProducts.Where(p => p.CategoryId == selectedCategoryId);
+            }
+
+            if (!string.IsNullOrEmpty(searchText))
+            {
+                filteredProducts = filteredProducts.Where(p => p.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) || p.Category.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+            }
+
+            return filteredProducts;
+        }
+    }
+    private string Truncate(string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        return value.Length <= maxLength ? value : value.Substring(0, maxLength) + "...";
+    }
+}

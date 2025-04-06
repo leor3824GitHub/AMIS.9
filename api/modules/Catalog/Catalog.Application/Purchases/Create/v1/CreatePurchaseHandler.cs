@@ -13,7 +13,7 @@ public sealed class CreatePurchaseHandler(
     public async Task<CreatePurchaseResponse> Handle(CreatePurchaseCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var purchase = Purchase.Create(request.SupplierId!, request.PurchaseDate, request.TotalAmount);
+        var purchase = Purchase.Create(request.SupplierId, request.PurchaseDate, request.TotalAmount);
         await repository.AddAsync(purchase, cancellationToken);
         logger.LogInformation("purchase created {PurchaseId}", purchase.Id);
         return new CreatePurchaseResponse(purchase.Id);

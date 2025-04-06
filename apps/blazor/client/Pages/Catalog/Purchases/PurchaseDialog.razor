@@ -1,0 +1,49 @@
+﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <MudDialog>
+        <DialogContent>
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudSelect T="Guid?" Label="Supplier" @bind-Value="Model.SupplierId">
+                        @foreach (var suppliers in _suppliers)
+                        {
+                            <MudSelectItem T="Guid?" Value="suppliers.Id">@suppliers.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="Model.PurchaseDate" Label="Purchase Date" For="@(() => Model.PurchaseDate)" />
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudSelect T="String" Label="Status" @bind-Value="Model.Status">
+                        @foreach (var status in Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>())
+                        {
+                            <MudSelectItem T="String" Value="status.ToString()">@status</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudTextField @bind-Value="Model.TotalAmount" Label="TotalAmount" For="@(() => Model.TotalAmount)" />
+                </MudItem>                
+            </MudGrid>
+            @* <MudDataGrid Items="filteredPurchaseItems" MultiSelection="true" @bind-SelectedItems="selectedPurchaseItems" ColumnResizeMode="ResizeMode.Column" Hover="true" Loading="@loading">
+                <Columns>
+                    <PropertyColumn Property="x => x.Product.Name" Title="Product" />
+                    <PropertyColumn Property="x => x.Qty" Title="Quantity" />
+                    <PropertyColumn Property="x => x.UnitPrice" Title="Unit Price" />
+                    <PropertyColumn Property="x => x.Status" Title="Status" />
+                </Columns>
+                <PagerContent>
+                    <MudDataGridPager />
+                </PagerContent>
+            </MudDataGrid> *@
+        </DialogContent>
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+

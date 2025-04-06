@@ -9487,7 +9487,7 @@ namespace AMIS.Blazor.Infrastructure.Api
         public System.Guid? Id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("supplierId")]
-        public System.Guid SupplierId { get; set; }
+        public System.Guid? SupplierId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("purchaseDate")]
         public System.DateTime PurchaseDate { get; set; }
@@ -10327,7 +10327,7 @@ namespace AMIS.Blazor.Infrastructure.Api
         public System.Guid Id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("supplierId")]
-        public System.Guid SupplierId { get; set; }
+        public System.Guid? SupplierId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("purchaseDate")]
         public System.DateTime PurchaseDate { get; set; }

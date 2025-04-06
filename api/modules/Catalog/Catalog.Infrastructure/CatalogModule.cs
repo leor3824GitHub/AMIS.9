@@ -8,6 +8,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using AMIS.WebApi.Catalog.Application.Products.Create.v1;
+using FluentValidation;
+using AMIS.WebApi.Catalog.Application.Products.Update.v1;
 
 namespace AMIS.WebApi.Catalog.Infrastructure;
 public static class CatalogModule
@@ -121,6 +124,9 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
         builder.Services.AddKeyedScoped<IReadRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
+
+        builder.Services.AddValidatorsFromAssemblyContaining<CreateProductCommandValidator>();
+        builder.Services.AddValidatorsFromAssemblyContaining<UpdateProductCommandValidator>();
 
         return builder;
     }

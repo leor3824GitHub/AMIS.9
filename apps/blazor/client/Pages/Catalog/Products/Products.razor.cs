@@ -10,8 +10,8 @@ using AMIS.Blazor.Infrastructure.Auth;
 using MapsterMapper;
 using Mapster;
 
-namespace AMIS.Blazor.Client.Pages.Catalog.Product2;
-public partial class Productstable
+namespace AMIS.Blazor.Client.Pages.Catalog.Products;
+public partial class Products
 {
     private MudDataGrid<ProductResponse> _table = default!;
     private HashSet<ProductResponse> _selectedItems = new();

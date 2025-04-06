@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 
-namespace AMIS.Blazor.Client.Pages.Catalog.Product2;
+namespace AMIS.Blazor.Client.Pages.Catalog.Products;
 public partial class ProductDialog
 {
     [Inject]
@@ -22,14 +22,10 @@ public partial class ProductDialog
     [Parameter] public List<CategoryResponse> _categories { get; set; }
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     private string? _successMessage;
-        
-    //private List<CategoryResponse> category { get; set; } = default!;
-
-    private MudForm? _form;
+    private FshValidation? _customValidation;
     private bool _uploading;
-    private string _uploadErrorMessage;
+    private string? _uploadErrorMessage;
     private bool _isUploading;
-    private const long MaxAllowedSize = 3145728;
 
     private async Task OnValidSubmit()
     {

@@ -17,6 +17,23 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Pages\Catalog\Products\Product3.razor.cs" />
+	  <Compile Remove="Pages\Catalog\Products_1.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Content Remove="Pages\Catalog\Products\Product3.razor" />
+	  <Content Remove="Pages\Catalog\Products\Product4.razor" />
+	  <Content Remove="Pages\Catalog\Products_1.razor" />
+	  <Content Remove="Pages\Home.razor" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="Pages\Catalog\Products\Product3.razor.css" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Blazored.FluentValidation" />
 		<PackageReference Include="Mapster" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" />
 		<PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" PrivateAssets="all" />

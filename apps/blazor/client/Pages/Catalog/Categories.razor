@@ -4,10 +4,6 @@
 
 <EntityTable @ref="_table" TEntity="CategoryResponse" TId="Guid" TRequest="CategoryViewModel" Context="@Context">
 
-    <AdvancedSearchContent>
-        <!-- Add any advanced search content here if needed -->
-    </AdvancedSearchContent>
-
     <EditFormContent>
         @if (!Context.AddEditModal.IsCreate)
         {

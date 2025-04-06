@@ -8,7 +8,7 @@ using MudBlazor;
 
 namespace AMIS.Blazor.Client.Pages.Catalog;
 
-public partial class Products
+public partial class Products_1
 {
     [Inject]
     protected IApiClient _client { get; set; } = default!;

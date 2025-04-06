@@ -1,0 +1,78 @@
+﻿@page "/catalog/purchases"
+
+<MudDataGrid ServerData="ServerReload"
+             MultiSelection="true"
+             @bind-SelectedItems="_selectedItems"
+             @bind-SelectedItem="_currentDto"
+             ColumnResizeMode="ResizeMode.Column"
+             Hover="true"
+             Loading="@_loading" @ref="_table">
+    <ToolBarContent>
+        <div class="d-flex align-start flex-grow-1">
+            <MudText Typo="Typo.h6">List of Purchases</MudText>
+            <MudSpacer />
+
+            <div class="d-flex flex-column">
+                <div class="d-flex gap-1">
+                    <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                        <MudButton Variant="Variant.Outlined"
+                                   Size="Size.Small"
+                                   Disabled="@_loading"
+                                   OnClick="@(() => OnRefresh())"
+                                   StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Primary">
+                            Refresh
+                        </MudButton>
+                        @if (_canCreate)
+                        {
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       Size="Size.Small"
+                                       Disabled="@_loading"
+                                       OnClick="OnCreate"
+                                       IconColor="Color.Surface">
+                                New
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                       StartIcon="@Icons.Material.Filled.ContentCopy"
+                                       Size="Size.Small"
+                                       Disabled="@(_selectedItems.Count != 1)"
+                                       OnClick="OnClone"
+                                       IconColor="Color.Surface">
+                                Clone
+                            </MudButton>
+                        }                        
+                    </MudHidden>                    
+                </div>
+                @if (_canSearch)
+                {
+                    <MudTextField T="string" ValueChanged="@(s=>OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+                }
+
+            </div>
+        </div>
+    </ToolBarContent>
+    <Columns>
+        <SelectColumn T="PurchaseResponse" />        
+        <PropertyColumn Property="x => x.Supplier.Name" Title="Supplier" />
+        <PropertyColumn Property="x => x.PurchaseDate" Title="Purchase Date" />
+        <PropertyColumn Property="x => x.TotalAmount" Title="Total Amount" />
+        <PropertyColumn Property="x => x.Status" Title="Status" />
+        <TemplateColumn>
+            <CellTemplate>
+                <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
+                         Dense="true"
+                         IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
+
+                    <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => OnDetails(context.Item))">Details</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                </MudMenu>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager />
+    </PagerContent>
+</MudDataGrid>

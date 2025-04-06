@@ -1,11 +1,15 @@
-﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+﻿
+
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
     <MudDialog>
         <DialogContent>
+            <FshValidation @ref="_customValidation" />
             <DataAnnotationsValidator />
             <ValidationSummary />
             <MudGrid>
                 <MudItem xs="12" sm="6">
                     <MudTextField @bind-Value="Model.Name" Label="Name" For="@(() => Model.Name)" />
+                    <ValidationMessage For="@(() => Model.Name)"/>
                 </MudItem>
                 <MudItem xs="12" md="6">
                     <MudSelect T="Guid?" Label="Category" @bind-Value="Model.CategoryId">
