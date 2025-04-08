@@ -9,6 +9,7 @@ using MudBlazor;
 using AMIS.Blazor.Infrastructure.Auth;
 using MapsterMapper;
 using Mapster;
+using static MudBlazor.CategoryTypes;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Products;
 public partial class Products
@@ -49,7 +50,7 @@ public partial class Products
 
         await LoadCategoriesAsync();
     }
-
+    
     private async Task LoadCategoriesAsync()
     {
         if (_categories.Count == 0)

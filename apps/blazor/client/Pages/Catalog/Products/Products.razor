@@ -5,8 +5,9 @@
              @bind-SelectedItems="_selectedItems"
              @bind-SelectedItem="_currentDto"
              ColumnResizeMode="ResizeMode.Column"
-             Hover="true"
-             Loading="@_loading" @ref="_table">
+             Hover="true"             
+             Loading="@_loading" 
+             @ref="_table">
     <ToolBarContent>
         <div class="d-flex align-start flex-grow-1">
             <MudText Typo="Typo.h6">Product List</MudText>
@@ -140,7 +141,7 @@
         <PropertyColumn Property="x => x.Unit" />
         <PropertyColumn Property="x => x.Sku" />
         <PropertyColumn Property="x => x.Location" />
-        <PropertyColumn Property="x => x.Category.Name" />
+        <PropertyColumn Property="x => x.Category.Name" Groupable="true" />
         <TemplateColumn>
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"

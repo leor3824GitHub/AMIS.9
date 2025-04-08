@@ -5,7 +5,7 @@ namespace AMIS.WebApi.Catalog.Application.Purchases.Update.v1;
 public sealed record UpdatePurchaseCommand(
     Guid Id,
     Guid? SupplierId,
-    DateTime PurchaseDate,
+    DateTime? PurchaseDate,
     string Status,
     decimal TotalAmount = 0) : IRequest<UpdatePurchaseResponse>;
 //In-progress', 'Partially', 'Cancelled

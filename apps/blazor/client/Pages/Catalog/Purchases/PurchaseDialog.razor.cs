@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Shared.Authorization;
@@ -22,6 +23,7 @@ public partial class PurchaseDialog
     [Parameter] public bool? IsCreate { get; set; }
     [Parameter] public List<SupplierResponse> _suppliers { get; set; }
     [Parameter] public List<ProductResponse> _products { get; set; }
+    
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     private PurchaseStatus selectedStatus = PurchaseStatus.Draft;
@@ -32,12 +34,12 @@ public partial class PurchaseDialog
     private string? _uploadErrorMessage;
     private bool _isUploading;
     private string? searchText;
+    private DateTime? TempDateTime;
 
-    protected override async Task OnInitializedAsync()
+    protected override void OnInitialized()
     {
-        
+        TempDateTime = Model.PurchaseDate;
     }
-
     private async Task OnValidSubmit()
     {
         if (IsCreate == null) return;
@@ -81,7 +83,7 @@ public partial class PurchaseDialog
     {
         if (Model != null && Model.SupplierId == null && _suppliers.Count != 0)
         {
-            Model.SupplierId = _suppliers.FirstOrDefault()?.Id;
+            Model.SupplierId = _suppliers.FirstOrDefault()?.Id;            
         }
     }     
 
