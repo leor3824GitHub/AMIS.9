@@ -7,14 +7,15 @@ namespace AMIS.WebApi.Catalog.Domain;
 public class Purchase : AuditableEntity, IAggregateRoot
 {
     public Guid? SupplierId { get; private set; }
-    public DateTime PurchaseDate { get; private set; }
+    public DateTime? PurchaseDate { get; private set; }
     public decimal TotalAmount { get; private set; }
-    public string Status { get; private set; }
+    public string Status { get; private set; } = "InProgress"; // Initialize to avoid CS8618
     public virtual Supplier Supplier { get; private set; } = default!;
+    public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
 
     private Purchase() { }
 
-    private Purchase(Guid id, Guid? supplierId, DateTime purchaseDate, decimal totalAmount)
+    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, decimal totalAmount)
     {
         Id = id;
         SupplierId = supplierId;
@@ -25,12 +26,18 @@ public class Purchase : AuditableEntity, IAggregateRoot
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
 
-    public static Purchase Create(Guid? supplierId, DateTime purchaseDate, decimal totalAmount)
+    public void AddItem(Guid productId, int qty, decimal unitPrice, string? status)
+    {
+        var item = PurchaseItem.Create(this.Id, productId, qty, unitPrice, status);
+        Items.Add(item);
+    }
+
+    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount)
     {
         return new Purchase(Guid.NewGuid(), supplierId, purchaseDate, totalAmount);
     }
 
-    public Purchase Update(Guid? supplierId, DateTime purchaseDate, decimal totalAmount, string? status)
+    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, string? status)
     {
         bool isUpdated = false;
 
@@ -65,5 +72,53 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
         return this;
     }
+    public void SyncItems(List<PurchaseItemUpdate> items)
+    {
+        var existingMap = Items.ToDictionary(i => i.Id, i => i);
+        var updatedItems = new List<PurchaseItem>();
+
+        foreach (var update in items)
+        {
+            if (update.Id.HasValue && existingMap.TryGetValue(update.Id.Value, out var existing))
+            {
+                // Track state before update for event comparison (optional)
+                var before = (existing.Qty, existing.UnitPrice, existing.ProductId, existing.Status);
+
+                existing.Update(update.ProductId, update.Qty, update.UnitPrice, update.Status);
+                updatedItems.Add(existing);
+
+                if (before != (existing.Qty, existing.UnitPrice, existing.ProductId, existing.Status))
+                {
+                    QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = existing });
+                }
+            }
+            else
+            {
+                var newItem = PurchaseItem.Create(Id, update.ProductId, update.Qty, update.UnitPrice, update.Status);
+                updatedItems.Add(newItem);
+                QueueDomainEvent(new PurchaseItemCreated { PurchaseItem = newItem });
+            }
+        }
+
+        // Remove old items not in the updated list
+        var toRemove = Items.Where(i => !updatedItems.Any(u => u.Id == i.Id)).ToList();
+        foreach (var item in toRemove)
+        {
+            Items.Remove(item);
+            QueueDomainEvent(new PurchaseItemRemoved { PurchaseItem = item });
+        }
+
+        // Add new items to the collection
+        foreach (var item in updatedItems)
+        {
+            if (!Items.Any(i => i.Id == item.Id))
+                Items.Add(item);
+        }
+
+        // Update total based on current items
+        var total = Items.Sum(i => i.Qty * i.UnitPrice);
+        Update(SupplierId, PurchaseDate, total, Status);
+    }
+
 }
 

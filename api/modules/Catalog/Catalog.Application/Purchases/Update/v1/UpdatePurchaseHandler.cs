@@ -16,7 +16,21 @@ public sealed class UpdatePurchaseHandler(
         ArgumentNullException.ThrowIfNull(request);
         var purchase = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = purchase ?? throw new PurchaseNotFoundException(request.Id);
+        
         var updatedPurchase = purchase.Update(request.SupplierId, request.PurchaseDate, request.TotalAmount, request.Status);
+
+        // Use the SyncItems method to update, add, and remove items inside the aggregate
+        var itemUpdates = request.Items.Select(i => new PurchaseItemUpdate(
+            i.Id, // Pass the Id
+            i.ProductId,
+            i.Qty,
+            i.UnitPrice,
+            i.Status
+        )).ToList();
+
+        purchase.SyncItems(itemUpdates);
+
+        // Save the updated aggregate root
         await repository.UpdateAsync(updatedPurchase, cancellationToken);
         logger.LogInformation("purchase with id : {PurchaseId} updated.", purchase.Id);
         return new UpdatePurchaseResponse(purchase.Id);
