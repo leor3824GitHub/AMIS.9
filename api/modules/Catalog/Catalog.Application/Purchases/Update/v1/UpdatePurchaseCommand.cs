@@ -2,7 +2,7 @@ using MediatR;
 
 namespace AMIS.WebApi.Catalog.Application.Purchases.Update.v1;
 
-public sealed record PurchaseItemDto(
+public sealed record PurchaseItemUpdateDto(
     Guid? Id,                 // The ID of the purchase item (could be null for new items)
     Guid ProductId,
     int Qty,
@@ -15,5 +15,5 @@ public sealed record UpdatePurchaseCommand(
     DateTime? PurchaseDate,    // The optional purchase date
     decimal TotalAmount,       // The total amount (could be recalculated)
     string? Status,            // The optional purchase status
-    ICollection<PurchaseItemDto>? Items = null  // The list of items to update/add/remove
+    ICollection<PurchaseItemUpdateDto>? Items = null  // The list of items to update/add/remove
 ) : IRequest<UpdatePurchaseResponse>;
