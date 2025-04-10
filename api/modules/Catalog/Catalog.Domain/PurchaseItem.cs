@@ -31,15 +31,9 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
         return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, status);
     }
 
-    public PurchaseItem Update(Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
+    public PurchaseItem Update(Guid productId, int qty, decimal unitPrice, string? status)
     {
-        bool isUpdated = false;
-
-        if (PurchaseId != purchaseId)
-        {
-            PurchaseId = purchaseId;
-            isUpdated = true;
-        }
+        bool isUpdated = false;             
 
         if (ProductId != productId)
         {
