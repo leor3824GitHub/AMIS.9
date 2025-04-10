@@ -11,6 +11,5 @@ internal sealed class PurchaseItemConfiguration : IEntityTypeConfiguration<Purch
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
         builder.Property(x => x.PurchaseId).IsRequired();
-        builder.Property(x => x.PurchaseId).IsRequired();
     }
 }
