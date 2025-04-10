@@ -21,7 +21,7 @@ public class Issuance : AuditableEntity, IAggregateRoot
         TotalAmount = totalAmount;
         IsClosed = false;
 
-        QueueDomainEvent(new IssuanceUpdated { Issuance = this });
+        QueueDomainEvent(new IssuanceCreated { Issuance = this });
     }
 
     public static Issuance Create(Guid employeeId, DateTime issuanceDate, decimal totalAmount)
