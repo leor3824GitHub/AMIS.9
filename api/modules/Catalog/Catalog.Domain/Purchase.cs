@@ -10,7 +10,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     public DateTime? PurchaseDate { get; private set; }
     public decimal TotalAmount { get; private set; }
     public string Status { get; private set; } = "InProgress"; // Initialize to avoid CS8618
-    public virtual Supplier Supplier { get; private set; } = default!;
+    public virtual Supplier? Supplier { get; }
     public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
 
     private Purchase() { }
