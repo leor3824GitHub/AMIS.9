@@ -16,3 +16,4 @@ public class PurchaseItemUpdate
         Status = status;
     }
 }
+
