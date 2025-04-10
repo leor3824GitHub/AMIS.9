@@ -1,6 +1,5 @@
-using AMIS.Framework.Core.Persistence;
+﻿using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
-using AMIS.WebApi.Catalog.Domain.Exceptions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -14,25 +13,24 @@ public sealed class UpdatePurchaseHandler(
     public async Task<UpdatePurchaseResponse> Handle(UpdatePurchaseCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var purchase = await repository.GetByIdAsync(request.Id, cancellationToken);
-        _ = purchase ?? throw new PurchaseNotFoundException(request.Id);
         
-        var updatedPurchase = purchase.Update(request.SupplierId, request.PurchaseDate, request.TotalAmount, request.Status);
+        // Create the purchase entity
+        var purchase = Purchase.Create(request.SupplierId, request.PurchaseDate, request.TotalAmount);
 
-        // Use the SyncItems method to update, add, and remove items inside the aggregate
-        var itemUpdates = request.Items.Select(i => new PurchaseItemUpdate(
-            i.Id, // Pass the Id
-            i.ProductId,
-            i.Qty,
-            i.UnitPrice,
-            i.Status
-        )).ToList();
+        // Add items if any
+        if (request.Items is not null && request.Items.Count > 0)
+        {
+            foreach (var item in request.Items)
+            {
+                purchase.AddItem(item.ProductId, item.Qty, item.UnitPrice, item.Status);
+            }
+        }
 
-        purchase.SyncItems(itemUpdates);
+        // Save entire aggregate (purchase + items)
+        await repository.AddAsync(purchase, cancellationToken);
 
-        // Save the updated aggregate root
-        await repository.UpdateAsync(updatedPurchase, cancellationToken);
-        logger.LogInformation("purchase with id : {PurchaseId} updated.", purchase.Id);
+        logger.LogInformation("purchase with items created {PurchaseId}", purchase.Id);
         return new UpdatePurchaseResponse(purchase.Id);
     }
 }
+

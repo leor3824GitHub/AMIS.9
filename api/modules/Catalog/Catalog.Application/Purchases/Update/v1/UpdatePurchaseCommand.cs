@@ -1,19 +1,19 @@
+﻿using System.ComponentModel;
 using MediatR;
 
 namespace AMIS.WebApi.Catalog.Application.Purchases.Update.v1;
-
 public sealed record PurchaseItemDto(
-    Guid? Id,                 // The ID of the purchase item (could be null for new items)
     Guid ProductId,
     int Qty,
     decimal UnitPrice,
     string? Status = "Pending"
 );
+
 public sealed record UpdatePurchaseCommand(
-    Guid Id,           // The ID of the purchase to update
-    Guid? SupplierId,          // The optional supplier ID (could be null)
-    DateTime? PurchaseDate,    // The optional purchase date
-    decimal TotalAmount,       // The total amount (could be recalculated)
-    string? Status,            // The optional purchase status
-    ICollection<PurchaseItemDto>? Items = null  // The list of items to update/add/remove
+    Guid Id,
+    Guid? SupplierId,
+    DateTime? PurchaseDate,
+    [property: DefaultValue(0)] decimal TotalAmount = 0,
+    [property: DefaultValue("InProgress")] string Status = "InProgress",
+    ICollection<PurchaseItemDto>? Items = null
 ) : IRequest<UpdatePurchaseResponse>;

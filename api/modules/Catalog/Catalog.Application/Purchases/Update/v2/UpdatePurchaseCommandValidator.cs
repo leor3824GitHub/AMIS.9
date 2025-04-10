@@ -1,6 +1,6 @@
-﻿using FluentValidation;
+using FluentValidation;
 
-namespace AMIS.WebApi.Catalog.Application.Purchases.Update.v1;
+namespace AMIS.WebApi.Catalog.Application.Purchases.Update.v2;
 public class UpdatePurchaseCommandValidator : AbstractValidator<UpdatePurchaseCommand>
 {
     public UpdatePurchaseCommandValidator()

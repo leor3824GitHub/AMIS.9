@@ -21,7 +21,7 @@ public sealed class UpdatePurchaseItemHandler(
             ?? throw new PurchaseItemNotFoundException(request.Id);
 
         // Update purchase item
-        var updatedPurchaseItem = purchaseItem.Update(request.ProductId, request.Qty, request.UnitPrice, request.Status);
+        var updatedPurchaseItem = purchaseItem.Update(request.PurchaseId, request.ProductId, request.Qty, request.UnitPrice, request.Status);
 
         await repository.UpdateAsync(updatedPurchaseItem, cancellationToken);
         logger.LogInformation("Purchase item with Id {PurchaseItemId} updated successfully.", purchaseItem.Id);

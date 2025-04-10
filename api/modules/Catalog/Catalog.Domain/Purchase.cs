@@ -1,7 +1,6 @@
 ﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
-using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 public class Purchase : AuditableEntity, IAggregateRoot
@@ -10,8 +9,8 @@ public class Purchase : AuditableEntity, IAggregateRoot
     public DateTime? PurchaseDate { get; private set; }
     public decimal TotalAmount { get; private set; }
     public string Status { get; private set; } = "InProgress"; // Initialize to avoid CS8618
-    public virtual Supplier Supplier { get; private set; } = default!;
-    public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
+    public virtual Supplier? Supplier { get; } // Removed unused private setter
+    public virtual ICollection<PurchaseItem> Items { get; private set; } = new List<PurchaseItem>(); // Fixed initialization
 
     private Purchase() { }
 
@@ -37,7 +36,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
         return new Purchase(Guid.NewGuid(), supplierId, purchaseDate, totalAmount);
     }
 
-    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, string? status)
+    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, decimal? totalAmount, string? status)
     {
         bool isUpdated = false;
 
@@ -53,9 +52,9 @@ public class Purchase : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (TotalAmount != totalAmount)
+        if (totalAmount.HasValue && TotalAmount != totalAmount.Value) // Explicitly handle nullable decimal
         {
-            TotalAmount = totalAmount;
+            TotalAmount = totalAmount.Value;
             isUpdated = true;
         }
 
@@ -72,8 +71,11 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
         return this;
     }
-    public void SyncItems(List<PurchaseItemUpdate> items)
+
+    public void SyncItems(ICollection<PurchaseItemUpdate> items) // Changed List<T> to ICollection<T>
     {
+        var purchaseId = this.Id;
+
         var existingMap = Items.ToDictionary(i => i.Id, i => i);
         var updatedItems = new List<PurchaseItem>();
 
@@ -84,7 +86,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
                 // Track state before update for event comparison (optional)
                 var before = (existing.Qty, existing.UnitPrice, existing.ProductId, existing.Status);
 
-                existing.Update(update.ProductId, update.Qty, update.UnitPrice, update.Status);
+                existing.Update(purchaseId, update.ProductId, update.Qty, update.UnitPrice, update.Status);
                 updatedItems.Add(existing);
 
                 if (before != (existing.Qty, existing.UnitPrice, existing.ProductId, existing.Status))
@@ -94,7 +96,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
             }
             else
             {
-                var newItem = PurchaseItem.Create(Id, update.ProductId, update.Qty, update.UnitPrice, update.Status);
+                var newItem = PurchaseItem.Create(purchaseId, update.ProductId, update.Qty, update.UnitPrice, update.Status);
                 updatedItems.Add(newItem);
                 QueueDomainEvent(new PurchaseItemCreated { PurchaseItem = newItem });
             }
@@ -119,6 +121,5 @@ public class Purchase : AuditableEntity, IAggregateRoot
         var total = Items.Sum(i => i.Qty * i.UnitPrice);
         Update(SupplierId, PurchaseDate, total, Status);
     }
-
 }
 
