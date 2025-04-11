@@ -27,6 +27,7 @@ public partial class PurchaseDialog
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     private PurchaseStatus selectedStatus = PurchaseStatus.Draft;
+    private MudDataGrid<PurchaseItemUpdateDto>? _itemsGrid;
 
     private string? _successMessage;
     private FshValidation? _customValidation;
@@ -91,8 +92,83 @@ public partial class PurchaseDialog
     {
         MudDialog.Cancel();
     }
+
+    private void OnItemEdited(object item)
+    {
+        // Ensure the item is of the correct type
+        if (item is PurchaseItemUpdateDto editedItem)
+        {
+            // Find the index of the item in the collection
+            var index = Model.Items.ToList().FindIndex(i => i.Id == editedItem.Id);
+
+            if (index >= 0)
+            {
+                // Update the existing item
+                Model.Items.ElementAt(index).Qty = editedItem.Qty;
+                Model.Items.ElementAt(index).UnitPrice = editedItem.UnitPrice;
+                Model.Items.ElementAt(index).Status = editedItem.Status;
+                Model.Items.ElementAt(index).ProductId = editedItem.ProductId;
+            }
+            else
+            {
+                // Add the item if it doesn't exist
+                Model.Items.Add(editedItem);
+            }
+
+            // Notify the UI to refresh
+            StateHasChanged();
+        }
+        else
+        {
+            // Log or handle invalid item type
+            Snackbar.Add("Invalid item type provided for editing.", Severity.Error);
+        }
+    }
+    private void OnRowEditCancel(object item)
+    {
+        // Ensure the item is of the correct type
+        if (item is PurchaseItemUpdateDto canceledItem)
+        {
+            // Find the original item in the collection
+            var originalItem = Model.Items.FirstOrDefault(i => i.Id == canceledItem.Id);
+
+            if (originalItem != null)
+            {
+                // Revert any changes made to the item
+                canceledItem.Qty = originalItem.Qty;
+                canceledItem.UnitPrice = originalItem.UnitPrice;
+                canceledItem.Status = originalItem.Status;
+                canceledItem.ProductId = originalItem.ProductId;
+            }
+
+            // Notify the UI to refresh
+            StateHasChanged();
+        }
+        else
+        {
+            // Log or handle invalid item type
+            Snackbar.Add("Invalid item type provided for cancellation.", Severity.Error);
+        }
+    }
+
+    private void AddNewItem()
+    {
+        var newItem = new PurchaseItemUpdateDto
+        {
+            ProductId = Guid.NewGuid(), // Or another ID mechanism
+            Qty = 1,
+            UnitPrice = 0,
+            Status = PurchaseStatus.Draft.ToString()
+        };
+
+        Model.Items.Add(newItem);
+    }
+    private void RemoveItem(PurchaseItemUpdateDto item)
+    {
+        Model.Items.Remove(item);
+    }
 }
- public enum PurchaseStatus
+public enum PurchaseStatus
 {
     Draft, //The purchase order has been created but is not yet finalized. It may still be edited.
     Submitted, //The purchase order has been sent to the supplier or vendor but has not yet been acknowledged or accepted.

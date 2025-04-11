@@ -118,13 +118,14 @@ public partial class Purchases
         return new GridData<PurchaseResponse> { TotalItems = _totalItems, Items = _entityList };
     }
 
-    private async Task ShowEditFormDialog(string title, UpdatePurchaseCommand command, bool IsCreate, List<SupplierResponse> suppliers)
+    private async Task ShowEditFormDialog(string title, UpdatePurchaseCommand command, bool IsCreate, List<SupplierResponse> suppliers, List<ProductResponse>? products)
     {
         var parameters = new DialogParameters
         {
             { nameof(PurchaseDialog.Model), command },
             { nameof(PurchaseDialog.IsCreate), IsCreate },
-            { nameof(PurchaseDialog._suppliers), suppliers }
+            { nameof(PurchaseDialog._suppliers), suppliers },
+            { nameof(PurchaseDialog._products), products }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<PurchaseDialog>(title, parameters, options);
@@ -142,7 +143,7 @@ public partial class Purchases
         _currentDto.PurchaseDate = DateTime.Today;
         _currentDto.SupplierId = null;
         var model = _currentDto.Adapt<UpdatePurchaseCommand>();
-        await ShowEditFormDialog("Create new Item", model, true, _supplier);
+        await ShowEditFormDialog("Create new Item", model, true, _supplier, _product);
     }
 
     private async Task OnClone()
@@ -153,7 +154,7 @@ public partial class Purchases
             var command = new Mapper().Map<PurchaseResponse, UpdatePurchaseCommand>(copy);
             //var command = copy.Adapt<PurchaseViewModel>();
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
-            await ShowEditFormDialog("Clone an Item", command, true, _supplier);
+            await ShowEditFormDialog("Clone an Item", command, true, _supplier, _product);
         }
     }
     private async Task OnDetails(PurchaseResponse dto)
@@ -164,7 +165,7 @@ public partial class Purchases
     {
         
         var command = dto.Adapt<UpdatePurchaseCommand>();
-        await ShowEditFormDialog("Edit the Item", command, false, _supplier);
+        await ShowEditFormDialog("Edit the Item", command, false, _supplier, _product);
     }
 
     private async Task OnDelete(PurchaseResponse dto)

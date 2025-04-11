@@ -27,17 +27,51 @@
                     <MudTextField @bind-Value="Model.TotalAmount" Label="TotalAmount" For="@(() => Model.TotalAmount)" />
                 </MudItem>                
             </MudGrid>
-            @* <MudDataGrid Items="filteredPurchaseItems" MultiSelection="true" @bind-SelectedItems="selectedPurchaseItems" ColumnResizeMode="ResizeMode.Column" Hover="true" Loading="@loading">
-                <Columns>
-                    <PropertyColumn Property="x => x.Product.Name" Title="Product" />
-                    <PropertyColumn Property="x => x.Qty" Title="Quantity" />
-                    <PropertyColumn Property="x => x.UnitPrice" Title="Unit Price" />
-                    <PropertyColumn Property="x => x.Status" Title="Status" />
-                </Columns>
-                <PagerContent>
-                    <MudDataGridPager />
-                </PagerContent>
-            </MudDataGrid> *@
+            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddNewItem">Add Item</MudButton>
+            <MudTable T="PurchaseItemUpdateDto"
+                      Items="Model.Items"
+                      ReadOnly="false"
+                      CanCancelEdit="true"
+                      Hover="true"
+                      Bordered="true"
+                      RowEditCommit="OnItemEdited"
+                      RowEditCancel="OnRowEditCancel">
+                <RowTemplate Context="Itemcontext">                    
+                    <MudTd T="Guid?" DataLabel="ProductId">
+                        @_products.FirstOrDefault(p => p.Id == Itemcontext.ProductId)?.Name
+                    </MudTd>
+                    <MudTd T="int" DataLabel="Qty">@Itemcontext.Qty</MudTd>
+                    <MudTd T="double" DataLabel="UnitPrice">@Itemcontext.UnitPrice</MudTd>
+                    <MudTd T="string" DataLabel="Status">@Itemcontext.Status</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => RemoveItem(Itemcontext))" />
+                    </MudTd>
+                </RowTemplate>
+                <RowEditingTemplate Context="Itemcontext">
+                    <MudTd DataLabel="Product">
+                        <MudSelect T="Guid" Label="Product" @bind-Value="Itemcontext.ProductId">
+                            @foreach (var product in _products)
+                            {
+                                <MudSelectItem T="Guid?" Value="product.Id">@product.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudTd>
+                    <MudTd DataLabel="Qty">
+                        <MudNumericField T="int" @bind-Value="Itemcontext.Qty" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Unit Price">
+                        <MudNumericField T="double" @bind-Value="Itemcontext.UnitPrice" Required />
+                    </MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudSelect T="string" Label="Status" @bind-Value="Itemcontext.Status">
+                            @foreach (var status in Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>())
+                            {
+                                <MudSelectItem T="string" Value="status.ToString()">@status</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudTd>
+                </RowEditingTemplate>
+            </MudTable>           
         </DialogContent>
         <DialogActions>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
