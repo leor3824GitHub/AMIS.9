@@ -41,7 +41,18 @@
                                        IconColor="Color.Surface">
                                 Clone
                             </MudButton>
-                        }                        
+                        }
+                        @if (_canDelete)
+                        {
+                            <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                                       StartIcon="@Icons.Material.Filled.Delete"
+                                       Disabled="@(!(_selectedItems.Count > 0))"
+                                       Size="Size.Small"
+                                      
+                                       IconColor="Color.Surface">
+                                Delete
+                            </MudButton>
+                        }
                     </MudHidden>                    
                 </div>
                 @if (_canSearch)
@@ -66,7 +77,6 @@
                          IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
 
                     <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
-                    <MudMenuItem OnClick="@(() => OnDetails(context.Item))">Details</MudMenuItem>
                     <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
                 </MudMenu>
             </CellTemplate>

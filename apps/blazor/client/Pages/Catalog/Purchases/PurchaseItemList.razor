@@ -1,0 +1,130 @@
+﻿ <!-- Item List Section -->
+<MudPaper Class="pa-4 mb-4" Height="600px">
+    <MudText Typo="Typo.h6">Items</MudText>
+
+    <MudTable T="PurchaseItemUpdateDto"
+              Items="Items"
+              Hover="true"
+              Bordered="true"
+              Dense="true"
+              Breakpoint="Breakpoint.Sm">
+
+        <HeaderContent>
+            <MudTh>Product</MudTh>
+            <MudTh>Quantity</MudTh>
+            <MudTh>Unit Price</MudTh>
+            <MudTh>Amount</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh class="text-center">Actions</MudTh>
+        </HeaderContent>
+
+        <RowTemplate Context="item">
+
+            @if (item == EditingItem)
+            {
+                <MudTd>
+                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense>
+                        @foreach (var product in Products)
+                        {
+                            <MudSelectItem T="Guid?" Value="product.Id">@product.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd>
+                    <MudNumericField T="int" @bind-Value="item.Qty" Dense Immediate="true" />
+                </MudTd>
+                <MudTd>
+                    <MudNumericField T="double" @bind-Value="item.UnitPrice" Dense Immediate="true" Adornment="Adornment.End" AdornmentText="Php" />
+                </MudTd>
+                <MudTd>
+                    <MudText>@(item.Qty * item.UnitPrice)</MudText> @* Amount *@
+                </MudTd>
+                <MudTd>
+                    <MudSelect T="PurchaseStatus?" @bind-Value="item.ItemStatus" Dense>
+                        @foreach (var status in PurchaseStatusList)
+                        {
+                            <MudSelectItem T="PurchaseStatus?" Value="status">@GetDisplayName(status)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd class="text-center">
+                    <div class="d-flex justify-center gap-2">
+                        <MudTooltip Text="Save Changes">
+                            <MudIconButton Icon="@Icons.Material.Filled.Check"
+                                           Color="Color.Success"
+                                           OnClick="@(() => SaveEdit())" />
+                        </MudTooltip>
+
+                        <MudTooltip Text="Cancel Edit">
+                            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                           Color="Color.Secondary"
+                                           OnClick="@(() => CancelEdit())" />
+                        </MudTooltip>
+                    </div>
+                </MudTd>
+            }
+            else
+            {
+                <MudTd>
+                    @{
+                        var product = Products?.FirstOrDefault(p => p.Id == item.ProductId);
+                    }
+                    @(product is not null ? product.Name : "—")
+                </MudTd>
+
+                <MudTd>@item.Qty</MudTd>
+                <MudTd>@item.UnitPrice.ToString("N2")</MudTd>
+                <MudTd>@(item.Qty * item.UnitPrice)</MudTd>
+                <MudTd T="PurchaseStatus?" DataLabel="Status">@item.ItemStatus</MudTd>
+                <MudTd class="text-center">
+                    <div class="d-flex justify-center gap-2">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                       Color="Color.Primary"
+                                       OnClick="@(() => EditItem(item))" />
+
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                       Color="Color.Error"
+                                       OnClick="@(() => RemoveItem(item))" />
+                    </div>
+                </MudTd>
+            }
+
+        </RowTemplate>
+
+        <!-- Inline Add Row -->
+        <FooterContent>
+            <MudTd>
+                <MudSelect T="Guid?" @bind-Value="Productid" Dense>
+                    @foreach (var product in Products)
+                    {
+                        <MudSelectItem T="Guid?" Value="product.Id">@product.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudTd>
+            <MudTd>
+                <MudNumericField T="int" @bind-Value="Qty" />
+            </MudTd>
+            <MudTd>
+                <MudNumericField T="double" @bind-Value="Unitprice" Dense Adornment="Adornment.End" AdornmentText="Php" />
+            </MudTd>
+            <MudTd>
+                <MudTd>
+                    @(Qty * Unitprice)
+                </MudTd>
+            </MudTd>
+            <MudTd>
+                <MudTd>
+                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly="true" />
+                </MudTd>
+            </MudTd>
+            <MudTd class="text-center">
+                <MudTooltip Text="Add Item">
+                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                                   Color="Color.Primary"
+                                   OnClick="AddNewItem" />
+                </MudTooltip>
+            </MudTd>
+        </FooterContent>
+    </MudTable>
+</MudPaper>
+

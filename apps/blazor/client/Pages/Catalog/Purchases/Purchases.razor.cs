@@ -9,7 +9,6 @@ using MudBlazor;
 using AMIS.Blazor.Infrastructure.Auth;
 using MapsterMapper;
 using Mapster;
-using System.Reflection;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
 public partial class Purchases
@@ -26,8 +25,6 @@ public partial class Purchases
     [Inject]
     private ISnackbar? Snackbar { get; set; }
     private PurchaseResponse _currentDto = new();
-    private List<SupplierResponse> _supplier = new List<SupplierResponse>();
-    private List<ProductResponse> _product = new List<ProductResponse>();
 
     private string searchString = "";
     private bool _loading;
@@ -49,32 +46,7 @@ public partial class Purchases
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.Purchases);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Purchases);
 
-        await LoadSupplierAsync();
-        await LoadProductAsync();
 
-    }
-    private async Task LoadProductAsync()
-    {
-        if (_product.Count == 0)
-        {
-            var response = await purchaseclient.SearchProductsEndpointAsync("1", new SearchProductsCommand());
-            if (response?.Items != null)
-            {
-                _product = response.Items.ToList();
-            }
-        }
-    }
-
-    private async Task LoadSupplierAsync()
-    {
-        if (_supplier.Count == 0)
-        {
-            var response = await purchaseclient.SearchSuppliersEndpointAsync("1", new SearchSuppliersCommand());
-            if (response?.Items != null)
-            {
-                _supplier = response.Items.ToList();
-            }
-        }
     }
 
     private async Task<GridData<PurchaseResponse>> ServerReload(GridState<PurchaseResponse> state)
@@ -118,14 +90,12 @@ public partial class Purchases
         return new GridData<PurchaseResponse> { TotalItems = _totalItems, Items = _entityList };
     }
 
-    private async Task ShowEditFormDialog(string title, UpdatePurchaseCommand command, bool IsCreate, List<SupplierResponse> suppliers, List<ProductResponse>? products)
+    private async Task ShowEditFormDialog(string title, UpdatePurchaseCommand command, bool IsCreate)
     {
         var parameters = new DialogParameters
         {
             { nameof(PurchaseDialog.Model), command },
             { nameof(PurchaseDialog.IsCreate), IsCreate },
-            { nameof(PurchaseDialog._suppliers), suppliers },
-            { nameof(PurchaseDialog._products), products }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<PurchaseDialog>(title, parameters, options);
@@ -142,8 +112,10 @@ public partial class Purchases
     {
         _currentDto.PurchaseDate = DateTime.Today;
         _currentDto.SupplierId = null;
-        var model = _currentDto.Adapt<UpdatePurchaseCommand>();
-        await ShowEditFormDialog("Create new Item", model, true, _supplier, _product);
+        var model = new Mapper().Map<PurchaseResponse, UpdatePurchaseCommand>(_currentDto);
+        //var command = copy.Adapt<PurchaseViewModel>();
+        //var model = _currentDto.Adapt<UpdatePurchaseCommand>();
+        await ShowEditFormDialog("Create new purchase", model, true);
     }
 
     private async Task OnClone()
@@ -154,18 +126,13 @@ public partial class Purchases
             var command = new Mapper().Map<PurchaseResponse, UpdatePurchaseCommand>(copy);
             //var command = copy.Adapt<PurchaseViewModel>();
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
-            await ShowEditFormDialog("Clone an Item", command, true, _supplier, _product);
+            await ShowEditFormDialog("Clone a purchase", command, true);
         }
     }
-    private async Task OnDetails(PurchaseResponse dto)
-    {
-
-    }
     private async Task OnEdit(PurchaseResponse dto)
-    {
-        
+    {        
         var command = dto.Adapt<UpdatePurchaseCommand>();
-        await ShowEditFormDialog("Edit the Item", command, false, _supplier, _product);
+        await ShowEditFormDialog("Edit the purchase", command, false);
     }
 
     private async Task OnDelete(PurchaseResponse dto)
@@ -190,7 +157,46 @@ public partial class Purchases
             await _table.ReloadServerData();
         }
     }
-   
+    //private async Task OnDeleteChecked()
+    //{
+    //    var purchaseIds = _selectedItems
+    //   .Select(item => item.Id)
+    //   .Where(id => id.HasValue)
+    //   .Select(id => id.Value)
+    //   .ToList();
+
+    //    if (purchaseIds.Count == 0)
+    //    {
+    //        Snackbar?.Add("No items selected for deletion.", Severity.Warning);
+    //        return;
+    //    }
+
+    //    string deleteContent = "Are you sure you want to delete the selected purchases?";
+    //    var parameters = new DialogParameters
+    //    {
+    //        { nameof(DeleteConfirmation.ContentText), deleteContent }
+    //    };
+    //    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
+    //    var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
+    //    var result = await dialog.Result;
+    //    if (!result!.Canceled)
+    //    {
+    //        try
+    //        {
+    //            await ApiHelper.ExecuteCallGuardedAsync(
+    //                () => purchaseclient.DeletePurchasesEndpointAsync("1", purchaseIds),
+    //                Snackbar);
+
+    //            await _table.ReloadServerData();
+    //            _selectedItems.Clear();
+    //        }
+    //        catch (Exception ex)
+    //        {
+    //            Snackbar?.Add($"Error deleting purchases: {ex.Message}", Severity.Error);
+    //        }
+    //    }
+    //}
+
     private async Task OnRefresh()
     {
         await _table.ReloadServerData();
@@ -203,38 +209,4 @@ public partial class Purchases
         return _table.ReloadServerData();
     }
 
-    // Advanced Search
-
-    private Guid? _searchBrandId;
-    private Guid? SearchBrandId
-    {
-        get => _searchBrandId;
-        set
-        {
-            _searchBrandId = value;
-            _ = _table.ReloadServerData();
-        }
-    }
-
-    private decimal _searchMinimumRate;
-    private decimal SearchMinimumRate
-    {
-        get => _searchMinimumRate;
-        set
-        {
-            _searchMinimumRate = value;
-            _ = _table.ReloadServerData();
-        }
-    }
-
-    private decimal _searchMaximumRate = 9999;
-    private decimal SearchMaximumRate
-    {
-        get => _searchMaximumRate;
-        set
-        {
-            _searchMaximumRate = value;
-            _ = _table.ReloadServerData();
-        }
-    }
 }

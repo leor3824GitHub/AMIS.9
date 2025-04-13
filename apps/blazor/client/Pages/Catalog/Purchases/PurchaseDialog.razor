@@ -3,119 +3,58 @@
         <DialogContent>
             <DataAnnotationsValidator />
             <ValidationSummary />
-            
-             <!-- Purchase Information Section -->
-            <MudPaper Class="pa-4 mb-4">
-                <MudText Typo="Typo.h6">Purchase Information</MudText>
-                <MudGrid Class="mt-2">
-                <MudItem xs="12" md="6">                    
-                    <MudSelect T="Guid?" Label="Supplier" @bind-Value="Model.SupplierId">
-                        @foreach (var suppliers in _suppliers)
-                        {
-                            <MudSelectItem T="Guid?" Value="suppliers.Id">@suppliers.Name</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudDatePicker @bind-Date="Model.PurchaseDate" Label="Purchase Date" For="@(() => Model.PurchaseDate)" />
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudSelect T="PurchaseStatus?" Label="Status"
-                               @bind-Value="Model.Status">                        
-                        @foreach (var status in PurchaseStatusList)
-                        {
-                            <MudSelectItem T="PurchaseStatus?" Value="status">@GetDisplayName(status)</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudTextField @bind-Value="Model.TotalAmount" Label="TotalAmount" For="@(() => Model.TotalAmount)" />
-                </MudItem>                
-            </MudGrid>
-             </MudPaper>
 
-            <!-- Item List Section -->
-            <MudPaper Class="pa-4 mb-4">
-                <MudText Typo="Typo.h6">Items</MudText>
-                <MudGrid Class="mt-2">
-                    <MudItem xs="12" md="4" Class="d-flex align-end">
-                        <MudSelect T="Guid?" Label="Product" @bind-Value="Productid">
-                            @foreach (var product in _products)
+            <!-- Purchase Information Section -->
+            <MudPaper Class="pa-2 mb-2" Elevation="1" Square="true">
+                <MudGrid>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSelect T="Guid?" Label="Supplier" @bind-Value="Model.SupplierId">
+                            @foreach (var suppliers in _suppliers)
                             {
-                                <MudSelectItem T="Guid?" Value="product.Id">@product.Name</MudSelectItem>
+                                <MudSelectItem T="Guid?" Value="suppliers.Id">@suppliers.Name</MudSelectItem>
                             }
                         </MudSelect>
                     </MudItem>
-                    <MudItem xs="12" sm="4" md="2" Class="d-flex align-end">
-                        <MudNumericField T="int" @bind-Value="Qty" Required />
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudDatePicker @bind-Date="Model.PurchaseDate" Label="Purchase Date" For="@(() => Model.PurchaseDate)" />
                     </MudItem>
-                    <MudItem xs="12" sm="4" md="2" Class="d-flex align-end">
-                        <MudNumericField T="double" @bind-Value="Unitprice" Required />
-                    </MudItem>
-                    <MudItem xs="12" sm="4" md="4" Class="d-flex align-end">
-                        <MudButton StartIcon="@Icons.Material.Filled.Add"
-                                   OnClick="AddNewItem"
-                                   Variant="Variant.Filled"
-                                   Color="Color.Primary"
-                                   Class="mt-1">
-                            Add Item
-                        </MudButton>
-                    </MudItem>
-                </MudGrid>
-
-            <MudTable T="PurchaseItemUpdateDto"
-                      Items="Model.Items"
-                      Context="Itemcontext"
-                      ReadOnly="false"
-                      CanCancelEdit="true"
-                      Hover="true"
-                      Bordered="true"
-                      RowEditCommit="OnItemEdited"
-                      RowEditCancel="OnRowEditCancel">
-                      <RowTemplate Context="Itemcontext">                    
-                    <MudTd T="Guid" DataLabel="ProductId">
-                        @(_products?.FirstOrDefault(p => p.Id == Itemcontext.ProductId)?.Name ?? "Unknown")
-                    </MudTd>
-                    <MudTd T="int" DataLabel="Qty">@Itemcontext.Qty</MudTd>
-                    <MudTd T="double" DataLabel="UnitPrice">@Itemcontext.UnitPrice</MudTd>
-                    <MudTd T="PurchaseStatus?" DataLabel="Status">@Itemcontext.ItemStatus</MudTd>
-                    <MudTd>
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => RemoveItem(Itemcontext))" />
-                    </MudTd>
-                </RowTemplate>
-                <RowEditingTemplate>
-                    <MudTd DataLabel="Product">
-                        <MudSelect T="Guid?" Label="Product" @bind-Value="Itemcontext.ProductId">
-                            @foreach (var product in _products)
-                            {
-                                <MudSelectItem T="Guid?" Value="product.Id">@product.Name</MudSelectItem>
-                            }
-                        </MudSelect>
-                    </MudTd>
-                    <MudTd DataLabel="Qty">
-                        <MudNumericField T="int" @bind-Value="Itemcontext.Qty" Required />
-                    </MudTd>
-                    <MudTd DataLabel="Unit Price">
-                        <MudNumericField T="double" @bind-Value="Itemcontext.UnitPrice" Required />
-                    </MudTd>
-                    <MudTd DataLabel="Status">
-                        <MudSelect T="PurchaseStatus?" Label="Status" 
-                                   @bind-Value="Itemcontext.ItemStatus">
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudSelect T="PurchaseStatus?" Label="Status" @bind-Value="Model.Status">                        
                             @foreach (var status in PurchaseStatusList)
                             {
                                 <MudSelectItem T="PurchaseStatus?" Value="status">@GetDisplayName(status)</MudSelectItem>
                             }
                         </MudSelect>
-                    </MudTd>
-                </RowEditingTemplate>
-            </MudTable>
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudTextField @bind-Value="Model.TotalAmount" Label="TotalAmount" For="@(() => Model.TotalAmount)" ReadOnly="true" />
+                    </MudItem>                
+                </MudGrid>
             </MudPaper>
+
+            <!-- ✅ Move Save/Cancel Button Here -->
+            <MudPaper Class="pa-2 mb-2" Elevation="0" Square="true">
+                <MudStack Row Spacing="2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+                </MudStack>
+            </MudPaper>
+            @if (Model.Id != Guid.Empty)
+            {
+                <!-- ✅ Include PurchaseItemList inside the same DialogContent -->
+                <PurchaseItemList Items="@Model.Items"
+                                  Products="_products"
+                                  Suppliers="_suppliers"
+                                  Status="Model.Status"
+                                  PurchaseId="@Model.Id"
+                                  OnTotalAmountChanged="UpdateTotalAmount" />
+            }
+            else
+            {
+                <MudText Color="Color.Warning">Save the purchase first to manage items.</MudText>
+            }
+           
         </DialogContent>
-        <DialogActions>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
-        </DialogActions>
+
     </MudDialog>
 </EditForm>
-
-

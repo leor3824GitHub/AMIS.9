@@ -3,7 +3,9 @@ using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
 using Mapster;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+
 
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
@@ -15,24 +17,19 @@ public partial class PurchaseDialog
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public UpdatePurchaseCommand Model { get; set; }
-    [Parameter] public EventCallback OnCancel { get; set; }
-   
+    [Parameter] public EventCallback OnCancel { get; set; }    
     [Parameter] public Action? Refresh { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
-    [Parameter] public List<SupplierResponse> _suppliers { get; set; }
-    [Parameter] public List<ProductResponse> _products { get; set; }
-    
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private List<SupplierResponse> _suppliers = new List<SupplierResponse>();
+    private List<ProductResponse> _products = new List<ProductResponse>();
+
+    private PurchaseItemUpdateDto? EditingItem { get; set; }
+
     private string? _successMessage;
     private FshValidation? _customValidation;
-    private bool _uploading;
-    private string? _uploadErrorMessage;
-    private bool _isUploading;
     private string? searchText;
-
-    private int Qty;
-    private double Unitprice;
-    private Guid? Productid;
 
     private List<PurchaseStatus> PurchaseStatusList =>
     Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>().ToList();
@@ -44,10 +41,40 @@ public partial class PurchaseDialog
                          .FirstOrDefault();
         return attr?.Name ?? value.ToString();
     }
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
+    {       
+        await LoadSupplierAsync();
+        await LoadProductAsync();     
+
+        //if (Model.SupplierId == null && _suppliers.Any())
+        //{
+        //    Model.SupplierId = _suppliers.First().Id;
+        //}
+    }
+
+    private async Task LoadProductAsync()
     {
-        Model ??= new UpdatePurchaseCommand();
-        Model.Items ??= new List<PurchaseItemUpdateDto>();
+        if (_products.Count == 0)
+        {
+            var response = await PurchaseClient.SearchProductsEndpointAsync("1", new SearchProductsCommand());
+            if (response?.Items != null)
+            {
+                _products = response.Items.ToList();
+            }
+        }
+    }
+
+    private async Task LoadSupplierAsync()
+    {
+        if (_suppliers.Count == 0)
+        {
+            var response = await PurchaseClient.SearchSuppliersEndpointAsync("1", new SearchSuppliersCommand());
+            if (response?.Items != null)
+            {
+                _suppliers = response.Items.ToList();
+            }
+        }
+        StateHasChanged();
     }
     private async Task OnValidSubmit()
     {
@@ -66,9 +93,12 @@ public partial class PurchaseDialog
 
             if (response != null)
             {
+                Model.Id = (Guid)response.Id;
+                StateHasChanged();
                 _successMessage = "Purchase created successfully!";
-                MudDialog.Close(DialogResult.Ok(true));
+                //MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
+                
             }
         }
         else // Update product
@@ -82,103 +112,61 @@ public partial class PurchaseDialog
 
             if (response != null)
             {
+                StateHasChanged();
                 _successMessage = "Purchase updated successfully!";
-                MudDialog.Close(DialogResult.Ok(true));
+                //MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }
         }
+
+        
     }
-    protected override async Task OnParametersSetAsync()
+    //protected override async Task OnParametersSetAsync()
+    //{
+    //    if (Model != null && Model.SupplierId == null && _suppliers.Count != 0)
+    //    {
+    //        Model.SupplierId = _suppliers.FirstOrDefault()?.Id;
+    //    }
+    //}
+
+    //private async Task ShowEditFormDialog(
+    // string title,
+    // List<PurchaseItemResponse> items,
+    // List<ProductResponse> products,
+    // PurchaseStatus? status,
+    // EventCallback<double> totalAmount,
+    // List<SupplierResponse> suppliers)
+    //{
+    //    var parameters = new DialogParameters
+    //{
+    //    { nameof(PurchaseItemList.Items), items },
+    //    { nameof(PurchaseItemList.Products), products },
+    //    { nameof(PurchaseItemList.Status), status },
+    //    { nameof(PurchaseItemList.TotalAmount), totalAmount },
+    //    { nameof(PurchaseItemList), suppliers }
+    //};
+
+    //    var options = new DialogOptions
+    //    {
+    //        CloseButton = true,
+    //        MaxWidth = MaxWidth.Medium,
+    //        FullWidth = true
+    //    };
+
+    //    var dialog = await DialogService.ShowAsync<PurchaseDialog>(title, parameters, options);
+    //    var state = await dialog.Result;
+
+    //}
+
+    private void UpdateTotalAmount(double value)
     {
-        if (Model != null && Model.SupplierId == null && _suppliers.Count != 0)
-        {
-            Model.SupplierId = _suppliers.FirstOrDefault()?.Id;            
-        }
-    }     
+        Model.TotalAmount = value;
+        StateHasChanged();
+    }
 
     private void Cancel()
     {
         MudDialog.Cancel();
-    }
-
-    private void OnItemEdited(object item)
-    {
-        // Ensure the item is of the correct type
-        if (item is PurchaseItemUpdateDto editedItem)
-        {
-            // Find the index of the item in the collection
-            var index = Model.Items.ToList().FindIndex(i => i.Id == editedItem.Id);
-
-            if (index >= 0)
-            {
-                // Update the existing item
-                Model.Items.ElementAt(index).Qty = editedItem.Qty;
-                Model.Items.ElementAt(index).UnitPrice = editedItem.UnitPrice;
-                Model.Items.ElementAt(index).ItemStatus = editedItem.ItemStatus;
-                Model.Items.ElementAt(index).ProductId = editedItem.ProductId;
-            }
-            else
-            {
-                // Add the item if it doesn't exist
-                Model.Items.Add(editedItem);
-            }
-
-            // Notify the UI to refresh
-            StateHasChanged();
-        }
-        else
-        {
-            // Log or handle invalid item type
-            Snackbar.Add("Invalid item type provided for editing.", Severity.Error);
-        }
-    }
-    private void OnRowEditCancel(object item)
-    {
-        // Ensure the item is of the correct type
-        if (item is PurchaseItemUpdateDto canceledItem)
-        {
-            // Find the original item in the collection
-            var originalItem = Model.Items.FirstOrDefault(i => i.Id == canceledItem.Id);
-
-            if (originalItem != null)
-            {
-                // Revert any changes made to the item
-                canceledItem.Qty = originalItem.Qty;
-                canceledItem.UnitPrice = originalItem.UnitPrice;
-                canceledItem.ItemStatus = originalItem.ItemStatus;
-                canceledItem.ProductId = originalItem.ProductId;
-            }
-
-            // Notify the UI to refresh
-            StateHasChanged();
-        }
-        else
-        {
-            // Log or handle invalid item type
-            Snackbar.Add("Invalid item type provided for cancellation.", Severity.Error);
-        }
-    }
-
-    private void AddNewItem()
-    {
-        
-        var newItem = new PurchaseItemUpdateDto
-        {
-            ProductId = Productid ?? Guid.Empty, // Ensure this is valid
-            Qty = Qty,
-            UnitPrice = Unitprice,
-            ItemStatus = Model.Status,
-        };
-
-        Model.Items.Add(newItem);
-
-        Productid = null;
-        Qty = 0;
-        Unitprice = 0;
-    }
-
-    private void RemoveItem(PurchaseItemUpdateDto item)
-    {
-        Model.Items.Remove(item);
-    }
+    }    
+   
 }
