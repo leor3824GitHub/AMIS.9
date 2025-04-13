@@ -8942,11 +8942,12 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("purchaseDate")]
         public System.DateTime? PurchaseDate { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public PurchaseStatus Status { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("totalAmount")]
         public double TotalAmount { get; set; } = 0D;
-
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; } = "InProgress";
 
         [System.Text.Json.Serialization.JsonPropertyName("items")]
         public System.Collections.Generic.ICollection<PurchaseItemDto> Items { get; set; }
@@ -8969,8 +8970,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("unitPrice")]
         public double UnitPrice { get; set; } = 0D;
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; } = "Pending";
+        [System.Text.Json.Serialization.JsonPropertyName("itemStatus")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public PurchaseStatus ItemStatus { get; set; }
 
     }
 
@@ -9443,8 +9445,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("unitPrice")]
         public double UnitPrice { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("itemStatus")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public PurchaseStatus ItemStatus { get; set; }
 
     }
 
@@ -9467,8 +9470,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("unitPrice")]
         public double UnitPrice { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("itemStatus")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public PurchaseStatus ItemStatus { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("product")]
         public ProductResponse Product { get; set; }
@@ -9510,7 +9514,7 @@ namespace AMIS.Blazor.Infrastructure.Api
         public System.Guid? Id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
-        public System.Guid ProductId { get; set; }
+        public System.Guid? ProductId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("qty")]
         public int Qty { get; set; }
@@ -9518,8 +9522,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("unitPrice")]
         public double UnitPrice { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("itemStatus")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public PurchaseStatus? ItemStatus { get; set; }
 
     }
 
@@ -9540,7 +9545,8 @@ namespace AMIS.Blazor.Infrastructure.Api
         public double TotalAmount { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; }
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public PurchaseStatus Status { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("supplier")]
         public SupplierResponse Supplier { get; set; }
@@ -9574,6 +9580,45 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("hasNext")]
         public bool HasNext { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum PurchaseStatus
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Draft")]
+        Draft = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Submitted")]
+        Submitted = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Approved")]
+        Approved = 2,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Acknowledged")]
+        Acknowledged = 3,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
+        InProgress = 4,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Shipped")]
+        Shipped = 5,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"PartiallyDelivered")]
+        PartiallyDelivered = 6,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Delivered")]
+        Delivered = 7,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Closed")]
+        Closed = 8,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Cancelled")]
+        Cancelled = 9,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Pending")]
+        Pending = 10,
 
     }
 
@@ -10383,7 +10428,8 @@ namespace AMIS.Blazor.Infrastructure.Api
         public double TotalAmount { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; }
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public PurchaseStatus? Status { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("items")]
         public System.Collections.Generic.ICollection<PurchaseItemUpdateDto> Items { get; set; }
@@ -10401,7 +10447,7 @@ namespace AMIS.Blazor.Infrastructure.Api
         public System.Guid PurchaseId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
-        public System.Guid ProductId { get; set; }
+        public System.Guid? ProductId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("qty")]
         public int Qty { get; set; }
@@ -10409,8 +10455,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("unitPrice")]
         public double UnitPrice { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("status")]
-        public string Status { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("itemStatus")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public PurchaseStatus ItemStatus { get; set; }
 
     }
 

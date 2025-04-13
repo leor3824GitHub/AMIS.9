@@ -1,10 +1,5 @@
-﻿using System.Text.Json.Serialization;
-
-namespace AMIS.WebApi.Catalog.Domain.ValueObjects;
-
-[JsonConverter(typeof(JsonStringEnumConverter))]
-[Flags]
-public enum PurchaseStatus
+﻿namespace AMIS.Blazor.Shared.Notifications;
+public enum Status
 {
     Draft,          //The purchase order has been created but is not yet finalized. It may still be edited.
     Submitted,      //The purchase order has been sent to the supplier or vendor but has not yet been acknowledged or accepted.

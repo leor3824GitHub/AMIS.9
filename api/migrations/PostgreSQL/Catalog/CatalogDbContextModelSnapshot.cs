@@ -406,9 +406,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int?>("Status")
+                        .HasColumnType("integer");
 
                     b.Property<Guid>("SupplierId")
                         .HasColumnType("uuid");
@@ -448,13 +447,16 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("ItemStatus")
+                        .HasColumnType("integer");
+
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("ProductId")
+                    b.Property<Guid?>("ProductId")
                         .HasColumnType("uuid");
 
                     b.Property<Guid>("PurchaseId")
@@ -462,9 +464,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.Property<int>("Qty")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Status")
-                        .HasColumnType("text");
 
                     b.Property<string>("TenantId")
                         .IsRequired()
@@ -599,9 +598,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 {
                     b.HasOne("AMIS.WebApi.Catalog.Domain.Product", "Product")
                         .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ProductId");
 
                     b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", null)
                         .WithMany("Items")

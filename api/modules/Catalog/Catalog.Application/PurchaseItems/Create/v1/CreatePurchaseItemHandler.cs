@@ -15,7 +15,7 @@ public sealed class CreatePurchaseItemHandler(
         ArgumentNullException.ThrowIfNull(request);
 
         //create purchase item
-        var purchaseItem = PurchaseItem.Create(request.PurchaseId, request.ProductId!, request.Qty, request.UnitPrice, request.Status);
+        var purchaseItem = PurchaseItem.Create(request.PurchaseId, request.ProductId!, request.Qty, request.UnitPrice, request.ItemStatus);
 
         await repository.AddAsync(purchaseItem, cancellationToken);
         logger.LogInformation("purchaseItem created {PurchaseItemId}", purchaseItem.Id);

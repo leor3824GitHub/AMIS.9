@@ -25,7 +25,7 @@ public sealed class UpdatePurchaseHandler(
             i.ProductId,
             i.Qty,
             i.UnitPrice,
-            i.Status
+            i.ItemStatus
         )).ToList();
 
         purchase.SyncItems(itemUpdates);

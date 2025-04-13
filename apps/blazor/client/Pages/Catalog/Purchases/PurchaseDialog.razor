@@ -3,8 +3,12 @@
         <DialogContent>
             <DataAnnotationsValidator />
             <ValidationSummary />
-            <MudGrid>
-                <MudItem xs="12" md="6">
+            
+             <!-- Purchase Information Section -->
+            <MudPaper Class="pa-4 mb-4">
+                <MudText Typo="Typo.h6">Purchase Information</MudText>
+                <MudGrid Class="mt-2">
+                <MudItem xs="12" md="6">                    
                     <MudSelect T="Guid?" Label="Supplier" @bind-Value="Model.SupplierId">
                         @foreach (var suppliers in _suppliers)
                         {
@@ -16,10 +20,11 @@
                     <MudDatePicker @bind-Date="Model.PurchaseDate" Label="Purchase Date" For="@(() => Model.PurchaseDate)" />
                 </MudItem>
                 <MudItem xs="12" sm="6" md="3">
-                    <MudSelect T="String" Label="Status" @bind-Value="Model.Status">
-                        @foreach (var status in Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>())
+                    <MudSelect T="PurchaseStatus?" Label="Status"
+                               @bind-Value="Model.Status">                        
+                        @foreach (var status in PurchaseStatusList)
                         {
-                            <MudSelectItem T="String" Value="status.ToString()">@status</MudSelectItem>
+                            <MudSelectItem T="PurchaseStatus?" Value="status">@GetDisplayName(status)</MudSelectItem>
                         }
                     </MudSelect>
                 </MudItem>
@@ -27,29 +32,60 @@
                     <MudTextField @bind-Value="Model.TotalAmount" Label="TotalAmount" For="@(() => Model.TotalAmount)" />
                 </MudItem>                
             </MudGrid>
-            <MudButton StartIcon="@Icons.Material.Filled.Add" OnClick="AddNewItem">Add Item</MudButton>
+             </MudPaper>
+
+            <!-- Item List Section -->
+            <MudPaper Class="pa-4 mb-4">
+                <MudText Typo="Typo.h6">Items</MudText>
+                <MudGrid Class="mt-2">
+                    <MudItem xs="12" md="4" Class="d-flex align-end">
+                        <MudSelect T="Guid?" Label="Product" @bind-Value="Productid">
+                            @foreach (var product in _products)
+                            {
+                                <MudSelectItem T="Guid?" Value="product.Id">@product.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="4" md="2" Class="d-flex align-end">
+                        <MudNumericField T="int" @bind-Value="Qty" Required />
+                    </MudItem>
+                    <MudItem xs="12" sm="4" md="2" Class="d-flex align-end">
+                        <MudNumericField T="double" @bind-Value="Unitprice" Required />
+                    </MudItem>
+                    <MudItem xs="12" sm="4" md="4" Class="d-flex align-end">
+                        <MudButton StartIcon="@Icons.Material.Filled.Add"
+                                   OnClick="AddNewItem"
+                                   Variant="Variant.Filled"
+                                   Color="Color.Primary"
+                                   Class="mt-1">
+                            Add Item
+                        </MudButton>
+                    </MudItem>
+                </MudGrid>
+
             <MudTable T="PurchaseItemUpdateDto"
                       Items="Model.Items"
+                      Context="Itemcontext"
                       ReadOnly="false"
                       CanCancelEdit="true"
                       Hover="true"
                       Bordered="true"
                       RowEditCommit="OnItemEdited"
                       RowEditCancel="OnRowEditCancel">
-                <RowTemplate Context="Itemcontext">                    
-                    <MudTd T="Guid?" DataLabel="ProductId">
-                        @_products.FirstOrDefault(p => p.Id == Itemcontext.ProductId)?.Name
+                      <RowTemplate Context="Itemcontext">                    
+                    <MudTd T="Guid" DataLabel="ProductId">
+                        @(_products?.FirstOrDefault(p => p.Id == Itemcontext.ProductId)?.Name ?? "Unknown")
                     </MudTd>
                     <MudTd T="int" DataLabel="Qty">@Itemcontext.Qty</MudTd>
                     <MudTd T="double" DataLabel="UnitPrice">@Itemcontext.UnitPrice</MudTd>
-                    <MudTd T="string" DataLabel="Status">@Itemcontext.Status</MudTd>
+                    <MudTd T="PurchaseStatus?" DataLabel="Status">@Itemcontext.ItemStatus</MudTd>
                     <MudTd>
                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => RemoveItem(Itemcontext))" />
                     </MudTd>
                 </RowTemplate>
-                <RowEditingTemplate Context="Itemcontext">
+                <RowEditingTemplate>
                     <MudTd DataLabel="Product">
-                        <MudSelect T="Guid" Label="Product" @bind-Value="Itemcontext.ProductId">
+                        <MudSelect T="Guid?" Label="Product" @bind-Value="Itemcontext.ProductId">
                             @foreach (var product in _products)
                             {
                                 <MudSelectItem T="Guid?" Value="product.Id">@product.Name</MudSelectItem>
@@ -63,15 +99,17 @@
                         <MudNumericField T="double" @bind-Value="Itemcontext.UnitPrice" Required />
                     </MudTd>
                     <MudTd DataLabel="Status">
-                        <MudSelect T="string" Label="Status" @bind-Value="Itemcontext.Status">
-                            @foreach (var status in Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>())
+                        <MudSelect T="PurchaseStatus?" Label="Status" 
+                                   @bind-Value="Itemcontext.ItemStatus">
+                            @foreach (var status in PurchaseStatusList)
                             {
-                                <MudSelectItem T="string" Value="status.ToString()">@status</MudSelectItem>
+                                <MudSelectItem T="PurchaseStatus?" Value="status">@GetDisplayName(status)</MudSelectItem>
                             }
                         </MudSelect>
                     </MudTd>
                 </RowEditingTemplate>
-            </MudTable>           
+            </MudTable>
+            </MudPaper>
         </DialogContent>
         <DialogActions>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>

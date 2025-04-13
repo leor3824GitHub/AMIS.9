@@ -11,6 +11,6 @@ public class SearchPurchaseItemSpecs : EntitiesByPaginationFilterSpec<PurchaseIt
         : base(command) =>
         Query
             .Include(p => p.Product)
-            .OrderBy(c => c.Status, !command.HasOrderBy())
+            .OrderBy(c => c.ItemStatus, !command.HasOrderBy())
             .Where(p => p.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue);
 }

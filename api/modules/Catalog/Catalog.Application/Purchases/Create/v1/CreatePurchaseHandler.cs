@@ -15,14 +15,14 @@ public sealed class CreatePurchaseHandler(
         ArgumentNullException.ThrowIfNull(request);
         
         // Create the purchase entity
-        var purchase = Purchase.Create(request.SupplierId, request.PurchaseDate, request.TotalAmount);
+        var purchase = Purchase.Create(request.SupplierId, request.PurchaseDate, request.TotalAmount, request.Status);
 
         // Add items if any
         if (request.Items is not null && request.Items.Count > 0)
         {
             foreach (var item in request.Items)
             {
-                purchase.AddItem(item.ProductId, item.Qty, item.UnitPrice, item.Status);
+                purchase.AddItem(item.ProductId, item.Qty, item.UnitPrice, item.ItemStatus);
             }
         }
 

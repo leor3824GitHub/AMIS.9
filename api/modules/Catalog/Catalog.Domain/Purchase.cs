@@ -8,36 +8,36 @@ public class Purchase : AuditableEntity, IAggregateRoot
 {
     public Guid? SupplierId { get; private set; }
     public DateTime? PurchaseDate { get; private set; }
-    public decimal TotalAmount { get; private set; }
-    public string Status { get; private set; } = "InProgress";
+    public decimal TotalAmount { get; private set; } = 0;
+    public PurchaseStatus? Status { get; private set; }
     public virtual Supplier? Supplier { get; private set; }
     public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
 
     private Purchase() { }
 
-    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, decimal totalAmount)
+    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
     {
         Id = id;
         SupplierId = supplierId;
         PurchaseDate = purchaseDate;
         TotalAmount = totalAmount;
-        Status = "InProgress";
+        Status = status;
 
-        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+        QueueDomainEvent(new PurchaseCreated { Purchase = this });
     }
 
-    public void AddItem(Guid productId, int qty, decimal unitPrice, string? status)
+    public void AddItem(Guid productId, int qty, decimal unitPrice, PurchaseStatus? status)
     {
         var item = PurchaseItem.Create(this.Id, productId, qty, unitPrice, status);
         Items.Add(item);
     }
 
-    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount)
+    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
     {
-        return new Purchase(Guid.NewGuid(), supplierId, purchaseDate, totalAmount);
+        return new Purchase(Guid.NewGuid(), supplierId, purchaseDate, totalAmount, status);
     }
 
-    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, string? status)
+    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
     {
         bool isUpdated = false;
 
@@ -59,7 +59,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (!string.IsNullOrEmpty(status) && Status != status) // Safely handle nullable string
+        if (!Nullable.Equals(Status, status))
         {
             Status = status;
             isUpdated = true;
@@ -82,19 +82,19 @@ public class Purchase : AuditableEntity, IAggregateRoot
             if (update.Id.HasValue && existingMap.TryGetValue(update.Id.Value, out var existing))
             {
                 // Track state before update for event comparison (optional)
-                var before = (existing.Qty, existing.UnitPrice, existing.ProductId, existing.Status);
+                var before = (existing.Qty, existing.UnitPrice, existing.ProductId, existing.ItemStatus);
 
-                existing.Update(update.ProductId, update.Qty, update.UnitPrice, update.Status);
+                existing.Update(update.ProductId, update.Qty, update.UnitPrice, update.ItemStatus);
                 updatedItems.Add(existing);
 
-                if (before != (existing.Qty, existing.UnitPrice, existing.ProductId, existing.Status))
+                if (before != (existing.Qty, existing.UnitPrice, existing.ProductId, existing.ItemStatus))
                 {
                     QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = existing });
                 }
             }
             else
             {
-                var newItem = PurchaseItem.Create(Id, update.ProductId, update.Qty, update.UnitPrice, update.Status);
+                var newItem = PurchaseItem.Create(Id, update.ProductId, update.Qty, update.UnitPrice, update.ItemStatus);
                 updatedItems.Add(newItem);
                 QueueDomainEvent(new PurchaseItemCreated { PurchaseItem = newItem });
             }

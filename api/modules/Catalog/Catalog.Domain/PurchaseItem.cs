@@ -1,37 +1,38 @@
 ﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 public class PurchaseItem : AuditableEntity, IAggregateRoot
 {
     public Guid PurchaseId { get; private set; }
-    public Guid ProductId { get; private set; }
+    public Guid? ProductId { get; private set; }
     public int Qty { get; private set; }
     public decimal UnitPrice { get; private set; }
-    public string? Status { get; private set; }
+    public PurchaseStatus? ItemStatus { get; private set; }
     public virtual Product Product { get; private set; } = default!;
 
     private PurchaseItem() { }
 
-    private PurchaseItem(Guid id, Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
+    private PurchaseItem(Guid id, Guid purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
         Id = id;
         PurchaseId = purchaseId;
         ProductId = productId;
         Qty = qty;
         UnitPrice = unitPrice;
-        Status = status;
+        ItemStatus = itemstatus;
 
-        QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = this });
+        QueueDomainEvent(new PurchaseItemCreated { PurchaseItem = this });
     }
 
-    public static PurchaseItem Create(Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
+    public static PurchaseItem Create(Guid purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
-        return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, status);
+        return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, itemstatus);
     }
 
-    public PurchaseItem Update(Guid productId, int qty, decimal unitPrice, string? status)
+    public PurchaseItem Update(Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
         bool isUpdated = false;             
 
@@ -53,9 +54,9 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (!string.Equals(Status, status, StringComparison.OrdinalIgnoreCase))
+        if (!Nullable.Equals(ItemStatus, itemstatus))
         {
-            Status = status;
+            ItemStatus = itemstatus;
             isUpdated = true;
         }
 

@@ -1,11 +1,12 @@
 using System.ComponentModel;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using MediatR;
 
 namespace AMIS.WebApi.Catalog.Application.PurchaseItems.Update.v2;
 public sealed record UpdatePurchaseItemCommand(
     Guid Id,
     Guid PurchaseId,
-    Guid ProductId,
+    Guid? ProductId,
     int Qty,
     decimal UnitPrice,
-    string? Status = "Pending") : IRequest<UpdatePurchaseItemResponse>;
+    PurchaseStatus? ItemStatus) : IRequest<UpdatePurchaseItemResponse>;

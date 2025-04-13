@@ -1,12 +1,10 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.ComponentModel.DataAnnotations;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
-using AMIS.Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
 public partial class PurchaseDialog
@@ -25,21 +23,31 @@ public partial class PurchaseDialog
     [Parameter] public List<ProductResponse> _products { get; set; }
     
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
-
-    private PurchaseStatus selectedStatus = PurchaseStatus.Draft;
-    private MudDataGrid<PurchaseItemUpdateDto>? _itemsGrid;
-
     private string? _successMessage;
     private FshValidation? _customValidation;
     private bool _uploading;
     private string? _uploadErrorMessage;
     private bool _isUploading;
     private string? searchText;
-    private DateTime? TempDateTime;
 
+    private int Qty;
+    private double Unitprice;
+    private Guid? Productid;
+
+    private List<PurchaseStatus> PurchaseStatusList =>
+    Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>().ToList();
+    private string GetDisplayName(Enum value)
+    {
+        var field = value.GetType().GetField(value.ToString());
+        var attr = field?.GetCustomAttributes(typeof(DisplayAttribute), false)
+                         .Cast<DisplayAttribute>()
+                         .FirstOrDefault();
+        return attr?.Name ?? value.ToString();
+    }
     protected override void OnInitialized()
     {
-        TempDateTime = Model.PurchaseDate;
+        Model ??= new UpdatePurchaseCommand();
+        Model.Items ??= new List<PurchaseItemUpdateDto>();
     }
     private async Task OnValidSubmit()
     {
@@ -106,7 +114,7 @@ public partial class PurchaseDialog
                 // Update the existing item
                 Model.Items.ElementAt(index).Qty = editedItem.Qty;
                 Model.Items.ElementAt(index).UnitPrice = editedItem.UnitPrice;
-                Model.Items.ElementAt(index).Status = editedItem.Status;
+                Model.Items.ElementAt(index).ItemStatus = editedItem.ItemStatus;
                 Model.Items.ElementAt(index).ProductId = editedItem.ProductId;
             }
             else
@@ -137,7 +145,7 @@ public partial class PurchaseDialog
                 // Revert any changes made to the item
                 canceledItem.Qty = originalItem.Qty;
                 canceledItem.UnitPrice = originalItem.UnitPrice;
-                canceledItem.Status = originalItem.Status;
+                canceledItem.ItemStatus = originalItem.ItemStatus;
                 canceledItem.ProductId = originalItem.ProductId;
             }
 
@@ -153,32 +161,24 @@ public partial class PurchaseDialog
 
     private void AddNewItem()
     {
+        
         var newItem = new PurchaseItemUpdateDto
         {
-            ProductId = Guid.NewGuid(), // Or another ID mechanism
-            Qty = 1,
-            UnitPrice = 0,
-            Status = PurchaseStatus.Draft.ToString()
+            ProductId = Productid ?? Guid.Empty, // Ensure this is valid
+            Qty = Qty,
+            UnitPrice = Unitprice,
+            ItemStatus = Model.Status,
         };
 
         Model.Items.Add(newItem);
+
+        Productid = null;
+        Qty = 0;
+        Unitprice = 0;
     }
+
     private void RemoveItem(PurchaseItemUpdateDto item)
     {
         Model.Items.Remove(item);
     }
-}
-public enum PurchaseStatus
-{
-    Draft, //The purchase order has been created but is not yet finalized. It may still be edited.
-    Submitted, //The purchase order has been sent to the supplier or vendor but has not yet been acknowledged or accepted.
-    Approved, //The purchase order has been reviewed and authorized by the appropriate personnel within the organization.
-    Acknowledged, //The supplier has received and confirmed the purchase order.
-    InProgress, //The supplier is processing the order, but it has not yet been shipped.
-    Shipped, //The goods or services ordered have been dispatched by the supplier.
-    PartiallyDelivered, //Only some of the items in the purchase order have been delivered.
-    Delivered, //All items in the purchase order have been successfully delivered.
-    Closed, //The purchase order is fully completed, and the transaction is finished. This status usually follows delivery and invoicing.
-    Cancelled, //The purchase order has been voided before completion. This could happen due to changes in needs or issues with the supplier.
-    Pending //The purchase order is waiting for further action, such as approval or payment.
 }
