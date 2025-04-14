@@ -26,9 +26,12 @@ public class Purchase : AuditableEntity, IAggregateRoot
         QueueDomainEvent(new PurchaseCreated { Purchase = this });
     }
 
-    public void AddItem(Guid productId, int qty, decimal unitPrice, PurchaseStatus? status)
+    public void AddItem(Guid? id, Guid productId, int qty, decimal unitPrice, PurchaseStatus? status)
     {
-        var item = PurchaseItem.Create(this.Id, productId, qty, unitPrice, status);
+        var item = id.HasValue
+         ? PurchaseItem.CreateWithId(id.Value, this.Id, productId, qty, unitPrice, status)
+         : PurchaseItem.Create(this.Id, productId, qty, unitPrice, status);
+
         Items.Add(item);
     }
 

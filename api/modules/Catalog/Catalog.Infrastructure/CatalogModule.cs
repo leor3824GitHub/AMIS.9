@@ -66,6 +66,7 @@ public static class CatalogModule
 
             var purchaseItemGroup = app.MapGroup("purchaseItems").WithTags("purchaseItems");
             purchaseItemGroup.MapPurchaseItemCreationEndpoint();
+            purchaseItemGroup.MapBulkPurchaseItemCreationEndpoint();
             purchaseItemGroup.MapGetPurchaseItemEndpoint();
             purchaseItemGroup.MapGetPurchaseItemListEndpoint();
             purchaseItemGroup.MapPurchaseItemUpdateEndpoint();

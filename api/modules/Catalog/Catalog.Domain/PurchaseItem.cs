@@ -31,6 +31,10 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
     {
         return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, itemstatus);
     }
+    public static PurchaseItem CreateWithId(Guid id, Guid purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
+    {
+        return new PurchaseItem(id, purchaseId, productId, qty, unitPrice, itemstatus);
+    }
 
     public PurchaseItem Update(Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {

@@ -1,4 +1,5 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Application.Purchases.Create.v1;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Exceptions;
 using MediatR;
@@ -32,7 +33,18 @@ public sealed class UpdatePurchaseHandler(
 
         // Save the updated aggregate root
         await repository.UpdateAsync(updatedPurchase, cancellationToken);
-        logger.LogInformation("purchase with id : {PurchaseId} updated.", purchase.Id);
-        return new UpdatePurchaseResponse(purchase.Id);
+        // ? Convert domain PurchaseItem to DTO
+        var itemDtos = purchase.Items.Select(i => new PurchaseItemDto
+        {
+            Id = i.Id,
+            ProductId = i.ProductId,
+            Qty = i.Qty,
+            UnitPrice = i.UnitPrice,
+            ItemStatus = i.ItemStatus
+        }).ToList();
+
+        logger.LogInformation("Purchase with id {PurchaseId} updated.", purchase.Id);
+
+        return new UpdatePurchaseResponse(purchase.Id, itemDtos);
     }
 }

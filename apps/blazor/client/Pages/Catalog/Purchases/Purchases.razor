@@ -9,14 +9,16 @@
              @bind-SelectedItem="_currentDto"
              ColumnResizeMode="ResizeMode.Column"
              Hover="true"
-             Loading="@_loading" @ref="_table">
+             Loading="@_loading" 
+             @ref="_table">
         <ToolBarContent>
-            <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap">
-
+            @* <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap"> *@
+            <div class="justify-center mud-text-align-center">
                 <!-- 📦 Left: Buttons -->
-                <div class="d-flex align-center flex-nowrap gap-1">
+                @* <div class="d-flex align-center flex-nowrap gap-1"> *@
                     <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                        <MudButton Variant="Variant.Outlined"
+                        <MudButton class="me-2" 
+                                   Variant="Variant.Outlined"
                                    Size="Size.Small"
                                    Disabled="@_loading"
                                    OnClick="@(() => OnRefresh())"
@@ -28,7 +30,8 @@
 
                         @if (_canCreate)
                         {
-                            <MudButton Variant="Variant.Outlined"
+                            <MudButton class="me-2"
+                                       Variant="Variant.Outlined"
                                        Color="Color.Primary"
                                        StartIcon="@Icons.Material.Filled.Add"
                                        Size="Size.Small"
@@ -38,7 +41,8 @@
                                 New
                             </MudButton>
 
-                            <MudButton Variant="Variant.Outlined"
+                            <MudButton class="me-2" 
+                                       Variant="Variant.Outlined"
                                        Color="Color.Primary"
                                        StartIcon="@Icons.Material.Filled.ContentCopy"
                                        Size="Size.Small"
@@ -51,7 +55,8 @@
 
                         @if (_canDelete)
                         {
-                            <MudButton Variant="Variant.Outlined"
+                            <MudButton class="me-2" 
+                                       Variant="Variant.Outlined"
                                        Color="Color.Error"
                                        StartIcon="@Icons.Material.Filled.Delete"
                                        Disabled="@(!(_selectedItems.Count > 0))"
@@ -80,24 +85,27 @@
                             }
                         </MudMenu>
                     </MudHidden>
-                </div>
+                @* </div> *@
 
                 <!-- 🔍 Right: Search Box -->
+            </div>
+                <MudSpacer />
                 @if (_canSearch)
                 {
-                    <div class="d-flex justify-end w-100">
-                        <div style="width: 300px;">
-                            <MudTextField T="string"
+                    @* <div class="d-flex justify-end w-100">
+                        <div style="width: 300px;"> *@
+                            <MudTextField class="me-2"  
+                                          T="string"
                                           ValueChanged="@(s => OnSearch(s))"
                                           Placeholder="Search"
                                           Adornment="Adornment.Start"
                                           AdornmentIcon="@Icons.Material.Filled.Search"
                                           IconSize="Size.Medium"
                                           Style="width: 100%;" />
-                        </div>
-                    </div>
+                       @*  </div>
+                    </div> *@
                 }
-            </div>
+            
         </ToolBarContent>
 
 

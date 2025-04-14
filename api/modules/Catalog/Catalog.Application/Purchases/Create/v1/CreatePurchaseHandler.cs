@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AMIS.WebApi.Catalog.Application.Purchases.Create.v1;
+
 public sealed class CreatePurchaseHandler(
     ILogger<CreatePurchaseHandler> logger,
     [FromKeyedServices("catalog:purchases")] IRepository<Purchase> repository)
@@ -13,24 +14,43 @@ public sealed class CreatePurchaseHandler(
     public async Task<CreatePurchaseResponse> Handle(CreatePurchaseCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        
-        // Create the purchase entity
-        var purchase = Purchase.Create(request.SupplierId, request.PurchaseDate, request.TotalAmount, request.Status);
 
-        // Add items if any
-        if (request.Items is not null && request.Items.Count > 0)
+        // Create the purchase entity (aggregate root)
+        var purchase = Purchase.Create(
+            request.SupplierId,
+            request.PurchaseDate,
+            request.TotalAmount,
+            request.Status
+        );
+
+        // If items are provided, sync them into the purchase
+        if (request.Items is { Count: > 0 })
         {
-            foreach (var item in request.Items)
-            {
-                purchase.AddItem(item.ProductId, item.Qty, item.UnitPrice, item.ItemStatus);
-            }
+            var itemUpdates = request.Items.Select(item => new PurchaseItemUpdate(
+                null, // Id is null on create
+                item.ProductId,
+                item.Qty,
+                item.UnitPrice,
+                item.ItemStatus
+            )).ToList();
+
+            purchase.SyncItems(itemUpdates);
         }
 
-        // Save entire aggregate (purchase + items)
+        // Persist the entire aggregate (purchase + items)
         await repository.AddAsync(purchase, cancellationToken);
 
-        logger.LogInformation("purchase with items created {PurchaseId}", purchase.Id);
-        return new CreatePurchaseResponse(purchase.Id);
+        // ✅ Convert domain PurchaseItem to DTO
+        var itemDtos = purchase.Items.Select(i => new PurchaseItemDto
+        {
+            Id = i.Id,
+            ProductId = i.ProductId,
+            Qty = i.Qty,
+            UnitPrice = i.UnitPrice,
+            ItemStatus = i.ItemStatus
+        }).ToList();
+
+        logger.LogInformation("Purchase created with ID {PurchaseId}", purchase.Id);
+        return new CreatePurchaseResponse(purchase.Id, itemDtos);
     }
 }
-
