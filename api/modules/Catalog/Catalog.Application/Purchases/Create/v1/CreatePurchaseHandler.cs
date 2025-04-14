@@ -41,14 +41,8 @@ public sealed class CreatePurchaseHandler(
         await repository.AddAsync(purchase, cancellationToken);
 
         // ✅ Convert domain PurchaseItem to DTO
-        var itemDtos = purchase.Items.Select(i => new PurchaseItemDto
-        {
-            Id = i.Id,
-            ProductId = i.ProductId,
-            Qty = i.Qty,
-            UnitPrice = i.UnitPrice,
-            ItemStatus = i.ItemStatus
-        }).ToList();
+        var itemDtos = purchase.Items.Select(i =>
+            new PurchaseItemDto(i.Id, i.ProductId, i.Qty, i.UnitPrice, i.ItemStatus)).ToList();
 
         logger.LogInformation("Purchase created with ID {PurchaseId}", purchase.Id);
         return new CreatePurchaseResponse(purchase.Id, itemDtos);

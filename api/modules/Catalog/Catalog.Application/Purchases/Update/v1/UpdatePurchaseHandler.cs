@@ -34,14 +34,8 @@ public sealed class UpdatePurchaseHandler(
         // Save the updated aggregate root
         await repository.UpdateAsync(updatedPurchase, cancellationToken);
         // ? Convert domain PurchaseItem to DTO
-        var itemDtos = purchase.Items.Select(i => new PurchaseItemDto
-        {
-            Id = i.Id,
-            ProductId = i.ProductId,
-            Qty = i.Qty,
-            UnitPrice = i.UnitPrice,
-            ItemStatus = i.ItemStatus
-        }).ToList();
+        var itemDtos = purchase.Items.Select(i =>
+            new PurchaseItemDto(i.Id, i.ProductId, i.Qty, i.UnitPrice, i.ItemStatus)).ToList();
 
         logger.LogInformation("Purchase with id {PurchaseId} updated.", purchase.Id);
 
