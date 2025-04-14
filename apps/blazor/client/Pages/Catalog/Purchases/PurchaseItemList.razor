@@ -1,6 +1,6 @@
 ﻿ <!-- Item List Section -->
-<MudPaper Class="pa-4 mb-4" Height="600px">
-    <MudText Typo="Typo.h6">Items</MudText>
+<MudPaper Class="pa-4 mb-4" Style="max-height: 80vh; overflow-y: auto;">
+    <MudText Typo="Typo.h6">Purchase Items</MudText>
 
     <MudTable T="PurchaseItemUpdateDto"
               Items="Items"
@@ -40,10 +40,10 @@
                     <MudText>@(item.Qty * item.UnitPrice)</MudText> @* Amount *@
                 </MudTd>
                 <MudTd>
-                    <MudSelect T="PurchaseStatus?" @bind-Value="item.ItemStatus" Dense>
+                    <MudSelect T="PurchaseStatus" @bind-Value="item.ItemStatus" Dense>
                         @foreach (var status in PurchaseStatusList)
                         {
-                            <MudSelectItem T="PurchaseStatus?" Value="status">@GetDisplayName(status)</MudSelectItem>
+                            <MudSelectItem T="PurchaseStatus" Value="status">@GetDisplayName(status)</MudSelectItem>
                         }
                     </MudSelect>
                 </MudTd>
@@ -78,13 +78,16 @@
                 <MudTd T="PurchaseStatus?" DataLabel="Status">@item.ItemStatus</MudTd>
                 <MudTd class="text-center">
                     <div class="d-flex justify-center gap-2">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit"
-                                       Color="Color.Primary"
-                                       OnClick="@(() => EditItem(item))" />
-
+                        <MudTooltip Text="Edit Item">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Primary"
+                                           OnClick="@(() => EditItem(item))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Delete Item">
                         <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                        Color="Color.Error"
                                        OnClick="@(() => RemoveItem(item))" />
+                        </MudTooltip>
                     </div>
                 </MudTd>
             }
@@ -119,7 +122,7 @@
             </MudTd>
             <MudTd class="text-center">
                 <MudTooltip Text="Add Item">
-                    <MudIconButton Icon="@Icons.Material.Filled.Add"
+                    <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline"
                                    Color="Color.Primary"
                                    OnClick="AddNewItem" />
                 </MudTooltip>

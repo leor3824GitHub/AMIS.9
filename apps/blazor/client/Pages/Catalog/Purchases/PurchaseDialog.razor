@@ -1,13 +1,13 @@
 ﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
-    <MudDialog>
-        <DialogContent>
+    <MudDialog Style="height: 850px; overflow-y: auto;">
+        <DialogContent >
             <DataAnnotationsValidator />
             <ValidationSummary />
 
             <!-- Purchase Information Section -->
             <MudPaper Class="pa-2 mb-2" Elevation="1" Square="true">
                 <MudGrid>
-                    <MudItem xs="12" sm="6" md="3">
+                    <MudItem xs="12" sm="6" md="4">
                         <MudSelect T="Guid?" Label="Supplier" @bind-Value="Model.SupplierId">
                             @foreach (var suppliers in _suppliers)
                             {
@@ -15,30 +15,34 @@
                             }
                         </MudSelect>
                     </MudItem>
-                    <MudItem xs="12" sm="6" md="3">
+                    <MudItem xs="12" sm="6" md="2">
                         <MudDatePicker @bind-Date="Model.PurchaseDate" Label="Purchase Date" For="@(() => Model.PurchaseDate)" />
                     </MudItem>
-                    <MudItem xs="12" sm="6" md="3">
-                        <MudSelect T="PurchaseStatus?" Label="Status" @bind-Value="Model.Status">                        
+                    <MudItem xs="12" sm="6" md="2">
+                        <MudSelect T="PurchaseStatus" Label="Status" @bind-Value="Model.Status">                        
                             @foreach (var status in PurchaseStatusList)
                             {
-                                <MudSelectItem T="PurchaseStatus?" Value="status">@GetDisplayName(status)</MudSelectItem>
+                                <MudSelectItem T="PurchaseStatus" Value="status">@GetDisplayName(status)</MudSelectItem>
                             }
                         </MudSelect>
                     </MudItem>
-                    <MudItem xs="12" sm="6" md="3">
-                        <MudTextField @bind-Value="Model.TotalAmount" Label="TotalAmount" For="@(() => Model.TotalAmount)" ReadOnly="true" />
-                    </MudItem>                
+                    <MudItem xs="12" sm="6" md="2">
+                        <MudTextField @bind-Value="Model.TotalAmount" Label="TotalAmount" For="@(() => Model.TotalAmount)" Format="N2" ReadOnly="true" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6" md="2">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" >Save</MudButton>                   
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="Cancel">Close</MudButton>
+                    </MudItem>
                 </MudGrid>
             </MudPaper>
 
             <!-- ✅ Move Save/Cancel Button Here -->
-            <MudPaper Class="pa-2 mb-2" Elevation="0" Square="true">
-                <MudStack Row Spacing="2">
-                    <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
+            @* <MudPaper Class="pa-2 mb-2" Elevation="0" Square="true">
+                <MudStack Row Spacing="2">        
                     <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
                 </MudStack>
-            </MudPaper>
+            </MudPaper> *@
+
             @if (Model.Id != Guid.Empty)
             {
                 <!-- ✅ Include PurchaseItemList inside the same DialogContent -->

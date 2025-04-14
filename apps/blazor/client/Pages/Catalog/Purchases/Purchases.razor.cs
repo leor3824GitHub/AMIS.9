@@ -97,7 +97,7 @@ public partial class Purchases
             { nameof(PurchaseDialog.Model), command },
             { nameof(PurchaseDialog.IsCreate), IsCreate },
         };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true };
         var dialog = await DialogService.ShowAsync<PurchaseDialog>(title, parameters, options);
         var state = await dialog.Result;
 
@@ -157,45 +157,45 @@ public partial class Purchases
             await _table.ReloadServerData();
         }
     }
-    //private async Task OnDeleteChecked()
-    //{
-    //    var purchaseIds = _selectedItems
-    //   .Select(item => item.Id)
-    //   .Where(id => id.HasValue)
-    //   .Select(id => id.Value)
-    //   .ToList();
+    private async Task OnDeleteChecked()
+    {
+        var purchaseIds = _selectedItems
+       .Select(item => item.Id)
+       .Where(id => id.HasValue)
+       .Select(id => id.Value)
+       .ToList();
 
-    //    if (purchaseIds.Count == 0)
-    //    {
-    //        Snackbar?.Add("No items selected for deletion.", Severity.Warning);
-    //        return;
-    //    }
+        if (purchaseIds.Count == 0)
+        {
+            Snackbar?.Add("No items selected for deletion.", Severity.Warning);
+            return;
+        }
 
-    //    string deleteContent = "Are you sure you want to delete the selected purchases?";
-    //    var parameters = new DialogParameters
-    //    {
-    //        { nameof(DeleteConfirmation.ContentText), deleteContent }
-    //    };
-    //    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
-    //    var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
-    //    var result = await dialog.Result;
-    //    if (!result!.Canceled)
-    //    {
-    //        try
-    //        {
-    //            await ApiHelper.ExecuteCallGuardedAsync(
-    //                () => purchaseclient.DeletePurchasesEndpointAsync("1", purchaseIds),
-    //                Snackbar);
+        string deleteContent = "Are you sure you want to delete the selected purchases?";
+        var parameters = new DialogParameters
+        {
+            { nameof(DeleteConfirmation.ContentText), deleteContent }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
+        var result = await dialog.Result;
+        if (!result!.Canceled)
+        {
+            try
+            {
+                await ApiHelper.ExecuteCallGuardedAsync(
+                    () => purchaseclient.DeletePurchasesEndpointAsync("1", purchaseIds),
+                    Snackbar);
 
-    //            await _table.ReloadServerData();
-    //            _selectedItems.Clear();
-    //        }
-    //        catch (Exception ex)
-    //        {
-    //            Snackbar?.Add($"Error deleting purchases: {ex.Message}", Severity.Error);
-    //        }
-    //    }
-    //}
+                await _table.ReloadServerData();
+                _selectedItems.Clear();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Error deleting purchases: {ex.Message}", Severity.Error);
+            }
+        }
+    }
 
     private async Task OnRefresh()
     {

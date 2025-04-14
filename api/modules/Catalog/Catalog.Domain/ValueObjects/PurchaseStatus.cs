@@ -3,7 +3,6 @@
 namespace AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-[Flags]
 public enum PurchaseStatus
 {
     Draft,          //The purchase order has been created but is not yet finalized. It may still be edited.
