@@ -14,14 +14,20 @@ public sealed class UpdatePurchaseHandler(
     public async Task<UpdatePurchaseResponse> Handle(UpdatePurchaseCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var purchase = await repository.GetByIdAsync(request.Id, cancellationToken);
-        _ = purchase ?? throw new PurchaseNotFoundException(request.Id);
-        
-        var updatedPurchase = purchase.Update(request.SupplierId, request.PurchaseDate, request.TotalAmount, request.Status);
+        var spec = new GetUpdatePurchaseSpecs(request.Id);
+        var purchase = await repository.FirstOrDefaultAsync(spec, cancellationToken);
 
-        // Use the SyncItems method to update, add, and remove items inside the aggregate
+        if (purchase is null)
+        {
+            throw new PurchaseNotFoundException(request.Id);
+        }
+
+        // Update base purchase fields
+        purchase.Update(request.SupplierId, request.PurchaseDate, request.TotalAmount, request.Status);
+
+        // Update items using domain method
         var itemUpdates = request.Items.Select(i => new PurchaseItemUpdate(
-            i.Id, // Pass the Id
+            i.Id,
             i.ProductId,
             i.Qty,
             i.UnitPrice,
@@ -30,9 +36,11 @@ public sealed class UpdatePurchaseHandler(
 
         purchase.SyncItems(itemUpdates);
 
-        // Save the updated aggregate root
-        await repository.UpdateAsync(updatedPurchase, cancellationToken);
-        logger.LogInformation("purchase with id : {PurchaseId} updated.", purchase.Id);
+        // Save updated aggregate root
+        await repository.UpdateAsync(purchase, cancellationToken);
+
+        logger.LogInformation("Purchase with ID {PurchaseId} successfully updated.", purchase.Id);
+
         return new UpdatePurchaseResponse(purchase.Id);
     }
 }

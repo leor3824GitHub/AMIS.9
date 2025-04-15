@@ -74,50 +74,60 @@ public class Purchase : AuditableEntity, IAggregateRoot
     }
     public void SyncItems(List<PurchaseItemUpdate> items)
     {
+        // Step 1: Map existing items by ID
         var existingMap = Items.ToDictionary(i => i.Id, i => i);
-        var updatedItems = new List<PurchaseItem>();
+        var updatedItemIds = new HashSet<Guid>();
+        var newItems = new List<PurchaseItem>();
 
+        // Step 2: Process each item in the input
         foreach (var update in items)
         {
             if (update.Id.HasValue && existingMap.TryGetValue(update.Id.Value, out var existing))
             {
-                // Track state before update for event comparison (optional)
-                var before = (existing.Qty, existing.UnitPrice, existing.ProductId, existing.ItemStatus);
+                // Save original state for comparison
+                var before = (existing.ProductId, existing.Qty, existing.UnitPrice, existing.ItemStatus);
 
+                // Update existing item
                 existing.Update(update.ProductId, update.Qty, update.UnitPrice, update.ItemStatus);
-                updatedItems.Add(existing);
+                updatedItemIds.Add(existing.Id);
 
-                if (before != (existing.Qty, existing.UnitPrice, existing.ProductId, existing.ItemStatus))
+                // Raise event only if there was a change
+                if (before != (existing.ProductId, existing.Qty, existing.UnitPrice, existing.ItemStatus))
                 {
                     QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = existing });
                 }
             }
             else
             {
+                // Create new item
                 var newItem = PurchaseItem.Create(Id, update.ProductId, update.Qty, update.UnitPrice, update.ItemStatus);
-                updatedItems.Add(newItem);
+
+                // Add to temp collection only (do NOT modify Items yet)
+                newItems.Add(newItem);
+                updatedItemIds.Add(newItem.Id);
+
+                // Raise domain event
                 QueueDomainEvent(new PurchaseItemCreated { PurchaseItem = newItem });
             }
         }
 
-        // Remove old items not in the updated list
-        var toRemove = Items.Where(i => !updatedItems.Any(u => u.Id == i.Id)).ToList();
+        // Step 3: Remove items not present in the update list
+        var toRemove = Items.Where(i => !updatedItemIds.Contains(i.Id)).ToList();
         foreach (var item in toRemove)
         {
             Items.Remove(item);
             QueueDomainEvent(new PurchaseItemRemoved { PurchaseItem = item });
         }
 
-        // Add new items to the collection
-        foreach (var item in updatedItems)
+        // Step 4: Now safely add new items to the collection
+        foreach (var newItem in newItems)
         {
-            if (!Items.Any(i => i.Id == item.Id))
-                Items.Add(item);
+            Items.Add(newItem);
         }
 
-        // Update total based on current items
-        var total = Items.Sum(i => i.Qty * i.UnitPrice);
-        Update(SupplierId, PurchaseDate, total, Status);
+        // Optional: Recalculate total if needed
+        // var total = Items.Sum(i => i.Qty * i.UnitPrice);
+        // Update(SupplierId, PurchaseDate, total, Status);
     }
 
 }
