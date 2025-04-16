@@ -9457,6 +9457,21 @@ namespace AMIS.Blazor.Infrastructure.Api
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
+    public enum ItemOperationType
+    {
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Add")]
+        Add = 0,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Update")]
+        Update = 1,
+
+        [System.Runtime.Serialization.EnumMember(Value = @"Remove")]
+        Remove = 2,
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class PaginationFilter
     {
 
@@ -9544,8 +9559,14 @@ namespace AMIS.Blazor.Infrastructure.Api
     public partial class PurchaseItemDto
     {
 
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
+        public System.Guid? PurchaseId { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
-        public System.Guid ProductId { get; set; }
+        public System.Guid? ProductId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("qty")]
         public int Qty { get; set; }
@@ -9621,6 +9642,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
+        public System.Guid? PurchaseId { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
         public System.Guid? ProductId { get; set; }
 
@@ -9633,6 +9657,10 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("itemStatus")]
         [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public PurchaseStatus ItemStatus { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("operationType")]
+        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
+        public ItemOperationType OperationType { get; set; }
 
     }
 
