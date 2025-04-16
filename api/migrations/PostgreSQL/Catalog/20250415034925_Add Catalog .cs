@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 {
     /// <inheritdoc />
-    public partial class AddCatalogs : Migration
+    public partial class AddCatalog : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

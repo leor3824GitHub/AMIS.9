@@ -4,8 +4,11 @@
     <AssemblyName>AMIS.WebApi.Catalog.Infrastructure</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Endpoints\v1\PurchaseItem\**" />
     <Compile Remove="Persistence\Repositories\**" />
+    <EmbeddedResource Remove="Endpoints\v1\PurchaseItem\**" />
     <EmbeddedResource Remove="Persistence\Repositories\**" />
+    <None Remove="Endpoints\v1\PurchaseItem\**" />
     <None Remove="Persistence\Repositories\**" />
   </ItemGroup>
   <ItemGroup>

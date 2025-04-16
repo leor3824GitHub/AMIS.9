@@ -93,7 +93,7 @@ public partial class PurchaseDialog
 
             if (response != null)
             {
-                Model.Id = (Guid)response.Id;
+                Model.Id = (Guid)response.PurchaseId;
                 StateHasChanged();
                 _successMessage = "Purchase created successfully!";
                 //MudDialog.Close(DialogResult.Ok(true));

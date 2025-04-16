@@ -64,13 +64,13 @@ public static class CatalogModule
             purchaseGroup.MapPurchaseDeleteEndpoint();
             purchaseGroup.MapPurchasesDeleteEndpoint();
 
-            var purchaseItemGroup = app.MapGroup("purchaseItems").WithTags("purchaseItems");
-            purchaseItemGroup.MapPurchaseItemCreationEndpoint();
-            purchaseItemGroup.MapBulkPurchaseItemCreationEndpoint();
-            purchaseItemGroup.MapGetPurchaseItemEndpoint();
-            purchaseItemGroup.MapGetPurchaseItemListEndpoint();
-            purchaseItemGroup.MapPurchaseItemUpdateEndpoint();
-            purchaseItemGroup.MapPurchaseItemDeleteEndpoint();
+            //var purchaseItemGroup = app.MapGroup("purchaseItems").WithTags("purchaseItems");
+            //purchaseItemGroup.MapPurchaseItemCreationEndpoint();
+            //purchaseItemGroup.MapBulkPurchaseItemCreationEndpoint();
+            //purchaseItemGroup.MapGetPurchaseItemEndpoint();
+            //purchaseItemGroup.MapGetPurchaseItemListEndpoint();
+            //purchaseItemGroup.MapPurchaseItemUpdateEndpoint();
+            //purchaseItemGroup.MapPurchaseItemDeleteEndpoint();
 
             var employeeGroup = app.MapGroup("employees").WithTags("employees");
             employeeGroup.MapEmployeeCreationEndpoint();
@@ -115,8 +115,8 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<Purchase>, CatalogRepository<Purchase>>("catalog:purchases");
         builder.Services.AddKeyedScoped<IReadRepository<Purchase>, CatalogRepository<Purchase>>("catalog:purchases");
 
-        builder.Services.AddKeyedScoped<IRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
-        builder.Services.AddKeyedScoped<IReadRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
+        //builder.Services.AddKeyedScoped<IRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
+        //builder.Services.AddKeyedScoped<IReadRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
 
         builder.Services.AddKeyedScoped<IRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
         builder.Services.AddKeyedScoped<IReadRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");

@@ -11,19 +11,16 @@ public partial class PurchaseItemList
     protected IApiClient Purchaseclient { get; set; } = default!;
     [Inject]
     private ISnackbar? Snackbar { get; set; }
-    private ICollection<PurchaseItemUpdateDto> _items = new List<PurchaseItemUpdateDto>();
-
-    [Parameter]
-    public ICollection<PurchaseItemUpdateDto> Items
-    {
-        get => _items;
-        set => _items = value ?? new List<PurchaseItemUpdateDto>();
-    }
     [Parameter] public List<ProductResponse> Products { get; set; } = new();
     [Parameter] public List<SupplierResponse> Suppliers { get; set; } = new();
     [Parameter] public PurchaseStatus? Status { get; set; }
     [Parameter] public Guid? PurchaseId { get; set; }
     [Parameter] public Action<Double> OnTotalAmountChanged { get; set; }
+    [Parameter]
+    public ICollection<PurchaseItemUpdateDto> Items { get; set; } = new List<PurchaseItemUpdateDto>();
+    [Parameter]
+    public EventCallback<ICollection<PurchaseItemUpdateDto>> ItemsChanged { get; set; }
+
 
     private Guid? Productid { get; set; }
     private int Qty { get; set; }
@@ -44,9 +41,10 @@ public partial class PurchaseItemList
         EditingItem = item;
     }
 
-    private void SaveEdit()
+    private async Task SaveEdit()
     {
         EditingItem = null;
+        await ItemsChanged.InvokeAsync(Items); // Notify parent
         UpdateTotalAmount();
     }
 
@@ -55,18 +53,22 @@ public partial class PurchaseItemList
         EditingItem = null;
     }
 
-    private void AddNewItem()
+    private async Task AddNewItem()
     {
         if (Productid == null || Qty <= 0 || Unitprice <= 0)
             return;
 
-        Items.Add(new PurchaseItemUpdateDto
+        var newItem = new PurchaseItemUpdateDto
         {
+            Id = null,
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
             ItemStatus = Itemstatus ?? Status ?? PurchaseStatus.Pending
-        });
+        };
+
+        Items.Add(newItem);
+        await ItemsChanged.InvokeAsync(Items); // Notify parent
 
         Productid = null;
         Qty = 0;
@@ -81,11 +83,12 @@ public partial class PurchaseItemList
         StateHasChanged();
     }
 
-    private void RemoveItem(PurchaseItemUpdateDto item)
+    private async Task RemoveItem(PurchaseItemUpdateDto item)
     {
         Items.Remove(item);
+        await ItemsChanged.InvokeAsync(Items); // Notify parent
         UpdateTotalAmount();
-        
+
     }
 
     private List<PurchaseStatus> PurchaseStatusList =>

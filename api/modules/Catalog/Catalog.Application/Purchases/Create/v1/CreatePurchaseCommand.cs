@@ -5,7 +5,7 @@ using MediatR;
 namespace AMIS.WebApi.Catalog.Application.Purchases.Create.v1;
 public sealed record PurchaseItemDto(
     Guid Id,
-    Guid? ProductId,
+    Guid ProductId,
     int Qty,
     decimal UnitPrice,
     PurchaseStatus? ItemStatus

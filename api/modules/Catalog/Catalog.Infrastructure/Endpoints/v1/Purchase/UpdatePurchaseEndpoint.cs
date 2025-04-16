@@ -18,8 +18,8 @@ public static class UpdatePurchaseEndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(UpdatePurchaseEndpoint))
-            .WithSummary("update a product")
-            .WithDescription("update a product")
+            .WithSummary("update a Purchase")
+            .WithDescription("update a Purchase")
             .Produces<UpdatePurchaseResponse>()
             .RequirePermission("Permissions.Purchases.Update")
             .MapToApiVersion(1);

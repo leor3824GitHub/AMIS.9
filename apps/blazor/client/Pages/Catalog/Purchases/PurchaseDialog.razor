@@ -43,20 +43,20 @@
                 </MudStack>
             </MudPaper> *@
 
-            @if (Model.Id != Guid.Empty)
-            {
+           @*  @if (Model.Id != Guid.Empty)
+            { *@
                 <!-- ✅ Include PurchaseItemList inside the same DialogContent -->
-                <PurchaseItemList Items="@Model.Items"
+                <PurchaseItemList @bind-Items="Model.Items"
                                   Products="_products"
                                   Suppliers="_suppliers"
                                   Status="Model.Status"
                                   PurchaseId="@Model.Id"
                                   OnTotalAmountChanged="UpdateTotalAmount" />
-            }
+           @*  }
             else
             {
                 <MudText Color="Color.Warning">Save the purchase first to manage items.</MudText>
-            }
+            } *@
            
         </DialogContent>
 

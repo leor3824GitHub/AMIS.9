@@ -31,7 +31,14 @@ public sealed class CatalogDbContext : FshDbContext
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
         base.OnModelCreating(modelBuilder);
+
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(CatalogDbContext).Assembly);
         modelBuilder.HasDefaultSchema(SchemaNames.Catalog);
+
+        modelBuilder.Entity<Purchase>()
+        .HasMany(p => p.Items)
+        .WithOne()
+        .HasForeignKey(i => i.PurchaseId)
+        .OnDelete(DeleteBehavior.Cascade);
     }
 }

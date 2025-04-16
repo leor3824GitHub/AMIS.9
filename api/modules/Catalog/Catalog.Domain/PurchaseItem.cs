@@ -4,39 +4,39 @@ using AMIS.WebApi.Catalog.Domain.Events;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
-public class PurchaseItem : AuditableEntity, IAggregateRoot
+public class PurchaseItem : BaseEntity, ISoftDeletable
 {
     public Guid PurchaseId { get; private set; }
-    public Guid? ProductId { get; private set; }
+    public Guid ProductId { get; private set; }
     public int Qty { get; private set; }
     public decimal UnitPrice { get; private set; }
     public PurchaseStatus? ItemStatus { get; private set; }
-    public virtual Product Product { get; private set; } = default!;
+
+    public DateTimeOffset? Deleted { get; set; }
+    public Guid? DeletedBy { get; set; }
 
     private PurchaseItem() { }
 
-    private PurchaseItem(Guid id, Guid purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
+    private PurchaseItem(Guid id, Guid purchaseId, Guid productId, int qty, decimal unitPrice, PurchaseStatus? status)
     {
         Id = id;
         PurchaseId = purchaseId;
         ProductId = productId;
         Qty = qty;
         UnitPrice = unitPrice;
-        ItemStatus = itemstatus;
-
-        QueueDomainEvent(new PurchaseItemCreated { PurchaseItem = this });
+        ItemStatus = status;
     }
 
-    public static PurchaseItem Create(Guid purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
+    public static PurchaseItem Create(Guid purchaseId, Guid productId, int qty, decimal unitPrice, PurchaseStatus? status)
     {
-        return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, itemstatus);
-    }
-    public static PurchaseItem CreateWithId(Guid id, Guid purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
-    {
-        return new PurchaseItem(id, purchaseId, productId, qty, unitPrice, itemstatus);
+        return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, status);
     }
 
-    public PurchaseItem Update(Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
+    public static PurchaseItem CreateWithId(Guid id, Guid purchaseId, Guid productId, int qty, decimal unitPrice, PurchaseStatus? status)
+    {
+        return new PurchaseItem(id, purchaseId, productId, qty, unitPrice, status);
+    }
+    public PurchaseItem Update(Guid productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
         bool isUpdated = false;             
 

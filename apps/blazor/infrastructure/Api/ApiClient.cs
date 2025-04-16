@@ -558,10 +558,10 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// update a product
+        /// update a Purchase
         /// </summary>
         /// <remarks>
-        /// update a product
+        /// update a Purchase
         /// </remarks>
         /// <param name="version">The requested API version</param>
         /// <returns>OK</returns>
@@ -4983,10 +4983,10 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// update a product
+        /// update a Purchase
         /// </summary>
         /// <remarks>
-        /// update a product
+        /// update a Purchase
         /// </remarks>
         /// <param name="version">The requested API version</param>
         /// <returns>OK</returns>
@@ -9097,8 +9097,11 @@ namespace AMIS.Blazor.Infrastructure.Api
     public partial class CreatePurchaseResponse
     {
 
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
+        public System.Guid? PurchaseId { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        public System.Collections.Generic.ICollection<PurchaseItemDto> Items { get; set; }
 
     }
 
@@ -9544,8 +9547,11 @@ namespace AMIS.Blazor.Infrastructure.Api
     public partial class PurchaseItemDto
     {
 
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
-        public System.Guid ProductId { get; set; }
+        public System.Guid? ProductId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("qty")]
         public int Qty { get; set; }
@@ -10590,6 +10596,9 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
         public System.Guid? Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("items")]
+        public System.Collections.Generic.ICollection<PurchaseItemDto> Items { get; set; }
 
     }
 
