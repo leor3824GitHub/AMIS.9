@@ -6,7 +6,7 @@ using AMIS.WebApi.Catalog.Domain.ValueObjects;
 namespace AMIS.WebApi.Catalog.Domain;
 public class PurchaseItem : AuditableEntity, IAggregateRoot
 {
-    public Guid PurchaseId { get; private set; }
+    public Guid? PurchaseId { get; private set; }
     public Guid? ProductId { get; private set; }
     public int Qty { get; private set; }
     public decimal UnitPrice { get; private set; }
@@ -15,7 +15,7 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
 
     private PurchaseItem() { }
 
-    private PurchaseItem(Guid id, Guid purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
+    private PurchaseItem(Guid id, Guid? purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
         Id = id;
         PurchaseId = purchaseId;
@@ -27,7 +27,7 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
         QueueDomainEvent(new PurchaseItemCreated { PurchaseItem = this });
     }
 
-    public static PurchaseItem Create(Guid purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
+    public static PurchaseItem Create(Guid? purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
         return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, itemstatus);
     }
