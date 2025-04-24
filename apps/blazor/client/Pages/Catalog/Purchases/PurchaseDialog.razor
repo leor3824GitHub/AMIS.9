@@ -1,4 +1,6 @@
 ﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <FshValidation @ref="_customValidation" />
+
     <MudDialog Style="height: 850px; overflow-y: auto;">
         <DialogContent >
             <DataAnnotationsValidator />
@@ -42,9 +44,9 @@
                     <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
                 </MudStack>
             </MudPaper> *@
-
+@* 
             @if (Model.Id != Guid.Empty)
-            {
+            { *@
                 <!-- ✅ Include PurchaseItemList inside the same DialogContent -->
                 <PurchaseItemList Items="@Model.Items"
                                   Products="_products"
@@ -52,11 +54,11 @@
                                   Status="Model.Status"
                                   PurchaseId="@Model.Id"
                                   OnTotalAmountChanged="UpdateTotalAmount" />
-            }
+@*             }
             else
             {
                 <MudText Color="Color.Warning">Save the purchase first to manage items.</MudText>
-            }
+            } *@
            
         </DialogContent>
 

@@ -24,6 +24,7 @@ public partial class Purchases
     protected IApiClient purchaseclient { get; set; } = default!;
     [Inject]
     private ISnackbar? Snackbar { get; set; }
+
     private PurchaseResponse _currentDto = new();
 
     private string searchString = "";
@@ -97,7 +98,13 @@ public partial class Purchases
             { nameof(PurchaseDialog.Model), command },
             { nameof(PurchaseDialog.IsCreate), IsCreate },
         };
-        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true };
+        var options = new DialogOptions { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Large, 
+            FullWidth = true, 
+            BackdropClick = false, 
+            Position = DialogPosition.Center 
+        };
         var dialog = await DialogService.ShowAsync<PurchaseDialog>(title, parameters, options);
         var state = await dialog.Result;
 
@@ -110,12 +117,20 @@ public partial class Purchases
 
     private async Task OnCreate()
     {
-        _currentDto.PurchaseDate = DateTime.Today;
-        _currentDto.SupplierId = null;
-        var model = new Mapper().Map<PurchaseResponse, UpdatePurchaseCommand>(_currentDto);
-        //var command = copy.Adapt<PurchaseViewModel>();
-        //var model = _currentDto.Adapt<UpdatePurchaseCommand>();
+        var model = CreateDefaultPurchaseCommand();
+
         await ShowEditFormDialog("Create new purchase", model, true);
+    }
+
+    private static UpdatePurchaseCommand CreateDefaultPurchaseCommand()
+    {
+        return new UpdatePurchaseCommand
+        {
+            PurchaseDate = DateTime.Today,
+            SupplierId = null,
+            Status = PurchaseStatus.Pending,
+            Items = new List<PurchaseItemUpdateDto>()
+        };
     }
 
     private async Task OnClone()
