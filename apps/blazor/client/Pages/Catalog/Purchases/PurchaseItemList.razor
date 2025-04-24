@@ -1,7 +1,7 @@
 ﻿ <!-- Item List Section -->
 <MudPaper Class="pa-4 mb-4" Style="max-height: 80vh; overflow-y: auto;">
-    <MudText Typo="Typo.h6">Purchase Items</MudText>
-
+    <MudText Typo="Typo.h6">Purchase Items - @(Items?.Count ?? 0)</MudText>
+    
     <MudTable T="PurchaseItemUpdateDto"
               Items="Items"
               Hover="true"
@@ -111,9 +111,7 @@
                 <MudNumericField T="double" @bind-Value="Unitprice" Dense Adornment="Adornment.End" AdornmentText="Php" />
             </MudTd>
             <MudTd>
-                <MudTd>
                     @(Qty * Unitprice)
-                </MudTd>
             </MudTd>
             <MudTd>
                 <MudTd>
