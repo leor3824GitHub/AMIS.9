@@ -49,7 +49,19 @@ public partial class PurchaseItemList
 
     private void SaveEdit()
     {
+        if (EditingItem == null || EditingItem.Qty <= 0 || EditingItem.UnitPrice <= 0)
+            return;
+
+        if (IsCreate == false)
+        {
+            var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
+
+            Purchaseclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
+            Snackbar?.Add("Item product successfully updated.", Severity.Success);
+        }
+
         EditingItem = null;
+
         UpdateTotalAmount();
     }
 
