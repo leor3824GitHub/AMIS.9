@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Reflection;
+using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
@@ -81,11 +82,21 @@ public partial class PurchaseItemList
         StateHasChanged();
     }
 
-    private void RemoveItem(PurchaseItemUpdateDto item)
+    private async Task RemoveItem(PurchaseItemUpdateDto item)
     {
-        Items.Remove(item);
-        UpdateTotalAmount();
-        
+        if (item.Id == null)
+        {
+            Snackbar?.Add("Item ID is null and cannot be removed.", Severity.Error);
+            return;
+        }
+
+        var id = item.Id.Value; // Convert nullable Guid to non-nullable Guid
+        await ApiHelper.ExecuteCallGuardedAsync(
+            () => Purchaseclient.DeletePurchaseItemEndpointAsync("1", id), Snackbar);
+
+       
+            Items.Remove(item);
+            UpdateTotalAmount();
     }
 
     private List<PurchaseStatus> PurchaseStatusList =>

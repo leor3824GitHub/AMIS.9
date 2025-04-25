@@ -97,6 +97,8 @@ public partial class Purchases
         {
             { nameof(PurchaseDialog.Model), command },
             { nameof(PurchaseDialog.IsCreate), IsCreate },
+            { nameof(PurchaseDialog.Refresh), EventCallback.Factory.Create(this, OnRefresh) }
+
         };
         var options = new DialogOptions { 
             CloseButton = true, 

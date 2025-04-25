@@ -1,4 +1,4 @@
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
 using Mapster;
@@ -16,8 +16,8 @@ public partial class PurchaseDialog
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
     [Parameter] public UpdatePurchaseCommand Model { get; set; }
-    [Parameter] public EventCallback OnCancel { get; set; }    
-    [Parameter] public Action? Refresh { get; set; }
+    [Parameter] public EventCallback OnCancel { get; set; }
+    [Parameter] public EventCallback Refresh { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
     
 
@@ -27,6 +27,7 @@ public partial class PurchaseDialog
     private PurchaseItemUpdateDto? EditingItem { get; set; }
 
     private string? _successMessage;
+    private FshValidation? Validation;
 
     private List<PurchaseStatus> PurchaseStatusList =>
     Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>().ToList();
@@ -73,54 +74,57 @@ public partial class PurchaseDialog
     }
     private async Task OnValidSubmit()
     {
-        if (!Model.SupplierId.HasValue || Model.SupplierId.Value == Guid.Empty)
         {
-            Snackbar.Add("Supplier is required.", Severity.Warning);
-            return;
-        }
+            if (IsCreate is not true && IsCreate is not false) return;
 
-        if (IsCreate is not true and not false) return;
+            Snackbar.Add(IsCreate.Value ? "Creating purchase order..." : "Updating purchase order...", Severity.Info);
 
-        Snackbar.Add(IsCreate.Value ? "Creating purchase order..." : "Updating purchase order...", Severity.Info);
-
-        if (IsCreate.Value) // Create product
-        {
-            var model = Model.Adapt<CreatePurchaseCommand>();
-            var response = await ApiHelper.ExecuteCallGuardedAsync(
-                () => PurchaseClient.CreatePurchaseEndpointAsync("1", model),
-                Snackbar,
-                Navigation
-            );
-
-            if (response?.Id is not null)
+            try
             {
-                Model.Id = (Guid)response.Id;
-                StateHasChanged();
-                _successMessage = "Purchase order created successfully!";
-                Refresh?.Invoke();
-                
+                if (IsCreate.Value) // Create Purchase Order
+                {
+                    var model = Model.Adapt<CreatePurchaseCommand>();
+
+                    var response = await PurchaseClient.CreatePurchaseEndpointAsync("1", model);
+
+                    if (response.Id.HasValue)
+                    {
+                        Model.Id = (Guid)response.Id;
+                        StateHasChanged();
+                        Snackbar.Add("Purchase order created successfully!", Severity.Success);
+                        await Refresh.InvokeAsync();
+
+                    }
+                }
+                else // Update Purchase Order
+                {
+                    var model = Model.Adapt<UpdatePurchaseCommand>();
+
+                    var response = await PurchaseClient.UpdatePurchaseEndpointAsync("1", model.Id, model);
+
+                    if (response != null)
+                    {
+                        StateHasChanged();
+                        Snackbar.Add("Purchase order updated successfully!", Severity.Success);
+                        await Refresh.InvokeAsync();
+
+                    }
+                }
+            }
+            catch (ApiException ex)
+            {
+                if (ex.StatusCode == 400)
+                {
+                    var errors = await ex.GetValidationErrorsAsync();
+                    Validation?.DisplayErrors(errors);
+                }
+                else
+                {
+                    Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+                }
             }
         }
-        else // Update product
-        {
-            var model = Model.Adapt<UpdatePurchaseCommand>();
-            var response = await ApiHelper.ExecuteCallGuardedAsync(
-                () => PurchaseClient.UpdatePurchaseEndpointAsync("1", model.Id, model),
-                Snackbar,
-                Navigation
-            );
-
-            if (response != null)
-            {
-                StateHasChanged();
-                _successMessage = "Purchase order updated successfully!";
-                Refresh?.Invoke();
-            }
-        }
-
-        
-    }
-    
+    }    
     private void UpdateTotalAmount(double value)
     {
         Model.TotalAmount = value;
