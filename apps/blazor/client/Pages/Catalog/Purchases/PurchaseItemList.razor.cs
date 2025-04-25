@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
+using Mapster;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
@@ -25,6 +26,7 @@ public partial class PurchaseItemList
     [Parameter] public PurchaseStatus? Status { get; set; }
     [Parameter] public Guid? PurchaseId { get; set; }
     [Parameter] public Action<Double> OnTotalAmountChanged { get; set; }
+    [Parameter] public bool? IsCreate { get; set; }
 
     private Guid? Productid { get; set; }
     private int Qty { get; set; }
@@ -61,20 +63,33 @@ public partial class PurchaseItemList
         if (Productid == null || Qty <= 0 || Unitprice <= 0)
             return;
 
-        Items.Add(new PurchaseItemUpdateDto
+        var newItem = new PurchaseItemUpdateDto
         {
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
             ItemStatus = Itemstatus ?? Status ?? PurchaseStatus.Pending
-        });
+        };
+        Items.Add(newItem);
 
+        if (IsCreate == false)
+        {
+            var model = newItem.Adapt<CreatePurchaseItemCommand>();
+            model.PurchaseId = (Guid)PurchaseId; // Make sure the command has this property
+
+            // Ideally use await with async method
+            Purchaseclient.CreatePurchaseItemEndpointAsync("1", model);
+            Snackbar?.Add("Item product successfully added.", Severity.Success);
+        }
+        
+        // Reset fields after adding
         Productid = null;
         Qty = 0;
         Unitprice = 0;
 
         UpdateTotalAmount();
     }
+
     private void UpdateTotalAmount()
     {
         double total = Items.Sum(i => i.Qty * i.UnitPrice);
@@ -82,21 +97,28 @@ public partial class PurchaseItemList
         StateHasChanged();
     }
 
-    private async Task RemoveItem(PurchaseItemUpdateDto item)
+    private void RemoveItem(PurchaseItemUpdateDto item)
     {
         if (item.Id == null)
         {
             Snackbar?.Add("Item ID is null and cannot be removed.", Severity.Error);
             return;
         }
+        try
+        {
+            var id = item.Id.Value; // Convert nullable Guid to non-nullable Guid
 
-        var id = item.Id.Value; // Convert nullable Guid to non-nullable Guid
-        await ApiHelper.ExecuteCallGuardedAsync(
-            () => Purchaseclient.DeletePurchaseItemEndpointAsync("1", id), Snackbar);
+           Purchaseclient.DeletePurchaseItemEndpointAsync("1", id);
 
-       
+            Snackbar?.Add("Item product successfully removed.", Severity.Success);
             Items.Remove(item);
             UpdateTotalAmount();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
+            Snackbar?.Add("The item product was not removed.", Severity.Error);
+        }
     }
 
     private List<PurchaseStatus> PurchaseStatusList =>

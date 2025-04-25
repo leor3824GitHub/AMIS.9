@@ -113,15 +113,15 @@ public partial class PurchaseDialog
             }
             catch (ApiException ex)
             {
-                if (ex.StatusCode == 400)
-                {
-                    var errors = await ex.GetValidationErrorsAsync();
-                    Validation?.DisplayErrors(errors);
-                }
-                else
-                {
+                //if (ex.StatusCode == 400)
+                //{
+                //    var errors = await ex.GetValidationErrorsAsync();
+                //    Validation?.DisplayErrors(errors);
+                //}
+                //else
+                //{
                     Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-                }
+                //}
             }
         }
     }    
