@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20250411144659_Add Catalogs")]
-    partial class AddCatalogs
+    [Migration("20250427122514_update1 Catalogs")]
+    partial class update1Catalogs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -515,9 +515,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<string>("Emailadd")
                         .HasColumnType("text");
 
-                    b.Property<bool>("IsVAT")
-                        .HasColumnType("boolean");
-
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
@@ -529,13 +526,18 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<string>("TIN")
-                        .HasColumnType("text");
+                    b.Property<string>("TaxClassification")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.Property<string>("TenantId")
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Tin")
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

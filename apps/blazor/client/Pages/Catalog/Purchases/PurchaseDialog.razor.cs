@@ -131,6 +131,10 @@ public partial class PurchaseDialog
         StateHasChanged();
     }
 
-    private void Cancel() => MudDialog.Cancel();
+    private void Cancel() 
+    {
+        MudDialog.Cancel();
+        Refresh.InvokeAsync();
+    } 
 
 }

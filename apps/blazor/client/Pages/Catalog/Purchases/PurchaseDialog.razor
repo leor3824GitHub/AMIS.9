@@ -6,21 +6,58 @@
             <ValidationSummary />
 
             <!-- Purchase Information Section -->
-            <MudPaper Class="pa-2 mb-2" Elevation="1" Square="true">
+            <MudPaper Class="pa-4 mt-3" Elevation="2" Square="true">
                 <MudGrid>
                     <MudItem xs="12" sm="6" md="4">
-                        <MudSelect T="Guid?" Label="Supplier" @bind-Value="Model.SupplierId">
+                        <MudSelect T="Guid?" Variant="Variant.Outlined" Label=" Supplier" @bind-Value="Model.SupplierId">
                             @foreach (var suppliers in _suppliers)
                             {
                                 <MudSelectItem T="Guid?" Value="suppliers.Id">@suppliers.Name</MudSelectItem>
                             }
                         </MudSelect>
+
+                     <!-- Supplier Info Block -->
+                        @* <MudItem > *@
+                            <MudPaper Class="pa-3 mt-2" Elevation="0" Square="true">
+                                <MudText Typo="Typo.subtitle2" Class="mb-2">Supplier Details</MudText>
+                                <MudDivider Class="my-2" />
+
+                                @{
+                                    var selectedSupplier = _suppliers.FirstOrDefault(s => s.Id == Model.SupplierId);
+                                }
+
+                                <MudGrid>
+                                    <MudItem xs="12" sm="6" md="4">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Address</MudText>
+                                        <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier?.Address) ? selectedSupplier.Address : "-")</MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" sm="6" md="4">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Contact No</MudText>
+                                        <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier?.ContactNo) ? selectedSupplier.ContactNo : "-")</MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" sm="6" md="4">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Email</MudText>
+                                        <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier?.Emailadd) ? selectedSupplier.Emailadd : "-")</MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" sm="6" md="4">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Tin</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier?.Tin) ? selectedSupplier.Tin : "-")</MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" sm="6" md="8">
+                                        <MudText Typo="Typo.caption" Color="Color.Secondary">Taxpayer Classification</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier?.TaxClassification) ? selectedSupplier.TaxClassification : "-")</MudText>
+                                    </MudItem>
+                                    
+                                </MudGrid>
+                            </MudPaper>
+                        @* </MudItem> *@
+
                     </MudItem>
                     <MudItem xs="12" sm="6" md="2">
-                        <MudDatePicker @bind-Date="Model.PurchaseDate" Label="Purchase Date" For="@(() => Model.PurchaseDate)" />
+                        <MudDatePicker @bind-Date="Model.PurchaseDate" Variant="Variant.Outlined" Label="Purchase Date" For="@(() => Model.PurchaseDate)" />
                     </MudItem>
                     <MudItem xs="12" sm="6" md="2">
-                        <MudSelect T="PurchaseStatus" Label="Status" @bind-Value="Model.Status">                        
+                        <MudSelect T="PurchaseStatus" Variant="Variant.Outlined" Label=" Status" @bind-Value="Model.Status">
                             @foreach (var status in PurchaseStatusList)
                             {
                                 <MudSelectItem T="PurchaseStatus" Value="status">@GetDisplayName(status)</MudSelectItem>
@@ -28,7 +65,7 @@
                         </MudSelect>
                     </MudItem>
                     <MudItem xs="12" sm="6" md="2">
-                        <MudTextField @bind-Value="Model.TotalAmount" Label="TotalAmount" For="@(() => Model.TotalAmount)" Format="N2" ReadOnly="true" />
+                        <MudTextField @bind-Value="Model.TotalAmount" Variant="Variant.Outlined"  Label="TotalAmount" For="@(() => Model.TotalAmount)" Format="N2" ReadOnly="true" />
                     </MudItem>
                     <MudItem xs="12" sm="6" md="2">
                         <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" >Save</MudButton>                   
@@ -36,7 +73,7 @@
                     </MudItem>
                 </MudGrid>
             </MudPaper>
-
+            <br />
             <!-- ✅ Move Save/Cancel Button Here -->
             @* <MudPaper Class="pa-2 mb-2" Elevation="0" Square="true">
                 <MudStack Row Spacing="2">        

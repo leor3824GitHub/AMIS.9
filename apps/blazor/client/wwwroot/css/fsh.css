@@ -2,6 +2,28 @@
     color: inherit;
 }
 
-.mud-list {
-    border: 1px solid var(--mud-palette-lines-default)
+/* Vertical borders only on <th> */
+.th-border-separator th {
+    border-right: 1px solid #ccc;
+    padding: 4px 8px; /* reduce height */
+    font-size: 0.875rem; /* optional: slightly smaller font */
+    height: 36px;
 }
+
+    .th-border-separator th:last-child {
+        border-right: none;
+    }
+
+/* Compact body cells */
+.th-border-separator td {
+    padding: 4px 8px; /* reduce vertical space */
+    height: 36px;
+    font-size: 0.875rem;
+}
+.text-right {
+    text-align: right !important;
+}
+.mud-text-right {
+    text-align: right !important;
+}
+

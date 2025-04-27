@@ -9107,22 +9107,22 @@ namespace AMIS.Blazor.Infrastructure.Api
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("name")]
-        public string Name { get; set; } = "Sample Supplier";
-
-        [System.Text.Json.Serialization.JsonPropertyName("isVAT")]
-        public bool IsVAT { get; set; } = true;
+        public string Name { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("address")]
-        public string Address { get; set; } = "Address";
+        public string Address { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("tin")]
-        public string Tin { get; set; } = "TIN";
+        public string Tin { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("contactNo")]
-        public string ContactNo { get; set; } = "ContactNo";
+        public string ContactNo { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("emailadd")]
-        public string Emailadd { get; set; } = "Emailadd";
+        public string Emailadd { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("taxClassification")]
+        public string TaxClassification { get; set; }
 
     }
 
@@ -9457,21 +9457,6 @@ namespace AMIS.Blazor.Infrastructure.Api
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public enum ItemOperationType
-    {
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Add")]
-        Add = 0,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Update")]
-        Update = 1,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Remove")]
-        Remove = 2,
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class PaginationFilter
     {
 
@@ -9657,10 +9642,6 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("itemStatus")]
         [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public PurchaseStatus ItemStatus { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("operationType")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
-        public ItemOperationType OperationType { get; set; }
 
     }
 
@@ -10146,8 +10127,8 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("tin")]
         public string Tin { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("isVAT")]
-        public bool IsVAT { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("TaxClassification")]
+        public string TaxClassification { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("contactNo")]
         public string ContactNo { get; set; }
@@ -10173,8 +10154,8 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("tin")]
         public string Tin { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("isVAT")]
-        public bool IsVAT { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("taxClassification")]
+        public string TaxClassification { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("contactNo")]
         public string ContactNo { get; set; }
@@ -10567,9 +10548,6 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
         public PurchaseStatus Status { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("items")]
-        public System.Collections.Generic.ICollection<PurchaseItemUpdateDto> Items { get; set; }
-
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -10631,8 +10609,8 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("name")]
         public string Name { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("isVAT")]
-        public bool IsVAT { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("taxClassification")]
+        public string TaxClassification { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("address")]
         public string Address { get; set; }

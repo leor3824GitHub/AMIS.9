@@ -51,18 +51,27 @@ public partial class PurchaseItemList
     {
         if (EditingItem == null || EditingItem.Qty <= 0 || EditingItem.UnitPrice <= 0)
             return;
-
-        if (IsCreate == false)
+        try 
         {
-            var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
+            if (IsCreate == false)
+            {
+                var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
 
-            Purchaseclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
-            Snackbar?.Add("Item product successfully updated.", Severity.Success);
+                Purchaseclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
+                Snackbar?.Add("Item product successfully updated.", Severity.Success);
+            }
+
+            EditingItem = null;
+
+            UpdateTotalAmount();
+          
+        }
+        catch (ApiException ex)
+        {
+            Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
+            Snackbar?.Add("The item product was not updated.", Severity.Error);
         }
 
-        EditingItem = null;
-
-        UpdateTotalAmount();
     }
 
     private void CancelEdit()

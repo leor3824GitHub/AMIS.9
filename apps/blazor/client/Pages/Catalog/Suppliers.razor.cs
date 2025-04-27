@@ -26,7 +26,8 @@ public partial class Suppliers
                 new(supplier => supplier.Name, "Name", "Name"),
                 new(supplier => supplier.Address, "Address", "Address"),
                 new(supplier => supplier.Tin, "Tin", "Tin"),
-                new(supplier => supplier.IsVAT, "IsVAT", "IsVAT"),
+                new(supplier => supplier.TaxClassification, "TaxClassification", "TaxClassification"),
+                new(supplier => supplier.ContactNo, "ContactNo", "ContactNo"),
                 new(supplier => supplier.Emailadd, "Emailadd", "Emailadd")
             },
             enableAdvancedSearch: true,

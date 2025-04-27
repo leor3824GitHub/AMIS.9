@@ -20,7 +20,7 @@ public sealed class GetSupplierHandler(
             {
                 var supplierItem = await repository.GetByIdAsync(request.Id, cancellationToken);
                 if (supplierItem == null) throw new SupplierNotFoundException(request.Id);
-                return new SupplierResponse(supplierItem.Id, supplierItem.Name, supplierItem.Address, supplierItem.TIN, supplierItem.IsVAT, supplierItem.ContactNo, supplierItem.Emailadd);
+                return new SupplierResponse(supplierItem.Id, supplierItem.Name, supplierItem.Address, supplierItem.Tin, supplierItem.TaxClassification, supplierItem.ContactNo, supplierItem.Emailadd);
             },
             cancellationToken: cancellationToken);
         return item!;

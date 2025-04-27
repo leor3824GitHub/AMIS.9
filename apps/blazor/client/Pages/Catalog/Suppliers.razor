@@ -25,7 +25,13 @@
             <MudTextField Label="Tin" For="@(() => context.Tin)" @bind-Value="context.Tin" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudCheckBox Label="IsVAT" For="@(() => context.IsVAT)" @bind-Value="context.IsVAT" />
+            <MudTextField Label="Tax Classification" For="@(() => context.TaxClassification)" @bind-Value="context.TaxClassification" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="ContactNo" For="@(() => context.ContactNo)" @bind-Value="context.ContactNo" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Emailadd" For="@(() => context.Emailadd)" @bind-Value="context.Emailadd" />
         </MudItem>
         @* <MudItem xs="12" md="12">
             <MudItem>

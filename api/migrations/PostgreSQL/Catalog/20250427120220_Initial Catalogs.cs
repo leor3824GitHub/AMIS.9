@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 {
     /// <inheritdoc />
-    public partial class AddCatalogs : Migration
+    public partial class InitialCatalogs : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -87,7 +87,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Address = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    TIN = table.Column<string>(type: "text", nullable: true),
+                    Tin = table.Column<string>(type: "text", nullable: true),
                     IsVAT = table.Column<bool>(type: "boolean", nullable: false),
                     ContactNo = table.Column<string>(type: "text", nullable: true),
                     Emailadd = table.Column<string>(type: "text", nullable: true),

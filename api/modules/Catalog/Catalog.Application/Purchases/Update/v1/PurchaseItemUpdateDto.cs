@@ -8,6 +8,5 @@ public sealed record PurchaseItemUpdateDto(
     Guid? ProductId,
     int Qty,
     decimal UnitPrice,
-    PurchaseStatus? ItemStatus,
-    ItemOperationType OperationType
+    PurchaseStatus? ItemStatus
 );

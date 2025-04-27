@@ -7,31 +7,31 @@ public class Supplier : AuditableEntity, IAggregateRoot
 {
     public string Name { get; private set; } = string.Empty;
     public string? Address { get; private set; }
-    public string? TIN { get; private set; }
-    public bool IsVAT { get; private set; } = true;
+    public string? Tin { get; private set; }
+    public string TaxClassification { get; private set; } = string.Empty;
     public string? ContactNo { get; private set; }
     public string? Emailadd { get; private set; }
 
     private Supplier() { }
 
-    private Supplier(Guid id, string name, string? address, string? tin, bool isVAT, string? contactNo, string? emailadd)
+    private Supplier(Guid id, string name, string? address, string? tin, string taxClassification, string? contactNo, string? emailadd)
     {
         Id = id;
         Name = name;
         Address = address;
-        TIN = tin;
-        IsVAT = isVAT;
+        Tin = tin;
+        TaxClassification = taxClassification;
         ContactNo = contactNo;
         Emailadd = emailadd;
         QueueDomainEvent(new SupplierCreated { Supplier = this });
     }
 
-    public static Supplier Create(string name, string? address, string? tin, bool isVAT, string? contactNo, string? emailadd)
+    public static Supplier Create(string name, string? address, string? tin, string taxClassification, string? contactNo, string? emailadd)
     {
-        return new Supplier(Guid.NewGuid(), name, address, tin, isVAT, contactNo, emailadd);
+        return new Supplier(Guid.NewGuid(), name, address, tin, taxClassification, contactNo, emailadd);
     }
 
-    public Supplier Update(string? name, string? address, string? tin, bool isVAT, string? contactNo, string? emailadd)
+    public Supplier Update(string? name, string? address, string? tin, string taxClassification, string? contactNo, string? emailadd)
     {
         bool isUpdated = false;
 
@@ -47,15 +47,15 @@ public class Supplier : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (!string.Equals(TIN, tin, StringComparison.OrdinalIgnoreCase))
+        if (!string.Equals(Tin, tin, StringComparison.OrdinalIgnoreCase))
         {
-            TIN = tin;
+            Tin = tin;
             isUpdated = true;
         }
 
-        if (IsVAT != isVAT)
+        if (!string.Equals(TaxClassification, taxClassification, StringComparison.OrdinalIgnoreCase))
         {
-            IsVAT = isVAT;
+            TaxClassification = taxClassification;
             isUpdated = true;
         }
 

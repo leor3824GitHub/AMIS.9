@@ -5,24 +5,23 @@
     <MudTable T="PurchaseItemUpdateDto"
               Items="Items"
               Hover="true"
-              Bordered="true"
-              Dense="true"
-              Breakpoint="Breakpoint.Sm">
+              Breakpoint="Breakpoint.Sm"
+              Class="th-border-separator">
 
         <HeaderContent>
             <MudTh Style="width: 500px;">Product</MudTh>
-            <MudTh Style="width: 80px;">Quantity</MudTh>
-            <MudTh Style="width: 120px;">Unit Price</MudTh>
-            <MudTh>Amount</MudTh>
+            <MudTh Style="width: 80px;" >Quantity</MudTh>
+            <MudTh Style="width: 120px;" >Unit Price</MudTh>
+            <MudTh >Amount</MudTh>
             <MudTh>Status</MudTh>
-            <MudTh class="text-center">Actions</MudTh>
+            <MudTh >Actions</MudTh>
         </HeaderContent>
 
         <RowTemplate Context="item">
             @if (item == EditingItem)
             {
                 <MudTd Style="width: 500px;">
-                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Style="width: 100%;">
+                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Style="width: 100%;" Variant="Variant.Outlined">
                         @foreach (var product in Products)
                         {
                             <MudSelectItem T="Guid?" Value="product.Id"
@@ -33,20 +32,20 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd Style="width: 80px;">
-                    <MudTextField T="int" @bind-Value="item.Qty" Dense Immediate="true" />
+                    <MudTextField T="int" @bind-Value="item.Qty" Immediate="true" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd Style="width: 120px;">
-                    <MudTextField T="double" @bind-Value="item.UnitPrice" Dense />
+                    <MudTextField T="double" @bind-Value="item.UnitPrice" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
                     @{
                         var newAmount = Qty * Unitprice;
                     }
 
-                    <MudText>@newAmount.ToString("N2")</MudText>
+                    <MudText Variant="Variant.Outlined">@newAmount.ToString("N2")</MudText>
                 </MudTd>
                 <MudTd>
-                    <MudSelect T="PurchaseStatus" @bind-Value="item.ItemStatus" Dense>
+                    <MudSelect T="PurchaseStatus" @bind-Value="item.ItemStatus" Dense Variant="Variant.Outlined">
                         @foreach (var status in PurchaseStatusList)
                         {
                             <MudSelectItem T="PurchaseStatus" Value="status">@GetDisplayName(status)</MudSelectItem>
@@ -104,47 +103,10 @@
                 </MudTd>
             }
         </RowTemplate>
-
-        <!-- Inline Add Row -->
-@*          <FooterContent>
-            <MudTd Style="width: 500px;">
-                <MudSelect T="Guid?" @bind-Value="Productid" Dense Style="width: 100%;">
-                    @foreach (var product in Products)
-                    {
-                        <MudSelectItem T="Guid?" Value="product.Id"
-                                       Style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
-                            @product.Name
-                        </MudSelectItem>
-                    }
-                </MudSelect>
-            </MudTd>
-            <MudTd Style="width: 80px;">
-                <MudNumericField T="int" @bind-Value="Qty" Dense />
-            </MudTd>
-            <MudTd Style="width: 120px;">
-                <MudNumericField T="double" @bind-Value="Unitprice" Dense />
-            </MudTd>
-            <MudTd>
-                @{
-                    var newAmount = Qty * Unitprice;
-                }
-                @newAmount.ToString("N2")
-            </MudTd>
-            <MudTd>
-                <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly="true" Dense />
-            </MudTd>
-            <MudTd class="text-center">
-                <MudTooltip Text="Add Item">
-                    <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline"
-                                   Color="Color.Primary"
-                                   OnClick="AddNewItem" />
-                </MudTooltip>
-            </MudTd>
-        </FooterContent>  *@
-
+       
         <FooterContent>
             <MudTd Style="width: 500px;">
-                <MudSelect T="Guid?" @bind-Value="Productid" Dense Style="width: 100%;" Placeholder="Select Product Here">
+                <MudSelect T="Guid?" @bind-Value="Productid" Dense Style="width: 100%;" Placeholder="Select Product Here" Variant="Variant.Outlined">
                     @foreach (var product in Products)
                     {
                         <MudSelectItem T="Guid?" Value="product.Id"
@@ -157,20 +119,20 @@
 
             @if (Productid != null)
             {
-                <MudTd Style="width: 80px;">
-                    <MudNumericField T="int" @bind-Value="Qty" Dense />
+                <MudTd Style="width: 80px;" >
+                    <MudNumericField HideSpinButtons="true" T="int" @bind-Value="Qty"  Variant="Variant.Outlined" />
                 </MudTd>
-                <MudTd Style="width: 120px;">
-                    <MudNumericField T="double" @bind-Value="Unitprice" Dense />
+                <MudTd Style="width: 120px;" >
+                    <MudNumericField HideSpinButtons="true" T="double" @bind-Value="Unitprice" Variant="Variant.Outlined" />
                 </MudTd>
-                <MudTd>
+                <MudTd >
                     @{
                         var newAmount = Qty * Unitprice;
                     }
-                    @newAmount.ToString("N2")
+                    <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly=" true" Label="Auto Compute" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly="true" Dense />
+                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly="true" Variant="Variant.Outlined" />
                 </MudTd>
 
                 <MudTd class="text-center">

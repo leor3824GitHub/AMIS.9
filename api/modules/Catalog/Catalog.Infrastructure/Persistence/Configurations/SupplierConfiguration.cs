@@ -12,5 +12,6 @@ internal sealed class SupplierConfiguration : IEntityTypeConfiguration<Supplier>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.Name).HasMaxLength(100);
         builder.Property(x => x.Address).HasMaxLength(1000);
+        builder.Property(x => x.TaxClassification).HasMaxLength(10);
     }
 }
