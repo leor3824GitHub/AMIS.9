@@ -91,7 +91,7 @@ public partial class Purchases
         return new GridData<PurchaseResponse> { TotalItems = _totalItems, Items = _entityList };
     }
 
-    private async Task ShowEditFormDialog(string title, UpdatePurchaseCommand command, bool IsCreate)
+    private async Task ShowEditFormDialog(string title, CreatePurchaseCommand command, bool IsCreate)
     {
         var parameters = new DialogParameters
         {
@@ -124,14 +124,14 @@ public partial class Purchases
         await ShowEditFormDialog("Create new purchase", model, true);
     }
 
-    private static UpdatePurchaseCommand CreateDefaultPurchaseCommand()
+    private static CreatePurchaseCommand CreateDefaultPurchaseCommand()
     {
-        return new UpdatePurchaseCommand
+        return new CreatePurchaseCommand
         {
             PurchaseDate = DateTime.Today,
             SupplierId = null,
             Status = PurchaseStatus.Pending,
-            Items = new List<PurchaseItemUpdateDto>()
+            Items = new List<PurchaseItemDto>()
         };
     }
 
@@ -140,7 +140,7 @@ public partial class Purchases
         var copy = _selectedItems.First();
         if (copy != null)
         {
-            var command = new Mapper().Map<PurchaseResponse, UpdatePurchaseCommand>(copy);
+            var command = new Mapper().Map<PurchaseResponse, CreatePurchaseCommand>(copy);
             //var command = copy.Adapt<PurchaseViewModel>();
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
             await ShowEditFormDialog("Clone a purchase", command, true);
@@ -148,7 +148,7 @@ public partial class Purchases
     }
     private async Task OnEdit(PurchaseResponse dto)
     {        
-        var command = dto.Adapt<UpdatePurchaseCommand>();
+        var command = dto.Adapt<CreatePurchaseCommand>();
         await ShowEditFormDialog("Edit the purchase", command, false);
     }
 

@@ -13,13 +13,13 @@ public partial class PurchaseItemList
     protected IApiClient Purchaseclient { get; set; } = default!;
     [Inject]
     private ISnackbar? Snackbar { get; set; }
-    private ICollection<PurchaseItemUpdateDto> _items = new List<PurchaseItemUpdateDto>();
+    private ICollection<PurchaseItemDto> _items = new List<PurchaseItemDto>();
 
     [Parameter]
-    public ICollection<PurchaseItemUpdateDto> Items
+    public ICollection<PurchaseItemDto> Items
     {
         get => _items;
-        set => _items = value ?? new List<PurchaseItemUpdateDto>();
+        set => _items = value ?? new List<PurchaseItemDto>();
     }
     [Parameter] public List<ProductResponse> Products { get; set; } = new();
     [Parameter] public List<SupplierResponse> Suppliers { get; set; } = new();
@@ -32,17 +32,17 @@ public partial class PurchaseItemList
     private int Qty { get; set; }
     private double Unitprice { get; set; }
     private PurchaseStatus? Itemstatus { get; set; }
-    private PurchaseItemUpdateDto EditingItem { get; set; }
+    private PurchaseItemDto EditingItem { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
         //Model ??= new UpdatePurchaseCommand();
-        //Model.Items ??= new List<PurchaseItemUpdateDto>();
+        //Model.Items ??= new List<PurchaseItemDto>();
         //await LoadSupplierAsync();
         //await LoadProductAsync();
     }
    
-    private void EditItem(PurchaseItemUpdateDto item)
+    private void EditItem(PurchaseItemDto item)
     {
         EditingItem = item;
     }
@@ -84,7 +84,7 @@ public partial class PurchaseItemList
         if (Productid == null || Qty <= 0 || Unitprice <= 0)
             return;
 
-        var newItem = new PurchaseItemUpdateDto
+        var newItem = new PurchaseItemDto
         {
             ProductId = Productid.Value,
             Qty = Qty,
@@ -118,7 +118,7 @@ public partial class PurchaseItemList
         StateHasChanged();
     }
 
-    private void RemoveItem(PurchaseItemUpdateDto item)
+    private void RemoveItem(PurchaseItemDto item)
     {
         if (item.Id == null)
         {
@@ -127,7 +127,7 @@ public partial class PurchaseItemList
         }
         try
         {
-            var id = item.Id.Value; // Convert nullable Guid to non-nullable Guid
+            var id = item.Id; // Convert nullable Guid to non-nullable Guid
 
            Purchaseclient.DeletePurchaseItemEndpointAsync("1", id);
 

@@ -13,6 +13,7 @@ public sealed record PurchaseItemDto(
 );
 
 public sealed record CreatePurchaseCommand(
+    Guid Id,
     Guid? SupplierId,
     DateTime? PurchaseDate,
     PurchaseStatus? Status,

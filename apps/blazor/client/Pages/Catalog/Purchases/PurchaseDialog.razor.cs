@@ -15,7 +15,7 @@ public partial class PurchaseDialog
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
-    [Parameter] public UpdatePurchaseCommand Model { get; set; }
+    [Parameter] public CreatePurchaseCommand Model { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback Refresh { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
