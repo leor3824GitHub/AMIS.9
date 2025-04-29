@@ -1,5 +1,13 @@
 ﻿@page "/catalog/products"
-
+<style>
+    .mud-table-container {
+        overflow: auto;
+    }
+</style>
+<div class="d-flex flex-column">
+    <div style="line-height: 1; margin-bottom: 4px;">
+        <MudText Typo="Typo.h6" Class="m-0">List of Products</MudText>
+    </div>
 <MudDataGrid ServerData="ServerReload"
              MultiSelection="true"
              @bind-SelectedItems="_selectedItems"
@@ -7,17 +15,14 @@
              ColumnResizeMode="ResizeMode.Column"
              Hover="true"             
              Loading="@_loading" 
-             @ref="_table">
+             @ref="_table"
+             Outlined>
     <ToolBarContent>
-        <div class="d-flex align-start flex-grow-1">
-            <MudText Typo="Typo.h6">Product List</MudText>
-            <MudSpacer />
+            <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap">
 
-            <div class="d-flex flex-column">
-                <div class="d-flex gap-1">
+                <div class="d-flex align-center flex-nowrap gap-1">
                     <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                        <MudButton Variant="Variant.Outlined"
-                                   Size="Size.Small"
+                        <MudButton Variant="Variant.Filled"            
                                    Disabled="@_loading"
                                    OnClick="@(() => OnRefresh())"
                                    StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Primary">
@@ -25,18 +30,16 @@
                         </MudButton>
                         @if (_canCreate)
                         {
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
                                        StartIcon="@Icons.Material.Filled.Add"
-                                       Size="Size.Small"
                                        Disabled="@_loading"
                                        OnClick="OnCreate"
                                        IconColor="Color.Surface">
                                 New
                             </MudButton>
 
-                            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
                                        StartIcon="@Icons.Material.Filled.ContentCopy"
-                                       Size="Size.Small"
                                        Disabled="@(_selectedItems.Count != 1)"
                                        OnClick="OnClone"
                                        IconColor="Color.Surface">
@@ -45,10 +48,9 @@
                         }
                         @if (_canDelete)
                         {
-                            <MudButton Variant="Variant.Outlined" Color="Color.Error"
+                            <MudButton Variant="Variant.Filled" Color="Color.Error"
                                        StartIcon="@Icons.Material.Filled.Delete"
                                        Disabled="@(!(_selectedItems.Count > 0))"
-                                       Size="Size.Small"
                                        OnClick="OnDeleteChecked"
                                        IconColor="Color.Surface">
                                 Delete
@@ -131,7 +133,6 @@
                 }
 
             </div>
-        </div>
     </ToolBarContent>
     <Columns>
         <SelectColumn T="ProductResponse" />
@@ -164,3 +165,4 @@
         <MudDataGridPager />
     </PagerContent>
 </MudDataGrid>
+</div>

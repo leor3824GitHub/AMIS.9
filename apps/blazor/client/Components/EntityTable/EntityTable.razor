@@ -122,9 +122,15 @@
                     }
                     else if (HasActions)
                     {
-                        <MudMenu Label="Actions" Variant="Variant.Filled" DropShadow=false
+                        @* <MudMenu Label="Actions" Variant="Variant.Filled" DropShadow=false
                             EndIcon="@Icons.Material.Filled.KeyboardArrowDown" IconColor="Color.Secondary" direction="Direction.Left"
-                            offsetX="true">
+                            offsetX="true"> *@
+                        <MudMenu Icon="@Icons.Material.Filled.Edit" 
+                                 Variant="Variant.Filled" 
+                                 Size="Size.Small"
+                                 Dense="true"
+                                 IconColor="Color.Info" 
+                                 AnchorOrigin="Origin.CenterLeft">
                             @if (CanUpdateEntity(context))
                             {
                                 <MudMenuItem @onclick="@(() => InvokeModal(context))">Edit</MudMenuItem>

@@ -1,4 +1,10 @@
 ﻿@page "/catalog/purchases"
+
+<style>
+    .mud-table-container {
+        overflow: auto;
+    }
+</style>
 <div class="d-flex flex-column">
     <div style="line-height: 1; margin-bottom: 4px;">
         <MudText Typo="Typo.h6" Class="m-0">List of Purchases</MudText>
@@ -9,7 +15,9 @@
              @bind-SelectedItem="_currentDto"
              ColumnResizeMode="ResizeMode.Column"
              Hover="true"
-             Loading="@_loading" @ref="_table">
+             Loading="@_loading" 
+             @ref="_table"
+             Outlined>
         <ToolBarContent>
             <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap">
 
@@ -19,7 +27,6 @@
                         <MudButton Variant="Variant.Filled"
                                    Color="Color.Secondary"
                                    DropShadow="false"
-                                   Size="Size.Small"
                                    Disabled="@_loading"
                                    OnClick="@(() => OnRefresh())"
                                    StartIcon="@Icons.Material.Filled.Refresh"
@@ -29,8 +36,7 @@
                         {
                             <MudButton Variant="Variant.Filled"
                                        Color="Color.Primary"
-                                       DropShadow="false"                                       
-                                       Size="Size.Small"
+                                       DropShadow="false"
                                        StartIcon="@Icons.Material.Filled.Add"
                                        Disabled="@_loading"
                                        OnClick="OnCreate"
@@ -42,7 +48,6 @@
                                        Color="Color.Tertiary"
                                        DropShadow="false"
                                        StartIcon="@Icons.Material.Filled.ContentCopy"
-                                       Size="Size.Small"
                                        Disabled="@(_selectedItems.Count != 1)"
                                        OnClick="OnClone"
                                        IconColor="Color.Surface">
@@ -57,7 +62,6 @@
                                        DropShadow="false"
                                        StartIcon="@Icons.Material.Filled.Delete"
                                        Disabled="@(!(_selectedItems.Count > 0))"
-                                       Size="Size.Small"
                                        OnClick="OnDeleteChecked"
                                        IconColor="Color.Surface">
                                 Delete
