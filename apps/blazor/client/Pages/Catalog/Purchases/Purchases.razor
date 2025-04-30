@@ -5,10 +5,11 @@
         overflow: auto;
     }
 </style>
-<div class="d-flex flex-column">
+<PageHeader Title="Purchases" Header="Purchases" SubHeader="Manage your Purchases." />
+@* <div class="d-flex flex-column">
     <div style="line-height: 1; margin-bottom: 4px;">
         <MudText Typo="Typo.h6" Class="m-0">List of Purchases</MudText>
-    </div>
+    </div> *@
 <MudDataGrid ServerData="ServerReload"
              MultiSelection="true"
              @bind-SelectedItems="_selectedItems"
@@ -87,23 +88,23 @@
                         </MudMenu>
                     </MudHidden>
                 </div>
-
+            </div>
+            <MudSpacer />
                 <!-- 🔍 Right: Search Box -->
                 @if (_canSearch)
                 {
-                    <div class="d-flex justify-end w-100">
-                        <div style="width: 300px;">
-                            <MudTextField T="string"
-                                          ValueChanged="@(s => OnSearch(s))"
-                                          Placeholder="Search"
-                                          Adornment="Adornment.Start"
-                                          AdornmentIcon="@Icons.Material.Filled.Search"
-                                          IconSize="Size.Medium"
-                                          Style="width: 100%;" />
-                        </div>
-                    </div>
+                    
+                <MudTextField T="string"
+                               ValueChanged="@(s => OnSearch(s))"
+                               Placeholder="Search"
+                               Adornment="Adornment.Start"
+                               AdornmentIcon="@Icons.Material.Filled.Search"
+                               IconSize="Size.Medium"
+                               Style="width: 100%;"
+                               Class="mt-0 mb-3" />
+                       
                 }
-            </div>
+            
         </ToolBarContent>
 
     <Columns>
