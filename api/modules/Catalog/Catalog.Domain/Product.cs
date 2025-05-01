@@ -8,36 +8,34 @@ public class Product : AuditableEntity, IAggregateRoot
     public string Name { get; private set; } = default!;
     public string? Description { get; private set; }
     public decimal Sku { get; private set; }
-    public string? Location { get; private set; }
-    public string Unit { get; private set; } = default!;
+    public string Unit { get; private set; } = "pcs";
     public string? ImagePath { get; private set; }
     public Guid? CategoryId { get; private set; }
-    public virtual Category Category { get; private set; } = default!;
-    
+    public virtual Category? Category { get; private set; }
+
 
     private Product() { }
 
-    private Product(Guid id, string name, string? description, decimal sku, string? location, string unit, string? imagePath, Guid? categoryId)
+    private Product(Guid id, string name, string? description, decimal sku, string unit, string? imagePath, Guid? categoryId)
     {
         Id = id;
         Name = name;
         Description = description;
         Sku = sku;
-        Location = location;
         Unit = unit;
         ImagePath = imagePath;
         CategoryId = categoryId;
-        
+
 
         QueueDomainEvent(new ProductCreated { Product = this });
     }
 
-    public static Product Create(string name, string? description, decimal sku, string? location, string unit, string? imagePath, Guid? categoryId)
+    public static Product Create(string name, string? description, decimal sku, string unit, string? imagePath, Guid? categoryId)
     {
-        return new Product(Guid.NewGuid(), name, description, sku, location, unit, imagePath, categoryId);
+        return new Product(Guid.NewGuid(), name, description, sku, unit, imagePath, categoryId);
     }
 
-    public Product Update(string? name, string? description, decimal? sku, string? location, string? unit, string? imagePath, Guid? categoryId)
+    public Product Update(string? name, string? description, decimal? sku, string? unit, string? imagePath, Guid? categoryId)
     {
         bool isUpdated = false;
 
@@ -62,12 +60,6 @@ public class Product : AuditableEntity, IAggregateRoot
         if (categoryId.HasValue && categoryId.Value != Guid.Empty && CategoryId != categoryId.Value)
         {
             CategoryId = categoryId.Value;
-            isUpdated = true;
-        }
-
-        if (!string.Equals(Location, location, StringComparison.OrdinalIgnoreCase))
-        {
-            Location = location;
             isUpdated = true;
         }
 

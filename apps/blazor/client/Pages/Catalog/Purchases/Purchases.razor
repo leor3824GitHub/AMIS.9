@@ -1,10 +1,10 @@
 ﻿@page "/catalog/purchases"
 
-<style>
+@* <style>
     .mud-table-container {
         overflow: auto;
     }
-</style>
+</style> *@
 <PageHeader Title="Purchases" Header="Purchases" SubHeader="Manage your Purchases." />
 @* <div class="d-flex flex-column">
     <div style="line-height: 1; margin-bottom: 4px;">
@@ -113,7 +113,7 @@
         <PropertyColumn Property="x => x.PurchaseDate" Title="Purchase Date" />
         <PropertyColumn Property="x => x.TotalAmount" Title="Total Amount" />
         <PropertyColumn Property="x => x.Status" Title="Status" />
-        <TemplateColumn>
+        <TemplateColumn Title="Action">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
                          Dense="true"
@@ -129,4 +129,4 @@
         <MudDataGridPager />
     </PagerContent>
 </MudDataGrid>
-</div>
+

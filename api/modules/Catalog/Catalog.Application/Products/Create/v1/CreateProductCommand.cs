@@ -7,7 +7,6 @@ public sealed record CreateProductCommand(
     [property: DefaultValue("Sample Product")] string? Name,
     [property: DefaultValue("Descriptive Description")] string? Description = null,
     [property: DefaultValue(10)] decimal SKU =10,
-    [property: DefaultValue("L1B1")] string Location = "L1B1",
     [property: DefaultValue("pc")] string Unit = "pc",
     FileUploadCommand? Image = null,
     Guid? CategoryId = null) : IRequest<CreateProductResponse>;

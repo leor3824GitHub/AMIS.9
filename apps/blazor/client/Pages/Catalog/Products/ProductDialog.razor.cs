@@ -74,7 +74,7 @@ public partial class ProductDialog
     {
         if (Model != null && Model.CategoryId == null && _categories.Count != 0)
         {
-            Model.CategoryId = _categories.FirstOrDefault()?.Id;
+            Model.CategoryId = null;
         }
     }
     private async Task UploadFiles(InputFileChangeEventArgs e)

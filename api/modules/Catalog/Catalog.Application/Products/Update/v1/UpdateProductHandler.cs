@@ -37,7 +37,7 @@ public sealed class UpdateProductHandler(
             ? (await storageService.UploadAsync<Product>(request.Image, FileType.Image, cancellationToken)).ToString()
             : product.ImagePath;
 
-        var updatedProduct = product.Update(request.Name, request.Description, request.SKU, request.Location, request.Unit, productImagePath, request.CategoryId);
+        var updatedProduct = product.Update(request.Name, request.Description, request.SKU, request.Unit, productImagePath, request.CategoryId);
         await repository.UpdateAsync(updatedProduct, cancellationToken);
         logger.LogInformation("product with id : {ProductId} updated.", product.Id);
         return new UpdateProductResponse(product.Id);

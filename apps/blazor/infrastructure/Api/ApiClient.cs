@@ -9017,9 +9017,6 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("sku")]
         public double Sku { get; set; } = 10D;
 
-        [System.Text.Json.Serialization.JsonPropertyName("location")]
-        public string Location { get; set; } = "L1B1";
-
         [System.Text.Json.Serialization.JsonPropertyName("unit")]
         public string Unit { get; set; } = "pc";
 
@@ -9043,6 +9040,7 @@ namespace AMIS.Blazor.Infrastructure.Api
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class CreatePurchaseCommand
     {
+
         [System.Text.Json.Serialization.JsonPropertyName("id")]
         public System.Guid Id { get; set; }
 
@@ -9498,9 +9496,6 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("sku")]
         public double Sku { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("location")]
-        public string Location { get; set; }
-
         [System.Text.Json.Serialization.JsonPropertyName("unit")]
         public string Unit { get; set; }
 
@@ -9619,31 +9614,6 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("hasNext")]
         public bool HasNext { get; set; }
-
-    }
-
-    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.3.0.0 (NJsonSchema v11.2.0.0 (Newtonsoft.Json v13.0.0.0))")]
-    public partial class PurchaseItemUpdateDto
-    {
-
-        [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid? Id { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
-        public System.Guid? PurchaseId { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("productId")]
-        public System.Guid? ProductId { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("qty")]
-        public int Qty { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("unitPrice")]
-        public double UnitPrice { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("itemStatus")]
-        [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
-        public PurchaseStatus ItemStatus { get; set; }
 
     }
 
@@ -10129,7 +10099,7 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("tin")]
         public string Tin { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("TaxClassification")]
+        [System.Text.Json.Serialization.JsonPropertyName("taxClassification")]
         public string TaxClassification { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("contactNo")]
@@ -10500,9 +10470,6 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("sku")]
         public double Sku { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("location")]
-        public string Location { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("unit")]
         public string Unit { get; set; }

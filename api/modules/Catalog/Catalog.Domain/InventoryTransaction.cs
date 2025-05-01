@@ -1,6 +1,7 @@
 ﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 
@@ -9,28 +10,32 @@ public class InventoryTransaction : AuditableEntity, IAggregateRoot
     public Guid? ProductId { get; private set; }
     public int Qty { get; private set; }
     public decimal UnitCost { get; private set; }
-    public string Transaction_Type { get; private set; } = default!;
+    public string? Location { get; private set; } // Added Location property
+    public Guid? SourceId { get; private set; }
+    public TransactionType TransactionType { get; private set; } = TransactionType.Issuance;
     public virtual Product Product { get; private set; } = default!;
 
     private InventoryTransaction() { }
 
-    private InventoryTransaction(Guid id, Guid? productId, int qty, decimal purchasePrice, string transactionType)
+    private InventoryTransaction(Guid id, Guid? productId, int qty, decimal purchasePrice, string? location, Guid? sourceId, TransactionType transactionType)
     {
         Id = id;
         ProductId = productId;
         Qty = qty;
         UnitCost = purchasePrice;
-        Transaction_Type = transactionType;
+        Location = location; // Initialize Location
+        SourceId = sourceId;
+        TransactionType = transactionType;
         QueueDomainEvent(new InventoryTransactionUpdated { InventoryTransaction = this });
     }
 
-    public static InventoryTransaction Create(Guid? productId, int qty, decimal purchasePrice, string transactionType)
+    public static InventoryTransaction Create(Guid? productId, int qty, decimal purchasePrice, string? location, Guid? sourceId, TransactionType transactionType)
     {
         ValidateStock(qty, purchasePrice);
-        return new InventoryTransaction(Guid.NewGuid(), productId, qty, purchasePrice, transactionType);
+        return new InventoryTransaction(Guid.NewGuid(), productId, qty, purchasePrice, location, sourceId, transactionType);
     }
 
-    public InventoryTransaction Update(Guid? productId, int qty, decimal purchasePrice, string transactionType)
+    public InventoryTransaction Update(Guid? productId, int qty, decimal purchasePrice, string? location, Guid? sourceId, TransactionType transactionType)
     {
         ValidateStock(qty, purchasePrice);
 
@@ -54,9 +59,21 @@ public class InventoryTransaction : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (Transaction_Type != transactionType)
+        if (Location != location) // Update Location
         {
-            Transaction_Type = transactionType;
+            Location = location;
+            isUpdated = true;
+        }
+
+        if (SourceId != sourceId)
+        {
+            SourceId = sourceId;
+            isUpdated = true;
+        }
+
+        if (TransactionType != transactionType)
+        {
+            TransactionType = transactionType;
             isUpdated = true;
         }
 
@@ -67,14 +84,6 @@ public class InventoryTransaction : AuditableEntity, IAggregateRoot
 
         return this;
     }
-
-    // You can optionally allow updating the transaction type with AddStock, DeductStock, etc., if needed.
-    // Just add a string transactionType parameter and assign it like:
-    // Transaction_Type = transactionType;
-
-    // Other methods remain unchanged unless you want to track or modify Transaction_Type in them.
-
-    // ... [rest of the code remains unchanged] ...
 
     private static void ValidateStock(int qty, decimal price)
     {

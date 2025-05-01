@@ -24,7 +24,7 @@ public partial class PurchaseDialog
     private List<SupplierResponse> _suppliers = new();
     private List<ProductResponse> _products = new();
 
-    private PurchaseItemUpdateDto? EditingItem { get; set; }
+    private PurchaseItemDto? EditingItem { get; set; }
 
     private string? _successMessage;
     private FshValidation? Validation;

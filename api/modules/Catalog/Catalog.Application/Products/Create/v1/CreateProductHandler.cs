@@ -26,7 +26,7 @@ public sealed class CreateProductHandler(
             imagepath = productImagePath.ToString();
         }
     
-        var product = Product.Create(request.Name!, request.Description, request.SKU, request.Location, request.Unit, imagepath, request.CategoryId);
+        var product = Product.Create(request.Name!, request.Description, request.SKU, request.Unit, imagepath, request.CategoryId);
         await repository.AddAsync(product, cancellationToken);
         logger.LogInformation("product created {ProductId}", product.Id);
         return new CreateProductResponse(product.Id);

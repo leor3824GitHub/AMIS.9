@@ -126,8 +126,8 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
         builder.Services.AddKeyedScoped<IReadRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
 
-        builder.Services.AddValidatorsFromAssemblyContaining<CreateProductCommandValidator>();
-        builder.Services.AddValidatorsFromAssemblyContaining<UpdateProductCommandValidator>();
+        builder.Services.AddKeyedScoped<IRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inventory-transactions");
+        builder.Services.AddKeyedScoped<IReadRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inventory-transactions");
 
         return builder;
     }

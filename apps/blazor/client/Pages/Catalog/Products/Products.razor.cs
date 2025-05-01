@@ -126,7 +126,7 @@ public partial class Products
     private async Task OnCreate()
     {
         var model = _currentDto.Adapt<ProductViewModel>();
-        await ShowEditFormDialog("Create new Item", model, true, _categories);
+        await ShowEditFormDialog("Create new Product", model, true, _categories);
     }
 
     private async Task OnClone()
@@ -137,7 +137,7 @@ public partial class Products
             var command = new Mapper().Map<ProductResponse, ProductViewModel>(copy);
             //var command = copy.Adapt<ProductViewModel>();
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
-            await ShowEditFormDialog("Clone an Item", command, true, _categories);
+            await ShowEditFormDialog("Clone an Product", command, true, _categories);
         }
     }
 
@@ -145,7 +145,7 @@ public partial class Products
     {
         
         var command = dto.Adapt<ProductViewModel>();
-        await ShowEditFormDialog("Edit the Item", command, false, _categories);
+        await ShowEditFormDialog("Edit the Product", command, false, _categories);
     }
 
     private async Task OnDelete(ProductResponse dto)

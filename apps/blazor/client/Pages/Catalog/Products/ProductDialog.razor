@@ -11,24 +11,25 @@
                     <MudTextField @bind-Value="Model.Name" Label="Name" For="@(() => Model.Name)" />
                     <ValidationMessage For="@(() => Model.Name)"/>
                 </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudSelect T="Guid?" Label="Category" @bind-Value="Model.CategoryId">
+                
+                <MudItem xs="12" >
+                    <MudTextField @bind-Value="Model.Description" Label="Description" For="@(() => Model.Description)" />
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudSelect T="Guid?" Label="Category" @bind-Value="Model.CategoryId" 
+                               Placeholder="Select a category"
+                               Clearable="true">
                         @foreach (var category in _categories)
                         {
                             <MudSelectItem T="Guid?" Value="category.Id">@category.Name</MudSelectItem>
                         }
+                        
                     </MudSelect>
                 </MudItem>
-                <MudItem xs="12" >
-                    <MudTextField @bind-Value="Model.Description" Label="Description" For="@(() => Model.Description)" />
-                </MudItem>
-                <MudItem xs="12" sm="6" md="3">
+                <MudItem xs="12" sm="6" md="4">
                     <MudTextField @bind-Value="Model.Unit" Label="Unit" For="@(() => Model.Unit)" />
                 </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudTextField @bind-Value="Model.Location" Label="Location" For="@(() => Model.Location)" />
-                </MudItem>
-                <MudItem xs="12" sm="6" >
+                <MudItem xs="12" sm="6" md="4">
                     <MudNumericField @bind-Value="Model.Sku" Label="Sku" For="@(() => Model.Sku)" />
                 </MudItem>
                 <MudItem xs="12">

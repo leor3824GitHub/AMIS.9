@@ -1,9 +1,9 @@
 ﻿@page "/catalog/products"
-<style>
+@* <style>
     .mud-table-container {
         overflow: auto;
     }
-</style>
+</style> *@
 <PageHeader Title="Products" Header="Products" SubHeader="Manage your Products." />
 
 <MudDataGrid ServerData="ServerReload"
@@ -54,8 +54,7 @@
                                        StartIcon="@Icons.Material.Filled.Delete"
                                        Disabled="@(!(_selectedItems.Count > 0))"
                                        OnClick="OnDeleteChecked"
-                                       IconColor="Color.Surface"
-                                       Class="mr-4">
+                                       IconColor="Color.Surface">
                                 Delete
                             </MudButton>
                         }
@@ -144,9 +143,8 @@
         <PropertyColumn Property="x => x.Description" />
         <PropertyColumn Property="x => x.Unit" />
         <PropertyColumn Property="x => x.Sku" />
-        <PropertyColumn Property="x => x.Location" />
-        <PropertyColumn Property="x => x.Category.Name" Groupable="true" />
-        <TemplateColumn>
+        <PropertyColumn Property="x => x.Category.Name" Title="Category" />
+        <TemplateColumn Title="Action">
             <CellTemplate>
                 <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
                          Dense="true"

@@ -23,4 +23,3 @@ public sealed class SearchProductsHandler(
         return new PagedList<ProductResponse>(items, request!.PageNumber, request!.PageSize, totalCount);
     }
 }
-
