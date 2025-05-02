@@ -1,0 +1,31 @@
+﻿using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Domain;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+namespace AMIS.WebApi.Catalog.Application.Inspections.CreateItem.v1;
+
+public sealed class CreateInspectionItemHandler(
+    ILogger<CreateInspectionItemHandler> logger,
+    [FromKeyedServices("catalog:inspectionitems")] IRepository<InspectionItem> repository)
+    : IRequestHandler<CreateInspectionItemCommand, CreateInspectionItemResponse>
+{
+    public async Task<CreateInspectionItemResponse> Handle(CreateInspectionItemCommand request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var entity = InspectionItem.Create(
+            request.InspectionId,
+            request.PurchaseItemId,
+            request.QuantityInspected,
+            request.QuantityPassed,
+            request.QuantityFailed,
+            request.Remarks);
+
+        await repository.AddAsync(entity, cancellationToken);
+        logger.LogInformation("Created inspection item {InspectionItemId}", entity.Id);
+
+        return new CreateInspectionItemResponse(entity.Id);
+    }
+}

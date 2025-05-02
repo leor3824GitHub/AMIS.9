@@ -11,27 +11,39 @@
     <EditFormContent>
         @if (!Context.AddEditModal.IsCreate)
         {
-            <MudItem xs="12" md="6">
+            <MudItem xs="12">
                 <MudTextField Value="context.Id" Underline=false ReadOnly Label="Supplier Id" />
             </MudItem>
         }
         <MudItem xs="12" md="6">
-            <MudTextField Label="Name" For="@(() => context.Name)" @bind-Value="context.Name" />
+            <MudTextField Label="Name" For="@(() => context.Name)" @bind-Value="context.Name" Style="max-width: 350px;" />
         </MudItem>
         <MudItem xs="12" md="6">
             <MudTextField Label="Address" For="@(() => context.Address)" @bind-Value="context.Address" />
+        </MudItem>        
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField Label="Tin" For="@(() => context.Tin)" @bind-Value="context.Tin" Style="max-width: 300px;" />
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField Label="Tax Registration (VAT/Non-VAT"
+                          For="@(() => context.TaxClassification)"
+                          @bind-Value="context.TaxClassification"
+                          Style="width: 80px;" />
+        </MudItem>
+        <MudItem xs="12" sm="6" md="4">
+            <MudTextField Label="Contact Number"
+                          @bind-Value="context.ContactNo"
+                          Placeholder="e.g. 09171234567"
+                          MaxLength="13"
+                          Immediate="true"
+                          Required="true"
+                          Pattern="^(09\d{9}|\+639\d{9})$"
+                          ErrorText="Enter a valid PH mobile number starting with 09 or +639"
+                          Style="width: 180px;" />
+
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField Label="Tin" For="@(() => context.Tin)" @bind-Value="context.Tin" />
-        </MudItem>
-        <MudItem xs="12" md="6">
-            <MudTextField Label="Tax Classification" For="@(() => context.TaxClassification)" @bind-Value="context.TaxClassification" />
-        </MudItem>
-        <MudItem xs="12" md="6">
-            <MudTextField Label="ContactNo" For="@(() => context.ContactNo)" @bind-Value="context.ContactNo" />
-        </MudItem>
-        <MudItem xs="12" md="6">
-            <MudTextField Label="Emailadd" For="@(() => context.Emailadd)" @bind-Value="context.Emailadd" />
+            <MudTextField Label="Emailadd" For="@(() => context.Emailadd)" @bind-Value="context.Emailadd" Style="max-width: 350px;" />
         </MudItem>
         @* <MudItem xs="12" md="12">
             <MudItem>

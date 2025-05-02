@@ -108,6 +108,14 @@ public static class FshPermissions
         new("Delete IssuanceItems", FshActions.Delete, FshResources.IssuanceItems),
         new("Export IssuanceItems", FshActions.Export, FshResources.IssuanceItems),
 
+        //inpections
+        new("View Inspections", FshActions.View, FshResources.Inspections, IsBasic: true),
+        new("Search Inspections", FshActions.Search, FshResources.Inspections, IsBasic: true),
+        new("Create Inspections", FshActions.Create, FshResources.Inspections),
+        new("Update Inspections", FshActions.Update, FshResources.Inspections),
+        new("Delete Inspections", FshActions.Delete, FshResources.Inspections),
+        new("Export Inspections", FshActions.Export, FshResources.Inspections),
+
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
         new("Search Todos", FshActions.Search, FshResources.Todos, IsBasic: true),
