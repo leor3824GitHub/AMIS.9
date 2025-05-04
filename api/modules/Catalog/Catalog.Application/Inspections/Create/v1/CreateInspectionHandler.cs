@@ -17,14 +17,14 @@ public sealed class CreateInspectionHandler(
 
         var inspection = Inspection.Create(
             purchaseId: request.PurchaseId,
-            inspectedBy: request.InspectedBy,
+            inspectedId: request.InspectorId,
             inspectionDate: request.InspectionDate,
             remarks: request.Remarks
         );
 
         foreach (var item in request.Items)
         {
-            inspection.AddItem(item.PurchaseItemId, item.QuantityInspected, item.Remarks);
+            inspection.AddItem(item.PurchaseItemId, item.QtyInspected,item.QtyPassed, item.QtyFailed, item.Remarks);
         }
 
         await repository.AddAsync(inspection, cancellationToken);

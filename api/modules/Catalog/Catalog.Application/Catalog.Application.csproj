@@ -12,8 +12,6 @@
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="InspectionItems\Delete\v1\" />
-    <Folder Include="InspectionItems\Get\v1\" />
     <Folder Include="InspectionItems\Search\v1\" />
   </ItemGroup>
 </Project>

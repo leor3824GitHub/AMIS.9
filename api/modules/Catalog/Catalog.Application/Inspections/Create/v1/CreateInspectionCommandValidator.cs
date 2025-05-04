@@ -7,13 +7,13 @@ public class CreateInspectionCommandValidator : AbstractValidator<CreateInspecti
     public CreateInspectionCommandValidator()
     {
         RuleFor(c => c.PurchaseId).NotEmpty();
-        RuleFor(c => c.InspectedBy).NotEmpty();
+        RuleFor(c => c.InspectorId).NotEmpty();
         RuleFor(c => c.InspectionDate).NotEmpty();
 
         RuleForEach(c => c.Items).ChildRules(items =>
         {
             items.RuleFor(i => i.PurchaseItemId).NotEmpty();
-            items.RuleFor(i => i.QuantityInspected).GreaterThan(0);
+            items.RuleFor(i => i.QtyInspected).GreaterThan(0);
         });
     }
 }

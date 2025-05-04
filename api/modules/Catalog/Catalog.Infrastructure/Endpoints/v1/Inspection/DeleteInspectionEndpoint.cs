@@ -1,5 +1,5 @@
 ﻿using AMIS.Framework.Infrastructure.Auth.Policy;
-using AMIS.WebApi.Catalog.Application.Purchases.Delete.v1;
+using AMIS.WebApi.Catalog.Application.Inspections.Delete.v1;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;

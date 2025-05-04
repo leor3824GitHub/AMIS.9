@@ -6,8 +6,8 @@ public class UpdateInspectionItemCommandValidator : AbstractValidator<UpdateInsp
 {
     public UpdateInspectionItemCommandValidator()
     {
-        RuleFor(x => x.QuantityInspected).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.QuantityPassed).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.QuantityFailed).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.QtyInspected).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.QtyPassed).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.QtyFailed).GreaterThanOrEqualTo(0);
     }
 }

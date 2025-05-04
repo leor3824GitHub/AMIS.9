@@ -6,8 +6,8 @@ public sealed record UpdateInspectionItemCommand(
     Guid Id,
     Guid InspectionId,
     Guid PurchaseItemId,
-    int QuantityInspected,
-    int QuantityPassed,
-    int QuantityFailed,
+    int QtyInspected,
+    int QtyPassed,
+    int QtyFailed,
     string? Remarks
 ) : IRequest<Guid>;

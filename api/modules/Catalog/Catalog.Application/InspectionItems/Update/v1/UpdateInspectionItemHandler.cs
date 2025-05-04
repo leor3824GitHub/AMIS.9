@@ -20,9 +20,9 @@ public sealed class UpdateInspectionItemHandler(
         item.Update(
             request.InspectionId,
             request.PurchaseItemId,
-            request.QuantityInspected,
-            request.QuantityPassed,
-            request.QuantityFailed,
+            request.QtyInspected,
+            request.QtyPassed,
+            request.QtyFailed,
             request.Remarks
         );
 

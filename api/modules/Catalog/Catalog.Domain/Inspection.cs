@@ -7,7 +7,7 @@ namespace AMIS.WebApi.Catalog.Domain;
 public class Inspection : AuditableEntity, IAggregateRoot
 {
     public Guid PurchaseId { get; private set; }
-    public Guid InspectedBy { get; private set; } // Employee ID
+    public Guid InspectorId { get; private set; } // Employee ID
     public DateTime InspectionDate { get; private set; }
     public string? Remarks { get; private set; }
 
@@ -17,29 +17,29 @@ public class Inspection : AuditableEntity, IAggregateRoot
 
     private Inspection() { }
 
-    private Inspection(Guid id, Guid purchaseId, Guid inspectedBy, DateTime inspectionDate, string? remarks)
+    private Inspection(Guid id, Guid purchaseId, Guid inspectedId, DateTime inspectionDate, string? remarks)
     {
         Id = id;
         PurchaseId = purchaseId;
-        InspectedBy = inspectedBy;
+        InspectorId = inspectedId;
         InspectionDate = inspectionDate;
         Remarks = remarks;
 
         QueueDomainEvent(new InspectionCreated { Inspection = this });
     }
 
-    public static Inspection Create(Guid purchaseId, Guid inspectedBy, DateTime inspectionDate, string? remarks)
+    public static Inspection Create(Guid purchaseId, Guid inspectedId, DateTime inspectionDate, string? remarks)
     {
-        return new Inspection(Guid.NewGuid(), purchaseId, inspectedBy, inspectionDate, remarks);
+        return new Inspection(Guid.NewGuid(), purchaseId, inspectedId, inspectionDate, remarks);
     }
 
-    public Inspection Update(Guid inspectedBy, DateTime inspectionDate, string? remarks)
+    public Inspection Update(Guid inspectedId, DateTime inspectionDate, string? remarks)
     {
         bool isUpdated = false;
 
-        if (InspectedBy != inspectedBy)
+        if (InspectorId != inspectedId)
         {
-            InspectedBy = inspectedBy;
+            InspectorId = inspectedId;
             isUpdated = true;
         }
 

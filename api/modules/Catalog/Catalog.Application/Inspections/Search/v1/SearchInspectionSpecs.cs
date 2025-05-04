@@ -12,7 +12,7 @@ public class SearchInspectionSpecs : EntitiesByPaginationFilterSpec<Inspection, 
         : base(command)
     {
         Query
-            .Include(i => i.InspectedBy)
+            .Include(i => i.InspectorId)
             .Include(i => i.Purchase)
             .OrderBy(i => i.InspectionDate, !command.HasOrderBy())
             .Where(i => i.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)

@@ -8,9 +8,9 @@ public class InspectionItem : AuditableEntity, IAggregateRoot
 {
     public Guid InspectionId { get; private set; }
     public Guid PurchaseItemId { get; private set; }
-    public int QuantityInspected { get; private set; }
-    public int QuantityPassed { get; private set; }
-    public int QuantityFailed { get; private set; }
+    public int QtyInspected { get; private set; }
+    public int QtyPassed { get; private set; }
+    public int QtyFailed { get; private set; }
     public string? Remarks { get; private set; }
 
     public virtual Inspection Inspection { get; private set; } = default!;
@@ -23,9 +23,9 @@ public class InspectionItem : AuditableEntity, IAggregateRoot
         Id = id;
         InspectionId = inspectionId;
         PurchaseItemId = purchaseItemId;
-        QuantityInspected = qtyInspected;
-        QuantityPassed = qtyPassed;
-        QuantityFailed = qtyFailed;
+        QtyInspected = qtyInspected;
+        QtyPassed = qtyPassed;
+        QtyFailed = qtyFailed;
         Remarks = remarks;
 
         QueueDomainEvent(new InspectionItemCreated { InspectionItem = this });
@@ -58,21 +58,21 @@ public class InspectionItem : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (QuantityInspected != quantityInspected)
+        if (QtyInspected != quantityInspected)
         {
-            QuantityInspected = quantityInspected;
+            QtyInspected = quantityInspected;
             isUpdated = true;
         }
 
-        if (QuantityPassed != quantityPassed)
+        if (QtyPassed != quantityPassed)
         {
-            QuantityPassed = quantityPassed;
+            QtyPassed = quantityPassed;
             isUpdated = true;
         }
 
-        if (QuantityFailed != quantityFailed)
+        if (QtyFailed != quantityFailed)
         {
-            QuantityFailed = quantityFailed;
+            QtyFailed = quantityFailed;
             isUpdated = true;
         }
 

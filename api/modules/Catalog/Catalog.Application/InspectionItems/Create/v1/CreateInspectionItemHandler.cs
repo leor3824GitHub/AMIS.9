@@ -18,9 +18,9 @@ public sealed class CreateInspectionItemHandler(
         var entity = InspectionItem.Create(
             request.InspectionId,
             request.PurchaseItemId,
-            request.QuantityInspected,
-            request.QuantityPassed,
-            request.QuantityFailed,
+            request.QtyInspected,
+            request.QtyPassed,
+            request.QtyFailed,
             request.Remarks);
 
         await repository.AddAsync(entity, cancellationToken);
