@@ -8,7 +8,7 @@ using AMIS.WebApi.Catalog.Domain;
 namespace AMIS.WebApi.Catalog.Application.InspectionItems.Get.v1;
 
 public sealed class GetInspectionItemHandler(
-    [FromKeyedServices("catalog:inspectionitems")] IReadRepository<InspectionItem> repository,
+    [FromKeyedServices("catalog:inspectionItems")] IReadRepository<InspectionItem> repository,
     ICacheService cache)
     : IRequestHandler<GetInspectionItemRequest, InspectionItemResponse>
 {

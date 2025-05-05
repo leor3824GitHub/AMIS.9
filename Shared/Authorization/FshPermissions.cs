@@ -108,6 +108,14 @@ public static class FshPermissions
         new("Delete IssuanceItems", FshActions.Delete, FshResources.IssuanceItems),
         new("Export IssuanceItems", FshActions.Export, FshResources.IssuanceItems),
 
+        //inventorytransactions
+        new("View InventoryTransactions", FshActions.View, FshResources.InventoryTransactions, IsBasic: true),
+        new("Search InventoryTransactions", FshActions.Search, FshResources.InventoryTransactions, IsBasic: true),
+        new("Create InventoryTransactions", FshActions.Create, FshResources.InventoryTransactions),
+        new("Update InventoryTransactions", FshActions.Update, FshResources.InventoryTransactions),
+        new("Delete InventoryTransactions", FshActions.Delete, FshResources.InventoryTransactions),
+        new("Export InventoryTransactions", FshActions.Export, FshResources.InventoryTransactions),
+
         //inpections
         new("View Inspections", FshActions.View, FshResources.Inspections, IsBasic: true),
         new("Search Inspections", FshActions.Search, FshResources.Inspections, IsBasic: true),
@@ -115,6 +123,14 @@ public static class FshPermissions
         new("Update Inspections", FshActions.Update, FshResources.Inspections),
         new("Delete Inspections", FshActions.Delete, FshResources.Inspections),
         new("Export Inspections", FshActions.Export, FshResources.Inspections),
+
+        //inpectionitems
+        new("View InspectionItems", FshActions.View, FshResources.InspectionItems, IsBasic: true),
+        new("Search InspectionItems", FshActions.Search, FshResources.InspectionItems, IsBasic: true),
+        new("Create InspectionItems", FshActions.Create, FshResources.InspectionItems),
+        new("Update InspectionItems", FshActions.Update, FshResources.InspectionItems),
+        new("Delete InspectionItems", FshActions.Delete, FshResources.InspectionItems),
+        new("Export InspectionItems", FshActions.Export, FshResources.InspectionItems),
 
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),

@@ -4,11 +4,11 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace AMIS.WebApi.Catalog.Application.Inspections.CreateItem.v1;
+namespace AMIS.WebApi.Catalog.Application.InspectionItems.Create.v1;
 
 public sealed class CreateInspectionItemHandler(
     ILogger<CreateInspectionItemHandler> logger,
-    [FromKeyedServices("catalog:inspectionitems")] IRepository<InspectionItem> repository)
+    [FromKeyedServices("catalog:inspectionItems")] IRepository<InspectionItem> repository)
     : IRequestHandler<CreateInspectionItemCommand, CreateInspectionItemResponse>
 {
     public async Task<CreateInspectionItemResponse> Handle(CreateInspectionItemCommand request, CancellationToken cancellationToken)

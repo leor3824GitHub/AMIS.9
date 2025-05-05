@@ -1,6 +1,6 @@
 ﻿using MediatR;
 
-namespace AMIS.WebApi.Catalog.Application.Inspections.UpdateItem.v1;
+namespace AMIS.WebApi.Catalog.Application.InspectionItems.Update.v1;
 
 public sealed record UpdateInspectionItemCommand(
     Guid Id,

@@ -91,6 +91,21 @@ public static class CatalogModule
             issuanceItemGroup.MapGetIssuanceItemListEndpoint();
             issuanceItemGroup.MapIssuanceItemUpdateEndpoint();
             issuanceItemGroup.MapIssuanceItemDeleteEndpoint();
+
+            var inventoryTranscationGroup = app.MapGroup("inventoryTranscation").WithTags("inventoryTranscation");
+            inventoryTranscationGroup.MapInventoryTransactionCreationEndpoint();
+            inventoryTranscationGroup.MapInventoryTransactionDeleteEndpoint();
+            inventoryTranscationGroup.MapGetInventoryTransactionEndpoint();
+            inventoryTranscationGroup.MapGetInventoryTransactionListEndpoint();
+            inventoryTranscationGroup.MapInventoryTransactionUpdateEndpoint();
+
+
+            var inspectionGroup = app.MapGroup("inspection").WithTags("inspection");
+            inspectionGroup.MapInspectionCreationEndpoint();
+            inspectionGroup.MapInspectionDeletionEndpoint();
+            inspectionGroup.MapGetInspectionEndpoint();
+            inspectionGroup.MapGetInspectionListEndpoint();
+            inspectionGroup.MapInspectionUpdateEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -129,8 +144,11 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inventory-transactions");
         builder.Services.AddKeyedScoped<IReadRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inventory-transactions");
 
-        builder.Services.AddKeyedScoped<IRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inspections");
-        builder.Services.AddKeyedScoped<IReadRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inspections");
+        builder.Services.AddKeyedScoped<IRepository<Inspection>, CatalogRepository<Inspection>>("catalog:inspections");
+        builder.Services.AddKeyedScoped<IReadRepository<Inspection>, CatalogRepository<Inspection>>("catalog:inspections");
+
+        builder.Services.AddKeyedScoped<IRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
+        builder.Services.AddKeyedScoped<IReadRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
 
         return builder;
     }

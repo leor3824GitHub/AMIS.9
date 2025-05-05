@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using System.ComponentModel;
 
-namespace AMIS.WebApi.Catalog.Application.Inspections.CreateItem.v1;
+namespace AMIS.WebApi.Catalog.Application.InspectionItems.Create.v1;
 
 public sealed record CreateInspectionItemCommand(
     [property: DefaultValue("00000000-0000-0000-0000-000000000001")] Guid InspectionId,

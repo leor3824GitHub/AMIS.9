@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using AMIS.WebApi.Catalog.Application.Inspections.CreateItem.v1;
 using MediatR;
 
 namespace AMIS.WebApi.Catalog.Application.Inspections.Create.v1;

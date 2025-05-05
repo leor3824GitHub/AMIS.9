@@ -1,5 +1,4 @@
 ﻿using AMIS.Framework.Core.Persistence;
-using AMIS.WebApi.Catalog.Application.InspectionItems.Delete.v1;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Exceptions;
 using MediatR;
@@ -10,7 +9,7 @@ namespace AMIS.WebApi.Catalog.Application.InspectionItems.Delete.v1
 {
     public sealed class DeleteInspectionItemHandler(
         ILogger<DeleteInspectionItemHandler> logger,
-        [FromKeyedServices("catalog:inspectionitems")] IRepository<InspectionItem> repository)
+        [FromKeyedServices("catalog:inspectionItems")] IRepository<InspectionItem> repository)
         : IRequestHandler<DeleteInspectionItemCommand, DeleteInspectionItemResponse>
     {
         public async Task<DeleteInspectionItemResponse> Handle(DeleteInspectionItemCommand request, CancellationToken cancellationToken)

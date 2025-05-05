@@ -1,6 +1,6 @@
 ﻿using FluentValidation;
 
-namespace AMIS.WebApi.Catalog.Application.Inspections.UpdateItem.v1;
+namespace AMIS.WebApi.Catalog.Application.InspectionItems.Update.v1;
 
 public class UpdateInspectionItemCommandValidator : AbstractValidator<UpdateInspectionItemCommand>
 {

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AMIS.WebApi.Catalog.Application.Inspections.CreateItem.v1
+namespace AMIS.WebApi.Catalog.Application.InspectionItems.Create.v1
 {
     public sealed record CreateInspectionItemResponse(Guid Id);
 }
