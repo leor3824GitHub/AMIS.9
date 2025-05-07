@@ -1,6 +1,65 @@
-@Server_HostAddress = http://localhost:5000
+@Server_HostAddress = http://localhost:7000
 
 GET {{Server_HostAddress}}/weatherforecast/
 Accept: application/json
+
+### Create Brand
+POST {{Server_HostAddress}}/api/v1/catalog/brands
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Sample Brand",
+  "description": "This is a test brand"
+}
+
+###
+
+### Get Brand by ID
+GET {{Server_HostAddress}}/api/v1/catalog/brands/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+### Update Brand
+PUT {{Server_HostAddress}}/api/v1/catalog/brands/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Updated Brand",
+  "description": "Updated description"
+}
+
+###
+
+### Delete Brand
+DELETE {{Server_HostAddress}}/api/v1/catalog/brands/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+### Search Brands
+POST {{Server_HostAddress}}/api/v1/catalog/brands/search
+Content-Type: application/json
+Accept: application/json
+
+{
+  "filter": "sample",
+  "pageNumber": 1,
+  "pageSize": 10
+}
+
+###
+
+### Create Category
+POST {{Server_HostAddress}}/api/v1/catalog/categories
+Content-Type: application/json
+Accept: application/json
+
+{
+  "name": "Sample Category",
+  "description": "Test category"
+}
 
 ###
