@@ -11,4 +11,10 @@
     <ProjectReference Include="..\..\..\framework\Core\Core.csproj" />
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="AcceptanceItems\Delete\v1\" />
+    <Folder Include="AcceptanceItems\Get\v1\" />
+    <Folder Include="AcceptanceItems\Search\v1\" />
+    <Folder Include="AcceptanceItems\Update\v1\" />
+  </ItemGroup>
 </Project>

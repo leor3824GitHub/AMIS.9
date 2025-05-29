@@ -5,18 +5,14 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
 {
-    internal sealed class InspectionConfiguration : IEntityTypeConfiguration<Inspection>
+    internal sealed class AcceptanceConfiguration : IEntityTypeConfiguration<Acceptance>
     {
-        public void Configure(EntityTypeBuilder<Inspection> builder)
+        public void Configure(EntityTypeBuilder<Acceptance> builder)
         {
-            // MultiTenant support for Inspection entity
-            builder.IsMultiTenant();
-
-            // Primary key
-            builder.HasKey(x => x.Id);
-
-            // Property configurations
-            builder.Property(x => x.InspectionDate)
+            
+            builder.IsMultiTenant();   // MultiTenant support for Acceptance entity            
+            builder.HasKey(x => x.Id);  // Primary key            
+            builder.Property(x => x.AcceptanceDate)  // Property configurations
                 .IsRequired();
 
             builder.Property(x => x.Remarks)

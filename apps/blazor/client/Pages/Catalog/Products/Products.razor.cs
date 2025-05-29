@@ -136,6 +136,7 @@ public partial class Products
         {
             var command = new Mapper().Map<ProductResponse, ProductViewModel>(copy);
             //var command = copy.Adapt<ProductViewModel>();
+            command.ImagePath = null; // Clear the image path for the cloned item
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
             await ShowEditFormDialog("Clone an Product", command, true, _categories);
         }

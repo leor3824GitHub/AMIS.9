@@ -18,8 +18,8 @@ public static class UpdateInspectionItemEndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(UpdateInspectionItemEndpoint))
-            .WithSummary("update a inspection")
-            .WithDescription("update a inspection")
+            .WithSummary("update a inspection item")
+            .WithDescription("update a inspection item")
             .Produces<UpdateInspectionItemResponse>()
             .RequirePermission("Permissions.InspectionItems.Update")
             .MapToApiVersion(1);

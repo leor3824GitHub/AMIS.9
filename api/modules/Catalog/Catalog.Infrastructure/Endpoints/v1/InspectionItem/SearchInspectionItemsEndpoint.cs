@@ -21,8 +21,8 @@ public static class SearchInspectionItemsEndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(SearchInspectionItemsEndpoint))
-            .WithSummary("Gets a list of inspections")
-            .WithDescription("Gets a list of inspections with pagination and filtering support")
+            .WithSummary("Gets a list of inspection items")
+            .WithDescription("Gets a list of inspection items with pagination and filtering support")
             .Produces<PagedList<InspectionItemResponse>>()
             .RequirePermission("Permissions.InspectionItems.View")
             .MapToApiVersion(1);

@@ -22,9 +22,11 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="Pages\Catalog\InspectionRequest.razor" />
 	  <Content Remove="Pages\Catalog\Products\Product3.razor" />
 	  <Content Remove="Pages\Catalog\Products\Product4.razor" />
 	  <Content Remove="Pages\Catalog\Products_1.razor" />
+	  <Content Remove="Pages\Counter.razor" />
 	  <Content Remove="Pages\Home.razor" />
 	</ItemGroup>
 

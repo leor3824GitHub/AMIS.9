@@ -1,0 +1,87 @@
+﻿@page "/inspection/request"
+
+
+<MudPaper Class="p-6 max-w-2xl mx-auto mt-4">
+    <MudText Typo="Typo.h5" Class="mb-4">Request Product Inspection</MudText>
+
+    <MudForm @ref="form">
+        <MudStack Spacing="3">
+
+            <MudSelect T="Guid" Label="Purchase Order" @bind-Value="Request.PurchaseId" Required>
+                @foreach (var p in Purchases)
+                {
+                    <MudSelectItem Value="@p.Id">
+                        @($"{p.ReferenceNumber} - {p.SupplierName}")
+                    </MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudSelect T="Guid?" Label="Assign Inspector (optional)" @bind-Value="Request.AssignedInspectorId">
+                <MudSelectItem Value="null">-- None --</MudSelectItem>
+                @foreach (var e in Inspectors)
+                {
+                    <MudSelectItem Value="@e.Id">@e.FullName</MudSelectItem>
+                }
+            </MudSelect>
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@IsSubmitting" OnClick="SubmitRequest">
+                @if (IsSubmitting)
+                {
+                    <MudProgressCircular Size="20" Indeterminate="true" Class="me-2" />
+                    Submitting...
+                }
+                else
+                {
+                    Submit
+                }
+            </MudButton>
+
+            <MudText Color="Color.Error" Typo="Typo.caption" Class="mt-2">@ErrorMessage</MudText>
+        </MudStack>
+    </MudForm>
+</MudPaper>
+
+@code {
+    [Inject]
+    protected IApiClient inspectionclient { get; set; } = default!;
+    @inject NavigationManager NavManager
+
+    private MudForm form;
+    private InspectionRequestDto Request = new();
+    private List<PurchaseDto> Purchases = [];
+    private List<EmployeeDto> Inspectors = [];
+    private bool IsSubmitting = false;
+    private string ErrorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Purchases = await inspectionclient.GetPendingPurchasesAsync();
+        Inspectors = await inspectionclient.GetInspectorsAsync();
+    }
+
+    private async Task SubmitRequest()
+    {
+        ErrorMessage = string.Empty;
+        await form.Validate();
+
+        if (!form.IsValid)
+            return;
+
+        try
+        {
+            IsSubmitting = true;
+            await inspectionclient.RequestInspectionAsync(Request);
+            NavManager.NavigateTo("/inspection/requests");
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = "Failed to submit request. Please try again.";
+
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+}
+

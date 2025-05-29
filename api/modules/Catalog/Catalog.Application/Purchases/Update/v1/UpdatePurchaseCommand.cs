@@ -1,4 +1,3 @@
-using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using MediatR;
 

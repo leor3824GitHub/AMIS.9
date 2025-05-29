@@ -17,8 +17,8 @@ public static class CreateInspectionItemEndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(CreateInspectionItemEndpoint))
-            .WithSummary("creates a inspection")
-            .WithDescription("creates a inspection")
+            .WithSummary("creates a inspection item")
+            .WithDescription("creates a inspection item")
             .Produces<CreateInspectionItemResponse>()
             .RequirePermission("Permissions.InspectionItems.Create")
             .MapToApiVersion(1);

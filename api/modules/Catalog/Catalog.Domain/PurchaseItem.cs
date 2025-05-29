@@ -11,6 +11,9 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
     public int Qty { get; private set; }
     public decimal UnitPrice { get; private set; }
     public PurchaseStatus? ItemStatus { get; private set; }
+    public PurchaseItemInspectionStatus? InspectionStatus { get; private set; }
+    public PurchaseItemAcceptanceStatus? AcceptanceStatus { get; private set; }
+
     public virtual Product Product { get; private set; } = default!;
 
     private PurchaseItem() { }
@@ -63,6 +66,27 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
         if (isUpdated)
         {
             QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = this });
+        }
+
+        return this;
+    }
+    public PurchaseItem UpdateInspectionStatus(PurchaseItemInspectionStatus status)
+    {
+        if (InspectionStatus != status)
+        {
+            InspectionStatus = status;
+            QueueDomainEvent(new PurchaseItemInspected { PurchaseItem = this });
+        }
+
+        return this;
+    }
+
+    public PurchaseItem UpdateAcceptanceStatus(PurchaseItemAcceptanceStatus status)
+    {
+        if (AcceptanceStatus != status)
+        {
+            AcceptanceStatus = status;
+            QueueDomainEvent(new PurchaseItemAccepted { PurchaseItem = this });
         }
 
         return this;

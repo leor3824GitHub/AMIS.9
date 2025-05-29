@@ -17,8 +17,8 @@ public static class GetInspectionItemEndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(GetInspectionItemEndpoint))
-            .WithSummary("gets inspection by id")
-            .WithDescription("gets inspection by id")
+            .WithSummary("gets inspection item by id")
+            .WithDescription("gets inspection item by id")
             .Produces<InspectionItemResponse>()
             .RequirePermission("Permissions.InspectionItems.View")
             .MapToApiVersion(1);

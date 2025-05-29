@@ -19,8 +19,8 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1
                     return Results.Ok(response);
                 })
                 .WithName(nameof(DeleteInspectionItemEndpoint))
-                .WithSummary("Deletes an inspection")
-                .WithDescription("Deletes an inspection by Id")
+                .WithSummary("Deletes an inspection item")
+                .WithDescription("Deletes an inspection item by Id")
                 .Produces<DeleteInspectionItemResponse>()
                 .RequirePermission("Permissions.InspectionItems.Delete")
                 .MapToApiVersion(1);

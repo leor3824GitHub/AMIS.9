@@ -106,6 +106,13 @@ public static class CatalogModule
             inspectionGroup.MapGetInspectionEndpoint();
             inspectionGroup.MapGetInspectionListEndpoint();
             inspectionGroup.MapInspectionUpdateEndpoint();
+
+            var inspectionItemGroup = app.MapGroup("inspectionItem").WithTags("inspectionItem");
+            inspectionItemGroup.MapInspectionItemCreationEndpoint();
+            inspectionItemGroup.MapInspectionItemDeletionEndpoint();
+            inspectionItemGroup.MapGetInspectionItemEndpoint();
+            inspectionItemGroup.MapGetInspectionItemListEndpoint();
+            inspectionItemGroup.MapInspectionItemUpdateEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
