@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Catalog.Application.InspectionItems.Create.v1;
 
 public sealed class CreateInspectionItemHandler(
     ILogger<CreateInspectionItemHandler> logger,
-    [FromKeyedServices("catalog:inspectionItems")] IRepository<InspectionItem> repository)
+    [FromKeyedServices("catalog:acceptanceItems")] IRepository<InspectionItem> repository)
     : IRequestHandler<CreateInspectionItemCommand, CreateInspectionItemResponse>
 {
     public async Task<CreateInspectionItemResponse> Handle(CreateInspectionItemCommand request, CancellationToken cancellationToken)

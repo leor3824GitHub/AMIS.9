@@ -31,7 +31,8 @@ public sealed class CatalogDbContext : FshDbContext
     public DbSet<Inspection> Inspections { get; set; } = null!;
     public DbSet<InspectionItem> InspectionItems { get; set; } = null!;
     public DbSet<Acceptance> Acceptances { get; set; } = null!;
-    public DbSet<AcceptanceItem> AcceptanceItem { get; set; } = null!;
+    public DbSet<AcceptanceItem> AcceptanceItems { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

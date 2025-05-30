@@ -157,6 +157,11 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
         builder.Services.AddKeyedScoped<IReadRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
 
+        builder.Services.AddKeyedScoped<IRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
+        builder.Services.AddKeyedScoped<IReadRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
+
+        builder.Services.AddKeyedScoped<IRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
+        builder.Services.AddKeyedScoped<IReadRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)
