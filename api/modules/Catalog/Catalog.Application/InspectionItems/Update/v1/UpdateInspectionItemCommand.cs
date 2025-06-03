@@ -10,4 +10,4 @@ public sealed record UpdateInspectionItemCommand(
     int QtyPassed,
     int QtyFailed,
     string? Remarks
-) : IRequest<Guid>;
+) : IRequest<UpdateInspectionItemResponse>;

@@ -10,9 +10,9 @@ namespace AMIS.WebApi.Catalog.Application.InspectionItems.Update.v1;
 public sealed class UpdateInspectionItemHandler(
     ILogger<UpdateInspectionItemHandler> logger,
     [FromKeyedServices("catalog:inspectionItems")] IRepository<InspectionItem> repository)
-    : IRequestHandler<UpdateInspectionItemCommand, Guid>
+    : IRequestHandler<UpdateInspectionItemCommand, UpdateInspectionItemResponse>
 {
-    public async Task<Guid> Handle(UpdateInspectionItemCommand request, CancellationToken cancellationToken)
+    public async Task<UpdateInspectionItemResponse> Handle(UpdateInspectionItemCommand request, CancellationToken cancellationToken)
     {
         var item = await repository.GetByIdAsync(request.Id, cancellationToken)
                    ?? throw new InspectionItemNotFoundException(request.Id);
@@ -29,6 +29,6 @@ public sealed class UpdateInspectionItemHandler(
         await repository.UpdateAsync(item, cancellationToken);
         logger.LogInformation("InspectionItem with id {Id} updated.", request.Id);
 
-        return request.Id;
+        return new UpdateInspectionItemResponse(request.Id);
     }
 }

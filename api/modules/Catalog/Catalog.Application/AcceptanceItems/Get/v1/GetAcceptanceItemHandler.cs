@@ -8,7 +8,7 @@ using AMIS.WebApi.Catalog.Domain;
 namespace AMIS.WebApi.Catalog.Application.AcceptanceItems.Get.v1;
 
 public sealed class GetAcceptanceItemHandler(
-    [FromKeyedServices("catalog:inspectionItems")] IReadRepository<AcceptanceItem> repository,
+    [FromKeyedServices("catalog:acceptanceItems")] IReadRepository<AcceptanceItem> repository,
     ICacheService cache)
     : IRequestHandler<GetAcceptanceItemRequest, AcceptanceItemResponse>
 {
@@ -16,17 +16,17 @@ public sealed class GetAcceptanceItemHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var inspection = await cache.GetOrSetAsync(
-            $"inspection:{request.Id}",
+        var acceptance = await cache.GetOrSetAsync(
+            $"acceptance:{request.Id}",
             async () =>
             {
                 var spec = new GetAcceptanceItemSpecs(request.Id);
-                var inspectionItem = await repository.FirstOrDefaultAsync(spec, cancellationToken);
-                if (inspectionItem == null) throw new AcceptanceItemNotFoundException(request.Id);
-                return inspectionItem;
+                var acceptanceItem = await repository.FirstOrDefaultAsync(spec, cancellationToken);
+                if (acceptanceItem == null) throw new AcceptanceItemNotFoundException(request.Id);
+                return acceptanceItem;
             },
             cancellationToken: cancellationToken);
 
-        return inspection!;
+        return acceptance!;
     }
 }

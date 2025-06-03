@@ -107,12 +107,26 @@ public static class CatalogModule
             inspectionGroup.MapGetInspectionListEndpoint();
             inspectionGroup.MapInspectionUpdateEndpoint();
 
-            var inspectionItemGroup = app.MapGroup("inspectionItem").WithTags("inspectionItem");
+            var inspectionItemGroup = app.MapGroup("inspectionItems").WithTags("inspectionItems");
             inspectionItemGroup.MapInspectionItemCreationEndpoint();
             inspectionItemGroup.MapInspectionItemDeletionEndpoint();
             inspectionItemGroup.MapGetInspectionItemEndpoint();
             inspectionItemGroup.MapGetInspectionItemListEndpoint();
             inspectionItemGroup.MapInspectionItemUpdateEndpoint();
+
+            var acceptanceGroup = app.MapGroup("acceptances").WithTags("acceptances");
+            acceptanceGroup.MapAcceptanceCreationEndpoint();
+            acceptanceGroup.MapAcceptanceDeletionEndpoint();
+            acceptanceGroup.MapGetAcceptanceEndpoint();
+            acceptanceGroup.MapGetAcceptanceListEndpoint();
+            acceptanceGroup.MapAcceptanceUpdateEndpoint();
+
+            var acceptanceItemGroup = app.MapGroup("acceptanceItems").WithTags("acceptanceItems");
+            acceptanceItemGroup.MapAcceptanceItemCreationEndpoint();
+            acceptanceItemGroup.MapAcceptanceItemDeletionEndpoint();
+            acceptanceItemGroup.MapGetAcceptanceItemEndpoint();
+            acceptanceItemGroup.MapGetAcceptanceItemListEndpoint();
+            acceptanceItemGroup.MapAcceptanceItemUpdateEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)

@@ -1,9 +1,10 @@
 ﻿using AMIS.Framework.Core.Domain;
+using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
 
 namespace AMIS.WebApi.Catalog.Domain;
 
-public class AcceptanceItem : AuditableEntity
+public class AcceptanceItem : AuditableEntity, IAggregateRoot
 {
     public Guid AcceptanceId { get; private set; }
     public Guid PurchaseItemId { get; private set; }
@@ -31,9 +32,21 @@ public class AcceptanceItem : AuditableEntity
         return new AcceptanceItem(Guid.NewGuid(), acceptanceId, purchaseItemId, qtyAccepted, remarks);
     }
 
-    public AcceptanceItem Update(int qtyAccepted, string? remarks)
+    public AcceptanceItem Update(Guid acceptanceId, Guid purchaseItemId, int qtyAccepted, string? remarks)
     {
         bool isUpdated = false;
+
+        if (AcceptanceId != acceptanceId)
+        {
+            AcceptanceId = acceptanceId;
+            isUpdated = true;
+        }
+
+        if (PurchaseItemId != purchaseItemId)
+        {
+            PurchaseItemId = purchaseItemId;
+            isUpdated = true;
+        }
 
         if (QtyAccepted != qtyAccepted)
         {
@@ -54,4 +67,5 @@ public class AcceptanceItem : AuditableEntity
 
         return this;
     }
+
 }
