@@ -132,6 +132,22 @@ public static class FshPermissions
         new("Delete InspectionItems", FshActions.Delete, FshResources.InspectionItems),
         new("Export InspectionItems", FshActions.Export, FshResources.InspectionItems),
 
+        //acceptances
+        new("View Acceptances", FshActions.View, FshResources.Acceptances, IsBasic: true),
+        new("Search Acceptances", FshActions.Search, FshResources.Acceptances, IsBasic: true),
+        new("Create Acceptances", FshActions.Create, FshResources.Acceptances),
+        new("Update Acceptances", FshActions.Update, FshResources.Acceptances),
+        new("Delete Acceptances", FshActions.Delete, FshResources.Acceptances),
+        new("Export Acceptances", FshActions.Export, FshResources.Acceptances),
+
+        //acceptanceitems
+        new("View AcceptanceItems", FshActions.View, FshResources.AcceptanceItems, IsBasic: true),
+        new("Search AcceptanceItems", FshActions.Search, FshResources.AcceptanceItems, IsBasic: true),
+        new("Create AcceptanceItems", FshActions.Create, FshResources.AcceptanceItems),
+        new("Update AcceptanceItems", FshActions.Update, FshResources.AcceptanceItems),
+        new("Delete AcceptanceItems", FshActions.Delete, FshResources.AcceptanceItems),
+        new("Export AcceptanceItems", FshActions.Export, FshResources.AcceptanceItems),
+
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
         new("Search Todos", FshActions.Search, FshResources.Todos, IsBasic: true),

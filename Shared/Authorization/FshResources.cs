@@ -21,6 +21,8 @@ public static class FshResources
     public const string InventoryTransactions = nameof(InventoryTransactions);
     public const string Inspections = nameof(Inspections);
     public const string InspectionItems = nameof(InspectionItems);
+    public const string Acceptances = nameof(Acceptances);
+    public const string AcceptanceItems = nameof(AcceptanceItems);
     public const string Todos = nameof(Todos);
     public const string AuditTrails = nameof(AuditTrails);
 }
