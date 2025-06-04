@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Catalog.Application.AcceptanceItems.Create.v1;
 
 public sealed class CreateAcceptanceItemHandler(
     ILogger<CreateAcceptanceItemHandler> logger,
-    [FromKeyedServices("catalog:inspectionItems")] IRepository<AcceptanceItem> repository)
+    [FromKeyedServices("catalog:acceptanceItems")] IRepository<AcceptanceItem> repository)
     : IRequestHandler<CreateAcceptanceItemCommand, CreateAcceptanceItemResponse>
 {
     public async Task<CreateAcceptanceItemResponse> Handle(CreateAcceptanceItemCommand request, CancellationToken cancellationToken)

@@ -8,7 +8,7 @@ using AMIS.WebApi.Catalog.Domain;
 namespace AMIS.WebApi.Catalog.Application.Acceptances.Get.v1;
 
 public sealed class GetAcceptanceHandler(
-    [FromKeyedServices("catalog:inspections")] IReadRepository<Acceptance> repository,
+    [FromKeyedServices("catalog:acceptances")] IReadRepository<Acceptance> repository,
     ICacheService cache)
     : IRequestHandler<GetAcceptanceRequest, AcceptanceResponse>
 {

@@ -1,0 +1,74 @@
+﻿@page "/catalog/inspectionrequests"
+<PageHeader Title="Inspection Requests" Header="Inspection Requests" SubHeader="Manage inspection requests for purchases." />
+
+<MudDataGrid ServerData="ServerReload"
+             MultiSelection="true"
+             @bind-SelectedItems="_selectedItems"
+             @bind-SelectedItem="_currentDto"
+             ColumnResizeMode="ResizeMode.Column"
+             Hover="true"
+             Loading="@_loading"
+             @ref="_table"
+             Outlined>
+
+    <ToolBarContent>
+        <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap">
+            <div class="d-flex align-center gap-1">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Disabled="@_loading"
+                           OnClick="@OnRefresh"
+                           StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+
+                @if (_canCreate)
+                {
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@_loading"
+                               OnClick="OnCreate"
+                               StartIcon="@Icons.Material.Filled.Add">New</MudButton>
+                }
+
+                @if (_canDelete)
+                {
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Error"
+                               Disabled="@(_selectedItems.Count == 0)"
+                               OnClick="OnDeleteChecked"
+                               StartIcon="@Icons.Material.Filled.Delete">Delete</MudButton>
+                }
+            </div>
+            <MudSpacer />
+            @if (_canSearch)
+            {
+                <MudTextField T="string"
+                              ValueChanged="@(s => OnSearch(s))"
+                              Placeholder="Search"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Class="mt-0 mb-3" />
+            }
+        </div>
+    </ToolBarContent>
+
+    <Columns>
+        <SelectColumn T="InspectionRequestResponse" />
+        <PropertyColumn Property="x => x.PurchaseNumber" Title="Purchase #" />
+        <PropertyColumn Property="x => x.SupplierName" Title="Supplier" />
+        <PropertyColumn Property="x => x.InspectorName" Title="Inspector" />
+        <PropertyColumn Property="x => x.RequestDate" Title="Request Date" />
+        <PropertyColumn Property="x => x.Status" Title="Status" />
+        <TemplateColumn Title="Action">
+            <CellTemplate>
+                <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">
+                    <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                </MudMenu>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+
+    <PagerContent>
+        <MudDataGridPager />
+    </PagerContent>
+</MudDataGrid>

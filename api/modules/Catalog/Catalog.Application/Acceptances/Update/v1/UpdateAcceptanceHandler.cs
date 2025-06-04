@@ -9,7 +9,7 @@ namespace AMIS.WebApi.Catalog.Application.Acceptances.Update.v1;
 
 public sealed class UpdateAcceptanceHandler(
     ILogger<UpdateAcceptanceHandler> logger,
-    [FromKeyedServices("catalog:inspections")] IRepository<Acceptance> repository)
+    [FromKeyedServices("catalog:acceptances")] IRepository<Acceptance> repository)
     : IRequestHandler<UpdateAcceptanceCommand, UpdateAcceptanceResponse>
 {
     public async Task<UpdateAcceptanceResponse> Handle(UpdateAcceptanceCommand request, CancellationToken cancellationToken)
