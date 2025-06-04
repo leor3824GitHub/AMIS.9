@@ -13,6 +13,12 @@ public class Purchase : AuditableEntity, IAggregateRoot
     public virtual Supplier? Supplier { get; private set; }
     public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
 
+    public virtual ICollection<Inspection> Inspections { get; private set; } = [];
+    public virtual ICollection<Acceptance> Acceptances { get; private set; } = [];
+
+    // Add summary helpers (not mapped)
+    public bool IsFullyInspected => Items.All(i => i.InspectionStatus == PurchaseItemInspectionStatus.Passed);
+    public bool IsFullyAccepted => Items.All(i => i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted);
     private Purchase() { }
 
     private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)

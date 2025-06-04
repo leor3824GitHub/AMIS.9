@@ -14,7 +14,17 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
     public PurchaseItemInspectionStatus? InspectionStatus { get; private set; }
     public PurchaseItemAcceptanceStatus? AcceptanceStatus { get; private set; }
 
+    // New aggregate fields for summary views
+    public int? QtyInspected { get; private set; }  // Set from InspectionItem
+    public int? QtyPassed { get; private set; }
+    public int? QtyFailed { get; private set; }
+
+    public int? QtyAccepted { get; private set; } // Set from AcceptanceItem
+
+    // Navigation
     public virtual Product Product { get; private set; } = default!;
+    public virtual ICollection<InspectionItem> InspectionItems { get; private set; } = [];
+    public virtual ICollection<AcceptanceItem> AcceptanceItems { get; private set; } = [];
 
     private PurchaseItem() { }
 
@@ -33,6 +43,17 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
     public static PurchaseItem Create(Guid? purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
         return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, itemstatus);
+    }
+        public void UpdateInspectionSummary(int inspected, int passed, int failed)
+    {
+        QtyInspected = inspected;
+        QtyPassed = passed;
+        QtyFailed = failed;
+    }
+
+    public void UpdateAcceptanceSummary(int accepted)
+    {
+        QtyAccepted = accepted;
     }
 
     public PurchaseItem Update(Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)

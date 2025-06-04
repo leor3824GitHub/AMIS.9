@@ -10,11 +10,14 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public Guid InspectorId { get; private set; } // Employee ID
     public DateTime InspectionDate { get; private set; }
     public string? Remarks { get; private set; }
-
+    
+    // Navigation
     public virtual Purchase Purchase { get; private set; } = default!;
     public virtual Employee Inspector { get; private set; } = default!;
     public virtual ICollection<InspectionItem> Items { get; private set; } = [];
-
+    
+    // Optional helper: was partial inspection?
+    public bool IsPartial => Items.Any(i => i.QtyFailed > 0);
     private Inspection() { }
 
     private Inspection(Guid id, Guid purchaseId, Guid inspectedId, DateTime inspectionDate, string? remarks)
