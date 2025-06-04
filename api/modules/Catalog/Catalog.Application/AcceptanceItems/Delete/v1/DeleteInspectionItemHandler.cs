@@ -9,7 +9,7 @@ namespace AMIS.WebApi.Catalog.Application.AcceptanceItems.Delete.v1
 {
     public sealed class DeleteAcceptanceItemHandler(
         ILogger<DeleteAcceptanceItemHandler> logger,
-        [FromKeyedServices("catalog:inspectionItems")] IRepository<AcceptanceItem> repository)
+        [FromKeyedServices("catalog:acceptanceItems")] IRepository<AcceptanceItem> repository)
         : IRequestHandler<DeleteAcceptanceItemCommand, DeleteAcceptanceItemResponse>
     {
         public async Task<DeleteAcceptanceItemResponse> Handle(DeleteAcceptanceItemCommand request, CancellationToken cancellationToken)

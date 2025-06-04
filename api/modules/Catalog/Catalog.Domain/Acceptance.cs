@@ -15,6 +15,7 @@ public class Acceptance : AuditableEntity, IAggregateRoot
     public virtual Employee AccountableOfficer { get; private set; } = default!;
     public virtual ICollection<AcceptanceItem> Items { get; private set; } = [];
 
+    public bool IsFullAcceptance => Items.All(i => i.PurchaseItem.Qty == i.QtyAccepted);
     private Acceptance() { }
 
     private Acceptance(Guid id, Guid purchaseId, Guid acceptedBy, DateTime acceptanceDate, string? remarks)

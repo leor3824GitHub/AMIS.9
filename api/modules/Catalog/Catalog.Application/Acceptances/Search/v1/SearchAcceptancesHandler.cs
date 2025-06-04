@@ -8,7 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace AMIS.WebApi.Catalog.Application.Acceptances.Search.v1;
 
 public sealed class SearchAcceptancesHandler(
-    [FromKeyedServices("catalog:inspections")] IReadRepository<Acceptance> repository)
+    [FromKeyedServices("catalog:acceptances")] IReadRepository<Acceptance> repository)
     : IRequestHandler<SearchAcceptancesCommand, PagedList<AcceptanceResponse>>
 {
     public async Task<PagedList<AcceptanceResponse>> Handle(SearchAcceptancesCommand request, CancellationToken cancellationToken)
