@@ -148,6 +148,14 @@ public static class FshPermissions
         new("Delete AcceptanceItems", FshActions.Delete, FshResources.AcceptanceItems),
         new("Export AcceptanceItems", FshActions.Export, FshResources.AcceptanceItems),
 
+        //inspectionrequests
+        new("View InspectionRequests", FshActions.View, FshResources.InspectionRequests, IsBasic: true),
+        new("Search InspectionRequests", FshActions.Search, FshResources.InspectionRequests, IsBasic: true),
+        new("Create InspectionRequests", FshActions.Create, FshResources.InspectionRequests),
+        new("Update InspectionRequests", FshActions.Update, FshResources.InspectionRequests),
+        new("Delete InspectionRequests", FshActions.Delete, FshResources.InspectionRequests),
+        new("Export InspectionRequests", FshActions.Export, FshResources.InspectionRequests),
+
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
         new("Search Todos", FshActions.Search, FshResources.Todos, IsBasic: true),

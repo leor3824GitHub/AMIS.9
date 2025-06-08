@@ -7,7 +7,7 @@ namespace AMIS.WebApi.Catalog.Application.Inspections.Search.v1;
 public class SearchInspectionsCommand : PaginationFilter, IRequest<PagedList<InspectionResponse>>
 {
     public Guid? PurchaseId { get; set; }
-    public Guid? InspectedBy { get; set; }
+    public Guid? InspectorId { get; set; }
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
 }

@@ -17,7 +17,7 @@ public sealed class CreateInspectionRequestHandler(
 
         var inspectionRequest = InspectionRequest.Create(
             purchaseId: request.PurchaseId,
-            requestedById: request.RequestById
+            requestedById: request.RequestedById
         );
 
         await repository.AddAsync(inspectionRequest, cancellationToken);

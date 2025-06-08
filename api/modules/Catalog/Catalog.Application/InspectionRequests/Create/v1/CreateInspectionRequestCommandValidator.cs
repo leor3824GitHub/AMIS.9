@@ -7,6 +7,6 @@ public class CreateInspectionRequestCommandValidator : AbstractValidator<CreateI
     public CreateInspectionRequestCommandValidator()
     {
         RuleFor(c => c.PurchaseId).NotEmpty();
-        RuleFor(c => c.RequestById).NotEmpty();
+        RuleFor(c => c.RequestedById).NotEmpty();
     }
 }

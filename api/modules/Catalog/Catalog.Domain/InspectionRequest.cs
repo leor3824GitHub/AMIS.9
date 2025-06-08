@@ -1,7 +1,7 @@
-﻿using AMIS.Framework.Core.Domain.Contracts;
-using AMIS.Framework.Core.Domain;
-using AMIS.WebApi.Catalog.Domain.ValueObjects;
+﻿using AMIS.Framework.Core.Domain;
+using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 
@@ -12,6 +12,8 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
     public Guid? AssignedInspectorId { get; private set; }
     public InspectionRequestStatus Status { get; private set; }
     public DateTime DateCreated { get; private set; }
+    public virtual Employee? Employee { get; private set; }
+    public virtual Purchase? Purchase { get; private set; }
 
     private InspectionRequest() { }
 

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20250501065102_update3 Catalogs")]
-    partial class update3Catalogs
+    [Migration("20250607150423_add initial Catalogs")]
+    partial class addinitialCatalogs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,6 +25,115 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Acceptance", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("AcceptanceDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("AcceptedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AccountableOfficerId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountableOfficerId");
+
+                    b.HasIndex("PurchaseId");
+
+                    b.ToTable("Acceptances", "catalog");
+
+                    b.HasAnnotation("Finbuckle:MultiTenant", true);
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.AcceptanceItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("AcceptanceId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("QtyAccepted")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AcceptanceId");
+
+                    b.HasIndex("PurchaseItemId");
+
+                    b.ToTable("AcceptanceItems", "catalog");
+
+                    b.HasAnnotation("Finbuckle:MultiTenant", true);
+                });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Brand", b =>
                 {
@@ -169,6 +278,181 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.HasAnnotation("Finbuckle:MultiTenant", true);
                 });
 
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Inspection", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("InspectionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("InspectorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InspectorId");
+
+                    b.HasIndex("PurchaseId");
+
+                    b.ToTable("Inspections", "catalog");
+
+                    b.HasAnnotation("Finbuckle:MultiTenant", true);
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.InspectionItem", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("InspectionId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("InspectionId1")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseItemId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("QtyFailed")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtyInspected")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("QtyPassed")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("InspectionId");
+
+                    b.HasIndex("InspectionId1");
+
+                    b.HasIndex("PurchaseItemId");
+
+                    b.ToTable("InspectionItems", "catalog");
+
+                    b.HasAnnotation("Finbuckle:MultiTenant", true);
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.InspectionRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("AssignedInspectorId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("DateCreated")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("EmployeeId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("RequestedById")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EmployeeId");
+
+                    b.HasIndex("PurchaseId");
+
+                    b.ToTable("InspectionRequests", "catalog");
+
+                    b.HasAnnotation("Finbuckle:MultiTenant", true);
+                });
+
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Inventory", b =>
                 {
                     b.Property<Guid>("Id")
@@ -239,6 +523,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -399,9 +686,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<string>("Location")
-                        .HasColumnType("text");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -484,6 +768,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
+                    b.Property<int?>("AcceptanceStatus")
+                        .HasColumnType("integer");
+
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("timestamp with time zone");
 
@@ -495,6 +782,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
+
+                    b.Property<int?>("InspectionStatus")
+                        .HasColumnType("integer");
 
                     b.Property<int?>("ItemStatus")
                         .HasColumnType("integer");
@@ -512,6 +802,18 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasColumnType("uuid");
 
                     b.Property<int>("Qty")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("QtyAccepted")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("QtyFailed")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("QtyInspected")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("QtyPassed")
                         .HasColumnType("integer");
 
                     b.Property<string>("TenantId")
@@ -590,6 +892,103 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.ToTable("Suppliers", "catalog");
 
                     b.HasAnnotation("Finbuckle:MultiTenant", true);
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Acceptance", b =>
+                {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Employee", "AccountableOfficer")
+                        .WithMany()
+                        .HasForeignKey("AccountableOfficerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", "Purchase")
+                        .WithMany("Acceptances")
+                        .HasForeignKey("PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AccountableOfficer");
+
+                    b.Navigation("Purchase");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.AcceptanceItem", b =>
+                {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Acceptance", "Acceptance")
+                        .WithMany("Items")
+                        .HasForeignKey("AcceptanceId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.PurchaseItem", "PurchaseItem")
+                        .WithMany("AcceptanceItems")
+                        .HasForeignKey("PurchaseItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Acceptance");
+
+                    b.Navigation("PurchaseItem");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Inspection", b =>
+                {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Employee", "Inspector")
+                        .WithMany()
+                        .HasForeignKey("InspectorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", "Purchase")
+                        .WithMany("Inspections")
+                        .HasForeignKey("PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Inspector");
+
+                    b.Navigation("Purchase");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.InspectionItem", b =>
+                {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Inspection", "Inspection")
+                        .WithMany()
+                        .HasForeignKey("InspectionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Inspection", null)
+                        .WithMany("Items")
+                        .HasForeignKey("InspectionId1");
+
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.PurchaseItem", "PurchaseItem")
+                        .WithMany("InspectionItems")
+                        .HasForeignKey("PurchaseItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Inspection");
+
+                    b.Navigation("PurchaseItem");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.InspectionRequest", b =>
+                {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Employee", "Employee")
+                        .WithMany()
+                        .HasForeignKey("EmployeeId");
+
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", "Purchase")
+                        .WithMany()
+                        .HasForeignKey("PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Employee");
+
+                    b.Navigation("Purchase");
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Inventory", b =>
@@ -671,9 +1070,30 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Navigation("Product");
                 });
 
-            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Purchase", b =>
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Acceptance", b =>
                 {
                     b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Inspection", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Purchase", b =>
+                {
+                    b.Navigation("Acceptances");
+
+                    b.Navigation("Inspections");
+
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.PurchaseItem", b =>
+                {
+                    b.Navigation("AcceptanceItems");
+
+                    b.Navigation("InspectionItems");
                 });
 #pragma warning restore 612, 618
         }

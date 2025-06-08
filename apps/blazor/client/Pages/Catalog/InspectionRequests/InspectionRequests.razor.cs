@@ -30,20 +30,4 @@ protected override async Task OnInitializedAsync()
     _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.InspectionRequests);
 }
 
-private async Task<GridData<InspectionRequestResponse>> ServerReload(GridState<InspectionRequestResponse> state)
-{
-    _loading = true;
-    var filter = new SearchInspectionRequestsCommand
-    {
-        PageSize = state.PageSize,
-        PageNumber = state.Page + 1,
-        AdvancedSearch = new()
-        {
-            Fields = new[] { "purchaseReferenceNumber", "requestedBy" },
-            Keyword = searchString
-        }
-    };
 
-    try
-    {
-        var result = await ApiClient.SearchInspectionRequestsEndpointAsync("1", fi

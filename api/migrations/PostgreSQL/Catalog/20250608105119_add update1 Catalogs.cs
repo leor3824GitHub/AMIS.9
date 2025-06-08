@@ -5,7 +5,7 @@
 namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 {
     /// <inheritdoc />
-    public partial class update3Catalogs : Migration
+    public partial class addupdate1Catalogs : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

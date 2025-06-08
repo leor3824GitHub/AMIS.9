@@ -17,12 +17,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Compile Remove="Pages\Catalog\InspectionRequests\InspectionRequests.razor.cs" />
 	  <Compile Remove="Pages\Catalog\Products\Product3.razor.cs" />
 	  <Compile Remove="Pages\Catalog\Products_1.cs" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Content Remove="Pages\Catalog\InspectionRequest.razor" />
+	  <Content Remove="Pages\Catalog\InspectionRequests\InspectionRequests.razor" />
 	  <Content Remove="Pages\Catalog\Products\Product3.razor" />
 	  <Content Remove="Pages\Catalog\Products\Product4.razor" />
 	  <Content Remove="Pages\Catalog\Products_1.razor" />
@@ -48,6 +50,10 @@
 
 	<ItemGroup>
 		<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Pages\Catalog\InspectionRequests\" />
 	</ItemGroup>
 
 </Project>

@@ -1,5 +1,5 @@
-﻿using Finbuckle.MultiTenant;
-using AMIS.WebApi.Catalog.Domain;
+﻿using AMIS.WebApi.Catalog.Domain;
+using Finbuckle.MultiTenant;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -9,15 +9,31 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
     {
         public void Configure(EntityTypeBuilder<Inspection> builder)
         {
-            
-            builder.IsMultiTenant();   // MultiTenant support for Inspection entity            
-            builder.HasKey(x => x.Id);  // Primary key            
-            builder.Property(x => x.InspectionDate)  // Property configurations
+            // Enable multi-tenancy
+            builder.IsMultiTenant(); // Adds TenantId column and filter automatically
+
+            // Primary key
+            builder.HasKey(x => x.Id);
+
+            // Foreign key relationships
+            builder.HasOne(i => i.Inspector)
+                .WithMany() // Assuming Employee does NOT have a collection of Inspections
+                .HasForeignKey(i => i.InspectorId)
+                .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete if Inspector is deleted
+
+            builder.HasOne(i => i.Purchase)
+                .WithMany(p => p.Inspections)
+                .HasForeignKey(i => i.PurchaseId)
+                .OnDelete(DeleteBehavior.Cascade); // Usually OK to cascade if Purchase is deleted
+
+            // Property configurations
+            builder.Property(x => x.InspectionDate)
                 .IsRequired();
 
             builder.Property(x => x.Remarks)
                 .HasMaxLength(200)
-                .IsRequired(false); // Optional, adjust based on your design
+                .IsRequired(false);
+
         }
     }
 }

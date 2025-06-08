@@ -127,6 +127,13 @@ public static class CatalogModule
             acceptanceItemGroup.MapGetAcceptanceItemEndpoint();
             acceptanceItemGroup.MapGetAcceptanceItemListEndpoint();
             acceptanceItemGroup.MapAcceptanceItemUpdateEndpoint();
+
+            var inspectionRequestGroup = app.MapGroup("inspectionRequests").WithTags("inspectionRequests");
+            inspectionRequestGroup.MapInspectionRequestCreationEndpoint();
+            inspectionRequestGroup.MapInspectionRequestDeletionEndpoint();
+            inspectionRequestGroup.MapGetInspectionRequestEndpoint();
+            inspectionRequestGroup.MapGetInspectionRequestListEndpoint();
+            inspectionRequestGroup.MapInspectionRequestUpdateEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -176,6 +183,9 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
         builder.Services.AddKeyedScoped<IReadRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
+
+        builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
+        builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)
