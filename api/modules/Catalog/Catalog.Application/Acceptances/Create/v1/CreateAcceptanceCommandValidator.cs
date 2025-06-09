@@ -7,7 +7,7 @@ public class CreateAcceptanceCommandValidator : AbstractValidator<CreateAcceptan
     public CreateAcceptanceCommandValidator()
     {
         RuleFor(c => c.PurchaseId).NotEmpty();
-        RuleFor(c => c.AcceptorId).NotEmpty();
+        RuleFor(c => c.SupplyOfficerId).NotEmpty();
         RuleFor(c => c.AcceptanceDate).NotEmpty();
 
         RuleForEach(c => c.Items).ChildRules(items =>

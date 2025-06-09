@@ -12,7 +12,7 @@ public class SearchAcceptanceSpecs : EntitiesByPaginationFilterSpec<Acceptance, 
         : base(command)
     {
         Query
-            .Include(i => i.AcceptedBy)
+            .Include(i => i.SupplyOfficer)
             .Include(i => i.Purchase)
             .OrderBy(i => i.AcceptanceDate, !command.HasOrderBy())
             .Where(i => i.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)

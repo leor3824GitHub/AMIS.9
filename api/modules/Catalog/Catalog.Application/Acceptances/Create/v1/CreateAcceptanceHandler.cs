@@ -17,7 +17,7 @@ public sealed class CreateAcceptanceHandler(
 
         var acceptance = Acceptance.Create(
             purchaseId: request.PurchaseId,
-            acceptedBy: request.AcceptorId,
+            supplyOfficerId: request.SupplyOfficerId,
             acceptanceDate: request.AcceptanceDate,
             remarks: request.Remarks
         );

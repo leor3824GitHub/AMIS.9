@@ -10,6 +10,6 @@ public class GetAcceptanceSpecs : Specification<Acceptance, AcceptanceResponse>
         Query
             .Where(i => i.Id == id)
             .Include(i => i.Purchase)
-            .Include(i => i.AcceptedBy);
+            .Include(i => i.SupplyOfficer);
     }
 }

@@ -19,7 +19,7 @@ public sealed class UpdateAcceptanceHandler(
         var inspection = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = inspection ?? throw new AcceptanceNotFoundException(request.Id);
 
-        inspection.Update(request.AcceptedBy, request.AcceptanceDate, request.Remarks);
+        inspection.Update(request.SupplyOfficerId, request.AcceptanceDate, request.Remarks);
 
         await repository.UpdateAsync(inspection, cancellationToken);
         logger.LogInformation("Acceptance {AcceptanceId} updated (without item changes).", inspection.Id);

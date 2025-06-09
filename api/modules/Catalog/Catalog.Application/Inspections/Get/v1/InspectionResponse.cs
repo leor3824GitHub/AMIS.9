@@ -6,7 +6,6 @@ public sealed record InspectionResponse(
     Guid Id,
     DateTime InspectionDate,
     Guid InspectorId,
-    Guid PurchaseOrderId,
     string Remarks,
     EmployeeResponse Inspector
 );

@@ -8,6 +8,6 @@ public class UpdateAcceptanceCommandValidator : AbstractValidator<UpdateAcceptan
     {
         RuleFor(x => x.Id).NotEmpty();
         RuleFor(x => x.AcceptanceDate).NotEmpty();
-        RuleFor(x => x.AcceptedBy).NotEmpty();
+        RuleFor(x => x.SupplyOfficerId).NotEmpty();
     }
 }

@@ -8,6 +8,6 @@ public class UpdateInspectionCommandValidator : AbstractValidator<UpdateInspecti
     {
         RuleFor(x => x.Id).NotEmpty();
         RuleFor(x => x.InspectionDate).NotEmpty();
-        RuleFor(x => x.InspectedBy).NotEmpty();
+        RuleFor(x => x.InspectorId).NotEmpty();
     }
 }

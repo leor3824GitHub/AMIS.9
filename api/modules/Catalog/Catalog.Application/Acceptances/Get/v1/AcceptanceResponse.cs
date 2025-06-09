@@ -1,10 +1,13 @@
-﻿namespace AMIS.WebApi.Catalog.Application.Acceptances.Get.v1;
+﻿using AMIS.WebApi.Catalog.Application.Employees.Get.v1;
+
+namespace AMIS.WebApi.Catalog.Application.Acceptances.Get.v1;
 
 public sealed record AcceptanceResponse(
     Guid Id,
-    Guid PurchaseOrderId,
-    string AcceptedByName,
+    Guid PurchaseId,
+    Guid SupplyOfficerId,
     DateTime AcceptanceDate,    
-    string Remarks    
+    string Remarks,
+    EmployeeResponse SupplyOfficer
 );
 

@@ -6,7 +6,6 @@ namespace AMIS.WebApi.Catalog.Application.Inspections.Update.v1;
 public sealed record UpdateInspectionCommand(
     Guid Id,
     DateTime InspectionDate,
-    Guid InspectedBy,
-    Guid PurchaseId,
+    Guid InspectorId,
     string? Remarks
 ) : IRequest<UpdateInspectionResponse>;

@@ -20,11 +20,11 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public bool IsPartial => Items.Any(i => i.QtyFailed > 0);
     private Inspection() { }
 
-    private Inspection(Guid id, Guid purchaseId, Guid inspectedId, DateTime inspectionDate, string? remarks)
+    private Inspection(Guid id, Guid purchaseId, Guid inspectorId, DateTime inspectionDate, string? remarks)
     {
         Id = id;
         PurchaseId = purchaseId;
-        InspectorId = inspectedId;
+        InspectorId = inspectorId;
         InspectionDate = inspectionDate;
         Remarks = remarks;
 
@@ -36,13 +36,13 @@ public class Inspection : AuditableEntity, IAggregateRoot
         return new Inspection(Guid.NewGuid(), purchaseId, inspectedId, inspectionDate, remarks);
     }
 
-    public Inspection Update(Guid inspectedId, DateTime inspectionDate, string? remarks)
+    public Inspection Update(Guid inspectorId, DateTime inspectionDate, string? remarks)
     {
         bool isUpdated = false;
 
-        if (InspectorId != inspectedId)
+        if (InspectorId != inspectorId)
         {
-            InspectorId = inspectedId;
+            InspectorId = inspectorId;
             isUpdated = true;
         }
 
