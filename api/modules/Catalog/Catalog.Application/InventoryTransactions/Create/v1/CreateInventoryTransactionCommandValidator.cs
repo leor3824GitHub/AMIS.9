@@ -9,7 +9,7 @@ public class CreateInventoryTransactionCommandValidator : AbstractValidator<Crea
         RuleFor(x => x.ProductId).NotEmpty();
         RuleFor(x => x.Qty).GreaterThan(0);
         RuleFor(x => x.UnitCost).GreaterThan(0);
-        RuleFor(x => x.TransactionType).IsInEnum();
+        //RuleFor(x => x.TransactionType).IsInEnum();
     }
 }
 
