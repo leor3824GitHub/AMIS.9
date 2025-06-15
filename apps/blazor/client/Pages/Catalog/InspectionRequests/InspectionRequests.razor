@@ -51,22 +51,25 @@
         </div>
     </ToolBarContent>
 
-    <Columns>
-        <SelectColumn T="InspectionRequestResponse" />
-        <PropertyColumn Property="x => x.PurchaseNumber" Title="Purchase #" />
-        <PropertyColumn Property="x => x.SupplierName" Title="Supplier" />
-        <PropertyColumn Property="x => x.InspectorName" Title="Inspector" />
-        <PropertyColumn Property="x => x.RequestDate" Title="Request Date" />
-        <PropertyColumn Property="x => x.Status" Title="Status" />
-        <TemplateColumn Title="Action">
-            <CellTemplate>
-                <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">
-                    <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
-                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
-                </MudMenu>
-            </CellTemplate>
-        </TemplateColumn>
-    </Columns>
+        <Columns>
+            <SelectColumn T="InspectionRequestResponse" />
+            <PropertyColumn Property="x => x.PurchaseId" Title="PurchaseId" />
+            <PropertyColumn Property="x => x.Status" Title="Status" />
+            <PropertyColumn Property="x => x.AssignedInspectorId" Title="Inspector" />
+            <PropertyColumn Property="x => x.DateCreated" Title="Request Date" />
+            <TemplateColumn Title="Action">
+                <CellTemplate>
+                    <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">
+                        @if (context.Item.AssignedInspectorId == null)
+                        {
+                            <MudMenuItem OnClick="@(() => OnAssign(context.Item))">Assign</MudMenuItem>
+                        }
+                        <MudMenuItem OnClick="@(() => OnView(context.Item))">View</MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OnInspect(context.Item))">Inspect</MudMenuItem>
+                    </MudMenu>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
 
     <PagerContent>
         <MudDataGridPager />

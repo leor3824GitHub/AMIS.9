@@ -1,0 +1,51 @@
+﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <MudDialog>
+        <DialogContent>
+            <FshValidation @ref="_customValidation" />
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <MudItem xs="12" sm="6" md="4">
+                <MudSelect T="Guid" Label="Purchases" @bind-Value="Model.PurchaseId"
+                           Placeholder="Select a purchase"
+                           Clearable="true">
+                    @foreach (var purchase in _purchases)
+                    {
+                        <MudSelectItem T="Guid?" Value="purchase.Id">@purchase.Supplier</MudSelectItem>
+                    }
+
+                </MudSelect>
+            </MudItem>
+            <MudGrid>
+                @* <MudItem xs="12" sm="6">
+                    <MudTextField @bind-Value="Model.Status" Label="Status" For="@(() => Model.Status)" />
+                    <ValidationMessage For="@(() => Model.Status)" />
+                </MudItem> *@
+                <MudItem xs="12" sm="6" md="2">
+                    <MudSelect T="InspectionRequestStatus" Variant="Variant.Outlined" Label=" Status" @bind-Value="Model.Status">
+                        @foreach (var status in PurchaseStatusList)
+                        {
+                            <MudSelectItem T="InspectionRequestStatus" Value="status">@GetDisplayName(status)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="4">
+                    <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.AssignedInspectorId"
+                               Placeholder="Select a employee"
+                               Clearable="true">
+                        @foreach (var employee in _employees)
+                        {
+                            <MudSelectItem T="Guid?" Value="employee.Id">@employee.Name</MudSelectItem>
+                        }
+                        
+                    </MudSelect>
+                </MudItem>     
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+
