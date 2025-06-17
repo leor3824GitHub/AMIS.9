@@ -7,7 +7,7 @@ namespace AMIS.WebApi.Catalog.Domain;
 
 public class InspectionRequest : AuditableEntity, IAggregateRoot
 {
-    public Guid PurchaseId { get; private set; }
+    public Guid? PurchaseId { get; private set; }
     public Guid? RequestedById { get; private set; } // Warehouse user
     public Guid? AssignedInspectorId { get; private set; }
     public InspectionRequestStatus Status { get; private set; }
@@ -17,23 +17,37 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
 
     private InspectionRequest() { }
 
-    private InspectionRequest(Guid id, Guid purchaseId, Guid? requestedById)
+    private InspectionRequest(Guid id, Guid? purchaseId, Guid? requestedById, Guid? assignedInspectorId)
     {
         Id = id;
         PurchaseId = purchaseId;
-        RequestedById = requestedById; // is the guid of current user
-        Status = InspectionRequestStatus.Pending;
+        RequestedById = requestedById;
+        AssignedInspectorId = assignedInspectorId;
+
+        Status = assignedInspectorId.HasValue
+            ? InspectionRequestStatus.Assigned
+            : InspectionRequestStatus.Pending;
+
         DateCreated = DateTime.UtcNow;
 
         QueueDomainEvent(new InspectionRequestCreated { RequestId = Id });
+
+        if (assignedInspectorId.HasValue)
+        {
+            QueueDomainEvent(new InspectionRequestAssigned
+            {
+                RequestId = Id,
+                InspectorId = assignedInspectorId.Value
+            });
+        }
     }
 
-    public static InspectionRequest Create(Guid purchaseId, Guid? requestedById)
+    public static InspectionRequest Create(Guid? purchaseId, Guid? requestedById, Guid? assignedInspectorId = null)
     {
-        return new InspectionRequest(Guid.NewGuid(), purchaseId, requestedById);
+        return new InspectionRequest(Guid.NewGuid(), purchaseId, requestedById, assignedInspectorId);
     }
 
-    public InspectionRequest Update(Guid purchaseId, Guid? requestedById, Guid? assignedInspectorId, InspectionRequestStatus status)
+    public InspectionRequest Update(Guid? purchaseId, Guid? requestedById, Guid? assignedInspectorId, InspectionRequestStatus status)
     {
         bool isUpdated = false;
 

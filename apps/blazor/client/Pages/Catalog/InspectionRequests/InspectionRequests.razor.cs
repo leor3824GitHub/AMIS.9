@@ -48,9 +48,10 @@ public partial class InspectionRequests
         _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.InspectionRequests);
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.InspectionRequests);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.InspectionRequests);
-
-        await LoadEmployeesAsync();
+        
         await LoadPurchasesAsync();
+        await LoadEmployeesAsync();
+        
     }
 
     private async Task LoadEmployeesAsync()

@@ -5,29 +5,17 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
             <MudItem xs="12" sm="6" md="4">
-                <MudSelect T="Guid" Label="Purchases" @bind-Value="Model.PurchaseId"
-                           Placeholder="Select a purchase"
+                <MudSelect T="Guid?" Label="Purchase" @bind-Value="Model.PurchaseId"
+                           Placeholder="Select a purchase order"
                            Clearable="true">
                     @foreach (var purchase in _purchases)
                     {
-                        <MudSelectItem T="Guid?" Value="purchase.Id">@purchase.Supplier</MudSelectItem>
+                        <MudSelectItem T="Guid?" Value="purchase.Id">@purchase.PurchaseDate</MudSelectItem>
                     }
 
                 </MudSelect>
             </MudItem>
             <MudGrid>
-                @* <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="Model.Status" Label="Status" For="@(() => Model.Status)" />
-                    <ValidationMessage For="@(() => Model.Status)" />
-                </MudItem> *@
-                <MudItem xs="12" sm="6" md="2">
-                    <MudSelect T="InspectionRequestStatus" Variant="Variant.Outlined" Label=" Status" @bind-Value="Model.Status">
-                        @foreach (var status in PurchaseStatusList)
-                        {
-                            <MudSelectItem T="InspectionRequestStatus" Value="status">@GetDisplayName(status)</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
                 <MudItem xs="12" sm="6" md="4">
                     <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.AssignedInspectorId"
                                Placeholder="Select a employee"

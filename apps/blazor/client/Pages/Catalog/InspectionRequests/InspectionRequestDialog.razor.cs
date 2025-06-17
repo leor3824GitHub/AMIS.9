@@ -26,27 +26,22 @@ public partial class InspectionRequestDialog
     private string? _successMessage;
     private FshValidation? _customValidation;
 
-    private List<InspectionRequestStatus> PurchaseStatusList =>
-    Enum.GetValues(typeof(InspectionRequestStatus)).Cast<InspectionRequestStatus>().ToList();
-
-    private string GetDisplayName(Enum value)
-    {
-        var field = value.GetType().GetField(value.ToString());
-        var attr = field?.GetCustomAttributes(typeof(DisplayAttribute), false)
-                         .Cast<DisplayAttribute>()
-                         .FirstOrDefault();
-
-        return attr?.Name ?? value.ToString();
-    }
     private async Task OnValidSubmit()
     {
         if (IsCreate == null) return;
 
-        Snackbar.Add(IsCreate.Value ? "Creating product..." : "Updating product...", Severity.Info);
+        Snackbar.Add(IsCreate.Value ? "Creating inspection request..." : "Updating inspection request...", Severity.Info);
 
-        if (IsCreate.Value) // Create product
+        if (IsCreate.Value) // Create inspection request
         {
             var model = Model.Adapt<CreateInspectionRequestCommand>();
+
+            // Fix for CS8629: Ensure AssignedInspectorId is not null before casting
+            if (model.AssignedInspectorId.HasValue)
+            {
+                model.RequestedById = model.AssignedInspectorId.Value;
+            }
+
             var response = await ApiHelper.ExecuteCallGuardedAsync(
                 () => InspectionRequestClient.CreateInspectionRequestEndpointAsync("1", model),
                 Snackbar,
@@ -55,14 +50,13 @@ public partial class InspectionRequestDialog
 
             if (response != null)
             {
-                _successMessage = "Product created successfully!";
+                _successMessage = "Inspection request created successfully!";
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }
         }
         else // Update product
         {
-            //var model = Model.Adapt<UpdateProductCommand>();
             var response = await ApiHelper.ExecuteCallGuardedAsync(
                 () => InspectionRequestClient.UpdateInspectionRequestEndpointAsync("1", Model.Id, Model),
                 Snackbar,
@@ -71,7 +65,7 @@ public partial class InspectionRequestDialog
 
             if (response != null)
             {
-                _successMessage = "Product updated successfully!";
+                _successMessage = "Inspection request updated successfully!";
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }

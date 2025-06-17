@@ -21,21 +21,25 @@ public sealed class UpdateInspectionRequestHandler(
         _ = inspectionRequest ?? throw new InspectionRequestNotFoundException(request.Id);
         try
         {
-            using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
-
-            inspectionRequest.Update(request.PurchaseId, request.RequestedById, request.AssignedInspectorId, request.Status);
+            inspectionRequest.Update(request.PurchaseId, request.RequestedById,request.AssignedInspectorId, request.Status);
 
             await repository.UpdateAsync(inspectionRequest, cancellationToken);
-            logger.LogInformation("InspectionRequest {InspectionRequestId} updated (without item changes).", inspectionRequest.Id);
 
-            scope.Complete();
+
+            logger.LogInformation(
+                "InspectionRequest {InspectionRequestId} successfully updated. Status: {Status}, AssignedInspector: {Inspector}",
+                inspectionRequest.Id,
+                inspectionRequest.Status,
+                inspectionRequest.AssignedInspectorId?.ToString() ?? "none"
+            );
+
             return new UpdateInspectionRequestResponse(inspectionRequest.Id);
         }
         catch (Exception ex)
         {
-            logger.LogWarning(ex, "Validation failed for InspectionRequest {InspectionRequestId}.", request.Id);
+            logger.LogError(ex, "Failed to update InspectionRequest {InspectionRequestId}", request.Id);
             throw;
         }
-        
+
     }
 }

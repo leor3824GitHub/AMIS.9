@@ -12186,10 +12186,13 @@ namespace AMIS.Blazor.Infrastructure.Api
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
-        public System.Guid PurchaseId { get; set; } = new System.Guid("beef1122-xxxx-xxxx-xxxx-aabbccddeeff");
+        public System.Guid? PurchaseId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("requestedById")]
-        public System.Guid RequestedById { get; set; } = new System.Guid("bfb91a20-xxxx-xxxx-xxxx-df0c914c1a22");
+        public System.Guid RequestedById { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("assignedInspectorId")]
+        public System.Guid? AssignedInspectorId { get; set; }
 
     }
 
@@ -12774,10 +12777,10 @@ namespace AMIS.Blazor.Infrastructure.Api
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
-        public System.Guid Id { get; set; }
+        public System.Guid? Id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
-        public System.Guid PurchaseId { get; set; }
+        public System.Guid? PurchaseId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("requestedById")]
         public System.Guid RequestedById { get; set; }
@@ -14330,7 +14333,7 @@ namespace AMIS.Blazor.Infrastructure.Api
         public System.Guid Id { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
-        public System.Guid PurchaseId { get; set; }
+        public System.Guid? PurchaseId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("requestedById")]
         public System.Guid RequestedById { get; set; }
