@@ -15,15 +15,15 @@ public sealed class CreateInspectionRequestHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var inspectionRequest = InspectionRequest.Create(request.PurchaseId, request.RequestedById, request.AssignedInspectorId);
+        var inspectionRequest = InspectionRequest.Create(request.PurchaseId, request.InspectorId);
 
         await repository.AddAsync(inspectionRequest, cancellationToken);
 
         logger.LogInformation(
             "InspectionRequest created {InspectionRequestId}{InspectorInfo}",
             inspectionRequest.Id,
-            request.AssignedInspectorId is not null
-                ? $" with AssignedInspectorId {request.AssignedInspectorId}"
+            request.InspectorId is not null
+                ? $" with AssignedInspectorId {request.InspectorId}"
                 : string.Empty
         );
 

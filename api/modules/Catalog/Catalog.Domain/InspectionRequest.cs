@@ -8,23 +8,23 @@ namespace AMIS.WebApi.Catalog.Domain;
 public class InspectionRequest : AuditableEntity, IAggregateRoot
 {
     public Guid? PurchaseId { get; private set; }
-    public Guid? RequestedById { get; private set; } // Warehouse user
-    public Guid? AssignedInspectorId { get; private set; }
+    //public Guid? RequestedById { get; private set; } // Warehouse user
+    public Guid? InspectorId { get; private set; }
     public InspectionRequestStatus Status { get; private set; }
     public DateTime DateCreated { get; private set; }
-    public virtual Employee? Employee { get; private set; }
+    public virtual Employee? Inspector { get; private set; }
     public virtual Purchase? Purchase { get; private set; }
 
     private InspectionRequest() { }
 
-    private InspectionRequest(Guid id, Guid? purchaseId, Guid? requestedById, Guid? assignedInspectorId)
+    private InspectionRequest(Guid id, Guid? purchaseId, Guid? inspectorId)
     {
         Id = id;
         PurchaseId = purchaseId;
-        RequestedById = requestedById;
-        AssignedInspectorId = assignedInspectorId;
+        //RequestedById = requestedById;
+        InspectorId = inspectorId;
 
-        Status = assignedInspectorId.HasValue
+        Status = inspectorId.HasValue
             ? InspectionRequestStatus.Assigned
             : InspectionRequestStatus.Pending;
 
@@ -32,22 +32,22 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
 
         QueueDomainEvent(new InspectionRequestCreated { RequestId = Id });
 
-        if (assignedInspectorId.HasValue)
+        if (inspectorId.HasValue)
         {
             QueueDomainEvent(new InspectionRequestAssigned
             {
                 RequestId = Id,
-                InspectorId = assignedInspectorId.Value
+                InspectorId = inspectorId.Value
             });
         }
     }
 
-    public static InspectionRequest Create(Guid? purchaseId, Guid? requestedById, Guid? assignedInspectorId = null)
+    public static InspectionRequest Create(Guid? purchaseId, Guid? inspectorId = null)
     {
-        return new InspectionRequest(Guid.NewGuid(), purchaseId, requestedById, assignedInspectorId);
+        return new InspectionRequest(Guid.NewGuid(), purchaseId, inspectorId);
     }
 
-    public InspectionRequest Update(Guid? purchaseId, Guid? requestedById, Guid? assignedInspectorId, InspectionRequestStatus status)
+    public InspectionRequest Update(Guid? purchaseId, Guid? inspectorId, InspectionRequestStatus status)
     {
         bool isUpdated = false;
 
@@ -57,15 +57,9 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (RequestedById != requestedById)
+        if (InspectorId != inspectorId)
         {
-            RequestedById = requestedById;
-            isUpdated = true;
-        }
-
-        if (AssignedInspectorId != assignedInspectorId)
-        {
-            AssignedInspectorId = assignedInspectorId;
+            InspectorId = inspectorId;
             isUpdated = true;
         }
 
@@ -85,7 +79,7 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
 
     public void AssignInspector(Guid inspectorId)
     {
-        AssignedInspectorId = inspectorId;
+        InspectorId = inspectorId;
         Status = InspectionRequestStatus.Assigned;
         QueueDomainEvent(new InspectionRequestAssigned { RequestId = Id, InspectorId = inspectorId });
     }

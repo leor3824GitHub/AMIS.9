@@ -10,14 +10,30 @@
                            Clearable="true">
                     @foreach (var purchase in _purchases)
                     {
-                        <MudSelectItem T="Guid?" Value="purchase.Id">@purchase.PurchaseDate</MudSelectItem>
+                        <MudSelectItem T="Guid?" Value="purchase.Id">
+                            @(purchase.PurchaseDate?.ToString("yyyy-MM-dd") ?? "No Date")
+                        </MudSelectItem>
                     }
-
                 </MudSelect>
+            </MudItem>
+            @{
+                var SelectedPurchase = _purchases.FirstOrDefault(s => s.Id == Model.PurchaseId);
+            }
+            <!-- Display supplier name and item count -->
+            <MudItem xs="12" sm="6" md="4">
+                <MudTextField Label="Supplier Name"
+                              ReadOnly="true"
+                              Value="@(SelectedPurchase?.Supplier?.Name ?? "N/A")"" />
+            </MudItem>
+
+            <MudItem xs="12" sm="6" md="4">
+                <MudTextField Label="Number of Items"
+                              ReadOnly="true"
+                              Value="@(SelectedPurchase?.Items?.Count.ToString() ?? "0")" />
             </MudItem>
             <MudGrid>
                 <MudItem xs="12" sm="6" md="4">
-                    <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.AssignedInspectorId"
+                    <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.InspectorId"
                                Placeholder="Select a employee"
                                Clearable="true">
                         @foreach (var employee in _employees)

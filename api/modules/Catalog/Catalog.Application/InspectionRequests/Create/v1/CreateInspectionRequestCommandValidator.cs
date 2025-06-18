@@ -10,11 +10,7 @@ public class CreateInspectionRequestCommandValidator : AbstractValidator<CreateI
            .NotEmpty()
            .WithMessage("PurchaseId is required.");
 
-        RuleFor(c => c.RequestedById)
-            .NotEmpty()
-            .WithMessage("RequestedById is required.");
-
-        RuleFor(c => c.AssignedInspectorId)
+        RuleFor(c => c.InspectorId)
             .Must(id => id == null || id != Guid.Empty)
             .WithMessage("AssignedInspectorId must be a valid GUID if provided.");
     }

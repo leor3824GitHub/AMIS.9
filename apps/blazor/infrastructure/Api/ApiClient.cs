@@ -12188,11 +12188,8 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
         public System.Guid? PurchaseId { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("requestedById")]
-        public System.Guid RequestedById { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("assignedInspectorId")]
-        public System.Guid? AssignedInspectorId { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("inspectorId")]
+        public System.Guid? InspectorId { get; set; }
 
     }
 
@@ -12782,11 +12779,8 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
         public System.Guid? PurchaseId { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("requestedById")]
-        public System.Guid RequestedById { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("assignedInspectorId")]
-        public System.Guid? AssignedInspectorId { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("inspectorId")]
+        public System.Guid? InspectorId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]
@@ -12794,6 +12788,12 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("dateCreated")]
         public System.DateTime DateCreated { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("purchase")]
+        public PurchaseResponse Purchase { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("inspector")]
+        public EmployeeResponse Inspector { get; set; }
 
     }
 
@@ -14335,11 +14335,8 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
         public System.Guid? PurchaseId { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("requestedById")]
-        public System.Guid RequestedById { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("assignedInspectorId")]
-        public System.Guid? AssignedInspectorId { get; set; }
+        [System.Text.Json.Serialization.JsonPropertyName("inspectorId")]
+        public System.Guid? InspectorId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         [System.Text.Json.Serialization.JsonConverter(typeof(System.Text.Json.Serialization.JsonStringEnumConverter))]

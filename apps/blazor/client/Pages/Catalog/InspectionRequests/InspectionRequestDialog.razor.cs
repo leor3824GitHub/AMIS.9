@@ -36,11 +36,7 @@ public partial class InspectionRequestDialog
         {
             var model = Model.Adapt<CreateInspectionRequestCommand>();
 
-            // Fix for CS8629: Ensure AssignedInspectorId is not null before casting
-            if (model.AssignedInspectorId.HasValue)
-            {
-                model.RequestedById = model.AssignedInspectorId.Value;
-            }
+            // Fix for CS8629: Ensure AssignedInspectorId is not null before casting  
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
                 () => InspectionRequestClient.CreateInspectionRequestEndpointAsync("1", model),
@@ -77,9 +73,9 @@ public partial class InspectionRequestDialog
     //}
     protected override async Task OnParametersSetAsync()
     {
-        if (Model != null && Model.AssignedInspectorId == null && _employees.Count != 0)
+        if (Model != null && Model.InspectorId == null && _employees.Count != 0)
         {
-            Model.AssignedInspectorId = null;
+            Model.InspectorId = null;
         }
     }
 
