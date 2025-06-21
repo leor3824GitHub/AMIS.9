@@ -6,8 +6,7 @@ namespace AMIS.WebApi.Catalog.Application.InspectionRequests.Create.v1;
 
 public sealed record CreateInspectionRequestCommand(
     Guid? PurchaseId,
-    Guid RequestedById,
-    Guid? AssignedInspectorId = null
+    Guid? InspectorId = null
 ) : IRequest<CreateInspectionRequestResponse>;
 
 

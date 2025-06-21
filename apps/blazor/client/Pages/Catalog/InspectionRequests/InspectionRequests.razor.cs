@@ -146,6 +146,11 @@ public partial class InspectionRequests
     {
         await _table.ReloadServerData();
     }
+
+    private async Task ReAssign(InspectionRequestResponse item)
+    {
+        // Open assign inspector dialog or redirect
+    }
     private async Task OnAssign(InspectionRequestResponse item)
     {
         // Open assign inspector dialog or redirect

@@ -21,7 +21,7 @@ public sealed class UpdateInspectionRequestHandler(
         _ = inspectionRequest ?? throw new InspectionRequestNotFoundException(request.Id);
         try
         {
-            inspectionRequest.Update(request.PurchaseId, request.RequestedById,request.AssignedInspectorId, request.Status);
+            inspectionRequest.Update(request.PurchaseId, request.InspectorId, request.Status);
 
             await repository.UpdateAsync(inspectionRequest, cancellationToken);
 
@@ -30,7 +30,7 @@ public sealed class UpdateInspectionRequestHandler(
                 "InspectionRequest {InspectionRequestId} successfully updated. Status: {Status}, AssignedInspector: {Inspector}",
                 inspectionRequest.Id,
                 inspectionRequest.Status,
-                inspectionRequest.AssignedInspectorId?.ToString() ?? "none"
+                inspectionRequest.InspectorId?.ToString() ?? "none"
             );
 
             return new UpdateInspectionRequestResponse(inspectionRequest.Id);

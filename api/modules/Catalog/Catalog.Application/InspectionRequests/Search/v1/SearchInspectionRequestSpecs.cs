@@ -12,7 +12,7 @@ public class SearchInspectionRequestSpecs : EntitiesByPaginationFilterSpec<Inspe
         : base(command)
     {
         Query
-            .Include(i => i.Employee)
+            .Include(i => i.Inspector)
             .Include(i => i.Purchase)
             .Where(i => i.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)
             .Where(i => i.DateCreated >= command.FromDate, command.FromDate.HasValue)

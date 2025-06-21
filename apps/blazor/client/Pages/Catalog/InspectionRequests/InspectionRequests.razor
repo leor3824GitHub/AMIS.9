@@ -53,17 +53,38 @@
 
         <Columns>
             <SelectColumn T="InspectionRequestResponse" />
-            @* <PropertyColumn Property="x => x.Purchases.Supplier.Name" Title="Supplier" /> *@
-            <PropertyColumn Property="x => x.Purchases.PurchaseDate" Title="PurchaseDate" />
-            <PropertyColumn Property="x => x.Status" Title="Status" />
-            <PropertyColumn Property="x => x.AssignedInspectorId" Title="Inspector" />
-            <PropertyColumn Property="x => x.DateCreated" Title="Request Date" />
+            @* <PropertyColumn Property="x => x.Purchase.PurchaseDate" Title="DatePurchase" /> *@
+            <TemplateColumn Title="DatePurchase">
+                <CellTemplate>
+                    @(context.Item.Purchase.PurchaseDate.HasValue
+                                    ? context.Item.Purchase.PurchaseDate.Value.ToString("yyyy-MM-dd")
+                                    : "")
+                </CellTemplate>
+            </TemplateColumn>
+            <PropertyColumn Property="x => x.Purchase.Supplier.Name" Title="Supplier Name" />
+            <TemplateColumn Title="No. of Item/s" Style="width: 120px;" >
+                    <CellTemplate>
+                        @(context.Item.Purchase?.Items?.Count ?? 0)
+                    </CellTemplate>
+                </TemplateColumn>
+        <PropertyColumn Property="x => x.Status" Title="Status" Style="width: 120px;" />
+            <PropertyColumn Property="x => x.Inspector.Name" Title="Inspector" />
+            @* <PropertyColumn Property="x => x.DateCreated" Title="Request Date" /> *@
+            <TemplateColumn Title="Request Date">
+                <CellTemplate>
+                    @context.Item.DateCreated.ToString("yyyy-MM-dd")
+                </CellTemplate>
+            </TemplateColumn>
             <TemplateColumn Title="Action">
                 <CellTemplate>
                     <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">
-                        @if (context.Item.AssignedInspectorId == null)
+                        @if (context.Item.InspectorId == null)
                         {
                             <MudMenuItem OnClick="@(() => OnAssign(context.Item))">Assign</MudMenuItem>
+                        }
+                        else
+                        {
+                            <MudMenuItem OnClick="@(() => ReAssign(context.Item))">Re-Assign</MudMenuItem>
                         }
                         <MudMenuItem OnClick="@(() => OnView(context.Item))">View</MudMenuItem>
                         <MudMenuItem OnClick="@(() => OnInspect(context.Item))">Inspect</MudMenuItem>
