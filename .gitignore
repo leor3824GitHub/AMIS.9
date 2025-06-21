@@ -363,3 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 /api/framework/Core/Persistence/IRepository.cs
 /api/modules/Catalog/Catalog.Infrastructure/Persistence/CatalogRepository.cs
+/apps/blazor/client/Pages/Catalog/InspectionRequests/InspectionRequestDialog.razor.cs
+/apps/blazor/client/Pages/Catalog/InspectionRequests/InspectionRequests.razor.cs
+/apps/blazor/infrastructure/Api/ApiClient.cs
+/.gitignore

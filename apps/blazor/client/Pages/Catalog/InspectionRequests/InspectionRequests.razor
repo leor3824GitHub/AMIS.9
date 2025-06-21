@@ -53,7 +53,8 @@
 
         <Columns>
             <SelectColumn T="InspectionRequestResponse" />
-            <PropertyColumn Property="x => x.PurchaseId" Title="PurchaseId" />
+            @* <PropertyColumn Property="x => x.Purchases.Supplier.Name" Title="Supplier" /> *@
+            <PropertyColumn Property="x => x.Purchases.PurchaseDate" Title="PurchaseDate" />
             <PropertyColumn Property="x => x.Status" Title="Status" />
             <PropertyColumn Property="x => x.AssignedInspectorId" Title="Inspector" />
             <PropertyColumn Property="x => x.DateCreated" Title="Request Date" />
