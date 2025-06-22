@@ -53,28 +53,10 @@
 
         <Columns>
             <SelectColumn T="InspectionRequestResponse" />
-            @* <PropertyColumn Property="x => x.Purchase.PurchaseDate" Title="DatePurchase" /> *@
-            <TemplateColumn Title="DatePurchase">
-                <CellTemplate>
-                    @(context.Item.Purchase.PurchaseDate.HasValue
-                                    ? context.Item.Purchase.PurchaseDate.Value.ToString("yyyy-MM-dd")
-                                    : "")
-                </CellTemplate>
-            </TemplateColumn>
-            <PropertyColumn Property="x => x.Purchase.Supplier.Name" Title="Supplier Name" />
-            <TemplateColumn Title="No. of Item/s" Style="width: 120px;" >
-                    <CellTemplate>
-                        @(context.Item.Purchase?.Items?.Count ?? 0)
-                    </CellTemplate>
-                </TemplateColumn>
-        <PropertyColumn Property="x => x.Status" Title="Status" Style="width: 120px;" />
-            <PropertyColumn Property="x => x.Inspector.Name" Title="Inspector" />
-            @* <PropertyColumn Property="x => x.DateCreated" Title="Request Date" /> *@
-            <TemplateColumn Title="Request Date">
-                <CellTemplate>
-                    @context.Item.DateCreated.ToString("yyyy-MM-dd")
-                </CellTemplate>
-            </TemplateColumn>
+            <PropertyColumn Property="x => x.Purchase.PurchaseDate" Title="Purchase Date" />
+            <PropertyColumn Property="x => x.Status" Title="Status" />
+            <PropertyColumn Property="x => x.InspectorId" Title="Inspector" />
+            <PropertyColumn Property="x => x.DateCreated" Title="Request Date" />
             <TemplateColumn Title="Action">
                 <CellTemplate>
                     <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">

@@ -367,3 +367,4 @@ FodyWeavers.xsd
 /apps/blazor/client/Pages/Catalog/InspectionRequests/InspectionRequests.razor.cs
 /apps/blazor/infrastructure/Api/ApiClient.cs
 /.gitignore
+/apps/blazor/client/Pages/Catalog/InspectionRequests/InspectionRequests.razor
