@@ -4,9 +4,11 @@
             <FshValidation @ref="_customValidation" />
             <DataAnnotationsValidator />
             <ValidationSummary />
+
+            <MudGrid>
             <MudItem xs="12" sm="6" md="4">
-                <MudSelect T="Guid?" Label="Purchase" @bind-Value="Model.PurchaseId"
-                           Placeholder="Select a purchase order"
+                <MudSelect T="Guid?" Label="Purchase Order" @bind-Value="Model.PurchaseId"
+                           Placeholder="Select a purchase order by date"
                            Clearable="true">
                     @foreach (var purchase in _purchases)
                     {
@@ -15,23 +17,20 @@
                         </MudSelectItem>
                     }
                 </MudSelect>
-            </MudItem>
             @{
                 var SelectedPurchase = _purchases.FirstOrDefault(s => s.Id == Model.PurchaseId);
             }
-            <!-- Display supplier name and item count -->
-            <MudItem xs="12" sm="6" md="4">
-                <MudTextField Label="Supplier Name"
-                              ReadOnly="true"
-                              Value="@(SelectedPurchase?.Supplier?.Name ?? "N/A")"" />
-            </MudItem>
+           <!-- Supplier Info directly under Purchase -->
+                    <MudText Typo="Typo.body1" Class="mt-2">
+                        <strong>Supplier Name:</strong> @(SelectedPurchase?.Supplier?.Name ?? "N/A")
+                    </MudText>
+                    <MudText Typo="Typo.body1">
+                        <strong>Number of Items:</strong> @(SelectedPurchase?.Items?.Count.ToString() ?? "0")
+                    </MudText>
+                </MudItem>
 
-            <MudItem xs="12" sm="6" md="4">
-                <MudTextField Label="Number of Items"
-                              ReadOnly="true"
-                              Value="@(SelectedPurchase?.Items?.Count.ToString() ?? "0")" />
-            </MudItem>
-            <MudGrid>
+                <!-- Inspector Select -->
+            
                 <MudItem xs="12" sm="6" md="4">
                     <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.InspectorId"
                                Placeholder="Select a employee"
@@ -44,7 +43,9 @@
                     </MudSelect>
                 </MudItem>     
             </MudGrid>
+
         </DialogContent>
+
         <DialogActions>
             <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
             <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>

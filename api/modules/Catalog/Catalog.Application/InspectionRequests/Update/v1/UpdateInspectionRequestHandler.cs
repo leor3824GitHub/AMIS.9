@@ -21,7 +21,7 @@ public sealed class UpdateInspectionRequestHandler(
         _ = inspectionRequest ?? throw new InspectionRequestNotFoundException(request.Id);
         try
         {
-            inspectionRequest.Update(request.PurchaseId, request.InspectorId, request.Status);
+            inspectionRequest.Update(request.PurchaseId, request.InspectorId);
 
             await repository.UpdateAsync(inspectionRequest, cancellationToken);
 

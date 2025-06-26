@@ -149,11 +149,14 @@ public partial class InspectionRequests
 
     private async Task ReAssign(InspectionRequestResponse item)
     {
-        // Open assign inspector dialog or redirect
+        // Open reassign inspector dialog or redirect
+        var model = item.Adapt<UpdateInspectionRequestCommand>(); // Fix: Change the type to match the expected argument
+        await ShowEditFormDialog("Re-assign to other inspector", model, false, _employees, _purchases);
     }
     private async Task OnAssign(InspectionRequestResponse item)
     {
-        // Open assign inspector dialog or redirect
+        var model = item.Adapt<UpdateInspectionRequestCommand>(); // Fix: Change the type to match the expected argument
+        await ShowEditFormDialog("Assign a inspector", model, false, _employees, _purchases);
     }
 
     private async Task OnView(InspectionRequestResponse item)

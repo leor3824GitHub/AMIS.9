@@ -47,7 +47,7 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
         return new InspectionRequest(Guid.NewGuid(), purchaseId, inspectorId);
     }
 
-    public InspectionRequest Update(Guid? purchaseId, Guid? inspectorId, InspectionRequestStatus status)
+    public InspectionRequest Update(Guid? purchaseId, Guid? inspectorId)
     {
         bool isUpdated = false;
 
@@ -61,12 +61,10 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
         {
             InspectorId = inspectorId;
             isUpdated = true;
-        }
 
-        if (Status != status)
-        {
-            Status = status;
-            isUpdated = true;
+            Status = inspectorId.HasValue
+            ? InspectionRequestStatus.Assigned
+            : InspectionRequestStatus.Pending;
         }
 
         if (isUpdated)
