@@ -8,41 +8,50 @@ public class Inspection : AuditableEntity, IAggregateRoot
 {
     public Guid PurchaseId { get; private set; }
     public Guid InspectorId { get; private set; } // Employee ID
+    public Guid? InspectionRequestId { get; private set; }
     public DateTime InspectionDate { get; private set; }
     public string? Remarks { get; private set; }
-    
+
     // Navigation
+    public virtual InspectionRequest? InspectionRequest { get; private set; }
     public virtual Purchase Purchase { get; private set; } = default!;
     public virtual Employee Inspector { get; private set; } = default!;
     public virtual ICollection<InspectionItem> Items { get; private set; } = [];
-    
+
     // Optional helper: was partial inspection?
     public bool IsPartial => Items.Any(i => i.QtyFailed > 0);
     private Inspection() { }
 
-    private Inspection(Guid id, Guid purchaseId, Guid inspectorId, DateTime inspectionDate, string? remarks)
+    private Inspection(Guid id, Guid purchaseId, Guid inspectorId, Guid? inspectionRequestId, DateTime inspectionDate, string? remarks)
     {
         Id = id;
         PurchaseId = purchaseId;
         InspectorId = inspectorId;
+        InspectionRequestId = inspectionRequestId;
         InspectionDate = inspectionDate;
         Remarks = remarks;
 
         QueueDomainEvent(new InspectionCreated { Inspection = this });
     }
 
-    public static Inspection Create(Guid purchaseId, Guid inspectedId, DateTime inspectionDate, string? remarks)
+    public static Inspection Create(Guid purchaseId, Guid inspectorId, Guid? inspectionRequestId, DateTime inspectionDate, string? remarks)
     {
-        return new Inspection(Guid.NewGuid(), purchaseId, inspectedId, inspectionDate, remarks);
+        return new Inspection(Guid.NewGuid(), purchaseId, inspectorId, inspectionRequestId, inspectionDate, remarks);
     }
 
-    public Inspection Update(Guid inspectorId, DateTime inspectionDate, string? remarks)
+    public Inspection Update(Guid inspectorId, Guid? inspectionRequestId, DateTime inspectionDate, string? remarks)
     {
         bool isUpdated = false;
 
         if (InspectorId != inspectorId)
         {
             InspectorId = inspectorId;
+            isUpdated = true;
+        }
+
+        if (InspectionRequestId != inspectionRequestId)
+        {
+            InspectionRequestId = inspectionRequestId;
             isUpdated = true;
         }
 

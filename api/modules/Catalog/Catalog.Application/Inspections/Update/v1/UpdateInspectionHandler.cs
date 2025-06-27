@@ -19,7 +19,7 @@ public sealed class UpdateInspectionHandler(
         var inspection = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = inspection ?? throw new InspectionNotFoundException(request.Id);
 
-        inspection.Update(request.InspectorId, request.InspectionDate, request.Remarks);
+        inspection.Update(request.InspectorId, request.InspectionRequestId, request.InspectionDate, request.Remarks);
 
         await repository.UpdateAsync(inspection, cancellationToken);
         logger.LogInformation("Inspection {InspectionId} updated (without item changes).", inspection.Id);

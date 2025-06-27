@@ -16,9 +16,9 @@ public class UpdateInspectionRequestCommandValidator : AbstractValidator<UpdateI
             .WithMessage("InspectorId must be a valid GUID if provided.");
 
         // If AssignedInspectorId is provided, status must be Assigned or Completed
-        RuleFor(x => x)
-            .Must(x => x.InspectorId == null || x.Status == InspectionRequestStatus.Assigned || x.Status == InspectionRequestStatus.Completed)
-            .WithMessage("If an inspector is assigned, the status must be Assigned or Completed.");
+        //RuleFor(x => x)
+        //    .Must(x => x.InspectorId == null || x.Status == InspectionRequestStatus.Assigned || x.Status == InspectionRequestStatus.Completed)
+        //    .WithMessage("If an inspector is assigned, the status must be Assigned or Completed.");
 
         // If status is Completed, AssignedInspectorId must not be null
         RuleFor(x => x)

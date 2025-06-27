@@ -17,7 +17,8 @@ public sealed class CreateInspectionHandler(
 
         var inspection = Inspection.Create(
             purchaseId: request.PurchaseId,
-            inspectedId: request.InspectorId,
+            inspectorId: request.InspectorId,
+            inspectionRequestId: request.InspectionRequestId,
             inspectionDate: request.InspectionDate,
             remarks: request.Remarks
         );

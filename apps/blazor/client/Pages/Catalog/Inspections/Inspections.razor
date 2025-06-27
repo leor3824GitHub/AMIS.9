@@ -1,5 +1,5 @@
-﻿@page "/catalog/inspectionrequests"
-<PageHeader Title="Inspection Requests" Header="Inspection Requests" SubHeader="Manage inspection requests for the purchases." />
+﻿@page "/catalog/inspections"
+<PageHeader Title="Inspections" Header="Inspections" SubHeader="Manage inspections" />
 
 <MudDataGrid ServerData="ServerReload"
              MultiSelection="true"
@@ -52,12 +52,12 @@
     </ToolBarContent>
 
         <Columns>
-            <SelectColumn T="InspectionRequestResponse" />
-            <PropertyColumn Property="x => x.Purchase.PurchaseDate" Title="Purchase Date" />
-            <PropertyColumn Property="x => x.Status" Title="Status" />
+            <SelectColumn T="InspectionResponse" />
+            @* <PropertyColumn Property="x => x.Purchase.PurchaseDate" Title="Purchase Date" /> *@
+            @* <PropertyColumn Property="x => x.Status" Title="Status" /> *@
             <PropertyColumn Property="x => x.Inspector.Name" Title="Inspector" />
-            <PropertyColumn Property="x => x.DateCreated" Title="Request Date" />
-            <TemplateColumn Title="Action">
+            @* <PropertyColumn Property="x => x.DateCreated" Title="Request Date" /> *@
+            @* <TemplateColumn Title="Action">
                 <CellTemplate>
                     <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">
                         @if (context.Item.InspectorId == null)
@@ -72,7 +72,7 @@
                         <MudMenuItem OnClick="@(() => OnInspect(context.Item))">Inspect</MudMenuItem>
                     </MudMenu>
                 </CellTemplate>
-            </TemplateColumn>
+            </TemplateColumn> *@
         </Columns>
 
     <PagerContent>
