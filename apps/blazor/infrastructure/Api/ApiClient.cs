@@ -462,6 +462,18 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// Deletes inspection requests by IDs
+        /// </summary>
+        /// <remarks>
+        /// Deletes inspection request by IDs
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task DeleteRangeInspectionRequestsEndpointAsync(string version, System.Collections.Generic.IEnumerable<System.Guid> body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// Deletes an inspectionRequest
         /// </summary>
         /// <remarks>
@@ -486,10 +498,10 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// update a inspectionRequest
+        /// update a inspection request
         /// </summary>
         /// <remarks>
-        /// update a inspectionRequest
+        /// update a inspection request
         /// </remarks>
         /// <param name="version">The requested API version</param>
         /// <returns>OK</returns>
@@ -4646,6 +4658,102 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// Deletes inspection requests by IDs
+        /// </summary>
+        /// <remarks>
+        /// Deletes inspection request by IDs
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>No Content</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task DeleteRangeInspectionRequestsEndpointAsync(string version, System.Collections.Generic.IEnumerable<System.Guid> body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("DELETE");
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+
+                    // Operation Path: "api/v{version}/catalog/inspectionRequests"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/catalog/inspectionRequests");
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 204)
+                        {
+                            return;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            string responseText_ = (response_.Content == null) ? string.Empty : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("Bad Request", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            string responseText_ = (response_.Content == null) ? string.Empty : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("Internal Server Error", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await response_.Content.ReadAsStringAsync().ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// Deletes an inspectionRequest
         /// </summary>
         /// <remarks>
@@ -4820,10 +4928,10 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
-        /// update a inspectionRequest
+        /// update a inspection request
         /// </summary>
         /// <remarks>
-        /// update a inspectionRequest
+        /// update a inspection request
         /// </remarks>
         /// <param name="version">The requested API version</param>
         /// <returns>OK</returns>
@@ -12137,6 +12245,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("inspectorId")]
         public System.Guid InspectorId { get; set; } = new System.Guid("bfb91a20-xxxx-xxxx-xxxx-df0c914c1a22");
 
+        [System.Text.Json.Serialization.JsonPropertyName("inspectionRequestId")]
+        public System.Guid InspectionRequestId { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("purchaseId")]
         public System.Guid PurchaseId { get; set; } = new System.Guid("beef1122-xxxx-xxxx-xxxx-aabbccddeeff");
 
@@ -12840,9 +12951,6 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Runtime.Serialization.EnumMember(Value = @"Completed")]
         Completed = 3,
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Cancelled")]
-        Cancelled = 4,
-
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.4.0.0 (NJsonSchema v11.3.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -12858,11 +12966,17 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("inspectorId")]
         public System.Guid InspectorId { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("inspectionRequestId")]
+        public System.Guid InspectionRequestId { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("remarks")]
         public string Remarks { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("inspector")]
         public EmployeeResponse Inspector { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("inspectionRequest")]
+        public InspectionRequestResponse InspectionRequest { get; set; }
 
     }
 
@@ -13327,32 +13441,20 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Runtime.Serialization.EnumMember(Value = @"Submitted")]
         Submitted = 1,
 
-        [System.Runtime.Serialization.EnumMember(Value = @"Approved")]
-        Approved = 2,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Acknowledged")]
-        Acknowledged = 3,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"InProgress")]
-        InProgress = 4,
-
-        [System.Runtime.Serialization.EnumMember(Value = @"Shipped")]
-        Shipped = 5,
-
         [System.Runtime.Serialization.EnumMember(Value = @"PartiallyDelivered")]
-        PartiallyDelivered = 6,
+        PartiallyDelivered = 2,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Delivered")]
-        Delivered = 7,
+        Delivered = 3,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Closed")]
-        Closed = 8,
+        Closed = 4,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Cancelled")]
-        Cancelled = 9,
+        Cancelled = 5,
 
         [System.Runtime.Serialization.EnumMember(Value = @"Pending")]
-        Pending = 10,
+        Pending = 6,
 
     }
 
@@ -14282,7 +14384,10 @@ namespace AMIS.Blazor.Infrastructure.Api
         public System.DateTime InspectionDate { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("inspectorId")]
-        public System.Guid InspectorId { get; set; }
+        public System.Guid? InspectorId { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("inspectionRequestId")]
+        public System.Guid? InspectionRequestId { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("remarks")]
         public string Remarks { get; set; }

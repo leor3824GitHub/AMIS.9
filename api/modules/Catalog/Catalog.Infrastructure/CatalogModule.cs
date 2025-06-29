@@ -3,14 +3,13 @@ using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Infrastructure.Persistence;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.InspectionRequest.v1;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.Inspection.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using AMIS.WebApi.Catalog.Application.Products.Create.v1;
-using FluentValidation;
-using AMIS.WebApi.Catalog.Application.Products.Update.v1;
 
 namespace AMIS.WebApi.Catalog.Infrastructure;
 public static class CatalogModule
@@ -99,7 +98,6 @@ public static class CatalogModule
             inventoryTranscationGroup.MapGetInventoryTransactionListEndpoint();
             inventoryTranscationGroup.MapInventoryTransactionUpdateEndpoint();
 
-
             var inspectionGroup = app.MapGroup("inspection").WithTags("inspection");
             inspectionGroup.MapInspectionCreationEndpoint();
             inspectionGroup.MapInspectionDeletionEndpoint();
@@ -131,6 +129,7 @@ public static class CatalogModule
             var inspectionRequestGroup = app.MapGroup("inspectionRequests").WithTags("inspectionRequests");
             inspectionRequestGroup.MapInspectionRequestCreationEndpoint();
             inspectionRequestGroup.MapInspectionRequestDeletionEndpoint();
+            inspectionRequestGroup.MapInspectionRequestDeletionRangeEndpoint();
             inspectionRequestGroup.MapGetInspectionRequestEndpoint();
             inspectionRequestGroup.MapGetInspectionRequestListEndpoint();
             inspectionRequestGroup.MapInspectionRequestUpdateEndpoint();

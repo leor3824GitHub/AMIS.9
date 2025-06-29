@@ -7,15 +7,15 @@ namespace AMIS.WebApi.Catalog.Domain;
 public class Inspection : AuditableEntity, IAggregateRoot
 {
     public Guid PurchaseId { get; private set; }
-    public Guid InspectorId { get; private set; } // Employee ID
+    public Guid? InspectorId { get; private set; } // Employee ID
     public Guid? InspectionRequestId { get; private set; }
     public DateTime InspectionDate { get; private set; }
     public string? Remarks { get; private set; }
 
     // Navigation
-    public virtual InspectionRequest? InspectionRequest { get; private set; }
-    public virtual Purchase Purchase { get; private set; } = default!;
-    public virtual Employee Inspector { get; private set; } = default!;
+    public virtual InspectionRequest? InspectionRequest { get; private set; } = default!;
+    public virtual Purchase? Purchase { get; private set; } = default!;
+    public virtual Employee? Inspector { get; private set; } = default!;
     public virtual ICollection<InspectionItem> Items { get; private set; } = [];
 
     // Optional helper: was partial inspection?
@@ -39,7 +39,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
         return new Inspection(Guid.NewGuid(), purchaseId, inspectorId, inspectionRequestId, inspectionDate, remarks);
     }
 
-    public Inspection Update(Guid inspectorId, Guid? inspectionRequestId, DateTime inspectionDate, string? remarks)
+    public Inspection Update(Guid? inspectorId, Guid? inspectionRequestId, DateTime inspectionDate, string? remarks)
     {
         bool isUpdated = false;
 

@@ -27,6 +27,8 @@ public partial class Inspections
     private InspectionResponse _currentDto = new();
     private List<InspectionRequestResponse> _inspectionrequests = new List<InspectionRequestResponse>();
     private List<InspectionItemResponse> _inspectionitems = new List<InspectionItemResponse>();
+    private List<EmployeeResponse> _employees = new List<EmployeeResponse>();
+    private List<PurchaseResponse> _purchases = new List<PurchaseResponse>();
 
     private string searchString = "";
     private bool _loading;
@@ -51,7 +53,9 @@ public partial class Inspections
         
         await LoadInspectionItemsAsync();
         await LoadInspectionRequestsAsync();
-        
+        await LoadPurchasesAsync();
+        await LoadEmployeesAsync();
+
     }
 
     private async Task LoadInspectionRequestsAsync()
@@ -73,6 +77,29 @@ public partial class Inspections
             if (response?.Items != null)
             {
                 _inspectionitems = response.Items.ToList();
+            }
+        }
+    }
+
+    private async Task LoadEmployeesAsync()
+    {
+        if (_employees.Count == 0)
+        {
+            var response = await inspectionclient.SearchEmployeesEndpointAsync("1", new SearchEmployeesCommand());
+            if (response?.Items != null)
+            {
+                _employees = response.Items.ToList();
+            }
+        }
+    }
+    private async Task LoadPurchasesAsync()
+    {
+        if (_purchases.Count == 0)
+        {
+            var response = await inspectionclient.SearchPurchasesEndpointAsync("1", new SearchPurchasesCommand());
+            if (response?.Items != null)
+            {
+                _purchases = response.Items.ToList();
             }
         }
     }
@@ -117,25 +144,24 @@ public partial class Inspections
         return new GridData<InspectionResponse> { TotalItems = _totalItems, Items = _entityList };
     }
 
-    //private async Task ShowEditFormDialog(string title, UpdateInspectionCommand command, bool IsCreate, List<EmployeeResponse> employees, List<PurchaseResponse> purchases)
-    //{
-    //    var parameters = new DialogParameters
-    //    {
-    //        { nameof(InspectionRequestDialog.Model), command },
-    //        { nameof(InspectionRequestDialog.IsCreate), IsCreate },
-    //        { nameof(InspectionRequestDialog._employees), employees },
-    //        { nameof(InspectionRequestDialog._purchases), purchases }
-    //    };
-    //    var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
-    //    var dialog = await DialogService.ShowAsync<InspectionRequestDialog>(title, parameters, options);
-    //    var state = await dialog.Result;
+    private async Task ShowEditFormDialog(string title, UpdateInspectionCommand command, bool IsCreate, List<InspectionRequestResponse> inspectionrequests)
+    {
+        var parameters = new DialogParameters
+        {
+            { nameof(InspectionDialog.Model), command },
+            { nameof(InspectionDialog.IsCreate), IsCreate },
+            { nameof(InspectionDialog._inspectionrequests), inspectionrequests }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<InspectionDialog>(title, parameters, options);
+        var state = await dialog.Result;
 
-    //    if (!state.Canceled)
-    //    {
-    //        await _table.ReloadServerData();
-    //        _selectedItems.Clear();
-    //    }
-    //}
+        if (!state.Canceled)
+        {
+            await _table.ReloadServerData();
+            _selectedItems.Clear();
+        }
+    }
     private async Task OnSearch(string value)
     {
         searchString = value;
@@ -147,37 +173,26 @@ public partial class Inspections
         await _table.ReloadServerData();
     }
 
-    private async Task ReAssign(InspectionRequestResponse item)
+    private async Task OnEdit(InspectionResponse item)
     {
-        // Open reassign inspector dialog or redirect
-        //var model = item.Adapt<UpdateInspectionRequestCommand>(); // Fix: Change the type to match the expected argument
-        //await ShowEditFormDialog("Re-assign to other inspector", model, false, _employees, _purchases);
-    }
-    private async Task OnAssign(InspectionRequestResponse item)
-    {
-        //var model = item.Adapt<UpdateInspectionRequestCommand>(); // Fix: Change the type to match the expected argument
-        //await ShowEditFormDialog("Assign a inspector", model, false, _employees, _purchases);
+        // Navigate to inspection edit form
     }
 
-    private async Task OnView(InspectionRequestResponse item)
+    private async Task OnDelete(InspectionResponse item)
     {
-        // Show inspection request details
-    }
-
-    private async Task OnInspect(InspectionRequestResponse item)
-    {
-        // Navigate to inspection form
+        // Navigate to inspection delete form
     }
 
     private async Task OnDeleteChecked()
     {
-      
+        // Navigate to inspection delete form
     }
 
     private async Task OnCreate()
     {
+        // Navigate to inspection create form
         // Confirm and delete selected requests InspectionRequestDialog
-        //var model = _currentDto.Adapt<UpdateInspectionCommand>(); // Fix: Change the type to match the expected argument
-        //await ShowEditFormDialog("Create new inspection details", model, true, _employees, _purchases);
+        var model = _currentDto.Adapt<UpdateInspectionCommand>(); // Fix: Change the type to match the expected argument
+        await ShowEditFormDialog("Create new inspection details", model, true, _inspectionrequests);
     }
 }  

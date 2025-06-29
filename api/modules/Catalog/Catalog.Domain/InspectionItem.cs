@@ -13,8 +13,8 @@ public class InspectionItem : AuditableEntity, IAggregateRoot
     public int QtyFailed { get; private set; }
     public string? Remarks { get; private set; }
 
-    public virtual Inspection Inspection { get; private set; } = default!;
-    public virtual PurchaseItem PurchaseItem { get; private set; } = default!;
+    public virtual Inspection? Inspection { get; private set; } = default!;
+    public virtual PurchaseItem? PurchaseItem { get; private set; } = default!;
 
     private InspectionItem() { }
 

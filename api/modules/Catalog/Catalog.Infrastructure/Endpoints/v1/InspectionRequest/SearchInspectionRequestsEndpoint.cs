@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
-namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.InspectionRequest.v1;
 
 public static class SearchInspectionRequestsEndpoint
 {

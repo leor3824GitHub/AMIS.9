@@ -171,7 +171,42 @@ public partial class InspectionRequests
 
     private async Task OnDeleteChecked()
     {
-      
+        var inspectionrequestid = _selectedItems
+        .Select(item => item.Id)
+        .Where(id => id.HasValue)
+        .Select(id => id.Value)
+        .ToList();
+
+        if (inspectionrequestid.Count == 0)
+        {
+            Snackbar?.Add("No items selected for deletion.", Severity.Warning);
+            return;
+        }
+
+        string deleteContent = "Are you sure you want to delete the selected items?";
+        var parameters = new DialogParameters
+        {
+            { nameof(DeleteConfirmation.ContentText), deleteContent }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
+        var result = await dialog.Result;
+        if (!result!.Canceled)
+        {
+            try
+            {
+                await ApiHelper.ExecuteCallGuardedAsync(
+                    () => inspectionrequestclient.DeleteRangeInspectionRequestsEndpointAsync("1", inspectionrequestid),
+                    Snackbar);
+
+                await _table.ReloadServerData();
+                _selectedItems.Clear();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Error deleting inspection requests: {ex.Message}", Severity.Error);
+            }
+        }
     }
 
     private async Task OnCreate()

@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.Inspection.v1;
 public static class CreateInspectionEndpoint
 {
     internal static RouteHandlerBuilder MapInspectionCreationEndpoint(this IEndpointRouteBuilder endpoints)

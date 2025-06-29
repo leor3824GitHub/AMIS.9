@@ -1,0 +1,61 @@
+﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <MudDialog>
+        <DialogContent>
+            <FshValidation @ref="_customValidation" />
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudGrid>
+            <MudItem xs="12" sm="6" md="4">
+                <MudSelect T="Guid?" Label="Inspection Request" @bind-Value="Model.InspectionRequestId"
+                           Placeholder="Select a inspection request by date"
+                           Clearable="true">
+                        @foreach (var inspectionrequests in _inspectionrequests)
+                    {
+                            <MudSelectItem T="Guid?" Value="inspectionrequests.Id">
+                                @(inspectionrequests.DateCreated.ToString("yyyy-MM-dd") ?? "No Date")
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            @{
+                        var SelectedInspectionRequest = _inspectionrequests.FirstOrDefault(s => s.Id == Model.InspectionRequestId);
+            }
+           <!-- Supplier Info directly under Purchase -->
+                   @*  <MudText Typo="Typo.body1" Class="mt-2">
+                        <strong>Supplier Name:</strong> @(SelectedInspectionRequest?.Purchase.Supplier?.Name ?? "N/A")
+                    </MudText>
+                    <MudText Typo="Typo.body1">
+                        <strong>Number of Items:</strong> @(SelectedInspectionRequest?.Purchase.Items?.Count.ToString() ?? "0")
+                    </MudText>*@
+             </MudItem> 
+
+                <!-- Inspector Select -->
+            
+                @* <MudItem xs="12" sm="6" md="4">
+                    <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.InspectorId"
+                               Placeholder="Select a employee"
+                               Clearable="true">
+                        @foreach (var employee in _employees)
+                        {
+                            <MudSelectItem T="Guid?" Value="employee.Id">@employee.Name</MudSelectItem>
+                        }
+                        
+                    </MudSelect>
+                </MudItem>      *@
+            </MudGrid>
+            <InspectionItemList Items="@Model.Items"
+                                  Products="_products"
+                                  Status="Model.Status"
+                                  PurchaseId="@Model.Id"
+                                  IsCreate="IsCreate"/>
+
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+
