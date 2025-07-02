@@ -1,6 +1,7 @@
 ﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 
@@ -13,12 +14,22 @@ public class InspectionItem : AuditableEntity, IAggregateRoot
     public int QtyFailed { get; private set; }
     public string? Remarks { get; private set; }
 
+    public InspectionItemStatus? InspectionItemStatus { get; private set; }
+
     public virtual Inspection? Inspection { get; private set; } = default!;
     public virtual PurchaseItem? PurchaseItem { get; private set; } = default!;
 
     private InspectionItem() { }
 
-    private InspectionItem(Guid id, Guid inspectionId, Guid purchaseItemId, int qtyInspected, int qtyPassed, int qtyFailed, string? remarks)
+    private InspectionItem(
+        Guid id,
+        Guid inspectionId,
+        Guid purchaseItemId,
+        int qtyInspected,
+        int qtyPassed,
+        int qtyFailed,
+        string? remarks,
+        InspectionItemStatus? inspectionItemStatus)
     {
         Id = id;
         InspectionId = inspectionId;
@@ -27,22 +38,39 @@ public class InspectionItem : AuditableEntity, IAggregateRoot
         QtyPassed = qtyPassed;
         QtyFailed = qtyFailed;
         Remarks = remarks;
+        InspectionItemStatus = inspectionItemStatus;
 
         QueueDomainEvent(new InspectionItemCreated { InspectionItem = this });
     }
 
-    public static InspectionItem Create(Guid inspectionId, Guid purchaseItemId, int qtyInspected, int qtyPassed, int qtyFailed, string? remarks)
+    public static InspectionItem Create(
+        Guid inspectionId,
+        Guid purchaseItemId,
+        int qtyInspected,
+        int qtyPassed,
+        int qtyFailed,
+        string? remarks,
+        InspectionItemStatus? inspectionItemStatus)
     {
-        return new InspectionItem(Guid.NewGuid(), inspectionId, purchaseItemId, qtyInspected, qtyPassed, qtyFailed, remarks);
+        return new InspectionItem(
+            Guid.NewGuid(),
+            inspectionId,
+            purchaseItemId,
+            qtyInspected,
+            qtyPassed,
+            qtyFailed,
+            remarks,
+            inspectionItemStatus);
     }
 
     public InspectionItem Update(
-    Guid inspectionId,
-    Guid purchaseItemId,
-    int quantityInspected,
-    int quantityPassed,
-    int quantityFailed,
-    string? remarks)
+        Guid inspectionId,
+        Guid purchaseItemId,
+        int quantityInspected,
+        int quantityPassed,
+        int quantityFailed,
+        string? remarks,
+        InspectionItemStatus? inspectionItemStatus)
     {
         bool isUpdated = false;
 
@@ -82,6 +110,12 @@ public class InspectionItem : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
+        if (InspectionItemStatus != inspectionItemStatus)
+        {
+            InspectionItemStatus = inspectionItemStatus;
+            isUpdated = true;
+        }
+
         if (isUpdated)
         {
             QueueDomainEvent(new InspectionItemUpdated { InspectionItem = this });
@@ -89,5 +123,4 @@ public class InspectionItem : AuditableEntity, IAggregateRoot
 
         return this;
     }
-
 }

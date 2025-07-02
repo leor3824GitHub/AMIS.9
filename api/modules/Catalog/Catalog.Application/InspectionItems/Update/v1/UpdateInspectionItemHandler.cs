@@ -23,7 +23,8 @@ public sealed class UpdateInspectionItemHandler(
             request.QtyInspected,
             request.QtyPassed,
             request.QtyFailed,
-            request.Remarks
+            request.Remarks,
+            request.InspectionItemStatus
         );
 
         await repository.UpdateAsync(item, cancellationToken);
