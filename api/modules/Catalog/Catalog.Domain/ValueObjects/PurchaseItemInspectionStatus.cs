@@ -8,5 +8,6 @@ public enum PurchaseItemInspectionStatus
     NotInspected,
     Passed,
     Failed,
-    PartiallyPassed
+    PartiallyPassed,
+    Rejected
 }

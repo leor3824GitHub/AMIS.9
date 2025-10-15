@@ -1,4 +1,7 @@
-﻿using AMIS.Framework.Core.Domain;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
@@ -7,122 +10,159 @@ namespace AMIS.WebApi.Catalog.Domain;
 
 public class Inspection : AuditableEntity, IAggregateRoot
 {
-    public Guid PurchaseId { get; private set; }
-    public Guid? InspectorId { get; private set; } // Employee ID
-    public Guid? InspectionRequestId { get; private set; }
-    public DateTime InspectionDate { get; private set; }
-    public InspectionStatus? InspectionStatus { get; private set; }
+    // Optional link to a Purchase
+    public Guid? PurchaseId { get; private set; }
+    public virtual Purchase? Purchase { get; private set; }
+
+    // Employee who performed the inspection
+    public Guid EmployeeId { get; private set; }
+    public virtual Employee Employee { get; private set; } = default!;
+
+    // Inspection details
+    public DateTime InspectedOn { get; private set; }
+    public bool Approved { get; private set; }
     public string? Remarks { get; private set; }
+    public string? IARDocumentPath { get; private set; }
 
-    // Navigation
-    public virtual InspectionRequest? InspectionRequest { get; private set; } = default!;
-    public virtual Purchase? Purchase { get; private set; } = default!;
-    public virtual Employee? Inspector { get; private set; } = default!;
-    public virtual ICollection<InspectionItem> Items { get; private set; } = [];
+    // Use InspectionItem for line items
+    public virtual ICollection<InspectionItem> Items { get; private set; } = new List<InspectionItem>();
 
-    // Optional helper: was partial inspection?
-    public bool IsPartial => Items.Any(i => i.QtyFailed > 0);
-
+    // Parameterless ctor for EF
     private Inspection() { }
 
-    private Inspection(
-        Guid id,
-        Guid purchaseId,
-        Guid inspectorId,
-        Guid? inspectionRequestId,
-        DateTime inspectionDate,
-        InspectionStatus? inspectionStatus,
-        string? remarks)
+    // Internal constructor - use factory Create(...) for creation
+    private Inspection(Guid id, Guid? purchaseId, Guid employeeId, DateTime inspectedOn, bool approved, string? remarks, string? iarDocumentPath)
     {
         Id = id;
         PurchaseId = purchaseId;
-        InspectorId = inspectorId;
-        InspectionRequestId = inspectionRequestId;
-        InspectionDate = inspectionDate;
-        InspectionStatus = inspectionStatus;
+        EmployeeId = employeeId;
+        InspectedOn = inspectedOn;
+        Approved = approved;
         Remarks = remarks;
-
-        QueueDomainEvent(new InspectionCreated { Inspection = this });
+        IARDocumentPath = iarDocumentPath;
+        Items = new List<InspectionItem>();
     }
 
-    public static Inspection Create(
-        Guid purchaseId,
-        Guid inspectorId,
-        Guid? inspectionRequestId,
-        DateTime inspectionDate,
-        InspectionStatus? inspectionStatus,
-        string? remarks)
+    // Factory - ensures Id is generated and sensible defaults are applied
+    public static Inspection Create(Guid? purchaseId, Guid employeeId, DateTime? inspectedOn = null, bool approved = false, string? remarks = null, string? iarDocumentPath = null)
     {
-        return new Inspection(
-            Guid.NewGuid(),
-            purchaseId,
-            inspectorId,
-            inspectionRequestId,
-            inspectionDate,
-            inspectionStatus,
-            remarks);
+        if (employeeId == Guid.Empty) throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
+        var inspectedAt = inspectedOn ?? DateTime.UtcNow;
+        return new Inspection(Guid.NewGuid(), purchaseId, employeeId, inspectedAt, approved, remarks, iarDocumentPath);
     }
 
-    public Inspection Update(
-        Guid? inspectorId,
-        Guid? inspectionRequestId,
-        DateTime inspectionDate,
-        InspectionStatus? inspectionStatus,
-        string? remarks)
+    // Add an existing item instance (sets link to this inspection if missing)
+    public void AddItem(InspectionItem item)
     {
-        bool isUpdated = false;
+        ArgumentNullException.ThrowIfNull(item);
 
-        if (InspectorId != inspectorId)
+        // Ensure the item points to this inspection; use the domain Update method on the item
+        if (item.InspectionId != this.Id)
         {
-            InspectorId = inspectorId;
-            isUpdated = true;
+            item.Update(this.Id,
+                        item.PurchaseItemId,
+                        item.QtyInspected,
+                        item.QtyPassed,
+                        item.QtyFailed,
+                        item.Remarks,
+                        item.InspectionItemStatus);
         }
 
-        if (InspectionRequestId != inspectionRequestId)
-        {
-            InspectionRequestId = inspectionRequestId;
-            isUpdated = true;
-        }
-
-        if (InspectionDate != inspectionDate)
-        {
-            InspectionDate = inspectionDate;
-            isUpdated = true;
-        }
-
-        if (InspectionStatus != inspectionStatus)
-        {
-            InspectionStatus = inspectionStatus;
-            isUpdated = true;
-        }
-
-        if (Remarks != remarks)
-        {
-            Remarks = remarks;
-            isUpdated = true;
-        }
-
-        if (isUpdated)
-        {
-            QueueDomainEvent(new InspectionUpdated { Inspection = this });
-        }
-
-        return this;
-    }
-
-    public void AddItem(Guid purchaseItemId, int qtyInspected, int qtyPassed, int qtyFailed, string? remarks)
-    {
-        if (qtyPassed + qtyFailed != qtyInspected)
-            throw new ArgumentException("The sum of passed and failed quantities must equal the inspected quantity.");
-
-        var item = InspectionItem.Create(Id, purchaseItemId, qtyInspected, qtyPassed, qtyFailed, remarks);
         Items.Add(item);
     }
 
-    public void RemoveItem(Guid purchaseItemId)
+    // Convenience overload: create and add item in one call
+    public InspectionItem AddItem(Guid purchaseItemId, int qtyInspected, int qtyPassed, int qtyFailed, string? remarks = null, InspectionItemStatus? inspectionItemStatus = null)
     {
-        var item = Items.FirstOrDefault(x => x.PurchaseItemId == purchaseItemId);
-        if (item is not null)
-            Items.Remove(item);
+        var item = InspectionItem.Create(this.Id, purchaseItemId, qtyInspected, qtyPassed, qtyFailed, remarks, inspectionItemStatus);
+        Items.Add(item);
+        return item;
+    }
+
+    public void RemoveItem(InspectionItem item)
+    {
+        if (item is null) throw new ArgumentNullException(nameof(item));
+        if (Items.Remove(item))
+        {
+            // detach navigation - keep InspectionId as-is for audit/history; do not set to Guid.Empty to avoid losing historic link
+        }
+    }
+
+    // Approve the inspection and emit domain event
+    public void Approve()
+    {
+        if (!Items.Any())
+            throw new InvalidOperationException("Cannot approve an inspection without items.");
+
+        // Business invariant: at least one accepted/passed item to consider approval meaningful
+        if (!Items.Any(i => i.InspectionItemStatus == InspectionItemStatus.Passed ||
+                            i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation))
+            throw new InvalidOperationException("Cannot approve an inspection where no items are passed/accepted.");
+
+        Approved = true;
+
+        // Queue domain event for handlers to react (inventory updates, accounting, etc.)
+        QueueDomainEvent(new InspectionApproved
+        {
+            InspectionId = this.Id,
+            PurchaseId = this.PurchaseId,
+            EmployeeId = this.EmployeeId,
+            ApprovedOn = DateTime.UtcNow
+        });
+    }
+
+    // Reject the inspection and emit domain event
+    public void Reject(string? reason = null)
+    {
+        Approved = false;
+        QueueDomainEvent(new InspectionRejected
+        {
+            InspectionId = this.Id,
+            PurchaseId = this.PurchaseId,
+            EmployeeId = this.EmployeeId,
+            RejectedOn = DateTime.UtcNow,
+            Reason = reason
+        });
+    }
+
+    public void UpdateRemarks(string? remarks)
+    {
+        Remarks = string.IsNullOrWhiteSpace(remarks) ? null : remarks;
+    }
+
+    public void UpdateIARDocument(string? path)
+    {
+        IARDocumentPath = string.IsNullOrWhiteSpace(path) ? null : path;
+    }
+
+    // Convenience queries
+    public IEnumerable<InspectionItem> AcceptedItems() => Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation).ToList();
+
+    public int TotalInspectedQuantity() => Items.Sum(i => i.QtyInspected);
+
+    public int TotalAcceptedQuantity() => Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation)
+                                              .Sum(i => i.QtyPassed);
+
+    // Set inspection date (with validation)
+    public void SetInspectedOn(DateTime inspectedOn)
+    {
+        if (inspectedOn == default)
+            throw new ArgumentException("InspectedOn must be a valid date.", nameof(inspectedOn));
+        InspectedOn = inspectedOn;
+    }
+
+    // Update the employee (inspector) if needed
+    public void SetEmployee(Guid employeeId)
+    {
+        if (employeeId == Guid.Empty) throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
+        if (EmployeeId == employeeId) return;
+        EmployeeId = employeeId;
+        Employee = null!;
+    }
+
+    // Update purchase link if needed
+    public void SetPurchase(Guid? purchaseId)
+    {
+        PurchaseId = purchaseId;
     }
 }
