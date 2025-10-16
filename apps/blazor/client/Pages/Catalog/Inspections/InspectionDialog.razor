@@ -6,49 +6,48 @@
             <ValidationSummary />
 
             <MudGrid>
-            <MudItem xs="12" sm="6" md="4">
-                <MudSelect T="Guid?" Label="Inspection Request" @bind-Value="Model.InspectionRequestId"
-                           Placeholder="Select a inspection request by date"
-                           Clearable="true">
-                        @foreach (var inspectionrequests in _inspectionrequests)
-                    {
-                            <MudSelectItem T="Guid?" Value="inspectionrequests.Id">
-                                @(inspectionrequests.DateCreated.ToString("yyyy-MM-dd") ?? "No Date")
-                        </MudSelectItem>
-                    }
-                </MudSelect>
-            @{
-                        var SelectedInspectionRequest = _inspectionrequests.FirstOrDefault(s => s.Id == Model.InspectionRequestId);
-            }
-           <!-- Supplier Info directly under Purchase -->
-                   @*  <MudText Typo="Typo.body1" Class="mt-2">
-                        <strong>Supplier Name:</strong> @(SelectedInspectionRequest?.Purchase.Supplier?.Name ?? "N/A")
-                    </MudText>
-                    <MudText Typo="Typo.body1">
-                        <strong>Number of Items:</strong> @(SelectedInspectionRequest?.Purchase.Items?.Count.ToString() ?? "0")
-                    </MudText>*@
-             </MudItem> 
-
-                <!-- Inspector Select -->
-            
-                @* <MudItem xs="12" sm="6" md="4">
-                    <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.InspectorId"
-                               Placeholder="Select a employee"
+                <MudItem xs="12" sm="6" md="6">
+                    <MudSelect T="Guid?" Label="Inspection Request"
+                               Value="@Model.InspectionRequestId"
+                               ValueChanged="OnRequestChanged"
+                               ValueExpression="@(() => Model.InspectionRequestId)"
+                               Placeholder="Select a inspection request by date"
                                Clearable="true">
-                        @foreach (var employee in _employees)
+                        @foreach (var r in _inspectionrequests)
                         {
-                            <MudSelectItem T="Guid?" Value="employee.Id">@employee.Name</MudSelectItem>
+                            <MudSelectItem T="Guid?" Value="@r.Id">
+                                @r.DateCreated.ToString("yyyy-MM-dd")
+                            </MudSelectItem>
                         }
-                        
                     </MudSelect>
-                </MudItem>      *@
-            </MudGrid>
-  @*           <InspectionItemList Items="@Model.Items"
-                                  Products="_products"
-                                  Status="Model.Status"
-                                  PurchaseId="@Model.Id"
-                                  IsCreate="IsCreate"/> *@
+                </MudItem>
 
+                <MudItem xs="12" sm="6" md="6">
+                    <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.InspectorId"
+                               Placeholder="Select an inspector"
+                               Clearable="true">
+                        @foreach (var e in _employees)
+                        {
+                            <MudSelectItem T="Guid?" Value="@e.Id">@e.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="6">
+                    <MudDatePicker Label="Inspection Date"
+                                   Date="@_inspectionDate"
+                                   DateChanged="@(d => OnDateChanged(d))"
+                                   Editable="true" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField T="string" Label="Remarks" @bind-Value="Model.Remarks" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <InspectionItemsEditor @ref="_itemsEditor" PurchaseItems="_poItems" Products="_products" />
+                </MudItem>
+            </MudGrid>
         </DialogContent>
 
         <DialogActions>

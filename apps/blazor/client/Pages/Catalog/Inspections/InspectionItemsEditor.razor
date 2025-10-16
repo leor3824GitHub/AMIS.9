@@ -1,0 +1,132 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudPaper Class="pa-3">
+    <MudText Typo="Typo.h6">Inspection Items</MudText>
+
+    @if (Inputs.Count == 0)
+    {
+        <MudText>No purchase items to inspect.</MudText>
+    }
+    else
+    {
+        <MudTable Items="Inputs" Hover="true" Dense="true">
+            <HeaderContent>
+                <MudTh>Product</MudTh>
+                <MudTh class="text-end">Ordered</MudTh>
+                <MudTh class="text-end">Inspected</MudTh>
+                <MudTh class="text-end">Passed</MudTh>
+                <MudTh class="text-end">Failed</MudTh>
+                <MudTh>Status</MudTh>
+                <MudTh>Remarks</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>
+                    @_productsById.TryGetValue(context.PurchaseItemId, out var p)
+                    @((MarkupString)$"<span>{(p?.Name ?? "—")}</span>")
+                </MudTd>
+                <MudTd Class="text-end">@context.OrderedQty</MudTd>
+                <MudTd Class="text-end">
+                    <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(context, v))" Min="0" Max="@context.OrderedQty" Immediate="true" />
+                </MudTd>
+                <MudTd Class="text-end">
+                    <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(context, v))" Min="0" Max="@context.QtyInspected" Immediate="true" />
+                </MudTd>
+                <MudTd Class="text-end">
+                    <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(context, v))" Min="0" Max="@context.QtyInspected" Immediate="true" />
+                </MudTd>
+                <MudTd>
+                    <MudSelect T="InspectionItemStatus" @bind-Value="context.Status" Dense="true">
+                        @foreach (var s in Enum.GetValues<InspectionItemStatus>())
+                        {
+                            <MudSelectItem Value="@s">@s</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd>
+                    <MudTextField T="string" @bind-Value="context.Remarks" />
+                </MudTd>
+            </RowTemplate>
+        </MudTable>
+    }
+</MudPaper>
+
+@code {
+    [Parameter] public List<PurchaseItemResponse> PurchaseItems { get; set; } = new();
+    [Parameter] public List<ProductResponse> Products { get; set; } = new();
+
+    private readonly Dictionary<Guid, ProductResponse> _productsById = new();
+
+    public class InspectionItemInput
+    {
+        public Guid PurchaseItemId { get; set; }
+        public int OrderedQty { get; set; }
+        public int QtyInspected { get; set; }
+        public int QtyPassed { get; set; }
+        public int QtyFailed { get; set; }
+        public InspectionItemStatus Status { get; set; } = InspectionItemStatus.NotInspected;
+        public string? Remarks { get; set; }
+    }
+
+    public List<InspectionItemInput> Inputs { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        _productsById.Clear();
+        foreach (var p in Products)
+        {
+            if (p.Id.HasValue) _productsById[p.Id.Value] = p;
+        }
+
+        Inputs = PurchaseItems
+            .Select(pi => new InspectionItemInput
+            {
+                PurchaseItemId = pi.Id!.Value,
+                OrderedQty = pi.Qty,
+                QtyInspected = pi.Qty,
+                QtyPassed = 0,
+                QtyFailed = pi.Qty, // ensure equality by default
+                Status = InspectionItemStatus.NotInspected,
+                Remarks = string.Empty
+            })
+            .ToList();
+    }
+
+    private void OnQtyInspectedChanged(InspectionItemInput item, int value)
+    {
+        if (value < 0) value = 0;
+        if (value > item.OrderedQty) value = item.OrderedQty;
+        item.QtyInspected = value;
+        if (item.QtyPassed > item.QtyInspected) item.QtyPassed = item.QtyInspected;
+        item.QtyFailed = Math.Max(0, item.QtyInspected - item.QtyPassed);
+        StateHasChanged();
+    }
+
+    private void OnQtyPassedChanged(InspectionItemInput item, int value)
+    {
+        if (value < 0) value = 0;
+        if (value > item.QtyInspected) value = item.QtyInspected;
+        item.QtyPassed = value;
+        item.QtyFailed = Math.Max(0, item.QtyInspected - item.QtyPassed);
+        StateHasChanged();
+    }
+
+    private void OnQtyFailedChanged(InspectionItemInput item, int value)
+    {
+        if (value < 0) value = 0;
+        if (value > item.QtyInspected) value = item.QtyInspected;
+        item.QtyFailed = value;
+        item.QtyPassed = Math.Max(0, item.QtyInspected - item.QtyFailed);
+        StateHasChanged();
+    }
+
+    public bool Validate()
+    {
+        foreach (var i in Inputs)
+        {
+            if (i.QtyInspected > i.OrderedQty) return false;
+            if (i.QtyPassed + i.QtyFailed != i.QtyInspected) return false;
+        }
+        return true;
+    }
+}

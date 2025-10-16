@@ -31,6 +31,11 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
             builder.Property(x => x.QtyFailed)
                 .IsRequired();
 
+            // Optional enum status (stored as int)
+            builder.Property(x => x.InspectionItemStatus)
+                .HasConversion<int?>()
+                .IsRequired(false);
+
             // Optional Remarks field
             builder.Property(x => x.Remarks)
                 .HasMaxLength(500)

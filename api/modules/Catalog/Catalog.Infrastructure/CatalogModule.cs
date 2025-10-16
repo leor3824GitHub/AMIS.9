@@ -104,6 +104,7 @@ public static class CatalogModule
             inspectionGroup.MapGetInspectionEndpoint();
             inspectionGroup.MapGetInspectionListEndpoint();
             inspectionGroup.MapInspectionUpdateEndpoint();
+            inspectionGroup.MapInspectionApproveEndpoint();
 
             var inspectionItemGroup = app.MapGroup("inspectionItems").WithTags("inspectionItems");
             inspectionItemGroup.MapInspectionItemCreationEndpoint();

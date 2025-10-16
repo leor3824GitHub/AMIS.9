@@ -91,7 +91,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     // Approve the inspection and emit domain event
     public void Approve()
     {
-        if (!Items.Any())
+        if (Items.Count == 0)
             throw new InvalidOperationException("Cannot approve an inspection without items.");
 
         // Business invariant: at least one accepted/passed item to consider approval meaningful

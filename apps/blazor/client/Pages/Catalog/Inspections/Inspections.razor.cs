@@ -42,6 +42,8 @@ public partial class Inspections
     private bool _canUpdate;
     private bool _canDelete;
 
+    // simple cache for approve enablement per inspection id
+    private readonly Dictionary<Guid, bool> _approveEnabledCache = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -112,7 +114,7 @@ public partial class Inspections
             PageNumber = state.Page + 1,
             AdvancedSearch = new()
             {
-                Fields = new[] { "purchaseId", "status", "assignedInspectorName" },
+                Fields = new[] { "purchaseId", "inspectorId" },
                 Keyword = searchString
             }
         };
@@ -121,6 +123,7 @@ public partial class Inspections
         {
             var result = await inspectionclient.SearchInspectionsEndpointAsync("1", inspectionFilter);
 
+            _approveEnabledCache.Clear();
             if (result != null)
             {
                 _totalItems = result.TotalCount;
@@ -150,7 +153,8 @@ public partial class Inspections
         {
             { nameof(InspectionDialog.Model), command },
             { nameof(InspectionDialog.IsCreate), IsCreate },
-            { nameof(InspectionDialog._inspectionrequests), inspectionrequests }
+            { nameof(InspectionDialog._inspectionrequests), inspectionrequests },
+            { nameof(InspectionDialog._employees), _employees }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<InspectionDialog>(title, parameters, options);
@@ -175,24 +179,85 @@ public partial class Inspections
 
     private async Task OnEdit(InspectionResponse item)
     {
-        // Navigate to inspection edit form
+        var model = item.Adapt<UpdateInspectionCommand>();
+        await ShowEditFormDialog("Edit inspection", model, false, _inspectionrequests);
     }
 
     private async Task OnDelete(InspectionResponse item)
     {
-        // Navigate to inspection delete form
+        try
+        {
+            await inspectionclient.DeleteInspectionEndpointAsync("1", item.Id);
+            Snackbar?.Add("Inspection deleted", Severity.Success);
+            await _table.ReloadServerData();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Delete failed: {ex.Message}", Severity.Error);
+        }
     }
 
     private async Task OnDeleteChecked()
     {
-        // Navigate to inspection delete form
+        if (_selectedItems.Count == 0) return;
+        foreach (var item in _selectedItems.ToList())
+        {
+            await OnDelete(item);
+        }
+        _selectedItems.Clear();
     }
 
     private async Task OnCreate()
     {
-        // Navigate to inspection create form
-        // Confirm and delete selected requests InspectionRequestDialog
-        var model = _currentDto.Adapt<UpdateInspectionCommand>(); // Fix: Change the type to match the expected argument
-        await ShowEditFormDialog("Create new inspection details", model, true, _inspectionrequests);
+        var model = new UpdateInspectionCommand
+        {
+            InspectionDate = DateTime.Now,
+            InspectorId = null,
+            InspectionRequestId = null,
+            Remarks = null
+        };
+        await ShowEditFormDialog("Create new inspection", model, true, _inspectionrequests);
+    }
+
+    private async Task OnApprove(InspectionResponse item)
+    {
+        try
+        {
+            await inspectionclient.ApproveInspectionEndpointAsync("1", item.Id);
+            Snackbar?.Add("Inspection approved", Severity.Success);
+            await _table.ReloadServerData();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Approve failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private bool IsApproveEnabled(InspectionResponse item)
+    {
+        if (item == null) return false;
+        if (_approveEnabledCache.TryGetValue(item.Id, out var enabled)) return enabled;
+
+        // If inspection is already approved, disable
+        if ((item as dynamic).Approved == true)
+        {
+            _approveEnabledCache[item.Id] = false;
+            return false;
+        }
+
+        try
+        {
+            // enable if there exists at least one inspection item with status Passed or AcceptedWithDeviation
+            var itemsResp = inspectionclient.SearchInspectionItemsEndpointAsync("1", new SearchInspectionItemsCommand { InspectionId = item.Id, PageNumber = 1, PageSize = 1 });
+            itemsResp.Wait();
+            var any = itemsResp.Result?.Items?.Any(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation) == true;
+            _approveEnabledCache[item.Id] = any;
+            return any;
+        }
+        catch
+        {
+            _approveEnabledCache[item.Id] = false;
+            return false;
+        }
     }
 }  

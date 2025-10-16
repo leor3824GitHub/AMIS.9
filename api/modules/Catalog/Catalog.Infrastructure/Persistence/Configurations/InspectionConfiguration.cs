@@ -16,9 +16,9 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
             builder.HasKey(x => x.Id);
 
             // Foreign key relationships
-            builder.HasOne(i => i.Inspector)
+            builder.HasOne(i => i.Employee)
                 .WithMany() // Assuming Employee does NOT have a collection of Inspections
-                .HasForeignKey(i => i.InspectorId)
+                .HasForeignKey(i => i.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete if Inspector is deleted
 
             builder.HasOne(i => i.Purchase)
@@ -27,7 +27,7 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
                 .OnDelete(DeleteBehavior.Cascade); // Usually OK to cascade if Purchase is deleted
 
             // Property configurations
-            builder.Property(x => x.InspectionDate)
+            builder.Property(x => x.InspectedOn)
                 .IsRequired();
 
             builder.Property(x => x.Remarks)

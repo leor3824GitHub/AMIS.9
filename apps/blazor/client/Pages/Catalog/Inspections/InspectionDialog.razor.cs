@@ -21,22 +21,99 @@ public partial class InspectionDialog
     [Parameter] public Action? Refresh { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
     [Parameter] public List<InspectionRequestResponse> _inspectionrequests { get; set; }
-    //[Parameter] public List<PurchaseResponse> _purchases { get; set; }
+    [Parameter] public List<EmployeeResponse> _employees { get; set; }
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     private string? _successMessage;
     private FshValidation? _customValidation;
+
+    private DateTime? _inspectionDate;
+
+    private InspectionItemsEditor? _itemsEditor;
+    private List<PurchaseItemResponse> _poItems = new();
+    private List<ProductResponse> _products = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        _inspectionDate = Model?.InspectionDate == default ? DateTime.Now : Model?.InspectionDate;
+        await LoadProducts();
+        SyncPoItems();
+    }
+
+    private void OnRequestChanged(Guid? requestId)
+    {
+        Model.InspectionRequestId = requestId;
+        SyncPoItems();
+        StateHasChanged();
+    }
+
+    private void SyncPoItems()
+    {
+        _poItems.Clear();
+        var selectedReq = _inspectionrequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
+        if (selectedReq?.Purchase?.Items != null)
+        {
+            _poItems = selectedReq.Purchase.Items.ToList();
+        }
+    }
+
+    private async Task LoadProducts()
+    {
+        // Fetch products for display names
+        var resp = await InspectionClient.SearchProductsEndpointAsync("1", new SearchProductsCommand { PageNumber = 1, PageSize = 1000 });
+        _products = resp?.Items?.ToList() ?? new List<ProductResponse>();
+    }
+
+    private void OnDateChanged(DateTime? d)
+    {
+        _inspectionDate = d;
+        if (d.HasValue)
+        {
+            Model.InspectionDate = d.Value;
+        }
+    }
 
     private async Task OnValidSubmit()
     {
         if (IsCreate == null) return;
 
+        // ensure date is set
+        if (!_inspectionDate.HasValue)
+        {
+            Snackbar.Add("Please select an Inspection Date.", Severity.Error);
+            return;
+        }
+        Model.InspectionDate = _inspectionDate.Value;
+
+        // ensure InspectorId and Request are set
+        if (Model.InspectorId is null || Model.InspectionRequestId is null)
+        {
+            Snackbar.Add("Please select an Inspector and Inspection Request.", Severity.Error);
+            return;
+        }
+
+        // validate item inputs
+        if (_itemsEditor is null || !_itemsEditor.Validate())
+        {
+            Snackbar.Add("Please check item quantities and status.", Severity.Error);
+            return;
+        }
+
         Snackbar.Add(IsCreate.Value ? "Creating inspection..." : "Updating inspection...", Severity.Info);
 
-        if (IsCreate.Value) // Create inspection request
+        if (IsCreate.Value)
         {
-            var model = Model.Adapt<CreateInspectionCommand>();
+            var selectedReq = _inspectionrequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
+            var purchaseId = selectedReq?.PurchaseId ?? Guid.Empty;
 
-            // Fix for CS8629: Ensure AssignedInspectorId is not null before casting  
+            var model = new CreateInspectionCommand
+            {
+                InspectionDate = Model.InspectionDate,
+                InspectorId = Model.InspectorId.Value,
+                InspectionRequestId = Model.InspectionRequestId.Value,
+                PurchaseId = purchaseId,
+                Remarks = Model.Remarks ?? string.Empty,
+                Items = new List<InspectionItemDto>()
+            };
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
                 () => InspectionClient.CreateInspectionEndpointAsync("1", model),
@@ -44,14 +121,36 @@ public partial class InspectionDialog
                 Navigation
             );
 
-            if (response != null)
+            if (response?.Id != null && response.Id.Value != Guid.Empty)
             {
+                // Create inspection items from user inputs
+                foreach (var input in _itemsEditor.Inputs)
+                {
+                    var createItem = new CreateInspectionItemCommand
+                    {
+                        InspectionId = response.Id.Value,
+                        PurchaseItemId = input.PurchaseItemId,
+                        QtyInspected = input.QtyInspected,
+                        QtyPassed = input.QtyPassed,
+                        QtyFailed = input.QtyFailed,
+                        Remarks = input.Remarks ?? string.Empty,
+                        InspectionItemStatus = input.Status
+                    };
+
+                    await ApiHelper.ExecuteCallGuardedAsync(
+                        () => InspectionClient.CreateInspectionItemEndpointAsync("1", createItem),
+                        Snackbar,
+                        Navigation
+                    );
+                }
+
                 _successMessage = "Inspection created successfully!";
+                Snackbar.Add(_successMessage, Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }
         }
-        else // Update product
+        else
         {
             var response = await ApiHelper.ExecuteCallGuardedAsync(
                 () => InspectionClient.UpdateInspectionEndpointAsync("1", Model.Id, Model),
@@ -62,20 +161,10 @@ public partial class InspectionDialog
             if (response != null)
             {
                 _successMessage = "Inspection updated successfully!";
+                Snackbar.Add(_successMessage, Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }
-        }
-    }
-    //private void OnCategoryChanged(List<CategoryResponse> Category)
-    //{
-    //    _categories = Category;
-    //}
-    protected override async Task OnParametersSetAsync()
-    {
-        if (Model != null && Model.InspectorId == null && _inspectionrequests.Count != 0)
-        {
-            Model.InspectorId = null;
         }
     }
 

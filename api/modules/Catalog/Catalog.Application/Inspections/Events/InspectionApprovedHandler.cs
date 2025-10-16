@@ -10,7 +10,7 @@ using AMIS.WebApi.Catalog.Application.Inspections.Specifications;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
-using AMIS.WebApi.Catalog.Application.PurchaseItems.Get.v1;
+using Microsoft.Extensions.DependencyInjection; // For FromKeyedServices
 
 namespace AMIS.WebApi.Catalog.Application.Inspections.Events;
 
@@ -22,9 +22,9 @@ public sealed class InspectionApprovedHandler : INotificationHandler<InspectionA
     private readonly ILogger<InspectionApprovedHandler> _logger;
 
     public InspectionApprovedHandler(
-        IReadRepository<Inspection> inspectionReadRepo,
-        IReadRepository<PurchaseItem> purchaseItemReadRepo,
-        IRepository<Inventory> inventoryRepo,
+        [FromKeyedServices("catalog:inspections")] IReadRepository<Inspection> inspectionReadRepo,
+        [FromKeyedServices("catalog:purchaseItems")] IReadRepository<PurchaseItem> purchaseItemReadRepo,
+        [FromKeyedServices("catalog:inventories")] IRepository<Inventory> inventoryRepo,
         ILogger<InspectionApprovedHandler> logger)
     {
         _inspectionReadRepo = inspectionReadRepo ?? throw new ArgumentNullException(nameof(inspectionReadRepo));
@@ -50,7 +50,7 @@ public sealed class InspectionApprovedHandler : INotificationHandler<InspectionA
                 .Where(i => i.QtyPassed > 0 || i.InspectionItemStatus == InspectionItemStatus.Passed)
                 .ToList();
 
-            if (!acceptedItems.Any())
+            if (acceptedItems.Count == 0)
             {
                 _logger.LogInformation("Inspection {InspectionId} approved but no accepted items to update inventory.", notification.InspectionId);
                 return;
@@ -59,14 +59,7 @@ public sealed class InspectionApprovedHandler : INotificationHandler<InspectionA
             foreach (var item in acceptedItems)
             {
                 // Load purchase item details (use navigation if present)
-                PurchaseItem? purchaseItem = item.PurchaseItem;
-                if (purchaseItem == null)
-                {
-                    // Adjust spec call to your actual spec implementation if necessary
-                    purchaseItem = await _purchaseItemReadRepo.FirstOrDefaultAsync(
-                        new GetPurchaseItemSpecs(item.PurchaseItemId),
-                        cancellationToken);
-                }
+                PurchaseItem? purchaseItem = item.PurchaseItem ?? await _purchaseItemReadRepo.GetByIdAsync(item.PurchaseItemId, cancellationToken);
 
                 if (purchaseItem == null)
                 {
@@ -96,7 +89,7 @@ public sealed class InspectionApprovedHandler : INotificationHandler<InspectionA
 
                 if (existingInventory == null)
                 {
-                    // Create new inventory aggregate using factory (if available) or new instance
+                    // Create via domain factory
                     var newInventory = Inventory.Create(productId, qtyToAdd, unitCost);
                     await _inventoryRepo.AddAsync(newInventory, cancellationToken);
                     _logger.LogInformation("Created inventory for Product {ProductId} with Qty {Qty}.", productId, qtyToAdd);

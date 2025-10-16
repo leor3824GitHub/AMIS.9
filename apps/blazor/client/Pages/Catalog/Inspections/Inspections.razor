@@ -53,15 +53,31 @@
 
         <Columns>
             <SelectColumn T="InspectionResponse" />
-            <PropertyColumn Property="x => x.InspectionDate" Title="Inspection Date" />
-            <PropertyColumn Property="x => x.Inspector.Name" Title="Inspector" />
-            <PropertyColumn Property="x => x.InspectionRequest.Purchase.Supplier.Name" Title="Supplier Name" />
-            <PropertyColumn Property="x => x.Remarks" Title="Remarks" />
+            <PropertyColumn Property="x => x.InspectedOn" Title="Inspection Date" />
+            <TemplateColumn Title="Inspector">
+                <CellTemplate>
+                    @(context.Item?.Employee?.Name ?? "—")
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Supplier Name">
+                <CellTemplate>
+                    @(context.Item?.Purchase?.Supplier?.Name ?? "—")
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Remarks">
+                <CellTemplate>
+                    @(context.Item?.Remarks ?? "")
+                </CellTemplate>
+            </TemplateColumn>
             <TemplateColumn Title="Action">
                 <CellTemplate>
                     <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">
                         <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
-                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                        @if (_canUpdate)
+                        {
+                            <MudMenuItem Disabled="@(!IsApproveEnabled(context.Item))" OnClick="@(() => OnApprove(context.Item))">Approve</MudMenuItem>
+                        }
                     </MudMenu>
                 </CellTemplate>
             </TemplateColumn>
