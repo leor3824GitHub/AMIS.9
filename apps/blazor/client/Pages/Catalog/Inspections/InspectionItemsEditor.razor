@@ -4,6 +4,15 @@
 <MudPaper Class="pa-3">
     <MudText Typo="Typo.h6">Inspection Items</MudText>
 
+    <MudStack Row="true" Spacing="2" Class="mb-3 mt-2">
+        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="SetAllInspected" StartIcon="@Icons.Material.Filled.DoneAll">
+            Mark All Inspected
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="MarkAllPassed" StartIcon="@Icons.Material.Filled.CheckCircle">
+            Mark All Passed
+        </MudButton>
+    </MudStack>
+
     @if (Inputs.Count == 0)
     {
         <MudText>No purchase items to inspect.</MudText>
@@ -14,26 +23,26 @@
             <HeaderContent>
                 <MudTh>Product</MudTh>
                 <MudTh class="text-end">Ordered</MudTh>
-                <MudTh class="text-end">Inspected</MudTh>
-                <MudTh class="text-end">Passed</MudTh>
-                <MudTh class="text-end">Failed</MudTh>
+                <MudTh>Inspection</MudTh>
                 <MudTh>Status</MudTh>
-                <MudTh>Remarks</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd>
-                    @_productsById.TryGetValue(context.PurchaseItemId, out var p)
-                    @((MarkupString)$"<span>{(p?.Name ?? "—")}</span>")
+                    @{
+                        _productsByPurchaseItemId.TryGetValue(context.PurchaseItemId, out var product);
+                    }
+                    @((product?.Name ?? "-"))
                 </MudTd>
                 <MudTd Class="text-end">@context.OrderedQty</MudTd>
-                <MudTd Class="text-end">
-                    <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(context, v))" Min="0" Max="@context.OrderedQty" Immediate="true" />
-                </MudTd>
-                <MudTd Class="text-end">
-                    <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(context, v))" Min="0" Max="@context.QtyInspected" Immediate="true" />
-                </MudTd>
-                <MudTd Class="text-end">
-                    <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(context, v))" Min="0" Max="@context.QtyInspected" Immediate="true" />
+                <MudTd>
+                    <MudStack Spacing="1">
+                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(context, v))" Min="0" Max="@context.OrderedQty" Immediate="true" Dense="true" Style="width: 90px;" Placeholder="Inspected" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(context, v))" Min="0" Max="@context.QtyInspected" Immediate="true" Dense="true" Style="width: 90px;" Placeholder="Passed" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(context, v))" Min="0" Max="@context.QtyInspected" Immediate="true" Dense="true" Style="width: 90px;" Placeholder="Failed" />
+                        </MudStack>
+                        <MudTextField T="string" @bind-Value="context.Remarks" Dense="true" Placeholder="Remarks" />
+                    </MudStack>
                 </MudTd>
                 <MudTd>
                     <MudSelect T="InspectionItemStatus" @bind-Value="context.Status" Dense="true">
@@ -42,9 +51,6 @@
                             <MudSelectItem Value="@s">@s</MudSelectItem>
                         }
                     </MudSelect>
-                </MudTd>
-                <MudTd>
-                    <MudTextField T="string" @bind-Value="context.Remarks" />
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -56,6 +62,7 @@
     [Parameter] public List<ProductResponse> Products { get; set; } = new();
 
     private readonly Dictionary<Guid, ProductResponse> _productsById = new();
+    private readonly Dictionary<Guid, ProductResponse> _productsByPurchaseItemId = new();
 
     public class InspectionItemInput
     {
@@ -73,9 +80,20 @@
     protected override void OnParametersSet()
     {
         _productsById.Clear();
+        _productsByPurchaseItemId.Clear();
+
         foreach (var p in Products)
         {
             if (p.Id.HasValue) _productsById[p.Id.Value] = p;
+        }
+
+        // Map purchase item id -> product for quick lookups
+        foreach (var pi in PurchaseItems)
+        {
+            if (pi.Id.HasValue && _productsById.TryGetValue(pi.ProductId, out var prod))
+            {
+                _productsByPurchaseItemId[pi.Id.Value] = prod;
+            }
         }
 
         Inputs = PurchaseItems
@@ -117,6 +135,29 @@
         if (value > item.QtyInspected) value = item.QtyInspected;
         item.QtyFailed = value;
         item.QtyPassed = Math.Max(0, item.QtyInspected - item.QtyFailed);
+        StateHasChanged();
+    }
+
+    public void SetAllInspected()
+    {
+        foreach (var i in Inputs)
+        {
+            i.QtyInspected = i.OrderedQty;
+            if (i.QtyPassed > i.QtyInspected) i.QtyPassed = i.QtyInspected;
+            i.QtyFailed = Math.Max(0, i.QtyInspected - i.QtyPassed);
+        }
+        StateHasChanged();
+    }
+
+    public void MarkAllPassed()
+    {
+        foreach (var i in Inputs)
+        {
+            i.QtyInspected = i.OrderedQty;
+            i.QtyPassed = i.QtyInspected;
+            i.QtyFailed = 0;
+            i.Status = InspectionItemStatus.Passed;
+        }
         StateHasChanged();
     }
 

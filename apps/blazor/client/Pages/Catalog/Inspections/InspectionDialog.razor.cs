@@ -37,11 +37,26 @@ public partial class InspectionDialog
         _inspectionDate = Model?.InspectionDate == default ? DateTime.Now : Model?.InspectionDate;
         await LoadProducts();
         SyncPoItems();
+
+        // Auto-fill inspector from the selected request if not already set
+        if (Model?.InspectionRequestId != null && Model.InspectorId == null)
+        {
+            var req = _inspectionrequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
+            if (req != null)
+            {
+                Model.InspectorId = req.InspectorId;
+            }
+        }
     }
 
     private void OnRequestChanged(Guid? requestId)
     {
         Model.InspectionRequestId = requestId;
+
+        // When user changes the request, auto-fill inspector from that request
+        var selectedReq = _inspectionrequests.FirstOrDefault(r => r.Id == requestId);
+        Model.InspectorId = selectedReq?.InspectorId;
+
         SyncPoItems();
         StateHasChanged();
     }
@@ -144,6 +159,9 @@ public partial class InspectionDialog
                     );
                 }
 
+                // After creating items, update inventory balances for accepted quantities
+                await UpdateInventoryForAcceptedItemsAsync();
+
                 _successMessage = "Inspection created successfully!";
                 Snackbar.Add(_successMessage, Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
@@ -165,6 +183,70 @@ public partial class InspectionDialog
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }
+        }
+    }
+
+    private async Task UpdateInventoryForAcceptedItemsAsync()
+    {
+        try
+        {
+            if (_itemsEditor is null || _poItems.Count == 0) return;
+
+            // Build quick lookup from purchase item id to its details
+            var poMap = _poItems.Where(pi => pi.Id.HasValue).ToDictionary(pi => pi.Id!.Value, pi => pi);
+
+            foreach (var input in _itemsEditor.Inputs)
+            {
+                if (input.QtyPassed <= 0) continue;
+                if (!poMap.TryGetValue(input.PurchaseItemId, out var pi)) continue;
+
+                var productId = pi.ProductId;
+                var qtyToAdd = input.QtyPassed;
+                var unitPrice = pi.UnitPrice; // double per NSwag client
+
+                // find existing inventory for product
+                var invList = await InspectionClient.SearchInventoriesEndpointAsync("1", new SearchInventoriesCommand { ProductId = productId, PageNumber = 1, PageSize = 1 });
+                var existing = invList?.Items?.FirstOrDefault();
+
+                if (existing == null || existing.Id == Guid.Empty)
+                {
+                    // create new inventory
+                    await ApiHelper.ExecuteCallGuardedAsync(
+                        () => InspectionClient.CreateInventoryEndpointAsync("1", new CreateInventoryCommand
+                        {
+                            ProductId = productId,
+                            Qty = qtyToAdd,
+                            AvePrice = unitPrice
+                        }),
+                        Snackbar,
+                        Navigation
+                    );
+                }
+                else
+                {
+                    // compute new average price and qty
+                    var currentQty = existing.Qty;
+                    var currentAve = existing.AvePrice;
+                    var newQty = currentQty + qtyToAdd;
+                    var newAve = newQty > 0 ? ((currentAve * currentQty) + (unitPrice * qtyToAdd)) / newQty : unitPrice;
+
+                    await ApiHelper.ExecuteCallGuardedAsync(
+                        () => InspectionClient.UpdateInventoryEndpointAsync("1", existing.Id!.Value, new UpdateInventoryCommand
+                        {
+                            Id = existing.Id!.Value,
+                            ProductId = productId,
+                            Qty = newQty,
+                            AvePrice = newAve
+                        }),
+                        Snackbar,
+                        Navigation
+                    );
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Inventory update failed: {ex.Message}", Severity.Error);
         }
     }
 

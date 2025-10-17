@@ -9,7 +9,7 @@
             <MudItem xs="12" sm="6" md="4">
                 <MudSelect T="Guid?" Label="Purchase Order" @bind-Value="Model.PurchaseId"
                            Placeholder="Select a purchase order by date"
-                           Clearable="true">
+                           Clearable="@(!ReadOnly)" Disabled="@ReadOnly">
                     @foreach (var purchase in _purchases)
                     {
                         <MudSelectItem T="Guid?" Value="purchase.Id">
@@ -34,7 +34,7 @@
                 <MudItem xs="12" sm="6" md="4">
                     <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.InspectorId"
                                Placeholder="Select a employee"
-                               Clearable="true">
+                               Clearable="@(!ReadOnly)" Disabled="@ReadOnly">
                         @foreach (var employee in _employees)
                         {
                             <MudSelectItem T="Guid?" Value="employee.Id">@employee.Name</MudSelectItem>
@@ -47,8 +47,11 @@
         </DialogContent>
 
         <DialogActions>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            @if (!ReadOnly)
+            {
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
+            }
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">@(ReadOnly ? "Close" : "Cancel")</MudButton>
         </DialogActions>
     </MudDialog>
 </EditForm>

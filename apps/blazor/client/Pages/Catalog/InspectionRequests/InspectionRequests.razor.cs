@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using AMIS.Blazor.Client.Pages.Catalog.Inspections; // for InspectionDialog
 
 namespace AMIS.Blazor.Client.Pages.Catalog.InspectionRequests;
 public partial class InspectionRequests
@@ -161,12 +162,47 @@ public partial class InspectionRequests
 
     private async Task OnView(InspectionRequestResponse item)
     {
-        // Show inspection request details
+        // open dialog in read-only mode
+        var model = item.Adapt<UpdateInspectionRequestCommand>();
+        var parameters = new DialogParameters
+        {
+            { nameof(InspectionRequestDialog.Model), model },
+            { nameof(InspectionRequestDialog.IsCreate), false },
+            { nameof(InspectionRequestDialog._employees), _employees },
+            { nameof(InspectionRequestDialog._purchases), _purchases },
+            { nameof(InspectionRequestDialog.ReadOnly), true }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<InspectionRequestDialog>("View inspection request", parameters, options);
+        await dialog.Result; // no action on close
     }
 
     private async Task OnInspect(InspectionRequestResponse item)
     {
-        // Navigate to inspection form
+        // opens InspectionDialog to create inspection for this request
+        var model = new UpdateInspectionCommand
+        {
+            InspectionDate = DateTime.Now,
+            InspectorId = item.InspectorId,
+            InspectionRequestId = item.Id,
+            Remarks = string.Empty
+        };
+
+        var requestList = new List<InspectionRequestResponse> { item };
+        var parameters = new DialogParameters
+        {
+            { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog.Model), model },
+            { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog.IsCreate), true },
+            { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog._inspectionrequests), requestList },
+            { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog._employees), _employees }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<InspectionDialog>("Create Inspection", parameters, options);
+        var state = await dialog.Result;
+        if (!state.Canceled)
+        {
+            await _table.ReloadServerData();
+        }
     }
 
     private async Task OnDeleteChecked()

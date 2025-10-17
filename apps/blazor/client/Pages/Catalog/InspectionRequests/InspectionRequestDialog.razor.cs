@@ -22,6 +22,7 @@ public partial class InspectionRequestDialog
     [Parameter] public bool? IsCreate { get; set; }
     [Parameter] public List<EmployeeResponse> _employees { get; set; }
     [Parameter] public List<PurchaseResponse> _purchases { get; set; }
+    [Parameter] public bool ReadOnly { get; set; } = false;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     private string? _successMessage;
     private FshValidation? _customValidation;
@@ -29,6 +30,12 @@ public partial class InspectionRequestDialog
     private async Task OnValidSubmit()
     {
         if (IsCreate == null) return;
+        if (ReadOnly)
+        {
+            // In view-only mode, just close the dialog.
+            MudDialog.Close(DialogResult.Cancel());
+            return;
+        }
 
         Snackbar.Add(IsCreate.Value ? "Creating inspection request..." : "Updating inspection request...", Severity.Info);
 
