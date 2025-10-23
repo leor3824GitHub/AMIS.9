@@ -1,5 +1,6 @@
 ﻿using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,9 +24,13 @@ public sealed class CreateInspectionHandler(
             remarks: request.Remarks
         );
 
-        foreach (var item in request.Items)
+        if (request.Items is not null)
         {
-            inspection.AddItem(item.PurchaseItemId, item.QtyInspected, item.QtyPassed, item.QtyFailed, item.Remarks);
+            foreach (var item in request.Items)
+            {
+                var status = item.InspectionItemStatus ?? InspectionItemStatus.NotInspected;
+                var entity = inspection.AddItem(item.PurchaseItemId, item.QtyInspected, item.QtyPassed, item.QtyFailed, item.Remarks, status);
+            }
         }
 
         await repository.AddAsync(inspection, cancellationToken);

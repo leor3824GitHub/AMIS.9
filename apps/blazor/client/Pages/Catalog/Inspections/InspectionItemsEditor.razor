@@ -1,17 +1,9 @@
 @using AMIS.Blazor.Infrastructure.Api
+@using ClientApi = AMIS.Blazor.Infrastructure.Api
 @using MudBlazor
 
 <MudPaper Class="pa-3">
     <MudText Typo="Typo.h6">Inspection Items</MudText>
-
-    <MudStack Row="true" Spacing="2" Class="mb-3 mt-2">
-        <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="SetAllInspected" StartIcon="@Icons.Material.Filled.DoneAll">
-            Mark All Inspected
-        </MudButton>
-        <MudButton Variant="Variant.Outlined" Color="Color.Success" OnClick="MarkAllPassed" StartIcon="@Icons.Material.Filled.CheckCircle">
-            Mark All Passed
-        </MudButton>
-    </MudStack>
 
     @if (Inputs.Count == 0)
     {
@@ -19,41 +11,64 @@
     }
     else
     {
-        <MudTable Items="Inputs" Hover="true" Dense="true">
+        <MudTable Items="Inputs" Hover="true" Dense="true" RowClick="@OnRowClick">
             <HeaderContent>
                 <MudTh>Product</MudTh>
                 <MudTh class="text-end">Ordered</MudTh>
-                <MudTh>Inspection</MudTh>
-                <MudTh>Status</MudTh>
+                <MudTh>Inspected</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd>
-                    @{
-                        _productsByPurchaseItemId.TryGetValue(context.PurchaseItemId, out var product);
-                    }
-                    @((product?.Name ?? "-"))
-                </MudTd>
-                <MudTd Class="text-end">@context.OrderedQty</MudTd>
-                <MudTd>
-                    <MudStack Spacing="1">
-                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(context, v))" Min="0" Max="@context.OrderedQty" Immediate="true" Dense="true" Style="width: 90px;" Placeholder="Inspected" />
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(context, v))" Min="0" Max="@context.QtyInspected" Immediate="true" Dense="true" Style="width: 90px;" Placeholder="Passed" />
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@context.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(context, v))" Min="0" Max="@context.QtyInspected" Immediate="true" Dense="true" Style="width: 90px;" Placeholder="Failed" />
-                        </MudStack>
-                        <MudTextField T="string" @bind-Value="context.Remarks" Dense="true" Placeholder="Remarks" />
-                    </MudStack>
-                </MudTd>
-                <MudTd>
-                    <MudSelect T="InspectionItemStatus" @bind-Value="context.Status" Dense="true">
-                        @foreach (var s in Enum.GetValues<InspectionItemStatus>())
-                        {
-                            <MudSelectItem Value="@s">@s</MudSelectItem>
+                    <div style="cursor:pointer" @onclick="@(() => SelectItem(context))">
+                        @{
+                            _productsByPurchaseItemId.TryGetValue(context.PurchaseItemId, out var product);
                         }
-                    </MudSelect>
+                        @((product?.Name ?? "-"))
+                    </div>
+                </MudTd>
+                <MudTd Class="text-end">
+                    <div style="cursor:pointer" @onclick="@(() => SelectItem(context))">@context.OrderedQty</div>
+                </MudTd>
+                <MudTd>
+                    <MudCheckBox T="bool?" Checked="@context.IsInspected" CheckedChanged="@((bool? v) => OnInspectedChanged(context, v))" />
                 </MudTd>
             </RowTemplate>
         </MudTable>
+
+        @if (_selectedItem is not null)
+        {
+            <MudDivider Class="my-4" />
+            <MudPaper Class="pa-3" Elevation="2">
+                <MudText Typo="Typo.subtitle1">Inspection Details</MudText>
+                <MudText Class="mb-2" Color="Color.Secondary">
+                    @{
+                        _productsByPurchaseItemId.TryGetValue(_selectedItem.PurchaseItemId, out var prod);
+                    }
+                    @((prod?.Name ?? "-")) — Ordered: @_selectedItem.OrderedQty
+                </MudText>
+
+                <MudForm @ref="_form">
+                    <MudStack Spacing="2">
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.OrderedQty" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Inspected" Label="Qty Inspected" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Passed" Label="Qty Passed" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Failed" Label="Qty Failed" />
+                            <MudSelect T="ClientApi.InspectionItemStatus" @bind-Value="_selectedItem.Status" Dense="true" Label="Status" Style="min-width: 200px;" />
+                        </MudStack>
+
+                        <MudTextField T="string" @bind-Value="_selectedItem.Remarks" Dense="true" Placeholder="Remarks" Label="Remarks" />
+
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true">
+                            Tip: Click a row to edit details. If quantities indicate a partial rejection (some failed), set the appropriate values here.
+                        </MudAlert>
+
+                        <MudStack Row="true" Spacing="1">
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="@(() => _selectedItem = null)">Close</MudButton>
+                        </MudStack>
+                    </MudStack>
+                </MudForm>
+            </MudPaper>
+        }
     }
 </MudPaper>
 
@@ -64,6 +79,11 @@
     private readonly Dictionary<Guid, ProductResponse> _productsById = new();
     private readonly Dictionary<Guid, ProductResponse> _productsByPurchaseItemId = new();
 
+    private MudForm? _form;
+
+    // Persistent edit map keyed by PurchaseItemId
+    private readonly Dictionary<Guid, InspectionItemInput> _editMap = new();
+
     public class InspectionItemInput
     {
         public Guid PurchaseItemId { get; set; }
@@ -71,14 +91,19 @@
         public int QtyInspected { get; set; }
         public int QtyPassed { get; set; }
         public int QtyFailed { get; set; }
-        public InspectionItemStatus Status { get; set; } = InspectionItemStatus.NotInspected;
+        public ClientApi.InspectionItemStatus Status { get; set; } = ClientApi.InspectionItemStatus.NotInspected;
         public string? Remarks { get; set; }
+        public bool IsInspected { get; set; }
     }
 
     public List<InspectionItemInput> Inputs { get; set; } = new();
 
+    private InspectionItemInput? _selectedItem;
+
     protected override void OnParametersSet()
     {
+        var selectedId = _selectedItem?.PurchaseItemId;
+
         _productsById.Clear();
         _productsByPurchaseItemId.Clear();
 
@@ -96,18 +121,89 @@
             }
         }
 
-        Inputs = PurchaseItems
-            .Select(pi => new InspectionItemInput
+        // Merge PurchaseItems into persistent edit map and rebuild Inputs view from it
+        var currentIds = PurchaseItems.Where(pi => pi.Id.HasValue).Select(pi => pi.Id!.Value).ToHashSet();
+
+        // Remove entries not present anymore
+        foreach (var key in _editMap.Keys.Except(currentIds).ToList())
+        {
+            _editMap.Remove(key);
+        }
+
+        // Add or update entries for current purchase items
+        foreach (var pi in PurchaseItems)
+        {
+            if (!pi.Id.HasValue) continue;
+            var id = pi.Id.Value;
+            if (!_editMap.TryGetValue(id, out var input))
             {
-                PurchaseItemId = pi.Id!.Value,
-                OrderedQty = pi.Qty,
-                QtyInspected = pi.Qty,
-                QtyPassed = 0,
-                QtyFailed = pi.Qty, // ensure equality by default
-                Status = InspectionItemStatus.NotInspected,
-                Remarks = string.Empty
-            })
+                input = new InspectionItemInput
+                {
+                    PurchaseItemId = id,
+                    OrderedQty = pi.Qty,
+                    QtyInspected = 0,
+                    QtyPassed = 0,
+                    QtyFailed = 0,
+                    Status = ClientApi.InspectionItemStatus.NotInspected,
+                    Remarks = string.Empty,
+                    IsInspected = false
+                };
+                _editMap[id] = input;
+            }
+            else
+            {
+                // keep user edits, only update the ordered qty
+                input.OrderedQty = pi.Qty;
+            }
+        }
+
+        // Reflect order of PurchaseItems
+        Inputs = PurchaseItems
+            .Where(pi => pi.Id.HasValue)
+            .Select(pi => _editMap[pi.Id!.Value])
             .ToList();
+
+        if (selectedId is Guid sid)
+        {
+            _selectedItem = Inputs.FirstOrDefault(i => i.PurchaseItemId == sid);
+        }
+    }
+
+    private void OnRowClick(TableRowClickEventArgs<InspectionItemInput> args)
+    {
+        _selectedItem = args.Item;
+        StateHasChanged();
+    }
+
+    private void SelectItem(InspectionItemInput item)
+    {
+        _selectedItem = item;
+        StateHasChanged();
+    }
+
+    private void OnInspectedChanged(InspectionItemInput item, bool? value)
+    {
+        var v = value ?? false;
+        item.IsInspected = v;
+        if (v)
+        {
+            // Default to fully passed when marked inspected
+            item.QtyInspected = item.OrderedQty;
+            item.QtyPassed = item.QtyInspected;
+            item.QtyFailed = 0;
+            item.Status = ClientApi.InspectionItemStatus.Passed;
+            item.Remarks = string.IsNullOrWhiteSpace(item.Remarks) ? "Inspected" : item.Remarks;
+        }
+        else
+        {
+            // Reset values when unchecking inspected
+            item.QtyInspected = 0;
+            item.QtyPassed = 0;
+            item.QtyFailed = 0;
+            item.Status = ClientApi.InspectionItemStatus.NotInspected;
+            item.Remarks = string.Empty;
+        }
+        StateHasChanged();
     }
 
     private void OnQtyInspectedChanged(InspectionItemInput item, int value)
@@ -117,6 +213,8 @@
         item.QtyInspected = value;
         if (item.QtyPassed > item.QtyInspected) item.QtyPassed = item.QtyInspected;
         item.QtyFailed = Math.Max(0, item.QtyInspected - item.QtyPassed);
+        item.IsInspected = item.QtyInspected > 0;
+        AutoSetStatus(item);
         StateHasChanged();
     }
 
@@ -126,6 +224,8 @@
         if (value > item.QtyInspected) value = item.QtyInspected;
         item.QtyPassed = value;
         item.QtyFailed = Math.Max(0, item.QtyInspected - item.QtyPassed);
+        item.IsInspected = item.QtyInspected > 0;
+        AutoSetStatus(item);
         StateHasChanged();
     }
 
@@ -135,30 +235,29 @@
         if (value > item.QtyInspected) value = item.QtyInspected;
         item.QtyFailed = value;
         item.QtyPassed = Math.Max(0, item.QtyInspected - item.QtyFailed);
+        item.IsInspected = item.QtyInspected > 0;
+        AutoSetStatus(item);
         StateHasChanged();
     }
 
-    public void SetAllInspected()
+    private static void AutoSetStatus(InspectionItemInput item)
     {
-        foreach (var i in Inputs)
+        if (item.QtyInspected == 0)
         {
-            i.QtyInspected = i.OrderedQty;
-            if (i.QtyPassed > i.QtyInspected) i.QtyPassed = i.QtyInspected;
-            i.QtyFailed = Math.Max(0, i.QtyInspected - i.QtyPassed);
+            item.Status = ClientApi.InspectionItemStatus.NotInspected;
         }
-        StateHasChanged();
-    }
-
-    public void MarkAllPassed()
-    {
-        foreach (var i in Inputs)
+        else if (item.QtyFailed == 0 && item.QtyInspected > 0)
         {
-            i.QtyInspected = i.OrderedQty;
-            i.QtyPassed = i.QtyInspected;
-            i.QtyFailed = 0;
-            i.Status = InspectionItemStatus.Passed;
+            item.Status = ClientApi.InspectionItemStatus.Passed;
         }
-        StateHasChanged();
+        else if (item.QtyFailed > 0 && item.QtyPassed > 0)
+        {
+            item.Status = ClientApi.InspectionItemStatus.Partial;
+        }
+        else if (item.QtyFailed > 0 && item.QtyPassed == 0)
+        {
+            item.Status = ClientApi.InspectionItemStatus.Rejected;
+        }
     }
 
     public bool Validate()

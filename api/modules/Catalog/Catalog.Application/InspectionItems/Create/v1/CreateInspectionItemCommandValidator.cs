@@ -8,11 +8,10 @@ public class CreateInspectionItemCommandValidator : AbstractValidator<CreateInsp
     {
         RuleFor(x => x.InspectionId).NotEmpty();
         RuleFor(x => x.PurchaseItemId).NotEmpty();
-        RuleFor(x => x.QtyInspected).GreaterThan(0);
+        RuleFor(x => x.QtyInspected).GreaterThanOrEqualTo(0);
         RuleFor(x => x.QtyPassed).GreaterThanOrEqualTo(0);
         RuleFor(x => x.QtyFailed).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.QtyPassed + x.QtyFailed)
-            .Equal(x => x.QtyInspected)
-            .WithMessage("Sum of QtyPassed and QtyFailed must equal QtyInspected.");
+        RuleFor(x => x).Must(x => x.QtyPassed + x.QtyFailed == x.QtyInspected)
+            .WithMessage("QtyPassed + QtyFailed must equal QtyInspected");
     }
 }

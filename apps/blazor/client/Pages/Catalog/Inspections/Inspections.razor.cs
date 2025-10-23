@@ -34,7 +34,8 @@ public partial class Inspections
     private bool _loading;
     private string successMessage = "";
 
-    private IEnumerable<InspectionResponse>? _entityList;
+    // Always keep a non-null enumerable for the grid
+    private IEnumerable<InspectionResponse> _entityList = Enumerable.Empty<InspectionResponse>();
     private int _totalItems;
 
     private bool _canSearch;
@@ -108,6 +109,10 @@ public partial class Inspections
     private async Task<GridData<InspectionResponse>> ServerReload(GridState<InspectionResponse> state)
     {
         _loading = true;
+        // default to empty so the grid never gets a null Items
+        _entityList = Enumerable.Empty<InspectionResponse>();
+        _totalItems = 0;
+
         var inspectionFilter = new SearchInspectionsCommand
         {
             PageSize = state.PageSize,
@@ -124,20 +129,15 @@ public partial class Inspections
             var result = await inspectionclient.SearchInspectionsEndpointAsync("1", inspectionFilter);
 
             _approveEnabledCache.Clear();
-            if (result != null)
-            {
-                _totalItems = result.TotalCount;
-                _entityList = result.Items;
-            }
-            else
-            {
-                _totalItems = 0;
-                _entityList = new List<InspectionResponse>();
-            }
+
+            _totalItems = result?.TotalCount ?? 0;
+            _entityList = result?.Items ?? Enumerable.Empty<InspectionResponse>();
         }
         catch (Exception ex)
         {
             Snackbar?.Add($"Error loading data: {ex.Message}", Severity.Error);
+            _totalItems = 0;
+            _entityList = Enumerable.Empty<InspectionResponse>();
         }
         finally
         {
@@ -153,8 +153,8 @@ public partial class Inspections
         {
             { nameof(InspectionDialog.Model), command },
             { nameof(InspectionDialog.IsCreate), IsCreate },
-            { nameof(InspectionDialog._inspectionrequests), inspectionrequests },
-            { nameof(InspectionDialog._employees), _employees }
+            { nameof(InspectionDialog.InspectionRequests), inspectionrequests },
+            { nameof(InspectionDialog.Employees), _employees }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<InspectionDialog>(title, parameters, options);

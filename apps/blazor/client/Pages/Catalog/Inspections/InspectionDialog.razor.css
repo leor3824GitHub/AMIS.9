@@ -1,0 +1,1 @@
+.input-field{min-width:220px}.mud-stack{gap:.5rem}.mud-stack>.input-field{flex:1 1 260px}.mud-stack>.request-field{flex:2 1 360px;min-width:320px}.mud-stack>.date-field{flex:0 0 220px}@media (max-width:600px){.mud-stack>.input-field,.mud-stack>.request-field,.mud-stack>.date-field{flex-basis:100%;min-width:0}}

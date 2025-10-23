@@ -9,6 +9,6 @@ public enum InspectionRequestStatus
     Assigned,  // Inspector has been assigned to the request.
     InProgress, // Inspection is currently ongoing.
     Completed, // Inspection has been completed.
-    //Cancelled  // The request was cancelled.
+    Failed     // Inspection completed with at least one failed item.
 }
 

@@ -193,8 +193,8 @@ public partial class InspectionRequests
         {
             { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog.Model), model },
             { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog.IsCreate), true },
-            { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog._inspectionrequests), requestList },
-            { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog._employees), _employees }
+            { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog.InspectionRequests), requestList },
+            { nameof(AMIS.Blazor.Client.Pages.Catalog.Inspections.InspectionDialog.Employees), _employees }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<InspectionDialog>("Create Inspection", parameters, options);

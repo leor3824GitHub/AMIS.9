@@ -14,7 +14,7 @@ public class SearchInspectionSpecs : EntitiesByPaginationFilterSpec<Inspection, 
         Query
             .Include(i => i.Employee)
             .Include(i => i.Purchase)
-            .ThenInclude(p => p!.Supplier)
+            //.ThenInclude(p => p!.Supplier)
             .OrderBy(c => c.InspectedOn, !command.HasOrderBy())
             .Where(i => i.EmployeeId == command.InspectorId!.Value, command.InspectorId.HasValue)
             .Where(i => i.InspectedOn >= command.FromDate, command.FromDate.HasValue)

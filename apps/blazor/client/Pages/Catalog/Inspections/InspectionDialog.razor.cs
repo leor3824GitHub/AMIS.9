@@ -19,9 +19,9 @@ public partial class InspectionDialog
     [Parameter] public EventCallback OnCancel { get; set; }
    
     [Parameter] public Action? Refresh { get; set; }
-    [Parameter] public bool? IsCreate { get; set; }
-    [Parameter] public List<InspectionRequestResponse> _inspectionrequests { get; set; }
-    [Parameter] public List<EmployeeResponse> _employees { get; set; }
+    [Parameter] public bool IsCreate { get; set; } = false;
+    [Parameter] public List<InspectionRequestResponse> InspectionRequests { get; set; } = new();
+    [Parameter] public List<EmployeeResponse> Employees { get; set; } = new();
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     private string? _successMessage;
     private FshValidation? _customValidation;
@@ -34,6 +34,23 @@ public partial class InspectionDialog
 
     protected override async Task OnParametersSetAsync()
     {
+        // Fallback: if dialog wasn't passed IsCreate, infer it from the model (no Id means create)
+        if (!IsCreate)
+        {
+            try
+            {
+                // many NSwag Update* commands include Id; treat default/empty as create
+                if (Model == null || Model.Id == Guid.Empty)
+                {
+                    IsCreate = true;
+                }
+            }
+            catch
+            {
+                // ignore if Model has no Id property
+            }
+        }
+
         _inspectionDate = Model?.InspectionDate == default ? DateTime.Now : Model?.InspectionDate;
         await LoadProducts();
         SyncPoItems();
@@ -41,7 +58,7 @@ public partial class InspectionDialog
         // Auto-fill inspector from the selected request if not already set
         if (Model?.InspectionRequestId != null && Model.InspectorId == null)
         {
-            var req = _inspectionrequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
+            var req = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
             if (req != null)
             {
                 Model.InspectorId = req.InspectorId;
@@ -54,7 +71,7 @@ public partial class InspectionDialog
         Model.InspectionRequestId = requestId;
 
         // When user changes the request, auto-fill inspector from that request
-        var selectedReq = _inspectionrequests.FirstOrDefault(r => r.Id == requestId);
+        var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == requestId);
         Model.InspectorId = selectedReq?.InspectorId;
 
         SyncPoItems();
@@ -64,7 +81,7 @@ public partial class InspectionDialog
     private void SyncPoItems()
     {
         _poItems.Clear();
-        var selectedReq = _inspectionrequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
+        var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
         if (selectedReq?.Purchase?.Items != null)
         {
             _poItems = selectedReq.Purchase.Items.ToList();
@@ -89,8 +106,6 @@ public partial class InspectionDialog
 
     private async Task OnValidSubmit()
     {
-        if (IsCreate == null) return;
-
         // ensure date is set
         if (!_inspectionDate.HasValue)
         {
@@ -113,11 +128,11 @@ public partial class InspectionDialog
             return;
         }
 
-        Snackbar.Add(IsCreate.Value ? "Creating inspection..." : "Updating inspection...", Severity.Info);
+        Snackbar.Add(IsCreate ? "Creating inspection..." : "Updating inspection...", Severity.Info);
 
-        if (IsCreate.Value)
+        if (IsCreate)
         {
-            var selectedReq = _inspectionrequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
+            var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
             var purchaseId = selectedReq?.PurchaseId ?? Guid.Empty;
 
             var model = new CreateInspectionCommand
@@ -162,6 +177,16 @@ public partial class InspectionDialog
                 // After creating items, update inventory balances for accepted quantities
                 await UpdateInventoryForAcceptedItemsAsync();
 
+                // Determine request status: Failed if any item has failures; otherwise Completed
+                var requestStatus = ResolveRequestStatusFromEditor();
+
+                // Update inspection request status accordingly
+                await UpdateInspectionRequestStatusAsync(
+                    Model.InspectionRequestId,
+                    purchaseId,
+                    Model.InspectorId,
+                    requestStatus);
+
                 _successMessage = "Inspection created successfully!";
                 Snackbar.Add(_successMessage, Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
@@ -178,11 +203,61 @@ public partial class InspectionDialog
 
             if (response != null)
             {
+                // Determine request status after update
+                var purchaseId = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId)?.PurchaseId;
+                var requestStatus = ResolveRequestStatusFromEditor();
+
+                await UpdateInspectionRequestStatusAsync(
+                    Model.InspectionRequestId,
+                    purchaseId,
+                    Model.InspectorId,
+                    requestStatus);
+
                 _successMessage = "Inspection updated successfully!";
                 Snackbar.Add(_successMessage, Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }
+        }
+    }
+
+    private InspectionRequestStatus ResolveRequestStatusFromEditor()
+    {
+        if (_itemsEditor?.Inputs is null || _itemsEditor.Inputs.Count == 0)
+            return InspectionRequestStatus.Pending;
+
+        var totalInspected = _itemsEditor.Inputs.Sum(i => i.QtyInspected);
+        var anyFailed = _itemsEditor.Inputs.Any(i => i.QtyFailed > 0);
+
+        if (totalInspected == 0)
+            return InspectionRequestStatus.Pending;
+
+        return anyFailed ? InspectionRequestStatus.Failed : InspectionRequestStatus.Completed;
+    }
+
+    private async Task UpdateInspectionRequestStatusAsync(Guid? requestId, Guid? purchaseId, Guid? inspectorId, InspectionRequestStatus status)
+    {
+        try
+        {
+            if (!requestId.HasValue) return;
+
+            var cmd = new UpdateInspectionRequestCommand
+            {
+                Id = requestId.Value,
+                PurchaseId = purchaseId,
+                InspectorId = inspectorId,
+                Status = status
+            };
+
+            await ApiHelper.ExecuteCallGuardedAsync(
+                () => InspectionClient.UpdateInspectionRequestEndpointAsync("1", requestId.Value, cmd),
+                Snackbar,
+                Navigation
+            );
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to update inspection request status: {ex.Message}", Severity.Error);
         }
     }
 

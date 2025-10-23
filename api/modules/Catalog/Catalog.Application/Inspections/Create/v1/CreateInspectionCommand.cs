@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using MediatR;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Application.Inspections.Create.v1;
 
@@ -18,5 +19,6 @@ public sealed record InspectionItemDto(
     int QtyInspected,
     int QtyPassed,
     int QtyFailed,
-    string? Remarks
+    string? Remarks,
+    [property: DefaultValue(InspectionItemStatus.NotInspected)] InspectionItemStatus? InspectionItemStatus
 );

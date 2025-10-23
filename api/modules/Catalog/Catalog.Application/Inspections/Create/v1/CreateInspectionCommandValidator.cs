@@ -6,14 +6,18 @@ public class CreateInspectionCommandValidator : AbstractValidator<CreateInspecti
 {
     public CreateInspectionCommandValidator()
     {
-        RuleFor(c => c.PurchaseId).NotEmpty();
-        RuleFor(c => c.InspectorId).NotEmpty();
-        RuleFor(c => c.InspectionDate).NotEmpty();
+        RuleFor(x => x.InspectionDate).NotEmpty();
+        RuleFor(x => x.InspectorId).NotEmpty();
+        RuleFor(x => x.PurchaseId).NotEmpty();
 
-        RuleForEach(c => c.Items).ChildRules(items =>
+        RuleForEach(x => x.Items).ChildRules(items =>
         {
             items.RuleFor(i => i.PurchaseItemId).NotEmpty();
-            items.RuleFor(i => i.QtyInspected).GreaterThan(0);
+            items.RuleFor(i => i.QtyInspected).GreaterThanOrEqualTo(0);
+            items.RuleFor(i => i.QtyPassed).GreaterThanOrEqualTo(0);
+            items.RuleFor(i => i.QtyFailed).GreaterThanOrEqualTo(0);
+            items.RuleFor(i => i).Must(i => i.QtyPassed + i.QtyFailed == i.QtyInspected)
+                .WithMessage("QtyPassed + QtyFailed must equal QtyInspected");
         });
     }
 }
