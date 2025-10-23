@@ -5,14 +5,15 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <MudGrid>
-                <MudItem xs="12" sm="6" md="6">
+            <MudGrid GutterSize="GutterSize.Small">
+                <MudItem xs="12" sm="4" md="4">
                     <MudSelect T="Guid?" Label="Inspection Request"
                                Value="@Model.InspectionRequestId"
                                ValueChanged="OnRequestChanged"
                                ValueExpression="@(() => Model.InspectionRequestId)"
                                Placeholder="Select a inspection request by date"
-                               Clearable="true">
+                               Clearable="true"
+                               Dense="true">
                         @foreach (var r in _inspectionrequests)
                         {
                             <MudSelectItem T="Guid?" Value="@r.Id">
@@ -22,10 +23,11 @@
                     </MudSelect>
                 </MudItem>
 
-                <MudItem xs="12" sm="6" md="6">
+                <MudItem xs="12" sm="4" md="4">
                     <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.InspectorId"
                                Placeholder="Select an inspector"
-                               Clearable="true">
+                               Clearable="true"
+                               Dense="true">
                         @foreach (var e in _employees)
                         {
                             <MudSelectItem T="Guid?" Value="@e.Id">@e.Name</MudSelectItem>
@@ -33,15 +35,16 @@
                     </MudSelect>
                 </MudItem>
 
-                <MudItem xs="12" sm="6" md="6">
+                <MudItem xs="12" sm="4" md="4">
                     <MudDatePicker Label="Inspection Date"
                                    Date="@_inspectionDate"
                                    DateChanged="@(d => OnDateChanged(d))"
-                                   Editable="true" />
+                                   Editable="true"
+                                   Dense="true" />
                 </MudItem>
 
                 <MudItem xs="12">
-                    <MudTextField T="string" Label="Remarks" @bind-Value="Model.Remarks" />
+                    <MudTextField T="string" Label="Remarks" @bind-Value="Model.Remarks" Dense="true" />
                 </MudItem>
 
                 <MudItem xs="12">
@@ -51,8 +54,10 @@
         </DialogContent>
 
         <DialogActions>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            <div class="pa-2">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Size="Size.Small">Save</MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Size="Size.Small">Cancel</MudButton>
+            </div>
         </DialogActions>
     </MudDialog>
 </EditForm>
