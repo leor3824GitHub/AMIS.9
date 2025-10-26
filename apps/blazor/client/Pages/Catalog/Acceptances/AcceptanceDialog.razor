@@ -83,9 +83,6 @@
                                     <HeaderContent>
                                         <MudTh>Product</MudTh>
                                         <MudTh class="text-end">Ordered</MudTh>
-                                        <MudTh class="text-end">Approved</MudTh>
-                                        <MudTh class="text-end">Accepted so far</MudTh>
-                                        <MudTh class="text-end">Remaining</MudTh>
                                         <MudTh class="text-end">Accepted</MudTh>
                                         <MudTh>Remarks</MudTh>
                                     </HeaderContent>
@@ -100,9 +97,6 @@
                                             </MudStack>
                                         </MudTd>
                                         <MudTd Class="text-end">@item.OrderedQty</MudTd>
-                                        <MudTd Class="text-end">@item.ApprovedQty</MudTd>
-                                        <MudTd Class="text-end">@item.AcceptedSoFar</MudTd>
-                                        <MudTd Class="text-end">@item.Remaining</MudTd>
                                         <MudTd Class="text-end">
                                             @if (AllowItemEditing)
                                             {
@@ -111,10 +105,9 @@
                                                                  Value="@item.QtyAccepted"
                                                                  ValueChanged="@(v => OnQtyAcceptedChanged(item, v))"
                                                                  Min="0"
-                                                                 Max="@item.Remaining"
                                                                  Immediate
                                                                  Margin="Margin.Dense"
-                                                                 Disabled="@(item.IsDepleted || item.AlreadyAccepted)"
+                                                                 Disabled="@item.AlreadyAccepted"
                                                                  Style="width: 140px;" />
                                             }
                                             else
@@ -149,7 +142,7 @@
                                 else
                                 {
                                     <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense>
-                                        Single-shot is enforced: if an acceptance already exists for a purchase item, you can’t add another. Accepted is capped to remaining approved quantity.
+                                        Single-shot is enforced: if an acceptance already exists for a purchase item, you can’t add another.
                                     </MudAlert>
                                 }
                             }

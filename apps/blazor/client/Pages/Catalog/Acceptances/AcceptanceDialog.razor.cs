@@ -94,7 +94,7 @@ public partial class AcceptanceDialog
             }
             SyncItems(seedFromAcceptance);
 
-            // Compute approved, accepted so far, and remaining per item for UX
+            // Refresh single-shot flags (AlreadyAccepted) for UX
             await RefreshComputedQuantitiesAsync(seedFromAcceptance);
 
             if (IsCreate)
@@ -169,78 +169,23 @@ public partial class AcceptanceDialog
             return;
         }
 
-        // Cache acceptance statuses to minimize calls
-        var acceptanceStatusCache = new Dictionary<Guid, AcceptanceStatus>();
-
         foreach (var input in Model.Items)
         {
-            try
+            // Single-shot: mark as already accepted if any acceptance item exists (posted or not)
+            var accSearch = new SearchAcceptanceItemsCommand
             {
-                // 1) Compute approved quantity from inspection items
-                var inspSearch = new SearchInspectionItemsCommand
-                {
-                    PageNumber = 1,
-                    PageSize = 50,
-                    PurchaseItemId = input.PurchaseItemId
-                };
+                PageNumber = 1,
+                PageSize = 100,
+                PurchaseItemId = input.PurchaseItemId
+            };
 
-                var inspItems = await ApiClient.SearchInspectionItemsEndpointAsync("1", inspSearch);
-                var approved = inspItems?.Items?.Sum(ii => ii.QtyPassed) ?? 0;
-                input.ApprovedQty = approved;
+            var accItems = await ApiClient.SearchAcceptanceItemsEndpointAsync("1", accSearch);
+            input.AlreadyAccepted = accItems?.Items?.Count > 0;
 
-                // 2) Compute accepted so far from posted acceptance items
-                var accSearch = new SearchAcceptanceItemsCommand
-                {
-                    PageNumber = 1,
-                    PageSize = 100,
-                    PurchaseItemId = input.PurchaseItemId
-                };
-
-                var accItems = await ApiClient.SearchAcceptanceItemsEndpointAsync("1", accSearch);
-                var acceptedSoFar = 0;
-                // Single-shot: mark as already accepted if any acceptance item exists (posted or not)
-                input.AlreadyAccepted = accItems?.Items?.Count > 0;
-                if (accItems?.Items != null)
-                {
-                    foreach (var ai in accItems.Items)
-                    {
-                        // Only count items from posted acceptances
-                        if (!acceptanceStatusCache.TryGetValue(ai.AcceptanceId, out var status))
-                        {
-                            var parent = await ApiClient.GetAcceptanceEndpointAsync("1", ai.AcceptanceId);
-                            status = parent?.Status ?? AcceptanceStatus.Pending;
-                            acceptanceStatusCache[ai.AcceptanceId] = status;
-                        }
-
-                        if (status == AcceptanceStatus.Posted)
-                        {
-                            acceptedSoFar += ai.QtyAccepted;
-                        }
-                    }
-                }
-                input.AcceptedSoFar = acceptedSoFar;
-
-                // 3) Clamp current input quantity to remaining
-                var remaining = input.Remaining;
-                if (!preserveExisting && AllowItemEditing)
-                {
-                    // If this is initial seeding, prefer to prefill with remaining, unless already accepted
-                    input.QtyAccepted = input.AlreadyAccepted ? 0 : remaining;
-                }
-                else if (input.QtyAccepted > remaining)
-                {
-                    input.QtyAccepted = remaining;
-                }
-            }
-            catch
+            if (!preserveExisting && AllowItemEditing)
             {
-                // Fallbacks if anything fails
-                input.ApprovedQty = input.ApprovedQty <= 0 ? 0 : input.ApprovedQty;
-                input.AcceptedSoFar = input.AcceptedSoFar <= 0 ? 0 : input.AcceptedSoFar;
-                if (input.QtyAccepted > input.Remaining)
-                {
-                    input.QtyAccepted = input.Remaining;
-                }
+                // If this is initial seeding, set to 0 when already accepted; otherwise keep current default
+                input.QtyAccepted = input.AlreadyAccepted ? 0 : input.QtyAccepted;
             }
         }
 
@@ -328,12 +273,6 @@ public partial class AcceptanceDialog
         if (value < 0)
         {
             value = 0;
-        }
-
-        var cap = item.Remaining;
-        if (value > cap)
-        {
-            value = cap;
         }
 
         item.QtyAccepted = value;
