@@ -3,6 +3,7 @@ using AMIS.WebApi.Catalog.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using AMIS.WebApi.Catalog.Application.InspectionItems.Specifications;
 
 namespace AMIS.WebApi.Catalog.Application.InspectionItems.Create.v1;
 
@@ -15,6 +16,14 @@ public sealed class CreateInspectionItemHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        // Single-shot guard: prevent creating another inspection for the same purchase item
+        var existsSpec = new InspectionItemByPurchaseItemIdSpec(request.PurchaseItemId);
+        var existing = await repository.FirstOrDefaultAsync(existsSpec, cancellationToken);
+        if (existing is not null)
+        {
+            throw new InvalidOperationException("An inspection has already been recorded for this purchase item. Single-shot inspection is enforced.");
+        }
+
         var entity = InspectionItem.Create(
             request.InspectionId,
             request.PurchaseItemId,
@@ -25,7 +34,7 @@ public sealed class CreateInspectionItemHandler(
             request.InspectionItemStatus);
 
         await repository.AddAsync(entity, cancellationToken);
-        logger.LogInformation("Created inspection item {InspectionItemId}", entity.Id);
+    logger.LogInformation("Created inspection item {InspectionItemId}", entity.Id);
 
         return new CreateInspectionItemResponse(entity.Id);
     }

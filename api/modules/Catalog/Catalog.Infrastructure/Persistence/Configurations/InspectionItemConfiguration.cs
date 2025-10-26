@@ -41,6 +41,10 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
                 .HasMaxLength(500)
                 .IsRequired(false); // optional
 
+            // Enforce single-shot inspection per PurchaseItem across all inspections
+            builder.HasIndex(x => x.PurchaseItemId)
+                .IsUnique();
+
             // Relationships
             builder.HasOne(x => x.Inspection)
                 .WithMany() // Assuming Inspection has no navigation collection

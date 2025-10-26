@@ -35,6 +35,10 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
             builder.HasIndex(x => new { x.AcceptanceId, x.PurchaseItemId })
                 .IsUnique();
 
+            // Enforce single-shot acceptance per PurchaseItem across all acceptances
+            builder.HasIndex(x => x.PurchaseItemId)
+                .IsUnique();
+
             // Optional Remarks field
             builder.Property(x => x.Remarks)
                 .HasMaxLength(500)

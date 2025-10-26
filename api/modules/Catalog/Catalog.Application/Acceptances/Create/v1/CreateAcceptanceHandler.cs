@@ -72,6 +72,12 @@ public sealed class CreateAcceptanceHandler(
                     throw new InvalidOperationException("Cannot accept items with zero approved quantity. Complete inspection first.");
                 }
 
+                // Single-shot guard: reject if any acceptance already exists for this purchase item
+                if (purchaseItem.AcceptanceItems.Count > 0)
+                {
+                    throw new InvalidOperationException($"An acceptance has already been recorded for purchase item {item.PurchaseItemId}. Single-shot acceptance is enforced.");
+                }
+
                 var alreadyAccepted = purchaseItem.AcceptanceItems
                     .Where(ai => ai.Acceptance != null && ai.Acceptance.IsPosted)
                     .Sum(ai => ai.QtyAccepted);
