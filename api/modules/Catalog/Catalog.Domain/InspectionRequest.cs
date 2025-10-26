@@ -118,8 +118,9 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
             { InspectionRequestStatus.Pending, new[] { InspectionRequestStatus.Assigned } },
             { InspectionRequestStatus.Assigned, new[] { InspectionRequestStatus.InProgress, InspectionRequestStatus.Pending } },
             { InspectionRequestStatus.InProgress, new[] { InspectionRequestStatus.Completed, InspectionRequestStatus.Failed } },
-            { InspectionRequestStatus.Completed, new[] { InspectionRequestStatus.Accepted } },
+            { InspectionRequestStatus.Completed, new[] { InspectionRequestStatus.PartiallyAccepted, InspectionRequestStatus.Accepted } },
             { InspectionRequestStatus.Failed, new[] { InspectionRequestStatus.Assigned } }, // Can reassign after failure
+            { InspectionRequestStatus.PartiallyAccepted, new[] { InspectionRequestStatus.Accepted } },
             { InspectionRequestStatus.Accepted, Array.Empty<InspectionRequestStatus>() }
         };
 

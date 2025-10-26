@@ -10,6 +10,7 @@ public enum InspectionRequestStatus
     InProgress = 2, // Inspection is currently ongoing.
     Completed = 3, // Inspection has been completed.
     Failed = 4,     // Inspection completed with at least one failed item.
-    Accepted = 5    // Acceptance has been posted for the inspected purchase.
+    PartiallyAccepted = 5, // Some quantities have been accepted but not all approved quantities.
+    Accepted = 6    // All approved quantities have been accepted (fully accepted).
 }
 

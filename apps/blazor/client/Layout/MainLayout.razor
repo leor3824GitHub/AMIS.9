@@ -67,6 +67,93 @@
 
 <MudMainContent>
     <MudContainer MaxWidth="MaxWidth.False" Class="px-6 py-6">
+        @if (_showDashboard)
+        {
+            <MudStack Class="mb-6" Spacing="2">
+                <MudText Typo="Typo.h5">Dashboard</MudText>
+                <MudText Typo="Typo.subtitle2">Quick overview of key catalog metrics</MudText>
+            </MudStack>
+
+            <MudGrid Class="mb-6">
+                <MudItem xs="12" sm="6" md="4" lg="2">
+                    <MudPaper Class="pa-4" Elevation="1">
+                        <div class="d-flex align-center justify-between">
+                            <div>
+                                <MudText Typo="Typo.subtitle2">Purchases</MudText>
+                                <MudText Typo="Typo.h5">@_purchaseCount</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Receipt" Color="Color.Info" Size="Size.Large" />
+                        </div>
+                        <MudButton Variant="Variant.Text" Color="Color.Info" OnClick="@(() => Navigation.NavigateTo("/catalog/purchases"))">View</MudButton>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4" lg="2">
+                    <MudPaper Class="pa-4" Elevation="1">
+                        <div class="d-flex align-center justify-between">
+                            <div>
+                                <MudText Typo="Typo.subtitle2">Inspection Requests</MudText>
+                                <MudText Typo="Typo.h5">@_inspectionRequestCount</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Assignment" Color="Color.Primary" Size="Size.Large" />
+                        </div>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/catalog/inspectionrequests"))">View</MudButton>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4" lg="2">
+                    <MudPaper Class="pa-4" Elevation="1">
+                        <div class="d-flex align-center justify-between">
+                            <div>
+                                <MudText Typo="Typo.subtitle2">Inspections</MudText>
+                                <MudText Typo="Typo.h5">@_inspectionsCount</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Search" Color="Color.Success" Size="Size.Large" />
+                        </div>
+                        <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => Navigation.NavigateTo("/catalog/inspections"))">View</MudButton>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4" lg="2">
+                    <MudPaper Class="pa-4" Elevation="1">
+                        <div class="d-flex align-center justify-between">
+                            <div>
+                                <MudText Typo="Typo.subtitle2">Acceptances</MudText>
+                                <MudText Typo="Typo.h5">@_acceptancesCount</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.HowToReg" Color="Color.Tertiary" Size="Size.Large" />
+                        </div>
+                        <MudButton Variant="Variant.Text" Color="Color.Tertiary" OnClick="@(() => Navigation.NavigateTo("/catalog/acceptances"))">View</MudButton>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4" lg="2">
+                    <MudPaper Class="pa-4" Elevation="1">
+                        <div class="d-flex align-center justify-between">
+                            <div>
+                                <MudText Typo="Typo.subtitle2">Suppliers</MudText>
+                                <MudText Typo="Typo.h5">@_suppliersCount</MudText>
+                            </div>
+                            <MudIcon Icon="@Icons.Material.Filled.Store" Color="Color.Warning" Size="Size.Large" />
+                        </div>
+                        <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => Navigation.NavigateTo("/catalog/suppliers"))">View</MudButton>
+                    </MudPaper>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="4" lg="2">
+                    <MudPaper Class="pa-4" Elevation="1">
+                        <div class="d-flex align-center justify-between">
+                            <div>
+                                <MudText Typo="Typo.subtitle2">Refresh</MudText>
+                                <MudText Typo="Typo.caption">Update metrics</MudText>
+                            </div>
+                            <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Default" OnClick="@LoadDashboardAsync" />
+                        </div>
+                        <MudText Typo="Typo.caption" Class="text-secondary">Last updated: @_lastUpdatedLocal</MudText>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        }
         @ChildContent
         <MudScrollToTop TopOffset="400" Style="z-index:2000;">
             <MudFab StartIcon="@Icons.Material.Filled.KeyboardArrowUp" Color="Color.Primary" />

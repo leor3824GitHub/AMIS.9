@@ -16,17 +16,23 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
     private readonly IReadRepository<Acceptance> _acceptanceReadRepository;
     private readonly IRepository<Inventory> _inventoryRepository;
     private readonly IRepository<PurchaseItem> _purchaseItemRepository;
+    private readonly IReadRepository<PurchaseItem> _purchaseItemReadRepository;
+    private readonly IRepository<InspectionRequest> _inspectionRequestRepository;
     private readonly ILogger<AcceptancePostedHandler> _logger;
 
     public AcceptancePostedHandler(
         [FromKeyedServices("catalog:acceptances")] IReadRepository<Acceptance> acceptanceReadRepository,
         [FromKeyedServices("catalog:inventories")] IRepository<Inventory> inventoryRepository,
         [FromKeyedServices("catalog:purchaseItems")] IRepository<PurchaseItem> purchaseItemRepository,
+        [FromKeyedServices("catalog:purchaseItems")] IReadRepository<PurchaseItem> purchaseItemReadRepository,
+        [FromKeyedServices("catalog:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepository,
         ILogger<AcceptancePostedHandler> logger)
     {
         _acceptanceReadRepository = acceptanceReadRepository ?? throw new ArgumentNullException(nameof(acceptanceReadRepository));
         _inventoryRepository = inventoryRepository ?? throw new ArgumentNullException(nameof(inventoryRepository));
         _purchaseItemRepository = purchaseItemRepository ?? throw new ArgumentNullException(nameof(purchaseItemRepository));
+        _purchaseItemReadRepository = purchaseItemReadRepository ?? throw new ArgumentNullException(nameof(purchaseItemReadRepository));
+        _inspectionRequestRepository = inspectionRequestRepository ?? throw new ArgumentNullException(nameof(inspectionRequestRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
@@ -87,12 +93,43 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
 
             purchaseItem.UpdateAcceptanceSummary(totalAccepted);
 
-            var targetStatus = totalAccepted >= purchaseItem.Qty
+            var approvedQty = purchaseItem.QtyPassed ?? purchaseItem.Qty;
+            var targetStatus = totalAccepted >= approvedQty
                 ? PurchaseItemAcceptanceStatus.Accepted
                 : PurchaseItemAcceptanceStatus.PartiallyAccepted;
 
             purchaseItem.UpdateAcceptanceStatus(targetStatus);
             await _purchaseItemRepository.UpdateAsync(purchaseItem, cancellationToken);
+        }
+
+        // After updating items, update InspectionRequest status (PartiallyAccepted vs Accepted)
+        var purchaseId = acceptance.PurchaseId;
+        var itemsSpec = new AMIS.WebApi.Catalog.Application.PurchaseItems.Specifications.GetPurchaseItemsByPurchaseSpec(purchaseId);
+        var purchaseItems = await _purchaseItemReadRepository.ListAsync(itemsSpec, cancellationToken);
+
+        var allApprovedQty = purchaseItems.All(pi => (pi.QtyPassed ?? pi.Qty) > 0);
+        var allFullyAccepted = purchaseItems.All(pi =>
+        {
+            var approved = pi.QtyPassed ?? pi.Qty;
+            var accepted = pi.AcceptanceItems?.Sum(ai => ai.QtyAccepted) ?? 0;
+            return accepted >= approved;
+        });
+
+        // Load related inspection request and set status
+        var reqSpec = new AMIS.WebApi.Catalog.Application.InspectionRequests.Specifications.GetInspectionRequestByPurchaseSpec(purchaseId);
+        var inspectionRequest = await _inspectionRequestRepository.FirstOrDefaultAsync(reqSpec, cancellationToken);
+        if (inspectionRequest is not null)
+        {
+            if (allApprovedQty && allFullyAccepted)
+            {
+                inspectionRequest.UpdateStatus(InspectionRequestStatus.Accepted);
+            }
+            else
+            {
+                inspectionRequest.UpdateStatus(InspectionRequestStatus.PartiallyAccepted);
+            }
+
+            await _inspectionRequestRepository.UpdateAsync(inspectionRequest, cancellationToken);
         }
     }
 }

@@ -1,4 +1,5 @@
 cd ./AMIS/src/api/server
+cd ./api/server
 
 dotnet ef migrations add "Add Identity Schema" --project .././migrations/postgresql/ --context IdentityDbContext -o Identity
 dotnet ef migrations add "Add Tenant Schema" --project .././migrations/postgresql/ --context TenantDbContext -o Tenant
