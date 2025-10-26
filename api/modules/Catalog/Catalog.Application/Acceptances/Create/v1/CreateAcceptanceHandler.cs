@@ -66,26 +66,21 @@ public sealed class CreateAcceptanceHandler(
                 var purchaseItem = await purchaseItemReadRepository.FirstOrDefaultAsync(piSpec, cancellationToken)
                     ?? throw new InvalidOperationException($"Purchase item {item.PurchaseItemId} not found.");
 
-                var approved = purchaseItem.QtyPassed ?? purchaseItem.Qty; // cap to inspected passed qty when available
-                if (approved <= 0)
-                {
-                    throw new InvalidOperationException("Cannot accept items with zero approved quantity. Complete inspection first.");
-                }
-
                 // Single-shot guard: reject if any acceptance already exists for this purchase item
                 if (purchaseItem.AcceptanceItems.Count > 0)
                 {
                     throw new InvalidOperationException($"An acceptance has already been recorded for purchase item {item.PurchaseItemId}. Single-shot acceptance is enforced.");
                 }
 
-                var alreadyAccepted = purchaseItem.AcceptanceItems
-                    .Where(ai => ai.Acceptance != null && ai.Acceptance.IsPosted)
-                    .Sum(ai => ai.QtyAccepted);
-
-                var remaining = approved - alreadyAccepted;
-                if (item.QtyAccepted > remaining)
+                // Ordered-qty guard: do not allow accepting more than ordered
+                if (item.QtyAccepted > purchaseItem.Qty)
                 {
-                    throw new InvalidOperationException($"Accepted quantity {item.QtyAccepted} exceeds remaining {remaining} for purchase item {item.PurchaseItemId}.");
+                    throw new InvalidOperationException($"Accepted quantity {item.QtyAccepted} exceeds ordered quantity {purchaseItem.Qty} for purchase item {item.PurchaseItemId}.");
+                }
+
+                if (item.QtyAccepted <= 0)
+                {
+                    throw new InvalidOperationException("Accepted quantity must be greater than zero.");
                 }
 
                 acceptance.AddItem(item.PurchaseItemId, item.QtyAccepted, item.Remarks);
