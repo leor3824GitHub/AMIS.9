@@ -11,7 +11,7 @@
     }
     else
     {
-        <MudTable Items="Inputs" Hover="true" Dense="true" RowClick="@OnRowClick">
+    <MudTable Items="Inputs" Hover="true" Dense="true" RowClick="OnRowClick">
             <HeaderContent>
                 <MudTh>Product</MudTh>
                 <MudTh class="text-end">Ordered</MudTh>
@@ -23,14 +23,20 @@
                         @{
                             _productsByPurchaseItemId.TryGetValue(context.PurchaseItemId, out var product);
                         }
-                        @((product?.Name ?? "-"))
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudText>@(product?.Name ?? "-")</MudText>
+                            @if (context.AlreadyInspected)
+                            {
+                                <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" Dense>Already inspected</MudChip>
+                            }
+                        </MudStack>
                     </div>
                 </MudTd>
                 <MudTd Class="text-end">
                     <div style="cursor:pointer" @onclick="@(() => SelectItem(context))">@context.OrderedQty</div>
                 </MudTd>
                 <MudTd>
-                    <MudCheckBox T="bool?" Checked="@context.IsInspected" CheckedChanged="@((bool? v) => OnInspectedChanged(context, v))" />
+                    <MudCheckBox T="bool?" Checked="@context.IsInspected" CheckedChanged="@((bool? v) => OnInspectedChanged(context, v))" Disabled="@context.AlreadyInspected" />
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -44,22 +50,22 @@
                     @{
                         _productsByPurchaseItemId.TryGetValue(_selectedItem.PurchaseItemId, out var prod);
                     }
-                    @((prod?.Name ?? "-")) — Ordered: @_selectedItem.OrderedQty
+                    @((prod?.Name ?? "-")) ï¿½ Ordered: @_selectedItem.OrderedQty
                 </MudText>
 
                 <MudForm @ref="_form">
                     <MudStack Spacing="2">
                         <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.OrderedQty" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Inspected" Label="Qty Inspected" />
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Passed" Label="Qty Passed" />
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Failed" Label="Qty Failed" />
-                            <MudSelect T="ClientApi.InspectionItemStatus" @bind-Value="_selectedItem.Status" Dense="true" Label="Status" Style="min-width: 200px;" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.OrderedQty" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Inspected" Label="Qty Inspected" Disabled="@_selectedItem.AlreadyInspected" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Passed" Label="Qty Passed" Disabled="@_selectedItem.AlreadyInspected" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Failed" Label="Qty Failed" Disabled="@_selectedItem.AlreadyInspected" />
+                            <MudSelect T="ClientApi.InspectionItemStatus" @bind-Value="_selectedItem.Status" Dense="true" Label="Status" Style="min-width: 200px;" Disabled="@_selectedItem.AlreadyInspected" />
                         </MudStack>
 
                         <MudTextField T="string" @bind-Value="_selectedItem.Remarks" Dense="true" Placeholder="Remarks" Label="Remarks" />
 
                         <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true">
-                            Tip: Click a row to edit details. If quantities indicate a partial rejection (some failed), set the appropriate values here.
+                            Single-shot is enforced: if an inspection already exists for a purchase item, you canâ€™t add another here. Tip: Click a row to edit details.
                         </MudAlert>
 
                         <MudStack Row="true" Spacing="1">
@@ -75,6 +81,7 @@
 @code {
     [Parameter] public List<PurchaseItemResponse> PurchaseItems { get; set; } = new();
     [Parameter] public List<ProductResponse> Products { get; set; } = new();
+    [Inject] private IApiClient ApiClient { get; set; } = default!;
 
     private readonly Dictionary<Guid, ProductResponse> _productsById = new();
     private readonly Dictionary<Guid, ProductResponse> _productsByPurchaseItemId = new();
@@ -94,13 +101,14 @@
         public ClientApi.InspectionItemStatus Status { get; set; } = ClientApi.InspectionItemStatus.NotInspected;
         public string? Remarks { get; set; }
         public bool IsInspected { get; set; }
+        public bool AlreadyInspected { get; set; }
     }
 
     public List<InspectionItemInput> Inputs { get; set; } = new();
 
     private InspectionItemInput? _selectedItem;
 
-    protected override void OnParametersSet()
+    protected override async void OnParametersSet()
     {
         var selectedId = _selectedItem?.PurchaseItemId;
 
@@ -166,6 +174,27 @@
         if (selectedId is Guid sid)
         {
             _selectedItem = Inputs.FirstOrDefault(i => i.PurchaseItemId == sid);
+        }
+
+        // Mark rows that already have an inspection item recorded (single-shot)
+        try
+        {
+            foreach (var input in Inputs)
+            {
+                var search = new SearchInspectionItemsCommand
+                {
+                    PageNumber = 1,
+                    PageSize = 1,
+                    PurchaseItemId = input.PurchaseItemId
+                };
+                var result = await ApiClient.SearchInspectionItemsEndpointAsync("1", search);
+                input.AlreadyInspected = (result?.Items?.Count ?? 0) > 0;
+            }
+            StateHasChanged();
+        }
+        catch
+        {
+            // Non-fatal; leave flags at default false
         }
     }
 
