@@ -12,6 +12,7 @@
 
         <HeaderContent>
             <MudTh Style="width: 500px;">Product</MudTh>
+            <MudTh Style="width: 100px;">Balance</MudTh>
             <MudTh Style="width: 80px;">Quantity</MudTh>
             <MudTh Style="width: 120px;">Unit Price</MudTh>
             <MudTh>Amount</MudTh>
@@ -33,14 +34,17 @@
                         }
                     </MudSelect>
                 </MudTd>
+                <MudTd Style="width: 100px;">
+                    <MudText>@GetBalanceFor(item.ProductId).ToString("N0")</MudText>
+                </MudTd>
                 <MudTd Style="width: 80px;">
-                    <MudTextField T="int" @bind-Value="item.Qty" Immediate Variant="Variant.Outlined" />
+                    <MudNumericField HideSpinButtons T="int" @bind-Value="item.Qty" Min="1" Max="@GetBalanceFor(item.ProductId)" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd Style="width: 120px;">
-                    <MudTextField T="double" @bind-Value="item.UnitPrice" Variant="Variant.Outlined" />
+                    <MudTextField T="string" Value="@GetAvePriceFor(item.ProductId).ToString("N2")" ReadOnly Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    @{ var newAmount = item.Qty * item.UnitPrice; }
+                    @{ var newAmount = item.Qty * GetAvePriceFor(item.ProductId); }
                     <MudText>@newAmount.ToString("N2")</MudText>
                 </MudTd>
                 <MudTd>
@@ -69,10 +73,11 @@
                         @(product is not null ? product.Name : "—")
                     </span>
                 </MudTd>
+                <MudTd Style="width: 100px;">@GetBalanceFor(item.ProductId).ToString("N0")</MudTd>
                 <MudTd Style="width: 80px;">@item.Qty.ToString("N0")</MudTd>
-                <MudTd Style="width: 120px;">@item.UnitPrice.ToString("N2")</MudTd>
+                <MudTd Style="width: 120px;">@GetAvePriceFor(item.ProductId).ToString("N2")</MudTd>
                 <MudTd>
-                    @{ var newAmount = item.Qty * item.UnitPrice; }
+                    @{ var newAmount = item.Qty * GetAvePriceFor(item.ProductId); }
                     @newAmount.ToString("N2")
                 </MudTd>
                 <MudTd>@item.Status</MudTd>
@@ -108,14 +113,17 @@
 
             @if (ProductId != null)
             {
+                <MudTd Style="width: 100px;">
+                    <MudText T="string">@GetBalanceFor(ProductId).ToString("N0")</MudText>
+                </MudTd>
                 <MudTd Style="width: 80px;">
-                    <MudNumericField HideSpinButtons T="int" @bind-Value="Qty" Variant="Variant.Outlined" />
+                    <MudNumericField HideSpinButtons T="int" @bind-Value="Qty" Min="1" Max="@GetBalanceFor(ProductId)" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd Style="width: 120px;">
-                    <MudNumericField HideSpinButtons T="double" @bind-Value="UnitPrice" Variant="Variant.Outlined" />
+                    <MudTextField T="string" Value="@GetAvePriceFor(ProductId).ToString("N2")" ReadOnly Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    @{ var newAmount = Qty * UnitPrice; }
+                    @{ var newAmount = Qty * GetAvePriceFor(ProductId); }
                     <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
@@ -126,13 +134,14 @@
                     <MudTooltip Text="Add Item">
                         <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline"
                                        Color="Color.Primary"
+                                       Disabled="@(GetBalanceFor(ProductId) <= 0 || Qty < 1 || Qty > GetBalanceFor(ProductId))"
                                        OnClick="AddNewItem" />
                     </MudTooltip>
                 </MudTd>
             }
             else
             {
-                <MudTd colspan="4"></MudTd>
+                <MudTd colspan="5"></MudTd>
             }
 
         </FooterContent>
