@@ -90,7 +90,15 @@
                                         <MudTh>Remarks</MudTh>
                                     </HeaderContent>
                                     <RowTemplate Context="item">
-                                        <MudTd>@item.ProductName</MudTd>
+                                        <MudTd>
+                                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                                <MudText>@item.ProductName</MudText>
+                                                @if (item.AlreadyAccepted)
+                                                {
+                                                    <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" Dense>Already accepted</MudChip>
+                                                }
+                                            </MudStack>
+                                        </MudTd>
                                         <MudTd Class="text-end">@item.OrderedQty</MudTd>
                                         <MudTd Class="text-end">@item.ApprovedQty</MudTd>
                                         <MudTd Class="text-end">@item.AcceptedSoFar</MudTd>
@@ -106,7 +114,7 @@
                                                                  Max="@item.Remaining"
                                                                  Immediate
                                                                  Margin="Margin.Dense"
-                                                                 Disabled="@item.IsDepleted"
+                                                                 Disabled="@(item.IsDepleted || item.AlreadyAccepted)"
                                                                  Style="width: 140px;" />
                                             }
                                             else
@@ -141,7 +149,7 @@
                                 else
                                 {
                                     <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense>
-                                        Accepted is capped to the remaining approved quantity. Remaining updates automatically based on inspections and posted acceptances.
+                                        Single-shot is enforced: if an acceptance already exists for a purchase item, you can’t add another. Accepted is capped to remaining approved quantity.
                                     </MudAlert>
                                 }
                             }

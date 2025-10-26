@@ -47,6 +47,8 @@ public sealed class AcceptanceFormModel
         public int AcceptedSoFar { get; set; }
         public int Remaining => Math.Max(ApprovedQty - AcceptedSoFar, 0);
         public bool IsDepleted => Remaining <= 0;
+        // Single-shot: if an acceptance item already exists for this purchase item (posted or not)
+        public bool AlreadyAccepted { get; set; }
         public string ProductName { get; set; } = string.Empty;
         public string? Remarks { get; set; }
     }

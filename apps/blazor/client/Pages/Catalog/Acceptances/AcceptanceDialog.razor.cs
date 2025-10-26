@@ -198,6 +198,8 @@ public partial class AcceptanceDialog
 
                 var accItems = await ApiClient.SearchAcceptanceItemsEndpointAsync("1", accSearch);
                 var acceptedSoFar = 0;
+                // Single-shot: mark as already accepted if any acceptance item exists (posted or not)
+                input.AlreadyAccepted = accItems?.Items?.Count > 0;
                 if (accItems?.Items != null)
                 {
                     foreach (var ai in accItems.Items)
@@ -222,8 +224,8 @@ public partial class AcceptanceDialog
                 var remaining = input.Remaining;
                 if (!preserveExisting && AllowItemEditing)
                 {
-                    // If this is initial seeding, prefer to prefill with remaining
-                    input.QtyAccepted = remaining;
+                    // If this is initial seeding, prefer to prefill with remaining, unless already accepted
+                    input.QtyAccepted = input.AlreadyAccepted ? 0 : remaining;
                 }
                 else if (input.QtyAccepted > remaining)
                 {
