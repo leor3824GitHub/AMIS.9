@@ -15,6 +15,11 @@ public sealed class CreateInspectionRequestHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
 
+        if (!request.PurchaseId.HasValue || request.PurchaseId.Value == Guid.Empty)
+        {
+            throw new InvalidOperationException("A purchase must be specified before raising an inspection request.");
+        }
+
         var inspectionRequest = InspectionRequest.Create(request.PurchaseId, request.InspectorId);
 
         await repository.AddAsync(inspectionRequest, cancellationToken);

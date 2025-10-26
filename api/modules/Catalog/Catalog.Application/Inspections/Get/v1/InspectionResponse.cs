@@ -1,5 +1,6 @@
 ﻿using AMIS.WebApi.Catalog.Application.Employees.Get.v1;
 using AMIS.WebApi.Catalog.Application.Purchases.Get.v1;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Application.Inspections.Get.v1;
 
@@ -11,6 +12,7 @@ public sealed record InspectionResponse(
     string? Remarks,
     EmployeeResponse Employee,
     PurchaseResponse? Purchase,
-    bool Approved
+    bool Approved,
+    InspectionStatus Status
 );
 

@@ -32,8 +32,6 @@ public partial class Inspections
 
     private string searchString = "";
     private bool _loading;
-    private string successMessage = "";
-
     // Always keep a non-null enumerable for the grid
     private IEnumerable<InspectionResponse> _entityList = Enumerable.Empty<InspectionResponse>();
     private int _totalItems;
@@ -238,8 +236,7 @@ public partial class Inspections
         if (item == null) return false;
         if (_approveEnabledCache.TryGetValue(item.Id, out var enabled)) return enabled;
 
-        // If inspection is already approved, disable
-        if ((item as dynamic).Approved == true)
+        if (item.Status != InspectionStatus.InProgress)
         {
             _approveEnabledCache[item.Id] = false;
             return false;
@@ -259,5 +256,23 @@ public partial class Inspections
             _approveEnabledCache[item.Id] = false;
             return false;
         }
+    }
+
+    private static Color GetStatusColor(InspectionResponse? inspection)
+    {
+        if (inspection is null)
+        {
+            return Color.Default;
+        }
+
+        return inspection.Status switch
+        {
+            InspectionStatus.InProgress => Color.Warning,
+            InspectionStatus.Completed => Color.Info,
+            InspectionStatus.Approved => Color.Success,
+            InspectionStatus.Rejected => Color.Error,
+            InspectionStatus.Cancelled => Color.Dark,
+            _ => Color.Default
+        };
     }
 }  

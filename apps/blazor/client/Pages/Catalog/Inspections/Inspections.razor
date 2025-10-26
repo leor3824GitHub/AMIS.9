@@ -64,6 +64,20 @@
                     @(context.Item?.Purchase?.Supplier?.Name ?? "—")
                 </CellTemplate>
             </TemplateColumn>
+            <TemplateColumn Title="Status">
+                <CellTemplate>
+                    @if (context.Item is not null)
+                    {
+                        <MudChip Color="@GetStatusColor(context.Item)" Size="Size.Small" Variant="Variant.Text">
+                            @context.Item.Status
+                        </MudChip>
+                    }
+                    else
+                    {
+                        <MudText>—</MudText>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
             <TemplateColumn Title="Remarks">
                 <CellTemplate>
                     @(context.Item?.Remarks ?? "")

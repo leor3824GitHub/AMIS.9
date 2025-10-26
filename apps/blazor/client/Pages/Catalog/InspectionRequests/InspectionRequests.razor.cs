@@ -251,4 +251,17 @@ public partial class InspectionRequests
         var model = _currentDto.Adapt<UpdateInspectionRequestCommand>(); // Fix: Change the type to match the expected argument
         await ShowEditFormDialog("Create new inspection request", model, true, _employees, _purchases);
     }
+
+    private static bool IsAlreadyInspected(InspectionRequestResponse request) =>
+        request.Status is InspectionRequestStatus.Completed
+            or InspectionRequestStatus.Failed
+            or InspectionRequestStatus.Accepted;
+
+    // Inspect is only enabled when the request is currently Assigned to an inspector
+    private static bool ShouldDisableInspect(InspectionRequestResponse request) =>
+        request.Status != InspectionRequestStatus.Assigned;
+
+    // Assign/Re-Assign should be disabled once the request has already been inspected (completed/failed) or accepted
+    private static bool ShouldDisableAssignActions(InspectionRequestResponse request) =>
+        IsAlreadyInspected(request);
 }  

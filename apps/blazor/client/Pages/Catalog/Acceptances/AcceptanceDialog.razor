@@ -1,0 +1,146 @@
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <MudDialog>
+        <DialogContent>
+            <FshValidation @ref="_validation" />
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudDatePicker Label="Acceptance Date"
+                                   Date="@_acceptanceDate"
+                                   DateChanged="OnDateChanged"
+                                   Editable />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudSelect T="Guid?"
+                               Label="Supply Officer"
+                               Value="@Model.SupplyOfficerId"
+                               ValueChanged="OnSupplyOfficerChanged"
+                               For="@(() => Model.SupplyOfficerId)"
+                               Placeholder="Select supply officer">
+                        @foreach (var officer in _supplyOfficerOptions)
+                        {
+                            <MudSelectItem T="Guid?" Value="@officer.Id">@officer.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudSelect T="Guid?"
+                               Label="Purchase"
+                               Value="@Model.PurchaseId"
+                               ValueChanged="OnPurchaseChanged"
+                               For="@(() => Model.PurchaseId)"
+                               Placeholder="Select purchase"
+                               Disabled="@(!CanChangePurchase)">
+                        @foreach (var purchase in _purchaseOptions)
+                        {
+                            <MudSelectItem T="Guid?" Value="@purchase.Id">@GetPurchaseLabel(purchase)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+                @if (IsCreate && !_prerequisitesMet && _prerequisiteMessage is not null)
+                {
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Warning" Variant="Variant.Text">
+                            @_prerequisiteMessage
+                        </MudAlert>
+                    </MudItem>
+                }
+                <MudItem xs="12">
+                    <MudTextField T="string"
+                                  Label="Remarks"
+                                  @bind-Value="Model.Remarks"
+                                  Lines="3"
+                                  Placeholder="Remarks" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudPaper Class="pa-3" Outlined>
+                        <MudStack Spacing="2">
+                            <MudText Typo="Typo.h6">Acceptance Items</MudText>
+
+                            @if (!Model.PurchaseId.HasValue)
+                            {
+                                <MudAlert Severity="Severity.Info" Variant="Variant.Text">
+                                    Select a purchase to load items for acceptance.
+                                </MudAlert>
+                            }
+                            else if (_loadingItems)
+                            {
+                                <div class="d-flex justify-center pa-4">
+                                    <MudProgressCircular Indeterminate Color="Color.Primary" />
+                                </div>
+                            }
+                            else if (Model.Items.Count == 0)
+                            {
+                                <MudAlert Severity="Severity.Warning" Variant="Variant.Text">
+                                    No purchase items found for the selected purchase.
+                                </MudAlert>
+                            }
+                            else
+                            {
+                                <MudTable Items="Model.Items" Hover Dense>
+                                    <HeaderContent>
+                                        <MudTh>Product</MudTh>
+                                        <MudTh class="text-end">Ordered</MudTh>
+                                        <MudTh class="text-end">Accepted</MudTh>
+                                        <MudTh>Remarks</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate Context="item">
+                                        <MudTd>@item.ProductName</MudTd>
+                                        <MudTd Class="text-end">@item.OrderedQty</MudTd>
+                                        <MudTd Class="text-end">
+                                            @if (AllowItemEditing)
+                                            {
+                                                <MudNumericField T="int"
+                                                                 HideSpinButtons
+                                                                 Value="@item.QtyAccepted"
+                                                                 ValueChanged="@(v => OnQtyAcceptedChanged(item, v))"
+                                                                 Min="0"
+                                                                 Max="@item.OrderedQty"
+                                                                 Immediate
+                                                                 Margin="Margin.Dense"
+                                                                 Style="width: 140px;" />
+                                            }
+                                            else
+                                            {
+                                                @item.QtyAccepted
+                                            }
+                                        </MudTd>
+                                        <MudTd>
+                                            @if (AllowItemEditing)
+                                            {
+                                                <MudTextField T="string"
+                                                              Value="@item.Remarks"
+                                                              ValueChanged="@(v => OnItemRemarkChanged(item, v))"
+                                                              Lines="2"
+                                                              Placeholder="Remarks"
+                                                              Margin="Margin.Dense" />
+                                            }
+                                            else
+                                            {
+                                                @item.Remarks
+                                            }
+                                        </MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+
+                                @if (!AllowItemEditing)
+                                {
+                                    <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense>
+                                        Existing acceptance items are read-only. Update quantities by editing individual acceptance items if needed.
+                                    </MudAlert>
+                                }
+                            }
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Disabled="@IsSubmitDisabled">@(IsCreate ? "Create" : "Save")</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>

@@ -3,10 +3,11 @@
 namespace AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum InspectionStatus 
-{ 
-    Pending, 
-    InProgress, 
-    Completed, 
-    Cancelled 
+public enum InspectionStatus
+{
+    InProgress,
+    Completed,
+    Approved,
+    Rejected,
+    Cancelled
 }

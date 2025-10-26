@@ -30,8 +30,6 @@ public partial class Products
 
     private string searchString = "";
     private bool _loading;
-    private string successMessage = "";
-
     private IEnumerable<ProductResponse>? _entityList;
     private int _totalItems;
 

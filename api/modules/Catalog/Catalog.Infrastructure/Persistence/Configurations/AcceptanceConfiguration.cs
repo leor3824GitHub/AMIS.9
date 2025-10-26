@@ -18,6 +18,11 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
             builder.Property(x => x.Remarks)
                 .HasMaxLength(200)
                 .IsRequired(false); // Optional, adjust based on your design
+
+            builder.Property(x => x.Status)
+                .HasConversion<string>()
+                .HasMaxLength(32)
+                .IsRequired();
         }
     }
 }

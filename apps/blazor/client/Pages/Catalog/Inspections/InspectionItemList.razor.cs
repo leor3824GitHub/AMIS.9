@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using AMIS.Blazor.Infrastructure.Api;
 using Mapster;
 using Microsoft.AspNetCore.Components;
@@ -11,15 +12,10 @@ public partial class InspectionItemList
     protected IApiClient Inspectionitemlistclient { get; set; } = default!;
     [Inject]
     private ISnackbar? Snackbar { get; set; }
-    private ICollection<PurchaseItemDto> _items = new List<PurchaseItemDto>();
-
+    [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Blazor parameter requires setter for binding mutable collection.")]
     [Parameter]
-    public ICollection<PurchaseItemDto> Items
-    {
-        get => _items;
-        set => _items = value ?? new List<PurchaseItemDto>();
-    }
-    [Parameter] public List<ProductResponse> Products { get; set; } = new();
+    public ICollection<PurchaseItemDto> Items { get; set; } = new List<PurchaseItemDto>();
+    [Parameter] public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
     //[Parameter] public List<SupplierResponse> Suppliers { get; set; } = new();
     [Parameter] public PurchaseStatus? Status { get; set; }
     [Parameter] public Guid? PurchaseId { get; set; }
@@ -29,8 +25,7 @@ public partial class InspectionItemList
     private Guid? Productid { get; set; }
     private int Qty { get; set; }
     private double Unitprice { get; set; }
-    private PurchaseStatus? Itemstatus { get; set; }
-    private PurchaseItemDto EditingItem { get; set; }
+    private PurchaseItemDto? EditingItem { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
@@ -38,6 +33,11 @@ public partial class InspectionItemList
         //Model.Items ??= new List<PurchaseItemDto>();
         //await LoadSupplierAsync();
         //await LoadProductAsync();
+    }
+
+    protected override void OnParametersSet()
+    {
+        Items ??= new List<PurchaseItemDto>();
     }
    
     private void EditItem(PurchaseItemDto item)
@@ -61,7 +61,7 @@ public partial class InspectionItemList
 
             EditingItem = null;
 
-            UpdateTotalAmount();
+            StateHasChanged();
           
         }
         catch (ApiException ex)
@@ -84,17 +84,21 @@ public partial class InspectionItemList
 
         var newItem = new PurchaseItemDto
         {
+            Id = Guid.NewGuid(),
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
-            ItemStatus = Itemstatus ?? Status ?? PurchaseStatus.Pending
+            ItemStatus = Status ?? PurchaseStatus.Pending
         };
         Items.Add(newItem);
 
         if (IsCreate == false)
         {
             var model = newItem.Adapt<CreatePurchaseItemCommand>();
-            model.PurchaseId = (Guid)PurchaseId; // Make sure the command has this property
+            if (PurchaseId.HasValue)
+            {
+                model.PurchaseId = PurchaseId.Value;
+            }
 
             // Ideally use await with async method
             Inspectionitemlistclient.CreatePurchaseItemEndpointAsync("1", model);
@@ -106,32 +110,25 @@ public partial class InspectionItemList
         Qty = 0;
         Unitprice = 0;
 
-        UpdateTotalAmount();
-    }
-
-    private void UpdateTotalAmount()
-    {
-        double total = Items.Sum(i => i.Qty * i.UnitPrice);
-        //OnTotalAmountChanged?.Invoke(total);
-        StateHasChanged();
+    StateHasChanged();
     }
 
     private void RemoveItem(PurchaseItemDto item)
     {
-        if (item.Id == null)
+        if (item.Id == Guid.Empty)
         {
             Snackbar?.Add("Item ID is null and cannot be removed.", Severity.Error);
             return;
         }
         try
         {
-            var id = item.Id; // Convert nullable Guid to non-nullable Guid
+            var id = item.Id;
 
            Inspectionitemlistclient.DeletePurchaseItemEndpointAsync("1", id);
 
             Snackbar?.Add("Item product successfully removed.", Severity.Success);
             Items.Remove(item);
-            UpdateTotalAmount();
+            StateHasChanged();
         }
         catch (ApiException ex)
         {
@@ -140,8 +137,8 @@ public partial class InspectionItemList
         }
     }
 
-    private List<PurchaseStatus> PurchaseStatusList =>
-    Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>().ToList();
+    private static IReadOnlyList<PurchaseStatus> PurchaseStatusList { get; } = Enum.GetValues<PurchaseStatus>();
+
     private static string GetDisplayName(Enum value)
     {
         var field = value.GetType().GetField(value.ToString());

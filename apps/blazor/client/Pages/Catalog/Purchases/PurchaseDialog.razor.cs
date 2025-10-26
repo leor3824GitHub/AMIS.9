@@ -26,13 +26,9 @@ public partial class PurchaseDialog
 
     private PurchaseItemDto? EditingItem { get; set; }
 
-    private string? _successMessage;
-    private FshValidation? Validation;
+    private static IReadOnlyList<PurchaseStatus> PurchaseStatusList { get; } = Enum.GetValues<PurchaseStatus>();
 
-    private List<PurchaseStatus> PurchaseStatusList =>
-    Enum.GetValues(typeof(PurchaseStatus)).Cast<PurchaseStatus>().ToList();
-    
-    private string GetDisplayName(Enum value)
+    private static string GetDisplayName(Enum value)
     {
         var field = value.GetType().GetField(value.ToString());
         var attr = field?.GetCustomAttributes(typeof(DisplayAttribute), false)

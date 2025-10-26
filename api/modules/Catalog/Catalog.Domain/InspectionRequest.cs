@@ -87,4 +87,47 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
         Status = InspectionRequestStatus.Completed;
         QueueDomainEvent(new InspectionRequestCompleted { RequestId = Id });
     }
+
+    public void MarkAccepted()
+    {
+        if (Status == InspectionRequestStatus.Accepted)
+        {
+            return;
+        }
+
+        Status = InspectionRequestStatus.Accepted;
+        QueueDomainEvent(new InspectionRequestUpdated { RequestId = Id });
+    }
+
+    public void UpdateStatus(InspectionRequestStatus newStatus)
+    {
+        if (Status != newStatus)
+        {
+            // Validate status transitions
+            ValidateStatusTransition(newStatus);
+            
+            Status = newStatus;
+            QueueDomainEvent(new InspectionRequestUpdated { RequestId = Id });
+        }
+    }
+
+    private void ValidateStatusTransition(InspectionRequestStatus newStatus)
+    {
+        var validTransitions = new Dictionary<InspectionRequestStatus, InspectionRequestStatus[]>
+        {
+            { InspectionRequestStatus.Pending, new[] { InspectionRequestStatus.Assigned } },
+            { InspectionRequestStatus.Assigned, new[] { InspectionRequestStatus.InProgress, InspectionRequestStatus.Pending } },
+            { InspectionRequestStatus.InProgress, new[] { InspectionRequestStatus.Completed, InspectionRequestStatus.Failed } },
+            { InspectionRequestStatus.Completed, new[] { InspectionRequestStatus.Accepted } },
+            { InspectionRequestStatus.Failed, new[] { InspectionRequestStatus.Assigned } }, // Can reassign after failure
+            { InspectionRequestStatus.Accepted, Array.Empty<InspectionRequestStatus>() }
+        };
+
+        if (validTransitions.TryGetValue(Status, out var allowedTransitions) 
+            && !allowedTransitions.Contains(newStatus))
+        {
+            throw new InvalidOperationException(
+                $"Cannot transition from {Status} to {newStatus}. Valid transitions: {string.Join(", ", allowedTransitions)}");
+        }
+    }
 }

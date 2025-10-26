@@ -4,7 +4,7 @@
 
     <MudTable T="PurchaseItemDto"
               Items="Items"
-              Hover="true"
+              Hover
               Breakpoint="Breakpoint.Sm"
               Class="th-border-separator">
 
@@ -32,7 +32,7 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd Style="width: 80px;">
-                    <MudTextField T="int" @bind-Value="item.Qty" Immediate="true" Variant="Variant.Outlined" />
+                    <MudTextField T="int" @bind-Value="item.Qty" Immediate Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd Style="width: 120px;">
                     <MudTextField T="double" @bind-Value="item.UnitPrice" Variant="Variant.Outlined" />
@@ -42,7 +42,7 @@
                         var newAmount = Qty * Unitprice;
                     }
 
-                    <MudText Variant="Variant.Outlined">@newAmount.ToString("N2")</MudText>
+                    <MudText>@newAmount.ToString("N2")</MudText>
                 </MudTd>
                 <MudTd>
                     <MudSelect T="PurchaseStatus" @bind-Value="item.ItemStatus" Dense Variant="Variant.Outlined">
@@ -86,7 +86,7 @@
                     }
                     @newAmount.ToString("N2")
                 </MudTd>
-                <MudTd T="PurchaseStatus?" DataLabel="Status">@item.ItemStatus</MudTd>
+                <MudTd DataLabel="Status">@item.ItemStatus</MudTd>
                 <MudTd class="text-center">
                     <div class="d-flex justify-center gap-2">
                         <MudTooltip Text="Edit Item">
@@ -120,19 +120,19 @@
             @if (Productid != null)
             {
                 <MudTd Style="width: 80px;" >
-                    <MudNumericField HideSpinButtons="true" T="int" @bind-Value="Qty"  Variant="Variant.Outlined" />
+                    <MudNumericField HideSpinButtons T="int" @bind-Value="Qty" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd Style="width: 120px;" >
-                    <MudNumericField HideSpinButtons="true" T="double" @bind-Value="Unitprice" Variant="Variant.Outlined" />
+                    <MudNumericField HideSpinButtons T="double" @bind-Value="Unitprice" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd >
                     @{
                         var newAmount = Qty * Unitprice;
                     }
-                    <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly=" true" Label="Auto Compute" Variant="Variant.Outlined" />
+                    <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly="true" Variant="Variant.Outlined" />
+                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly Variant="Variant.Outlined" />
                 </MudTd>
 
                 <MudTd class="text-center">

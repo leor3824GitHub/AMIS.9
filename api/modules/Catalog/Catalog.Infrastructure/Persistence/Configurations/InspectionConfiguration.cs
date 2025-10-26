@@ -34,6 +34,11 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
                 .HasMaxLength(200)
                 .IsRequired(false);
 
+            builder.Property(x => x.Status)
+                .HasConversion<string>()
+                .HasMaxLength(32)
+                .IsRequired();
+
         }
     }
 }

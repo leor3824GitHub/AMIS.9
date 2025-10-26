@@ -62,14 +62,15 @@
                     <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">
                         @if (context.Item.InspectorId == null)
                         {
-                            <MudMenuItem OnClick="@(() => OnAssign(context.Item))">Assign</MudMenuItem>
+                            <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)" OnClick="@(() => OnAssign(context.Item))">Assign</MudMenuItem>
                         }
                         else
                         {
-                            <MudMenuItem OnClick="@(() => ReAssign(context.Item))">Re-Assign</MudMenuItem>
+                            <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)" OnClick="@(() => ReAssign(context.Item))">Re-Assign</MudMenuItem>
                         }
                         <MudMenuItem OnClick="@(() => OnView(context.Item))">View</MudMenuItem>
-                        <MudMenuItem OnClick="@(() => OnInspect(context.Item))">Inspect</MudMenuItem>
+                        <MudMenuItem Disabled="@ShouldDisableInspect(context.Item)"
+                                     OnClick="@(() => OnInspect(context.Item))">Inspect</MudMenuItem>
                     </MudMenu>
                 </CellTemplate>
             </TemplateColumn>
