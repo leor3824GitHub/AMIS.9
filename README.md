@@ -1,4 +1,4 @@
-# AMIS.9
+# Asset Management Information System
 
 A modular Clean Architecture .NET 9 application with vertical-slice features, CQRS/MediatR, Blazor WebAssembly client, and local orchestration via .NET Aspire.
 
