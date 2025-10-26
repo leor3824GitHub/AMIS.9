@@ -23,16 +23,18 @@ public class IssuanceItem : AuditableEntity, IAggregateRoot
         UnitPrice = unitPrice;
         Status = status;
 
-        QueueDomainEvent(new IssuanceItemUpdated { IssuanceItem = this });
+        QueueDomainEvent(new IssuanceItemCreated { IssuanceItem = this });
     }
 
     public static IssuanceItem Create(Guid issuanceId, Guid productId, int qty, decimal unitPrice, string? status)
     {
+        Validate(qty, unitPrice);
         return new IssuanceItem(Guid.NewGuid(), issuanceId, productId, qty, unitPrice, status);
     }
 
     public IssuanceItem Update(Guid issuanceId, Guid productId, int qty, decimal unitPrice, string? status)
     {
+        Validate(qty, unitPrice);
         bool isUpdated = false;
 
         if (IssuanceId != issuanceId)
@@ -71,6 +73,19 @@ public class IssuanceItem : AuditableEntity, IAggregateRoot
         }
 
         return this;
+    }
+
+    private static void Validate(int qty, decimal unitPrice)
+    {
+        if (qty <= 0)
+        {
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(qty));
+        }
+
+        if (unitPrice < 0)
+        {
+            throw new ArgumentException("Unit price must not be negative.", nameof(unitPrice));
+        }
     }
 }
 

@@ -1,0 +1,39 @@
+@page "/catalog/inventories"
+
+<MudPaper Class="pa-4">
+    <MudText Typo="Typo.h5">Inventories</MudText>
+    <MudDivider Class="my-2" />
+
+    <MudStack Row="true" Spacing="2" Class="mb-2">
+        <MudTextField @bind-Value="searchString" Placeholder="Search by Product name" AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" DebounceInterval="300" OnKeyUp="@(async _ => await OnSearch(searchString))" />
+        <MudSpacer />
+        <MudButton Disabled="@(!_canCreate)" Color="Color.Primary" Variant="Variant.Filled" OnClick="OnCreate" StartIcon="@Icons.Material.Filled.Add">New</MudButton>
+        <MudButton Disabled="@(!_canDelete || _selectedItems.Count == 0)" Color="Color.Error" Variant="Variant.Outlined" OnClick="OnDeleteChecked" StartIcon="@Icons.Material.Filled.Delete">Delete Selected</MudButton>
+    </MudStack>
+
+    <MudDataGrid T="InventoryResponse" @ref="_table" ServerData="ServerReload" Loading="_loading" Dense="true" Hover="true" Bordered="true"
+                 MultiSelection="true" @bind-SelectedItems="_selectedItems">
+        <Columns>
+            <PropertyColumn Property="x => x.ProductId" Title="Product">
+                <CellTemplate>
+                    @context.Item.Product?.Name
+                </CellTemplate>
+            </PropertyColumn>
+            <PropertyColumn Property="x => x.Qty" Title="Quantity" />
+            <PropertyColumn Property="x => x.AvePrice" Title="Average Price">
+                <CellTemplate>
+                    @context.Item.AvePrice.ToString("C")
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn Title="Actions">
+                <CellTemplate>
+                    <MudIconButton Disabled="@(!_canUpdate)" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(async () => await OnEdit(context.Item))" />
+                    <MudIconButton Disabled="@(!_canDelete)" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(async () => await OnDelete(context.Item))" />
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+</MudPaper>
+
+@code {
+}

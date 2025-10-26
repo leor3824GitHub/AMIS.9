@@ -1,4 +1,5 @@
-﻿using AMIS.Framework.Core.Persistence;
+﻿using System.Transactions;
+using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Application.Inventories.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Exceptions;
@@ -10,7 +11,8 @@ namespace AMIS.WebApi.Catalog.Application.IssuanceItems.Delete.v1;
 public sealed class DeleteIssuanceItemHandler(
     ILogger<DeleteIssuanceItemHandler> logger,
     [FromKeyedServices("catalog:issuanceItems")] IRepository<IssuanceItem> repository,
-    [FromKeyedServices("catalog:inventories")] IRepository<Inventory> inventoryRepository)
+    [FromKeyedServices("catalog:inventories")] IRepository<Inventory> inventoryRepository,
+    [FromKeyedServices("catalog:issuances")] IRepository<Issuance> issuanceRepository)
     : IRequestHandler<DeleteIssuanceItemCommand>
 {
     public async Task Handle(DeleteIssuanceItemCommand request, CancellationToken cancellationToken)
@@ -18,26 +20,22 @@ public sealed class DeleteIssuanceItemHandler(
         ArgumentNullException.ThrowIfNull(request);
 
         // Retrieve the issuance item from the repository
-        var issuanceItem = await repository.GetByIdAsync(request.Id, cancellationToken);
+        var issuanceItem = await repository.GetByIdAsync(request.Id, cancellationToken)
+            ?? throw new IssuanceItemNotFoundException(request.Id);
 
-        // If the issuance item does not exist, throw an exception to stop further processing
-        if (issuanceItem == null)
+        var issuance = await issuanceRepository.GetByIdAsync(issuanceItem.IssuanceId, cancellationToken)
+            ?? throw new IssuanceNotFoundException(issuanceItem.IssuanceId);
+
+        if (issuance.IsClosed)
         {
-            logger.LogWarning("IssuanceItem with id {IssuanceItemId} not found.", request.Id);
-            return; // No need to proceed if the item does not exist
+            logger.LogWarning("Attempted to delete issuance item {IssuanceItemId} from closed issuance {IssuanceId}", issuanceItem.Id, issuance.Id);
+            return;
         }
 
-        // Try to delete the issuance item from the repository
-        try
-        {
-            await repository.DeleteAsync(issuanceItem, cancellationToken);
-            logger.LogInformation("IssuanceItem with id : {IssuanceItemId} deleted successfully", issuanceItem.Id);
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "An error occurred while deleting IssuanceItem with id : {IssuanceItemId}", issuanceItem.Id);
-            return; // Stop execution if deletion failed
-        }
+        using var scope = new TransactionScope(TransactionScopeAsyncFlowOption.Enabled);
+
+        await repository.DeleteAsync(issuanceItem, cancellationToken);
+        logger.LogInformation("IssuanceItem with id : {IssuanceItemId} deleted successfully", issuanceItem.Id);
 
         // Check if we need to update the inventory
         var spec = new GetInventoryProductIdSpecs(issuanceItem.ProductId);
@@ -47,23 +45,29 @@ public sealed class DeleteIssuanceItemHandler(
         {
             // Log a warning if inventory is not found for the product
             logger.LogWarning("Inventory not found for ProductId {ProductId}", issuanceItem.ProductId);
-            return; // No need to proceed if inventory doesn't exist
+        }
+        else
+        {
+            try
+            {
+                // Update the stock based on the deleted issuance item quantity
+                inventory.UpdateStock(issuanceItem.Qty);
+
+                // Save the updated inventory
+                await inventoryRepository.UpdateAsync(inventory, cancellationToken);
+                logger.LogInformation("{Qty} quantity of ProductId {ProductId} returned to inventory successfully.", issuanceItem.Qty, issuanceItem.ProductId);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "An error occurred while updating inventory for ProductId {ProductId}", issuanceItem.ProductId);
+            }
         }
 
-        try
-        {
-            // Update the stock based on the deleted issuance item quantity
-            inventory.UpdateStock(issuanceItem.Qty);
+        issuance.RegisterItemRemoved(issuanceItem.Qty, issuanceItem.UnitPrice);
+        await issuanceRepository.UpdateAsync(issuance, cancellationToken);
+        logger.LogInformation("Issuance {IssuanceId} total recalculated to {TotalAmount}", issuance.Id, issuance.TotalAmount);
 
-            // Save the updated inventory
-            await inventoryRepository.UpdateAsync(inventory, cancellationToken);
-            logger.LogInformation("{Qty} quantity of ProductId {ProductId} returned to inventory successfully.", issuanceItem.Qty, issuanceItem.ProductId);
-        }
-        catch (Exception ex)
-        {
-            // Log an error if updating inventory fails
-            logger.LogError(ex, "An error occurred while updating inventory for ProductId {ProductId}", issuanceItem.ProductId);
-        }
+        scope.Complete();
     }
 
 }

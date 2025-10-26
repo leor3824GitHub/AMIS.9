@@ -1,0 +1,85 @@
+@using AMIS.Blazor.Client.Components
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Forms
+
+<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+    <FshValidation @ref="_customValidation" />
+
+    <MudStack Spacing="3">
+        <MudText Typo="Typo.h6">@(IsCreate.GetValueOrDefault() ? "New Issuance" : "Edit Issuance")</MudText>
+
+        @if (Employees.Count == 0)
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Text">
+                No employees available. Please add an employee before saving.
+            </MudAlert>
+        }
+
+        @if (Model.IsClosed)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense>
+                This issuance is marked as closed. Totals are read-only.
+            </MudAlert>
+        }
+
+        <MudPaper Class="pa-4" Outlined>
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.subtitle2">Assignment</MudText>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="Guid?" Label="Employee" @bind-Value="SelectedEmployeeId" Required="true" Disabled="@(Employees.Count == 0)">
+                            @foreach (var employee in Employees)
+                            {
+                                <MudSelectItem Value="@employee.Id">@employee.Name</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudDatePicker Label="Issuance Date"
+                                       Date="@_issuanceDate"
+                                       DateChanged="OnDateChanged"
+                                       Required="true"
+                                       DateFormat="yyyy-MM-dd"
+                                       Editable />
+                    </MudItem>
+                </MudGrid>
+            </MudStack>
+        </MudPaper>
+
+        <MudPaper Class="pa-4" Outlined>
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.subtitle2">Summary</MudText>
+                <MudGrid Spacing="2" AlignItems="AlignItems.Center">
+                    <MudItem xs="12" md="6">
+                        <MudNumericField T="decimal" Label="Total Amount"
+                                         @bind-Value="Model.TotalAmount"
+                                         Min="0"
+                                         Disabled="true"
+                                         ReadOnly="true"
+                                         Format="C" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudText Typo="Typo.subtitle2">Status:</MudText>
+                            <MudChip T="string"
+                                     Color="@(Model.IsClosed ? Color.Success : Color.Info)"
+                                     Variant="Variant.Outlined"
+                                     Size="Size.Small">
+                                @(Model.IsClosed ? "Closed" : "Open")
+                            </MudChip>
+                        </MudStack>
+                    </MudItem>
+                </MudGrid>
+            </MudStack>
+        </MudPaper>
+
+        <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="1">
+            <MudButton ButtonType="ButtonType.Submit"
+                       Color="Color.Primary"
+                       Disabled="@(Employees.Count == 0)">
+                Save
+            </MudButton>
+            <MudButton OnClick="Cancel" Color="Color.Default" Variant="Variant.Text">Cancel</MudButton>
+        </MudStack>
+    </MudStack>
+</EditForm>

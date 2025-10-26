@@ -20,7 +20,7 @@ public partial class ProductDialog
     [Parameter] public Action? Refresh { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
     [Parameter] public List<CategoryResponse> _categories { get; set; }
-    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] public ISnackbar Snackbar { get; set; } = default!;
     private string? _successMessage;
     private FshValidation? _customValidation;
     private bool _uploading;
@@ -77,7 +77,7 @@ public partial class ProductDialog
             Model.CategoryId = null;
         }
     }
-    private async Task UploadFiles(InputFileChangeEventArgs e)
+    public async Task UploadFiles(InputFileChangeEventArgs e)
     {
         _uploadErrorMessage = string.Empty;
 

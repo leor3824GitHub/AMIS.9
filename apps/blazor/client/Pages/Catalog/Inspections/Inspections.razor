@@ -86,8 +86,8 @@
             <TemplateColumn Title="Action">
                 <CellTemplate>
                     <MudMenu Icon="@Icons.Material.Filled.Edit" Dense="true">
-                        <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
-                        <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                        <MudMenuItem Disabled="@(!CanEdit(context.Item))" OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
+                        <MudMenuItem Disabled="@(!CanDelete(context.Item))" OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
                         @if (_canUpdate)
                         {
                             <MudMenuItem Disabled="@(!IsApproveEnabled(context.Item))" OnClick="@(() => OnApprove(context.Item))">Approve</MudMenuItem>

@@ -15,6 +15,7 @@ public class SearchAcceptanceSpecs : EntitiesByPaginationFilterSpec<Acceptance, 
             .Include(i => i.SupplyOfficer)
             .Include(i => i.Purchase)
             .OrderBy(i => i.AcceptanceDate, !command.HasOrderBy())
+            .Where(i => i.InspectionId == command.InspectionId!.Value, command.InspectionId.HasValue)
             .Where(i => i.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)
             .Where(i => i.AcceptanceDate >= command.FromDate, command.FromDate.HasValue)
             .Where(i => i.AcceptanceDate <= command.ToDate, command.ToDate.HasValue);

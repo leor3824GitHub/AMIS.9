@@ -25,6 +25,14 @@
         {
             <MudNavLink Href="/catalog/inspections" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Inspections</MudNavLink>
         }
+        @if (_canViewIssuances)
+        {
+            <MudNavLink Href="/catalog/issuances" Icon="@Icons.Material.Filled.LocalShipping" Class="fsh-nav-child">Issuances</MudNavLink>
+        }
+        @if (_canViewInventories)
+        {
+            <MudNavLink Href="/catalog/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">Inventories</MudNavLink>
+        }
         @if (_canViewAcceptances)
         {
             <MudNavLink Href="/catalog/acceptances" Icon="@Icons.Material.Filled.AssignmentTurnedIn" Class="fsh-nav-child">Acceptances</MudNavLink>

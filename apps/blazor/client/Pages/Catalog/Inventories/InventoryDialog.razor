@@ -1,0 +1,18 @@
+<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+    <FshValidation @ref="_customValidation" />
+    <MudStack Spacing="2">
+        <MudSelect T="Guid?" Label="Product" @bind-Value="SelectedProductId" Required="true" Disabled="!IsCreate.GetValueOrDefault(false)">
+            @foreach (var p in Products)
+            {
+                <MudSelectItem Value="@p.Id">@p.Name</MudSelectItem>
+            }
+        </MudSelect>
+        <MudNumericField T="int" Label="Quantity" @bind-Value="Model.Qty" Min="1" Required="true" />
+        <MudNumericField T="decimal" Label="Average Price" @bind-Value="Model.AvePrice" Min="0.01M" Required="true" />
+
+        <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="1">
+            <MudButton ButtonType="ButtonType.Submit" Color="Color.Primary">Save</MudButton>
+            <MudButton OnClick="Cancel" Color="Color.Default" Variant="Variant.Text">Cancel</MudButton>
+        </MudStack>
+    </MudStack>
+</EditForm>

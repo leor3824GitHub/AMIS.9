@@ -1,0 +1,74 @@
+@page "/catalog/issuances"
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<PageHeader Title="Issuances" Header="Issuances" SubHeader="Manage issuance records" />
+
+<MudPaper Class="pa-4">
+    <MudStack Row="true" Spacing="2" Class="mb-2">
+        <MudTextField @bind-Value="_searchString"
+                      Placeholder="Search"
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search"
+                      Immediate="true"
+                      Disabled="@(!_canSearch)"
+                      DebounceInterval="250"
+                      OnKeyUp="@(async _ => await OnSearchAsync(_searchString))" />
+        <MudSpacer />
+        <MudButton Disabled="@(!_canCreate)"
+                   Color="Color.Primary"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Add"
+                   OnClick="OnCreate">New</MudButton>
+        <MudButton Disabled="@(!_canDelete || _selectedItems.Count == 0)"
+                   Color="Color.Error"
+                   Variant="Variant.Outlined"
+                   StartIcon="@Icons.Material.Filled.Delete"
+                   OnClick="OnDeleteSelected">Delete Selected</MudButton>
+    </MudStack>
+
+    <MudDataGrid T="IssuanceResponse"
+                 @ref="_table"
+                 ServerData="ServerReload"
+                 Loading="_loading"
+                 Dense="true"
+                 Hover="true"
+                 Bordered="true"
+                 MultiSelection="true"
+                 @bind-SelectedItems="_selectedItems">
+        <Columns>
+            <PropertyColumn Property="x => x.IssuanceDate" Title="Issued On" Format="{0:yyyy-MM-dd}" />
+            <TemplateColumn Title="Employee">
+                <CellTemplate>
+                    @context.Item.Employee?.Name ?? "—"
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Total Amount">
+                <CellTemplate>
+                    @context.Item.TotalAmount.ToString("C")
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Status">
+                <CellTemplate>
+                    <MudChip Color="@(context.Item.IsClosed ? Color.Success : Color.Info)"
+                             Variant="Variant.Outlined"
+                             Size="Size.Small">
+                        @(context.Item.IsClosed ? "Closed" : "Open")
+                    </MudChip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Actions">
+                <CellTemplate>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
+                        <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
+                        <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnToggleClosedAsync(context.Item))">
+                            @(context.Item.IsClosed ? "Reopen" : "Close")
+                        </MudMenuItem>
+                        <MudMenuItem Disabled="@(!_canDelete)" OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                    </MudMenu>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+    </MudDataGrid>
+</MudPaper>

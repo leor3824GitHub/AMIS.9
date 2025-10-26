@@ -43,6 +43,8 @@ public partial class Inspections
 
     // simple cache for approve enablement per inspection id
     private readonly Dictionary<Guid, bool> _approveEnabledCache = new();
+    // cache for whether an inspection already has an acceptance
+    private readonly Dictionary<Guid, bool> _hasAcceptanceCache = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -127,9 +129,36 @@ public partial class Inspections
             var result = await inspectionclient.SearchInspectionsEndpointAsync("1", inspectionFilter);
 
             _approveEnabledCache.Clear();
+            _hasAcceptanceCache.Clear();
 
             _totalItems = result?.TotalCount ?? 0;
             _entityList = result?.Items ?? Enumerable.Empty<InspectionResponse>();
+
+            // Pre-compute acceptance existence per inspection for delete gating
+            // Optimize to only query inspections that are InProgress (others can't be deleted anyway), and parallelize calls per page
+            if (result?.Items != null)
+            {
+                var candidates = result.Items.Where(i => i.Status == InspectionStatus.InProgress).ToList();
+                var tasks = candidates.Select(async insp =>
+                {
+                    try
+                    {
+                        var acc = await inspectionclient.SearchAcceptancesEndpointAsync("1", new SearchAcceptancesCommand
+                        {
+                            InspectionId = insp.Id,
+                            PageNumber = 1,
+                            PageSize = 1
+                        });
+                        _hasAcceptanceCache[insp.Id] = (acc?.TotalCount ?? 0) > 0;
+                    }
+                    catch
+                    {
+                        _hasAcceptanceCache[insp.Id] = false;
+                    }
+                });
+                await Task.WhenAll(tasks);
+            }
+
         }
         catch (Exception ex)
         {
@@ -177,32 +206,75 @@ public partial class Inspections
 
     private async Task OnEdit(InspectionResponse item)
     {
+        if (!CanEdit(item))
+        {
+            Snackbar?.Add("Only in-progress inspections can be edited.", Severity.Info);
+            return;
+        }
+
         var model = item.Adapt<UpdateInspectionCommand>();
         await ShowEditFormDialog("Edit inspection", model, false, _inspectionrequests);
     }
 
     private async Task OnDelete(InspectionResponse item)
     {
-        try
+        if (!CanDelete(item))
         {
-            await inspectionclient.DeleteInspectionEndpointAsync("1", item.Id);
-            Snackbar?.Add("Inspection deleted", Severity.Success);
-            await _table.ReloadServerData();
+            Snackbar?.Add("Only in-progress inspections can be deleted.", Severity.Info);
+            return;
         }
-        catch (Exception ex)
+
+        string deleteContent = $"You're sure you want to delete inspection '{item.Id}'?";
+        var parameters = new DialogParameters
         {
-            Snackbar?.Add($"Delete failed: {ex.Message}", Severity.Error);
+            { nameof(DeleteConfirmation.ContentText), deleteContent }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            await ApiHelper.ExecuteCallGuardedAsync(
+                () => inspectionclient.DeleteInspectionEndpointAsync("1", item.Id),
+                Snackbar);
+
+            await _table.ReloadServerData();
         }
     }
 
     private async Task OnDeleteChecked()
     {
-        if (_selectedItems.Count == 0) return;
-        foreach (var item in _selectedItems.ToList())
+        if (_selectedItems.Count == 0)
         {
-            await OnDelete(item);
+            Snackbar?.Add("No inspections selected.", Severity.Info);
+            return;
         }
-        _selectedItems.Clear();
+
+        string deleteContent = "Delete selected inspections?";
+        var parameters = new DialogParameters
+        {
+            { nameof(DeleteConfirmation.ContentText), deleteContent }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
+        var result = await dialog.Result;
+        if (result is { Canceled: false })
+        {
+            foreach (var item in _selectedItems.ToList())
+            {
+                if (!CanDelete(item))
+                {
+                    continue;
+                }
+
+                await ApiHelper.ExecuteCallGuardedAsync(
+                    () => inspectionclient.DeleteInspectionEndpointAsync("1", item.Id),
+                    Snackbar);
+            }
+
+            _selectedItems.Clear();
+            await _table.ReloadServerData();
+        }
     }
 
     private async Task OnCreate()
@@ -274,5 +346,16 @@ public partial class Inspections
             InspectionStatus.Cancelled => Color.Dark,
             _ => Color.Default
         };
+    }
+
+    private bool CanEdit(InspectionResponse? inspection) =>
+        _canUpdate && inspection is { Status: InspectionStatus.InProgress };
+
+    private bool CanDelete(InspectionResponse? inspection)
+    {
+        if (!_canDelete || inspection is null || inspection.Status != InspectionStatus.InProgress)
+            return false;
+
+        return !_hasAcceptanceCache.TryGetValue(inspection.Id, out var has) || !has;
     }
 }  

@@ -11,9 +11,9 @@ namespace AMIS.Blazor.Client.Pages.Catalog;
 public partial class Products_1
 {
     [Inject]
-    protected IApiClient _client { get; set; } = default!;
+    public IApiClient _client { get; set; } = default!;
     [Inject]
-    protected ISnackbar Snackbar { get; set; } = default!;
+    public ISnackbar Snackbar { get; set; } = default!;
 
     protected EntityServerTableContext<ProductResponse, Guid, ProductViewModel> Context { get; set; } = default!;
 
@@ -95,7 +95,7 @@ public partial class Products_1
     //        Context.AddEditModal.ForceRender();
     //    }
     //}
-    private async Task UploadFiles(InputFileChangeEventArgs e)
+    public async Task UploadFiles(InputFileChangeEventArgs e)
     {
         _uploadErrorMessage = string.Empty;
         var file = e.File;
