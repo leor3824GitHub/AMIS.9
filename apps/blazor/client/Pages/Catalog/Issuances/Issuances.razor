@@ -21,7 +21,7 @@
                    Variant="Variant.Filled"
                    StartIcon="@Icons.Material.Filled.Add"
                    OnClick="OnCreate">New</MudButton>
-        <MudButton Disabled="@(!_canDelete || _selectedItems.Count == 0)"
+    <MudButton Disabled="@(!_canDelete || _selectedItems.Count == 0 || _selectedItems.Any(i => i.IsClosed))"
                    Color="Color.Error"
                    Variant="Variant.Outlined"
                    StartIcon="@Icons.Material.Filled.Delete"

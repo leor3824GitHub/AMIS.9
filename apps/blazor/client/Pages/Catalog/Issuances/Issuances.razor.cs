@@ -277,6 +277,13 @@ public partial class Issuances
             return;
         }
 
+        // Guard: prevent deleting when any selected issuance is closed
+        if (_selectedItems.Any(i => i.IsClosed))
+        {
+            Snackbar?.Add("You can't delete closed issuances. Deselect closed items to proceed.", Severity.Warning);
+            return;
+        }
+
         var parameters = new DialogParameters
         {
             { nameof(DeleteConfirmation.ContentText), "Delete selected issuances?" }
