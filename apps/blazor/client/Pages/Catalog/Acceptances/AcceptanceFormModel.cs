@@ -42,6 +42,11 @@ public sealed class AcceptanceFormModel
         public Guid PurchaseItemId { get; set; }
         public int OrderedQty { get; set; }
         public int QtyAccepted { get; set; }
+        // Computed client-side for UX guidance
+        public int ApprovedQty { get; set; }
+        public int AcceptedSoFar { get; set; }
+        public int Remaining => Math.Max(ApprovedQty - AcceptedSoFar, 0);
+        public bool IsDepleted => Remaining <= 0;
         public string ProductName { get; set; } = string.Empty;
         public string? Remarks { get; set; }
     }

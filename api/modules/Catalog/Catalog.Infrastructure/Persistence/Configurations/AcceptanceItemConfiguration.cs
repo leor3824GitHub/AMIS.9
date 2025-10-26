@@ -25,6 +25,16 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
             builder.Property(x => x.QtyAccepted)
                 .IsRequired();
 
+            // DB-level guardrails
+            builder.ToTable(tb =>
+            {
+                tb.HasCheckConstraint("CK_AcceptanceItems_QtyAccepted_NonNegative", "\"QtyAccepted\" >= 0");
+            });
+
+            // Prevent duplicate purchase item rows within the same acceptance
+            builder.HasIndex(x => new { x.AcceptanceId, x.PurchaseItemId })
+                .IsUnique();
+
             // Optional Remarks field
             builder.Property(x => x.Remarks)
                 .HasMaxLength(500)

@@ -94,6 +94,9 @@ public partial class AcceptanceDialog
             }
             SyncItems(seedFromAcceptance);
 
+            // Compute approved, accepted so far, and remaining per item for UX
+            await RefreshComputedQuantitiesAsync(seedFromAcceptance);
+
             if (IsCreate)
             {
                 await EvaluateAcceptanceReadinessAsync(purchaseId);
@@ -159,6 +162,89 @@ public partial class AcceptanceDialog
     Model.ReplaceItems(updated);
     }
 
+    private async Task RefreshComputedQuantitiesAsync(bool preserveExisting)
+    {
+        if (Model.Items.Count == 0)
+        {
+            return;
+        }
+
+        // Cache acceptance statuses to minimize calls
+        var acceptanceStatusCache = new Dictionary<Guid, AcceptanceStatus>();
+
+        foreach (var input in Model.Items)
+        {
+            try
+            {
+                // 1) Compute approved quantity from inspection items
+                var inspSearch = new SearchInspectionItemsCommand
+                {
+                    PageNumber = 1,
+                    PageSize = 50,
+                    PurchaseItemId = input.PurchaseItemId
+                };
+
+                var inspItems = await ApiClient.SearchInspectionItemsEndpointAsync("1", inspSearch);
+                var approved = inspItems?.Items?.Sum(ii => ii.QtyPassed) ?? 0;
+                input.ApprovedQty = approved;
+
+                // 2) Compute accepted so far from posted acceptance items
+                var accSearch = new SearchAcceptanceItemsCommand
+                {
+                    PageNumber = 1,
+                    PageSize = 100,
+                    PurchaseItemId = input.PurchaseItemId
+                };
+
+                var accItems = await ApiClient.SearchAcceptanceItemsEndpointAsync("1", accSearch);
+                var acceptedSoFar = 0;
+                if (accItems?.Items != null)
+                {
+                    foreach (var ai in accItems.Items)
+                    {
+                        // Only count items from posted acceptances
+                        if (!acceptanceStatusCache.TryGetValue(ai.AcceptanceId, out var status))
+                        {
+                            var parent = await ApiClient.GetAcceptanceEndpointAsync("1", ai.AcceptanceId);
+                            status = parent?.Status ?? AcceptanceStatus.Pending;
+                            acceptanceStatusCache[ai.AcceptanceId] = status;
+                        }
+
+                        if (status == AcceptanceStatus.Posted)
+                        {
+                            acceptedSoFar += ai.QtyAccepted;
+                        }
+                    }
+                }
+                input.AcceptedSoFar = acceptedSoFar;
+
+                // 3) Clamp current input quantity to remaining
+                var remaining = input.Remaining;
+                if (!preserveExisting && AllowItemEditing)
+                {
+                    // If this is initial seeding, prefer to prefill with remaining
+                    input.QtyAccepted = remaining;
+                }
+                else if (input.QtyAccepted > remaining)
+                {
+                    input.QtyAccepted = remaining;
+                }
+            }
+            catch
+            {
+                // Fallbacks if anything fails
+                input.ApprovedQty = input.ApprovedQty <= 0 ? 0 : input.ApprovedQty;
+                input.AcceptedSoFar = input.AcceptedSoFar <= 0 ? 0 : input.AcceptedSoFar;
+                if (input.QtyAccepted > input.Remaining)
+                {
+                    input.QtyAccepted = input.Remaining;
+                }
+            }
+        }
+
+        StateHasChanged();
+    }
+
     private async Task EvaluateAcceptanceReadinessAsync(Guid purchaseId)
     {
         if (!IsCreate)
@@ -185,7 +271,7 @@ public partial class AcceptanceDialog
                 _prerequisitesMet = false;
                 _prerequisiteMessage = "Submit and complete an inspection request for this purchase before creating an acceptance.";
             }
-            else if (request.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
+            else if (request.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.PartiallyAccepted or InspectionRequestStatus.Accepted)
             {
                 _prerequisitesMet = true;
                 _prerequisiteMessage = null;
@@ -242,9 +328,10 @@ public partial class AcceptanceDialog
             value = 0;
         }
 
-        if (value > item.OrderedQty)
+        var cap = item.Remaining;
+        if (value > cap)
         {
-            value = item.OrderedQty;
+            value = cap;
         }
 
         item.QtyAccepted = value;
