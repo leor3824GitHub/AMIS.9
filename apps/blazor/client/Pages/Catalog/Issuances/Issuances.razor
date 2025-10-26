@@ -61,11 +61,11 @@
             <TemplateColumn Title="Actions">
                 <CellTemplate>
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
-                        <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
+                        <MudMenuItem Disabled="@(!_canUpdate || context.Item.IsClosed)" OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
                         <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnToggleClosedAsync(context.Item))">
                             @(context.Item.IsClosed ? "Reopen" : "Close")
                         </MudMenuItem>
-                        <MudMenuItem Disabled="@(!_canDelete)" OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                        <MudMenuItem Disabled="@(!_canDelete || context.Item.IsClosed)" OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
                     </MudMenu>
                 </CellTemplate>
             </TemplateColumn>
