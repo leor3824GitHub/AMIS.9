@@ -27,6 +27,7 @@ public partial class Issuances
     [Inject]
     private ISnackbar? Snackbar { get; set; }
     private readonly List<EmployeeResponse> _employees = new();
+    private readonly List<ProductResponse> _products = new();
     private IEnumerable<IssuanceResponse> _entityList = Enumerable.Empty<IssuanceResponse>();
     private int _totalItems;
     private bool _loading;
@@ -46,6 +47,7 @@ public partial class Issuances
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Issuances);
 
         await LoadEmployeesAsync();
+        await LoadProductsAsync();
     }
 
     private async Task LoadEmployeesAsync()
@@ -73,6 +75,34 @@ public partial class Issuances
         catch (Exception ex)
         {
             Snackbar?.Add($"Failed to load employees: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task LoadProductsAsync()
+    {
+        if (_products.Count > 0)
+        {
+            return;
+        }
+
+        try
+        {
+            var response = await ApiClient.SearchProductsEndpointAsync("1", new SearchProductsCommand
+            {
+                PageNumber = 1,
+                PageSize = 250,
+                OrderBy = new[] { "name" }
+            });
+
+            if (response?.Items != null)
+            {
+                _products.Clear();
+                _products.AddRange(response.Items);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Failed to load products: {ex.Message}", Severity.Error);
         }
     }
 
@@ -142,7 +172,8 @@ public partial class Issuances
             IssuanceDate = DateTime.Today,
             TotalAmount = 0,
             IsClosed = false,
-            EmployeeId = defaultEmployeeId
+            EmployeeId = defaultEmployeeId,
+            Items = new()
         };
 
         await ShowDialogAsync("Create issuance", model, isCreate: true);
@@ -159,6 +190,36 @@ public partial class Issuances
             IsClosed = dto.IsClosed
         };
 
+        try
+        {
+            if (dto.Id.HasValue)
+            {
+                var itemsResp = await ApiClient.SearchIssuanceItemsEndpointAsync("1", new SearchIssuanceItemsCommand
+                {
+                    PageNumber = 1,
+                    PageSize = 250,
+                    IssuanceId = dto.Id.Value
+                });
+
+                model.Items = itemsResp?.Items?
+                    .Select(x => new IssuanceItemDto
+                    {
+                        Id = x.Id ?? Guid.Empty,
+                        IssuanceId = x.IssuanceId,
+                        ProductId = x.ProductId,
+                        Qty = x.Qty,
+                        UnitPrice = x.UnitPrice,
+                        Status = x.Status
+                    })
+                    .ToList() ?? new();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Failed to load issuance items: {ex.Message}", Severity.Error);
+            model.Items = new();
+        }
+
         await ShowDialogAsync("Edit issuance", model, isCreate: false);
     }
 
@@ -168,7 +229,8 @@ public partial class Issuances
         {
             { nameof(IssuanceDialog.Model), model },
             { nameof(IssuanceDialog.IsCreate), isCreate },
-            { nameof(IssuanceDialog.Employees), _employees }
+            { nameof(IssuanceDialog.Employees), _employees },
+            { nameof(IssuanceDialog.Products), _products }
         };
 
         var options = new DialogOptions
@@ -273,4 +335,5 @@ public class IssuanceEditModel
     public DateTime IssuanceDate { get; set; }
     public decimal TotalAmount { get; set; }
     public bool IsClosed { get; set; }
+    public List<IssuanceItemDto> Items { get; set; } = new();
 }

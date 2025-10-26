@@ -28,6 +28,8 @@ public partial class IssuanceDialog
 
     [Parameter]
     public IReadOnlyList<EmployeeResponse> Employees { get; set; } = Array.Empty<EmployeeResponse>();
+    [Parameter]
+    public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
 
     private FshValidation? _customValidation;
     private Guid? SelectedEmployeeId;
@@ -86,6 +88,30 @@ public partial class IssuanceDialog
 
             if (response != null)
             {
+                // If there are items captured during creation, persist them now using the returned issuance Id
+                if (Model.Items?.Count > 0 && response.Id.HasValue)
+                {
+                    var createdId = response.Id.Value;
+                    foreach (var item in Model.Items)
+                    {
+                        try
+                        {
+                            var createItem = new CreateIssuanceItemCommand
+                            {
+                                IssuanceId = createdId,
+                                ProductId = item.ProductId!.Value,
+                                Qty = item.Qty,
+                                UnitPrice = item.UnitPrice,
+                                Status = item.Status
+                            };
+                            await ApiClient.CreateIssuanceItemEndpointAsync("1", createItem);
+                        }
+                        catch (ApiException ex)
+                        {
+                            Snackbar.Add($"Failed to add an item: {ex.Message}", Severity.Error);
+                        }
+                    }
+                }
                 Snackbar.Add("Issuance created successfully!", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
             }
@@ -124,5 +150,11 @@ public partial class IssuanceDialog
             _issuanceDate = value.Value;
             Model.IssuanceDate = value.Value;
         }
+    }
+
+    private void UpdateTotalAmount(double total)
+    {
+        Model.TotalAmount = Convert.ToDecimal(total);
+        StateHasChanged();
     }
 }

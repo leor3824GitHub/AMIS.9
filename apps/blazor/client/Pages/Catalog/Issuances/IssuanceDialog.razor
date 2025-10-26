@@ -2,84 +2,76 @@
 @using MudBlazor
 @using Microsoft.AspNetCore.Components.Forms
 
-<EditForm Model="Model" OnValidSubmit="OnValidSubmit">
-    <FshValidation @ref="_customValidation" />
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <MudDialog Style="height: 850px; overflow-y: auto;">
+        <DialogContent>
+            <FshValidation @ref="_customValidation" />
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-    <MudStack Spacing="3">
-        <MudText Typo="Typo.h6">@(IsCreate.GetValueOrDefault() ? "New Issuance" : "Edit Issuance")</MudText>
-
-        @if (Employees.Count == 0)
-        {
-            <MudAlert Severity="Severity.Warning" Variant="Variant.Text">
-                No employees available. Please add an employee before saving.
-            </MudAlert>
-        }
-
-        @if (Model.IsClosed)
-        {
-            <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense>
-                This issuance is marked as closed. Totals are read-only.
-            </MudAlert>
-        }
-
-        <MudPaper Class="pa-4" Outlined>
-            <MudStack Spacing="2">
-                <MudText Typo="Typo.subtitle2">Assignment</MudText>
-                <MudGrid Spacing="2">
-                    <MudItem xs="12" md="6">
-                        <MudSelect T="Guid?" Label="Employee" @bind-Value="SelectedEmployeeId" Required="true" Disabled="@(Employees.Count == 0)">
+            <MudPaper Class="pa-4 mt-3" Elevation="2" Square="true">
+                <MudGrid>
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudSelect T="Guid?" Variant="Variant.Outlined" Label=" Employee" @bind-Value="SelectedEmployeeId" Required="true" Disabled="@(Employees.Count == 0)">
                             @foreach (var employee in Employees)
                             {
-                                <MudSelectItem Value="@employee.Id">@employee.Name</MudSelectItem>
+                                <MudSelectItem T="Guid?" Value="@employee.Id">@employee.Name</MudSelectItem>
                             }
                         </MudSelect>
+
+                        <MudPaper Class="pa-3 mt-2" Elevation="0" Square="true">
+                            <MudText Typo="Typo.subtitle2" Class="mb-2">Employee Details</MudText>
+                            <MudDivider Class="my-2" />
+
+                            @{
+                                var selectedEmployee = Employees.FirstOrDefault(e => e.Id == SelectedEmployeeId);
+                            }
+
+                            <MudGrid>
+                                <MudItem xs="12" sm="6" md="6">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Designation</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedEmployee?.Designation) ? selectedEmployee!.Designation : "-")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6" md="6">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Responsibility Code</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedEmployee?.ResponsibilityCode) ? selectedEmployee!.ResponsibilityCode : "-")</MudText>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
                     </MudItem>
-                    <MudItem xs="12" md="6">
+
+                    <MudItem xs="12" sm="6" md="2">
                         <MudDatePicker Label="Issuance Date"
+                                       Variant="Variant.Outlined"
                                        Date="@_issuanceDate"
                                        DateChanged="OnDateChanged"
-                                       Required="true"
-                                       DateFormat="yyyy-MM-dd"
                                        Editable />
                     </MudItem>
-                </MudGrid>
-            </MudStack>
-        </MudPaper>
-
-        <MudPaper Class="pa-4" Outlined>
-            <MudStack Spacing="2">
-                <MudText Typo="Typo.subtitle2">Summary</MudText>
-                <MudGrid Spacing="2" AlignItems="AlignItems.Center">
-                    <MudItem xs="12" md="6">
-                        <MudNumericField T="decimal" Label="Total Amount"
-                                         @bind-Value="Model.TotalAmount"
-                                         Min="0"
-                                         Disabled="true"
-                                         ReadOnly="true"
-                                         Format="C" />
+                    <MudItem xs="12" sm="6" md="2">
+                        <MudTextField @bind-Value="Model.TotalAmount" Variant="Variant.Outlined" Label="Total Amount" For="@(() => Model.TotalAmount)" Format="N2" ReadOnly="true" />
                     </MudItem>
-                    <MudItem xs="12" md="6">
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                    <MudItem xs="12" sm="6" md="2">
+                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                             <MudText Typo="Typo.subtitle2">Status:</MudText>
-                            <MudChip T="string"
-                                     Color="@(Model.IsClosed ? Color.Success : Color.Info)"
-                                     Variant="Variant.Outlined"
-                                     Size="Size.Small">
+                            <MudChip T="string" Color="@(Model.IsClosed ? Color.Success : Color.Info)" Variant="Variant.Outlined" Size="Size.Small">
                                 @(Model.IsClosed ? "Closed" : "Open")
                             </MudChip>
                         </MudStack>
                     </MudItem>
+                    <MudItem xs="12" sm="6" md="2">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Disabled="@(Employees.Count == 0)">Save</MudButton>
+                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="Cancel">Close</MudButton>
+                    </MudItem>
                 </MudGrid>
-            </MudStack>
-        </MudPaper>
+            </MudPaper>
 
-        <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="1">
-            <MudButton ButtonType="ButtonType.Submit"
-                       Color="Color.Primary"
-                       Disabled="@(Employees.Count == 0)">
-                Save
-            </MudButton>
-            <MudButton OnClick="Cancel" Color="Color.Default" Variant="Variant.Text">Cancel</MudButton>
-        </MudStack>
-    </MudStack>
+            <br />
+
+            <IssuanceItemList Items="@Model.Items"
+                               Products="Products"
+                               IssuanceId="@Model.Id"
+                               OnTotalAmountChanged="UpdateTotalAmount"
+                               IsCreate="IsCreate" />
+        </DialogContent>
+    </MudDialog>
 </EditForm>
