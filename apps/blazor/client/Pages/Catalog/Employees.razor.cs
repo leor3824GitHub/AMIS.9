@@ -22,7 +22,6 @@ public partial class Employees
             entityResource: FshResources.Employees,
             fields: new()
             {
-                new(employee => employee.Id, "Id", "Id"),
                 new(employee => employee.Name, "Name", "Name"),
                 new(employee => employee.Designation, "Designation", "Designation"),
                 new(employee => employee.ResponsibilityCode, "Responsibilitycode", "Responsibilitycode"),

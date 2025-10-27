@@ -27,3 +27,30 @@
     text-align: right !important;
 }
 
+/* Global override: remove MudGrid spacing=2 gap paddings and container negative margins */
+.mud-grid-spacing-xs-2 { 
+    margin-left: 0 !important; 
+    margin-top: 0 !important; 
+    width: auto !important;
+}
+.mud-grid-spacing-xs-2 > .mud-grid-item { 
+    padding-left: 0 !important; 
+    padding-top: 0 !important; 
+}
+
+/* Override MudContainer padding: remove top and bottom padding (py-6), keep horizontal (px-6) */
+.mud-container.px-6.py-6 {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Smaller font sizes for page headers */
+.page-header .mud-typography-h4 {
+    font-size: 1.5rem !important; /* Reduced from default ~2.125rem */
+}
+
+.page-header .mud-typography-h6,
+.page-header .mud-typography-subtitle1,
+.page-header .mud-typography-subtitle2 {
+    font-size: 0.875rem !important; /* Smaller subtitle */
+}

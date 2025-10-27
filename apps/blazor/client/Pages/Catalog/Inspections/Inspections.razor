@@ -31,7 +31,7 @@
                        Disabled="@_loading"
                        OnClick="OnCreate"
                        StartIcon="@Icons.Material.Filled.Add">
-                New Inspection
+                New
             </MudButton>
         }
         @if (_canDelete)
@@ -41,7 +41,7 @@
                        Disabled="@(_selectedItems.Count == 0)"
                        OnClick="OnDeleteChecked"
                        StartIcon="@Icons.Material.Filled.Delete">
-                Delete Selected
+                Delete
             </MudButton>
         }
     </MudStack>

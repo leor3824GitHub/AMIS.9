@@ -1,158 +1,191 @@
 ﻿@page "/catalog/products"
-@* <style>
-    .mud-table-container {
-        overflow: auto;
-    }
-</style> *@
-<PageHeader Title="Products" Header="Products" SubHeader="Manage your Products." />
+
+<PageHeader Title="Product Management" 
+            Header="Product Management" 
+            SubHeader="Manage your product catalog with images, categories, and pricing" />
+
+<MudPaper Elevation="2" Class="pa-4 mb-4">
+    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="mb-2">
+        @if (_canSearch)
+        {
+            <MudTextField T="string"
+                          ValueChanged="@(s => OnSearch(s))"
+                          Placeholder="Search products..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Variant="Variant.Outlined"
+                          Margin="Margin.Dense"
+                          Style="max-width: 400px;" />
+        }
+        <MudSpacer />
+        <MudHidden Breakpoint="Breakpoint.SmAndDown">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       Disabled="@_loading"
+                       OnClick="@OnRefresh"
+                       StartIcon="@Icons.Material.Filled.Refresh">
+                Refresh
+            </MudButton>
+            @if (_canCreate)
+            {
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           Disabled="@_loading"
+                           OnClick="OnCreate"
+                           StartIcon="@Icons.Material.Filled.Add">
+                    New Product
+                </MudButton>
+                <MudButton Variant="Variant.Outlined"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.ContentCopy"
+                           Disabled="@(_selectedItems.Count != 1)"
+                           OnClick="OnClone">
+                    Clone
+                </MudButton>
+            }
+            @if (_canDelete)
+            {
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Error"
+                           StartIcon="@Icons.Material.Filled.Delete"
+                           Disabled="@(_selectedItems.Count == 0)"
+                           OnClick="OnDeleteChecked">
+                    Delete Selected
+                </MudButton>
+            }
+        </MudHidden>
+        <MudHidden Breakpoint="Breakpoint.MdAndUp">
+            <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
+                <MudMenuItem OnClick="@OnRefresh" Disabled="@_loading">
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                        <MudIcon Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" />
+                        <MudText>Refresh</MudText>
+                    </MudStack>
+                </MudMenuItem>
+                @if (_canCreate)
+                {
+                    <MudMenuItem OnClick="OnCreate" Disabled="@_loading">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" />
+                            <MudText>New</MudText>
+                        </MudStack>
+                    </MudMenuItem>
+                    <MudMenuItem OnClick="OnClone" Disabled="@(_selectedItems.Count != 1)">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small" />
+                            <MudText>Clone</MudText>
+                        </MudStack>
+                    </MudMenuItem>
+                }
+                @if (_canDelete)
+                {
+                    <MudDivider />
+                    <MudMenuItem OnClick="OnDeleteChecked" Disabled="@(_selectedItems.Count == 0)">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+                            <MudText>Delete</MudText>
+                        </MudStack>
+                    </MudMenuItem>
+                }
+            </MudMenu>
+        </MudHidden>
+    </MudStack>
+</MudPaper>
 
 <MudDataGrid ServerData="ServerReload"
              MultiSelection="true"
              @bind-SelectedItems="_selectedItems"
              @bind-SelectedItem="_currentDto"
              ColumnResizeMode="ResizeMode.Column"
-             Hover="true"             
-             Loading="@_loading" 
+             Hover="true"
+             Loading="@_loading"
              @ref="_table"
-             Outlined>
-    <ToolBarContent>
-            <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap">
+             Outlined
+             Striped="true">
 
-                <div class="d-flex align-center flex-nowrap gap-1">
-                    <MudHidden Breakpoint="Breakpoint.SmAndDown">
-                        <MudButton Variant="Variant.Filled"            
-                                   Disabled="@_loading"
-                                   OnClick="@(() => OnRefresh())"
-                                   StartIcon="@Icons.Material.Filled.Refresh" 
-                                   IconColor="Color.Surface" 
-                                   Color="Color.Secondary">
-                            Refresh
-                        </MudButton>
-                        @if (_canCreate)
-                        {
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.Add"
-                                       Disabled="@_loading"
-                                       OnClick="OnCreate"
-                                       IconColor="Color.Surface">
-                                New
-                            </MudButton>
-
-                            <MudButton Variant="Variant.Filled" 
-                                       Color="Color.Primary"
-                                       StartIcon="@Icons.Material.Filled.ContentCopy"
-                                       Disabled="@(_selectedItems.Count != 1)"
-                                       OnClick="OnClone"
-                                       IconColor="Color.Surface">
-                                Clone
-                            </MudButton>
-                        }
-                        @if (_canDelete)
-                        {
-                            <MudButton Variant="Variant.Filled" 
-                                       Color="Color.Error"
-                                       StartIcon="@Icons.Material.Filled.Delete"
-                                       Disabled="@(!(_selectedItems.Count > 0))"
-                                       OnClick="OnDeleteChecked"
-                                       IconColor="Color.Surface">
-                                Delete
-                            </MudButton>
-                        }
-                        @*  @if (_canExport)
-                        {
-                            <MudLoadingButton Loading="_exporting" Variant="Variant.Outlined" Color="Color.Primary"
-                                              Disabled="@_loading"
-                                              OnClick="OnExport"
-                                              StartIcon="@Icons.Custom.FileFormats.FileExcel"
-                                              Size="Size.Small">
-                                @ConstantString.Export
-                            </MudLoadingButton>
-                            <MudLoadingButton Loading="_pdfExporting" Variant="Variant.Outlined" Color="Color.Primary"
-                                              Disabled="@_loading"
-                                              OnClick="OnExportPDF"
-                                              StartIcon="@Icons.Custom.FileFormats.FilePdf"
-                                              Size="Size.Small">
-                                @ConstantString.ExportPDF
-                            </MudLoadingButton>
-                        } *@
-                        @* @if (_canImport)
-                        {
-                            <MudFileUpload T="IBrowserFile" FilesChanged="OnImportData" Accept=".xlsx">
-                                <ActivatorContent>
-                                    <MudButton Size="Size.Small"
-                                               Variant="Variant.Outlined"
-                                               Color="Color.Primary"
-                                               Disabled="@_loading"
-                                               StartIcon="@Icons.Material.Filled.Upload">
-                                        @if (_uploading)
-                                        {
-                                            <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                                            @ConstantString.Uploading
-                                        }
-                                        else
-                                        {
-                                            @ConstantString.Import
-                                        }
-                                    </MudButton>
-                                </ActivatorContent>
-                            </MudFileUpload>
-                        } *@
-                    </MudHidden>
-                    <!-- ☰ Actions for Small Screens -->
-                    <MudHidden Breakpoint="Breakpoint.MdAndUp">
-                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
-                            <MudMenuItem OnClick="@(() => OnRefresh())" Disabled="@_loading">Refresh</MudMenuItem>
-
-                            @if (_canCreate)
-                            {
-                                <MudMenuItem OnClick="OnCreate" Disabled="@_loading">New</MudMenuItem>
-                                <MudMenuItem OnClick="OnClone" Disabled="@(_selectedItems.Count != 1)">Clone</MudMenuItem>
-                            }
-
-                            @if (_canDelete)
-                            {
-                                <MudMenuItem OnClick="OnDeleteChecked" Disabled="@(_selectedItems.Count == 0)">Delete</MudMenuItem>
-                            }
-                        </MudMenu>
-                    </MudHidden>
-                </div>
-            </div>
-            <MudSpacer />
-            <!-- 🔍 Right: Search Box -->
-                @if (_canSearch)
-                {                
-                <MudTextField T="string" 
-                                ValueChanged="@(s=>OnSearch(s))" 
-                                Placeholder="Search" 
-                                Adornment="Adornment.Start"
-                                AdornmentIcon="@Icons.Material.Filled.Search" 
-                                IconSize="Size.Medium"
-                                Class="mt-0 mb-3" />
-                }
-            
-    </ToolBarContent>
     <Columns>
         <SelectColumn T="ProductResponse" />
-        <TemplateColumn Title="Image">
+        
+        <TemplateColumn Title="Product" Sortable="false">
             <CellTemplate>
-                <img src="@context.Item.ImagePath" alt="Product Image"
-                     style="width: 70px; height: 70px; border-radius: 50%; object-fit: cover; border: 2px solid #ccc;" />
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                    <MudAvatar Size="Size.Medium" Style="border: 2px solid #e0e0e0;">
+                        @if (!string.IsNullOrEmpty(context.Item.ImagePath))
+                        {
+                            <MudImage Src="@context.Item.ImagePath" ObjectFit="ObjectFit.Cover" />
+                        }
+                        else
+                        {
+                            <MudIcon Icon="@Icons.Material.Filled.Image" />
+                        }
+                    </MudAvatar>
+                    <MudStack Row="false" Spacing="0">
+                        <MudText Typo="Typo.body2" Style="font-weight: 500;">@context.Item.Name</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">
+                            SKU: @context.Item.Sku
+                        </MudText>
+                    </MudStack>
+                </MudStack>
             </CellTemplate>
         </TemplateColumn>
-        <PropertyColumn Property="x => x.Name" />
-        <PropertyColumn Property="x => x.Description" />
-        <PropertyColumn Property="x => x.Unit" />
-        <PropertyColumn Property="x => x.Sku" />
-        <PropertyColumn Property="x => x.Category.Name" Title="Category" />
-        <TemplateColumn Title="Action">
+
+        <TemplateColumn Title="Description" Sortable="false">
             <CellTemplate>
-                <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
-                         Dense="true"
-                         IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
+                @if (!string.IsNullOrEmpty(context.Item.Description))
+                {
+                    <MudText Typo="Typo.body2" Style="max-width: 300px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        @context.Item.Description
+                    </MudText>
+                }
+                else
+                {
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">No description</MudText>
+                }
+            </CellTemplate>
+        </TemplateColumn>
 
-                    <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
+        <TemplateColumn Title="Category" Sortable="false">
+            <CellTemplate>
+                @if (context.Item.Category != null)
+                {
+                    <MudChip Size="Size.Small" 
+                             Color="Color.Info" 
+                             Variant="Variant.Filled"
+                             Icon="@Icons.Material.Filled.Category">
+                        @context.Item.Category.Name
+                    </MudChip>
+                }
+                else
+                {
+                    <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined">Uncategorized</MudChip>
+                }
+            </CellTemplate>
+        </TemplateColumn>
 
-                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+        <TemplateColumn Title="Unit" Sortable="false">
+            <CellTemplate>
+                <MudText Typo="Typo.body2">
+                    @(context.Item.Unit ?? "—")
+                </MudText>
+            </CellTemplate>
+        </TemplateColumn>
+
+        <TemplateColumn Title="Actions" Sortable="false">
+            <CellTemplate>
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
+                    <MudMenuItem OnClick="@(() => OnEdit(context.Item))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Info" />
+                            <MudText>Edit Product</MudText>
+                        </MudStack>
+                    </MudMenuItem>
+                    <MudDivider />
+                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+                            <MudText>Delete</MudText>
+                        </MudStack>
+                    </MudMenuItem>
                 </MudMenu>
             </CellTemplate>
         </TemplateColumn>

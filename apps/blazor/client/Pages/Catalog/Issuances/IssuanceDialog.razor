@@ -9,7 +9,7 @@
             <DataAnnotationsValidator />
 
             <MudPaper Class="pa-4" Elevation="2">                
-                <MudGrid Spacing="3">
+                <MudGrid Spacing="1">
                     <MudItem xs="12" md="6">
                         <MudSelect T="Guid?" 
                                    Variant="Variant.Outlined" 
@@ -17,6 +17,8 @@
                                    @bind-Value="SelectedEmployeeId" 
                                    Required="true" 
                                    Disabled="@(Employees.Count == 0)"
+                                   Dense="true"
+                                   Margin="Margin.Dense"
                                    AdornmentIcon="@Icons.Material.Filled.Person"
                                    Adornment="Adornment.Start">
                             @foreach (var employee in Employees)
@@ -29,23 +31,26 @@
                         {
                             var selectedEmployee = Employees.First(e => e.Id == SelectedEmployeeId);
                             <MudPaper Class="pa-3 mt-2" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
-                                <MudStack Row="false" Spacing="2">
-                                    <MudStack Row="true" Spacing="1">
-                                        <MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" Color="Color.Primary" />
-                                        <MudText Typo="Typo.caption" Color="Color.Default">Designation</MudText>
-                                    </MudStack>
-                                    <MudText Typo="Typo.body2" Style="margin-left: 28px;">
-                                        @(!string.IsNullOrWhiteSpace(selectedEmployee.Designation) ? selectedEmployee.Designation : "Not specified")
-                                    </MudText>
-                                    
-                                    <MudStack Row="true" Spacing="1" Class="mt-2">
-                                        <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" Color="Color.Primary" />
-                                        <MudText Typo="Typo.caption" Color="Color.Default">Responsibility Code</MudText>
-                                    </MudStack>
-                                    <MudText Typo="Typo.body2" Style="margin-left: 28px;">
-                                        @(!string.IsNullOrWhiteSpace(selectedEmployee.ResponsibilityCode) ? selectedEmployee.ResponsibilityCode : "Not specified")
-                                    </MudText>
-                                </MudStack>
+                                <MudGrid Spacing="1">
+                                    <MudItem xs="12" sm="6">
+                                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                                            <MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" Color="Color.Primary" />
+                                            <MudText Typo="Typo.caption" Color="Color.Default">Designation</MudText>
+                                        </MudStack>
+                                        <MudText Typo="Typo.body2" Class="mt-1">
+                                            @(!string.IsNullOrWhiteSpace(selectedEmployee.Designation) ? selectedEmployee.Designation : "Not specified")
+                                        </MudText>
+                                    </MudItem>
+                                    <MudItem xs="12" sm="6">
+                                        <MudStack Row="true" Spacing="1" AlignItems="AlignItems.Center">
+                                            <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" Color="Color.Primary" />
+                                            <MudText Typo="Typo.caption" Color="Color.Default">Responsibility Code</MudText>
+                                        </MudStack>
+                                        <MudText Typo="Typo.body2" Class="mt-1">
+                                            @(!string.IsNullOrWhiteSpace(selectedEmployee.ResponsibilityCode) ? selectedEmployee.ResponsibilityCode : "Not specified")
+                                        </MudText>
+                                    </MudItem>
+                                </MudGrid>
                             </MudPaper>
                         }
                     </MudItem>
@@ -55,43 +60,45 @@
                                        Variant="Variant.Outlined"
                                        Date="@_issuanceDate"
                                        DateChanged="OnDateChanged"
+                                       Dense="true"
+                                       Margin="Margin.Dense"
                                        AdornmentIcon="@Icons.Material.Filled.CalendarToday"
                                        Adornment="Adornment.Start"
                                        Editable />
-                        
-                        <MudPaper Class="pa-3 mt-2" Elevation="0" Style="background-color: var(--mud-palette-info-light); background-color: rgba(33, 150, 243, 0.08);">
-                            <MudStack Row="false" Spacing="1">
-                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                    <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Size="Size.Small" Color="Color.Primary" />
-                                    <MudText Typo="Typo.caption" Color="Color.Default">Total Issuance Value</MudText>
-                                </MudStack>
-                                <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-weight: 600; margin-left: 28px;">
-                                    @Model.TotalAmount.ToString("C2")
-                                </MudText>
-                            </MudStack>
-                        </MudPaper>
-                        
+
                         <MudPaper Class="pa-3 mt-2" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                                <MudIcon Icon="@(Model.IsClosed ? Icons.Material.Filled.Lock : Icons.Material.Filled.LockOpen)" 
-                                         Color="@(Model.IsClosed ? Color.Success : Color.Warning)" />
-                                <MudStack Row="false" Spacing="0">
-                                    <MudText Typo="Typo.caption" Color="Color.Default">Status</MudText>
-                                    <MudChip T="string" 
-                                             Color="@(Model.IsClosed ? Color.Success : Color.Warning)" 
-                                             Variant="Variant.Filled" 
-                                             Size="Size.Small">
-                                        @(Model.IsClosed ? "Closed" : "Open")
-                                    </MudChip>
-                                </MudStack>
-                            </MudStack>
+                            <MudGrid Spacing="2" AlignItems="AlignItems.Center">
+                                <MudItem xs="12" sm="6">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                        <MudIcon Icon="@(Model.IsClosed ? Icons.Material.Filled.Lock : Icons.Material.Filled.LockOpen)" 
+                                                 Color="@(Model.IsClosed ? Color.Success : Color.Warning)" />
+                                        <MudStack Row="false" Spacing="0">
+                                            <MudText Typo="Typo.caption" Color="Color.Default">Status</MudText>
+                                            <MudChip T="string" 
+                                                     Color="@(Model.IsClosed ? Color.Success : Color.Warning)" 
+                                                     Variant="Variant.Filled" 
+                                                     Size="Size.Small">
+                                                @(Model.IsClosed ? "Closed" : "Open")
+                                            </MudChip>
+                                        </MudStack>
+                                    </MudStack>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                        <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Size="Size.Small" Color="Color.Primary" />
+                                        <MudStack Row="false" Spacing="0">
+                                            <MudText Typo="Typo.caption" Color="Color.Default">Total Issuance Value</MudText>
+                                            <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-weight: 600;">
+                                                @Model.TotalAmount.ToString("C2")
+                                            </MudText>
+                                        </MudStack>
+                                    </MudStack>
+                                </MudItem>
+                            </MudGrid>
                         </MudPaper>
                     </MudItem>
                 </MudGrid>
             </MudPaper>
-
-            <MudDivider Class="my-4" />
-
             <IssuanceItemList Items="@Model.Items"
                               Products="Products"
                               IssuanceId="@Model.Id"
@@ -109,6 +116,6 @@
                    Color="Color.Primary" 
                    Variant="Variant.Filled" 
                    Disabled="@(Employees.Count == 0)"
-                   StartIcon="@Icons.Material.Filled.Save">Save Issuance</MudButton>
+                   StartIcon="@Icons.Material.Filled.Save">Save</MudButton>
     </DialogActions>
 </MudDialog>

@@ -22,7 +22,6 @@ public partial class Suppliers
             entityResource: FshResources.Suppliers,
             fields: new()
             {
-                new(supplier => supplier.Id, "Id", "Id"),
                 new(supplier => supplier.Name, "Name", "Name"),
                 new(supplier => supplier.Address, "Address", "Address"),
                 new(supplier => supplier.Tin, "Tin", "Tin"),

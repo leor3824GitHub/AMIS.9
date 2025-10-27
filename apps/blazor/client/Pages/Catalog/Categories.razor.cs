@@ -22,7 +22,6 @@ public partial class Categories
             entityResource: FshResources.Categories,
             fields: new()
             {
-                new(category => category.Id, "Id", "Id"),
                 new(category => category.Name, "Name", "Name"),
                 new(category => category.Description, "Description", "Description")
             },
