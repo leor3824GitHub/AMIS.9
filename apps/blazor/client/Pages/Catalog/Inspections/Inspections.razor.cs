@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Inspections;
+
 public partial class Inspections
 {
     private MudDataGrid<InspectionResponse> _table = default!;
@@ -53,7 +54,7 @@ public partial class Inspections
         _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.Inspections);
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.Inspections);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Inspections);
-        
+
         await LoadInspectionItemsAsync();
         await LoadInspectionRequestsAsync();
         await LoadPurchasesAsync();
@@ -143,13 +144,22 @@ public partial class Inspections
                 {
                     try
                     {
-                        var acc = await inspectionclient.SearchAcceptancesEndpointAsync("1", new SearchAcceptancesCommand
+                        // Acceptances are associated with Purchases, not Inspections.
+                        // Use the inspection's PurchaseId to determine if any acceptances exist.
+                        if (insp.PurchaseId.HasValue)
                         {
-                            InspectionId = insp.Id,
-                            PageNumber = 1,
-                            PageSize = 1
-                        });
-                        _hasAcceptanceCache[insp.Id] = (acc?.TotalCount ?? 0) > 0;
+                            var acc = await inspectionclient.SearchAcceptancesEndpointAsync("1", new SearchAcceptancesCommand
+                            {
+                                PurchaseId = insp.PurchaseId.Value,
+                                PageNumber = 1,
+                                PageSize = 1
+                            });
+                            _hasAcceptanceCache[insp.Id] = (acc?.TotalCount ?? 0) > 0;
+                        }
+                        else
+                        {
+                            _hasAcceptanceCache[insp.Id] = false;
+                        }
                     }
                     catch
                     {
@@ -358,4 +368,4 @@ public partial class Inspections
 
         return !_hasAcceptanceCache.TryGetValue(inspection.Id, out var has) || !has;
     }
-}  
+}

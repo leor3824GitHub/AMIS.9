@@ -41,7 +41,7 @@ public partial class Issuances
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthState).User;
-    _canSearch = await AuthService.HasPermissionAsync(user, FshActions.Search, FshResources.Issuances);
+        _canSearch = await AuthService.HasPermissionAsync(user, FshActions.Search, FshResources.Issuances);
         _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.Issuances);
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.Issuances);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Issuances);
@@ -184,7 +184,8 @@ public partial class Issuances
         var model = new IssuanceEditModel
         {
             Id = dto.Id ?? Guid.Empty,
-            EmployeeId = dto.EmployeeId,
+            // IssuanceResponse does not expose EmployeeId directly; use nested Employee.Id when available
+            EmployeeId = dto.Employee?.Id ?? Guid.Empty,
             IssuanceDate = dto.IssuanceDate,
             TotalAmount = Convert.ToDecimal(dto.TotalAmount),
             IsClosed = dto.IsClosed
@@ -324,7 +325,8 @@ public partial class Issuances
         var command = new UpdateIssuanceCommand
         {
             Id = dto.Id.Value,
-            EmployeeId = dto.EmployeeId,
+            // Use nested Employee.Id for update
+            EmployeeId = dto.Employee?.Id ?? Guid.Empty,
             IssuanceDate = dto.IssuanceDate,
             TotalAmount = dto.TotalAmount,
             IsClosed = !dto.IsClosed

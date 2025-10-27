@@ -159,7 +159,7 @@ public partial class AcceptanceDialog
             updated.Add(input);
         }
 
-    Model.ReplaceItems(updated);
+        Model.ReplaceItems(updated);
     }
 
     private async Task RefreshComputedQuantitiesAsync(bool preserveExisting)
@@ -218,7 +218,7 @@ public partial class AcceptanceDialog
                 _prerequisitesMet = false;
                 _prerequisiteMessage = "Submit and complete an inspection request for this purchase before creating an acceptance.";
             }
-            else if (request.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.PartiallyAccepted or InspectionRequestStatus.Accepted)
+            else if (request.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
             {
                 _prerequisitesMet = true;
                 _prerequisiteMessage = null;
