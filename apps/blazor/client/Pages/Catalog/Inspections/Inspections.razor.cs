@@ -368,4 +368,57 @@ public partial class Inspections
 
         return !_hasAcceptanceCache.TryGetValue(inspection.Id, out var has) || !has;
     }
+
+    private string RowStyle(InspectionResponse inspection, int index)
+    {
+        return inspection.Status switch
+        {
+            InspectionStatus.Approved => "background-color: rgba(76, 175, 80, 0.08);", // Green for approved
+            InspectionStatus.Rejected => "background-color: rgba(244, 67, 54, 0.08);", // Red for rejected
+            InspectionStatus.Completed => "background-color: rgba(33, 150, 243, 0.08);", // Blue for completed
+            InspectionStatus.Cancelled => "background-color: rgba(158, 158, 158, 0.08);", // Grey for cancelled
+            _ => string.Empty
+        };
+    }
+
+    private string GetRelativeDateText(DateTime date)
+    {
+        var today = DateTime.Today;
+        var days = (today - date.Date).Days;
+
+        return days switch
+        {
+            0 => "Today",
+            1 => "Yesterday",
+            < 7 => $"{days} days ago",
+            < 30 => $"{days / 7} week{(days / 7 > 1 ? "s" : "")} ago",
+            < 365 => $"{days / 30} month{(days / 30 > 1 ? "s" : "")} ago",
+            _ => $"{days / 365} year{(days / 365 > 1 ? "s" : "")} ago"
+        };
+    }
+
+    private string GetEmployeeInitials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "?";
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+            return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+    }
+
+    private string GetStatusIcon(InspectionStatus status)
+    {
+        return status switch
+        {
+            InspectionStatus.InProgress => Icons.Material.Filled.HourglassEmpty,
+            InspectionStatus.Completed => Icons.Material.Filled.Assignment,
+            InspectionStatus.Approved => Icons.Material.Filled.CheckCircle,
+            InspectionStatus.Rejected => Icons.Material.Filled.Cancel,
+            InspectionStatus.Cancelled => Icons.Material.Filled.Block,
+            _ => Icons.Material.Filled.Help
+        };
+    }
 }

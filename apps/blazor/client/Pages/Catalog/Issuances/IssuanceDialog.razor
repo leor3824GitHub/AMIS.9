@@ -2,76 +2,113 @@
 @using MudBlazor
 @using Microsoft.AspNetCore.Components.Forms
 
-<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
-    <MudDialog Style="height: 850px; overflow-y: auto;">
-        <DialogContent>
+<MudDialog Style="max-height: 90vh; overflow-y: auto;">
+    <DialogContent>
+        <EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
             <FshValidation @ref="_customValidation" />
             <DataAnnotationsValidator />
-            <ValidationSummary />
 
-            <MudPaper Class="pa-4 mt-3" Elevation="2" Square="true">
-                <MudGrid>
-                    <MudItem xs="12" sm="6" md="4">
-                        <MudSelect T="Guid?" Variant="Variant.Outlined" Label=" Employee" @bind-Value="SelectedEmployeeId" Required="true" Disabled="@(Employees.Count == 0)">
+            <MudPaper Class="pa-4" Elevation="2">                
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" md="6">
+                        <MudSelect T="Guid?" 
+                                   Variant="Variant.Outlined" 
+                                   Label="Employee" 
+                                   @bind-Value="SelectedEmployeeId" 
+                                   Required="true" 
+                                   Disabled="@(Employees.Count == 0)"
+                                   AdornmentIcon="@Icons.Material.Filled.Person"
+                                   Adornment="Adornment.Start">
                             @foreach (var employee in Employees)
                             {
                                 <MudSelectItem T="Guid?" Value="@employee.Id">@employee.Name</MudSelectItem>
                             }
                         </MudSelect>
 
-                        <MudPaper Class="pa-3 mt-2" Elevation="0" Square="true">
-                            <MudText Typo="Typo.subtitle2" Class="mb-2">Employee Details</MudText>
-                            <MudDivider Class="my-2" />
-
-                            @{
-                                var selectedEmployee = Employees.FirstOrDefault(e => e.Id == SelectedEmployeeId);
-                            }
-
-                            <MudGrid>
-                                <MudItem xs="12" sm="6" md="6">
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Designation</MudText>
-                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedEmployee?.Designation) ? selectedEmployee!.Designation : "-")</MudText>
-                                </MudItem>
-                                <MudItem xs="12" sm="6" md="6">
-                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Responsibility Code</MudText>
-                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedEmployee?.ResponsibilityCode) ? selectedEmployee!.ResponsibilityCode : "-")</MudText>
-                                </MudItem>
-                            </MudGrid>
-                        </MudPaper>
+                        @if (Employees.Any(e => e.Id == SelectedEmployeeId))
+                        {
+                            var selectedEmployee = Employees.First(e => e.Id == SelectedEmployeeId);
+                            <MudPaper Class="pa-3 mt-2" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
+                                <MudStack Row="false" Spacing="2">
+                                    <MudStack Row="true" Spacing="1">
+                                        <MudIcon Icon="@Icons.Material.Filled.Badge" Size="Size.Small" Color="Color.Primary" />
+                                        <MudText Typo="Typo.caption" Color="Color.Default">Designation</MudText>
+                                    </MudStack>
+                                    <MudText Typo="Typo.body2" Style="margin-left: 28px;">
+                                        @(!string.IsNullOrWhiteSpace(selectedEmployee.Designation) ? selectedEmployee.Designation : "Not specified")
+                                    </MudText>
+                                    
+                                    <MudStack Row="true" Spacing="1" Class="mt-2">
+                                        <MudIcon Icon="@Icons.Material.Filled.Code" Size="Size.Small" Color="Color.Primary" />
+                                        <MudText Typo="Typo.caption" Color="Color.Default">Responsibility Code</MudText>
+                                    </MudStack>
+                                    <MudText Typo="Typo.body2" Style="margin-left: 28px;">
+                                        @(!string.IsNullOrWhiteSpace(selectedEmployee.ResponsibilityCode) ? selectedEmployee.ResponsibilityCode : "Not specified")
+                                    </MudText>
+                                </MudStack>
+                            </MudPaper>
+                        }
                     </MudItem>
 
-                    <MudItem xs="12" sm="6" md="2">
+                    <MudItem xs="12" md="6">
                         <MudDatePicker Label="Issuance Date"
                                        Variant="Variant.Outlined"
                                        Date="@_issuanceDate"
                                        DateChanged="OnDateChanged"
+                                       AdornmentIcon="@Icons.Material.Filled.CalendarToday"
+                                       Adornment="Adornment.Start"
                                        Editable />
-                    </MudItem>
-                    <MudItem xs="12" sm="6" md="2">
-                        <MudTextField @bind-Value="Model.TotalAmount" Variant="Variant.Outlined" Label="Total Amount" For="@(() => Model.TotalAmount)" Format="N2" ReadOnly="true" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6" md="2">
-                        <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                            <MudText Typo="Typo.subtitle2">Status:</MudText>
-                            <MudChip T="string" Color="@(Model.IsClosed ? Color.Success : Color.Info)" Variant="Variant.Outlined" Size="Size.Small">
-                                @(Model.IsClosed ? "Closed" : "Open")
-                            </MudChip>
-                        </MudStack>
-                    </MudItem>
-                    <MudItem xs="12" sm="6" md="2">
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit" Disabled="@(Employees.Count == 0)">Save</MudButton>
-                        <MudButton Variant="Variant.Filled" Color="Color.Secondary" OnClick="Cancel">Close</MudButton>
+                        
+                        <MudPaper Class="pa-3 mt-2" Elevation="0" Style="background-color: var(--mud-palette-info-light); background-color: rgba(33, 150, 243, 0.08);">
+                            <MudStack Row="false" Spacing="1">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Size="Size.Small" Color="Color.Primary" />
+                                    <MudText Typo="Typo.caption" Color="Color.Default">Total Issuance Value</MudText>
+                                </MudStack>
+                                <MudText Typo="Typo.h6" Color="Color.Primary" Style="font-weight: 600; margin-left: 28px;">
+                                    @Model.TotalAmount.ToString("C2")
+                                </MudText>
+                            </MudStack>
+                        </MudPaper>
+                        
+                        <MudPaper Class="pa-3 mt-2" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                <MudIcon Icon="@(Model.IsClosed ? Icons.Material.Filled.Lock : Icons.Material.Filled.LockOpen)" 
+                                         Color="@(Model.IsClosed ? Color.Success : Color.Warning)" />
+                                <MudStack Row="false" Spacing="0">
+                                    <MudText Typo="Typo.caption" Color="Color.Default">Status</MudText>
+                                    <MudChip T="string" 
+                                             Color="@(Model.IsClosed ? Color.Success : Color.Warning)" 
+                                             Variant="Variant.Filled" 
+                                             Size="Size.Small">
+                                        @(Model.IsClosed ? "Closed" : "Open")
+                                    </MudChip>
+                                </MudStack>
+                            </MudStack>
+                        </MudPaper>
                     </MudItem>
                 </MudGrid>
             </MudPaper>
 
-            <br />
+            <MudDivider Class="my-4" />
 
             <IssuanceItemList Items="@Model.Items"
-                               Products="Products"
-                               IssuanceId="@Model.Id"
-                               OnTotalAmountChanged="UpdateTotalAmount"
-                               IsCreate="IsCreate" />
-        </DialogContent>
-    </MudDialog>
-</EditForm>
+                              Products="Products"
+                              IssuanceId="@Model.Id"
+                              OnTotalAmountChanged="UpdateTotalAmount"
+                              IsCreate="IsCreate" />
+        </EditForm>
+    </DialogContent>
+    
+    <DialogActions>
+        <MudButton OnClick="Cancel" 
+                   Color="Color.Default" 
+                   Variant="Variant.Text"
+                   StartIcon="@Icons.Material.Filled.Close">Cancel</MudButton>
+        <MudButton OnClick="OnValidSubmit" 
+                   Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   Disabled="@(Employees.Count == 0)"
+                   StartIcon="@Icons.Material.Filled.Save">Save Issuance</MudButton>
+    </DialogActions>
+</MudDialog>

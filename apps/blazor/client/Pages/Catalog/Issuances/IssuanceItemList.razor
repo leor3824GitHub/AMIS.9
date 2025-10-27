@@ -1,26 +1,25 @@
 @using AMIS.Blazor.Infrastructure.Api
 @using MudBlazor
 
-<MudPaper Class="pa-4 mb-4" Style="max-height: 80vh; overflow-y: auto;">
+<MudPaper Class="pa-4 mb-4 editor-font-size-scope" Style="max-height: 80vh; overflow-y: auto;">
     <MudText Typo="Typo.h6">Issuance Items - @(Items?.Count ?? 0)</MudText>
 
     <MudTable T="IssuanceItemDto" Items="Items" Hover Breakpoint="Breakpoint.Sm" Class="th-border-separator">
 
         <HeaderContent>
-            <MudTh Style="width: 60%;">Product</MudTh>
+            <MudTh Style="width: 250px;">Product</MudTh>
             <MudTh Style="width: 100px;">Balance</MudTh>
             <MudTh Style="width: 80px;">Quantity</MudTh>
             <MudTh Style="width: 120px;">Unit Price</MudTh>
             <MudTh>Amount</MudTh>
-            <MudTh>Status</MudTh>
             <MudTh>Actions</MudTh>
         </HeaderContent>
 
         <RowTemplate Context="item">
             @if (item == EditingItem)
             {
-                <MudTd Style="width: 60%;">
-                    <MudSelect T="Guid ?" @bind-Value="item.ProductId" Dense Size="Size.Small" Style="width: 100%;"
+                <MudTd Style="width: 250px;">
+                    <MudSelect T="Guid ?" @bind-Value="item.ProductId" Dense Size="Size.Small"
                         Variant="Variant.Outlined">
                         @foreach (var product in Products)
                         {
@@ -66,7 +65,7 @@
             }
             else
             {
-                <MudTd Style="width: 60%;">
+                <MudTd Style="width: 250px;">
                     @{
                         var product = Products?.FirstOrDefault(p => p.Id == item.ProductId);
                     }
@@ -100,8 +99,8 @@
         </RowTemplate>
 
         <FooterContent>
-            <MudTd Style="width: 60%;">
-                <MudSelect T="Guid ?" @bind-Value="ProductId" Dense Size="Size.Small" Style="width: 100%;"
+            <MudTd Style="width: 250px;">
+                <MudSelect T="Guid ?" @bind-Value="ProductId" Dense Size="Size.Small"
                     Placeholder="Select Product Here" Variant="Variant.Outlined">
                     @foreach (var product in Products)
                     {
@@ -115,14 +114,14 @@
 
             @if (ProductId != null)
             {
-                <MudTd Style="width: 100px;">
+                <MudTd Style="width: 120px;">
                     <MudText T="string">@GetBalanceFor(ProductId).ToString("N0")</MudText>
                 </MudTd>
-                <MudTd Style="width: 80px;">
+                <MudTd Style="width: 100px;">
                     <MudNumericField HideSpinButtons T="int" @bind-Value="Qty" Min="1" Max="@GetBalanceFor(ProductId)"
                         Variant="Variant.Outlined" Size="Size.Small" />
                 </MudTd>
-                <MudTd Style="width: 120px;">
+                <MudTd Style="width: 140px;">
                     <MudTextField T="string" Value="@GetAvePriceFor(ProductId).ToString("N2")" ReadOnly
                         Variant="Variant.Outlined" Size="Size.Small" />
                 </MudTd>
@@ -132,10 +131,7 @@
                     }
                     <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute"
                         Variant="Variant.Outlined" Size="Size.Small" />
-                </MudTd>
-                <MudTd>
-                    <MudTextField T="string" Value="@Status" ReadOnly Variant="Variant.Outlined" Size="Size.Small" />
-                </MudTd>
+                </MudTd>               
 
                 <MudTd class="text-center">
                     <MudTooltip Text="Add Item">

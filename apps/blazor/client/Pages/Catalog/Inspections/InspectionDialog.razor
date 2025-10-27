@@ -5,55 +5,109 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <MudGrid>
+            <MudGrid Spacing="3">
+                <!-- Inspection Request Section -->
                 <MudItem xs="12">
-                    <MudStack Row Spacing="2" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
-                        <MudSelect T="Guid?" Label="Inspection Request"
-                                   Value="@Model.InspectionRequestId"
-                                   ValueChanged="OnRequestChanged"
-                                   For="@(() => Model.InspectionRequestId)"
-                                   Placeholder="Select a inspection request by date"
-                                   Clearable
-                                   Class="input-field request-field">
-                            @foreach (var r in InspectionRequests)
-                            {
-                                <MudSelectItem T="Guid?" Value="@r.Id">
-                                    @r.DateCreated.ToString("yyyy-MM-dd")
-                                </MudSelectItem>
-                            }
-                        </MudSelect>
-
-                        <MudSelect T="Guid?" Label="Inspector" @bind-Value="Model.InspectorId"
-                                   Placeholder="Select an inspector"
-                                   Clearable
-                                   Class="input-field">
-                            @foreach (var e in Employees)
-                            {
-                                <MudSelectItem T="Guid?" Value="@e.Id">@e.Name</MudSelectItem>
-                            }
-                        </MudSelect>
-
-                        <MudDatePicker Label="Inspection Date"
-                                       Date="@_inspectionDate"
-                                       DateChanged="@(d => OnDateChanged(d))"
-                                       Editable
-                                       Class="input-field date-field" />
-                    </MudStack>
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Assignment" Class="mr-2" />
+                        Inspection Request
+                    </MudText>
+                    <MudSelect T="Guid?" 
+                               Label="Inspection Request"
+                               Value="@Model.InspectionRequestId"
+                               ValueChanged="OnRequestChanged"
+                               For="@(() => Model.InspectionRequestId)"
+                               Placeholder="Select an inspection request by date"
+                               Clearable
+                               Variant="Variant.Outlined"
+                               Adornment="Adornment.Start"
+                               AdornmentIcon="@Icons.Material.Filled.RequestPage">
+                        @foreach (var r in InspectionRequests)
+                        {
+                            <MudSelectItem T="Guid?" Value="@r.Id">
+                                @r.DateCreated.ToString("MMM dd, yyyy") - @(r.Purchase?.Supplier?.Name ?? "Unknown Supplier")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudItem>
 
-                <MudItem xs="12">
-                    <MudTextField T="string" Label="Remarks" @bind-Value="Model.Remarks" />
+                <!-- Inspector and Date Section -->
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.PersonSearch" Class="mr-2" />
+                        Inspector
+                    </MudText>
+                    <MudSelect T="Guid?" 
+                               Label="Inspector" 
+                               @bind-Value="Model.InspectorId"
+                               Placeholder="Select an inspector"
+                               Clearable
+                               Variant="Variant.Outlined"
+                               Adornment="Adornment.Start"
+                               AdornmentIcon="@Icons.Material.Filled.Badge">
+                        @foreach (var e in Employees)
+                        {
+                            <MudSelectItem T="Guid?" Value="@e.Id">
+                                @e.Name @(!string.IsNullOrEmpty(e.Designation) ? $"- {e.Designation}" : "")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudItem>
 
+                <MudItem xs="12" sm="6">
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Class="mr-2" />
+                        Inspection Date
+                    </MudText>
+                    <MudDatePicker Label="Inspection Date"
+                                   Date="@_inspectionDate"
+                                   DateChanged="@(d => OnDateChanged(d))"
+                                   Editable
+                                   Variant="Variant.Outlined"
+                                   Adornment="Adornment.Start"
+                                   AdornmentIcon="@Icons.Material.Filled.Event" />
+                </MudItem>
+
+                <!-- Remarks Section -->
                 <MudItem xs="12">
-                    <InspectionItemsEditor @ref="_itemsEditor" PurchaseItems="_poItems" Products="_products" />
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Notes" Class="mr-2" />
+                        Remarks
+                    </MudText>
+                    <MudTextField T="string" 
+                                  Label="Remarks" 
+                                  @bind-Value="Model.Remarks"
+                                  Variant="Variant.Outlined"
+                                  Lines="3"
+                                  Placeholder="Add any additional notes or observations..." />
+                </MudItem>
+
+                <!-- Inspection Items Section -->
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.Inventory" Class="mr-2" />
+                        Inspection Items
+                    </MudText>
+                    <MudPaper Elevation="0" Class="pa-3" Style="background-color: rgba(0, 0, 0, 0.02);">
+                        <InspectionItemsEditor @ref="_itemsEditor" PurchaseItems="_poItems" Products="_products" />
+                    </MudPaper>
                 </MudItem>
             </MudGrid>
         </DialogContent>
 
         <DialogActions>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit">Save</MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel">Cancel</MudButton>
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Primary" 
+                       ButtonType="ButtonType.Submit"
+                       StartIcon="@Icons.Material.Filled.Save">
+                Save Inspection
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" 
+                       Color="Color.Secondary" 
+                       OnClick="Cancel"
+                       StartIcon="@Icons.Material.Filled.Cancel">
+                Cancel
+            </MudButton>
         </DialogActions>
     </MudDialog>
 </EditForm>

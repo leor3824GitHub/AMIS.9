@@ -264,4 +264,70 @@ public partial class InspectionRequests
     // Assign/Re-Assign should be disabled once the request has already been inspected (completed/failed) or accepted
     private static bool ShouldDisableAssignActions(InspectionRequestResponse request) =>
         IsAlreadyInspected(request);
-}  
+
+    private string RowStyle(InspectionRequestResponse request, int index)
+    {
+        return request.Status switch
+        {
+            InspectionRequestStatus.Completed => "background-color: rgba(76, 175, 80, 0.08);", // Green for completed
+            InspectionRequestStatus.Failed => "background-color: rgba(244, 67, 54, 0.08);", // Red for failed
+            InspectionRequestStatus.Accepted => "background-color: rgba(33, 150, 243, 0.08);", // Blue for accepted
+            InspectionRequestStatus.Assigned => "background-color: rgba(255, 152, 0, 0.05);", // Light orange for assigned
+            _ => string.Empty
+        };
+    }
+
+    private string GetRelativeDateText(DateTime date)
+    {
+        var today = DateTime.Today;
+        var days = (today - date.Date).Days;
+
+        return days switch
+        {
+            0 => "Today",
+            1 => "Yesterday",
+            < 7 => $"{days} days ago",
+            < 30 => $"{days / 7} week{(days / 7 > 1 ? "s" : "")} ago",
+            < 365 => $"{days / 30} month{(days / 30 > 1 ? "s" : "")} ago",
+            _ => $"{days / 365} year{(days / 365 > 1 ? "s" : "")} ago"
+        };
+    }
+
+    private string GetEmployeeInitials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "?";
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+            return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+    }
+
+    private Color GetStatusColor(InspectionRequestStatus status)
+    {
+        return status switch
+        {
+            InspectionRequestStatus.Pending => Color.Default,
+            InspectionRequestStatus.Assigned => Color.Info,
+            InspectionRequestStatus.Completed => Color.Success,
+            InspectionRequestStatus.Failed => Color.Error,
+            InspectionRequestStatus.Accepted => Color.Primary,
+            _ => Color.Default
+        };
+    }
+
+    private string GetStatusIcon(InspectionRequestStatus status)
+    {
+        return status switch
+        {
+            InspectionRequestStatus.Pending => Icons.Material.Filled.HourglassEmpty,
+            InspectionRequestStatus.Assigned => Icons.Material.Filled.AssignmentTurnedIn,
+            InspectionRequestStatus.Completed => Icons.Material.Filled.CheckCircle,
+            InspectionRequestStatus.Failed => Icons.Material.Filled.Cancel,
+            InspectionRequestStatus.Accepted => Icons.Material.Filled.TaskAlt,
+            _ => Icons.Material.Filled.Help
+        };
+    }
+}

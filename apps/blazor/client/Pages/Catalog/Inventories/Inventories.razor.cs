@@ -196,7 +196,37 @@ public partial class Inventories
         await _table.ReloadServerData();
     }
 
-    // No custom row style for now
+    private string RowStyle(InventoryResponse inventory, int index)
+    {
+        if (inventory.Qty <= 0)
+            return "background-color: rgba(244, 67, 54, 0.1);"; // Red tint for out of stock
+        if (inventory.Qty <= 10)
+            return "background-color: rgba(255, 152, 0, 0.08);"; // Orange tint for low stock
+        return string.Empty;
+    }
+
+    private Color GetStockLevelColor(int qty)
+    {
+        if (qty <= 0) return Color.Error;
+        if (qty <= 10) return Color.Warning;
+        if (qty <= 50) return Color.Info;
+        return Color.Success;
+    }
+
+    private string GetStockLevelIcon(int qty)
+    {
+        if (qty <= 0) return Icons.Material.Filled.ErrorOutline;
+        if (qty <= 10) return Icons.Material.Filled.Warning;
+        return Icons.Material.Filled.CheckCircle;
+    }
+
+    private string GetStockLevelText(int qty)
+    {
+        if (qty <= 0) return "Out of Stock";
+        if (qty <= 10) return "Low Stock";
+        if (qty <= 50) return "In Stock";
+        return "Well Stocked";
+    }
 }
 
 public class InventoryEditModel

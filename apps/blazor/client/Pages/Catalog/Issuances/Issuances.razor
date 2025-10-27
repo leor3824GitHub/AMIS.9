@@ -3,28 +3,31 @@
 @using AMIS.Blazor.Infrastructure.Api
 @using MudBlazor
 
-<PageHeader Title="Issuances" Header="Issuances" SubHeader="Manage issuance records" />
+<PageHeader Title="Issuances" Header="Issuance Management" SubHeader="Track product issuances to employees and manage inventory outflow" />
 
 <MudPaper Class="pa-4">
-    <MudStack Row="true" Spacing="2" Class="mb-2">
+    <MudStack Row="true" Spacing="2" Class="mb-4">
         <MudTextField @bind-Value="_searchString"
-                      Placeholder="Search"
+                      Placeholder="Search by employee name..."
                       Adornment="Adornment.Start"
                       AdornmentIcon="@Icons.Material.Filled.Search"
                       Immediate="true"
                       Disabled="@(!_canSearch)"
                       DebounceInterval="250"
+                      Variant="Variant.Outlined"
                       OnKeyUp="@(async _ => await OnSearchAsync(_searchString))" />
         <MudSpacer />
         <MudButton Disabled="@(!_canCreate)"
                    Color="Color.Primary"
                    Variant="Variant.Filled"
                    StartIcon="@Icons.Material.Filled.Add"
+                   Class="equal-action-width"
                    OnClick="OnCreate">New</MudButton>
-    <MudButton Disabled="@(!_canDelete || _selectedItems.Count == 0 || _selectedItems.Any(i => i.IsClosed))"
+        <MudButton Disabled="@(!_canDelete || _selectedItems.Count == 0 || _selectedItems.Any(i => i.IsClosed))"
                    Color="Color.Error"
                    Variant="Variant.Outlined"
                    StartIcon="@Icons.Material.Filled.Delete"
+                   Class="equal-action-width"
                    OnClick="OnDeleteSelected">Delete Selected</MudButton>
     </MudStack>
 
@@ -35,37 +38,97 @@
                  Dense="true"
                  Hover="true"
                  Bordered="true"
+                 Striped="true"
                  MultiSelection="true"
-                 @bind-SelectedItems="_selectedItems">
+                 @bind-SelectedItems="_selectedItems"
+                 RowStyleFunc="@RowStyle">
         <Columns>
-            <PropertyColumn Property="x => x.IssuanceDate" Title="Issued On" Format="{0:yyyy-MM-dd}" />
-            <TemplateColumn Title="Employee">
+            <PropertyColumn Property="x => x.IssuanceDate" Title="Issuance Date" Format="{0:MMM dd, yyyy}" Sortable="false">
                 <CellTemplate>
-                    @context.Item.Employee?.Name ?? "—"
+                    <MudStack Row="false" Spacing="0">
+                        <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                            @context.Item.IssuanceDate.ToString("MMM dd, yyyy")
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">
+                            @GetRelativeDateText(context.Item.IssuanceDate)
+                        </MudText>
+                    </MudStack>
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn Title="Employee" Sortable="false">
+                <CellTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudAvatar Color="Color.Primary" Size="Size.Small" Style="width: 32px; height: 32px;">
+                            @GetEmployeeInitials(context.Item.Employee?.Name)
+                        </MudAvatar>
+                        <MudStack Row="false" Spacing="0">
+                            <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                @(context.Item.Employee?.Name ?? "Unknown")
+                            </MudText>
+                            @if (!string.IsNullOrEmpty(context.Item.Employee?.Designation))
+                            {
+                                <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">
+                                    @context.Item.Employee.Designation
+                                </MudText>
+                            }
+                        </MudStack>
+                    </MudStack>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Total Amount">
+            <TemplateColumn Title="Items Count" Sortable="false">
                 <CellTemplate>
-                    @context.Item.TotalAmount.ToString("C")
-                </CellTemplate>
-            </TemplateColumn>
-            <TemplateColumn Title="Status">
-                <CellTemplate>
-                    <MudChip Color="@(context.Item.IsClosed ? Color.Success : Color.Info)"
+                    <MudChip Size="Size.Small" 
+                             Color="Color.Info" 
                              Variant="Variant.Outlined"
-                             Size="Size.Small">
+                             Icon="@Icons.Material.Filled.Inventory2">
+                        @GetItemsCountText(context.Item.Id)
+                    </MudChip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Total Amount" Sortable="false">
+                <CellTemplate>
+                    <MudStack Row="false" Spacing="0">
+                        <MudText Typo="Typo.body2" Style="font-weight: 600; color: var(--mud-palette-primary);">
+                            @context.Item.TotalAmount.ToString("C2")
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">
+                            total value
+                        </MudText>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Status" Sortable="false">
+                <CellTemplate>
+                    <MudChip Color="@(context.Item.IsClosed ? Color.Success : Color.Warning)"
+                             Variant="Variant.Filled"
+                             Size="Size.Small"
+                             Icon="@(context.Item.IsClosed ? Icons.Material.Filled.CheckCircle : Icons.Material.Filled.PendingActions)">
                         @(context.Item.IsClosed ? "Closed" : "Open")
                     </MudChip>
                 </CellTemplate>
             </TemplateColumn>
-            <TemplateColumn Title="Actions">
+            <TemplateColumn Title="Actions" Sortable="false">
                 <CellTemplate>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
-                        <MudMenuItem Disabled="@(!_canUpdate || context.Item.IsClosed)" OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
-                        <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnToggleClosedAsync(context.Item))">
-                            @(context.Item.IsClosed ? "Reopen" : "Close")
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
+                        <MudMenuItem Disabled="@(!_canUpdate || context.Item.IsClosed)" OnClick="@(() => OnEdit(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                                <MudText>Edit</MudText>
+                            </MudStack>
                         </MudMenuItem>
-                        <MudMenuItem Disabled="@(!_canDelete || context.Item.IsClosed)" OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                        <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnToggleClosedAsync(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@(context.Item.IsClosed ? Icons.Material.Filled.LockOpen : Icons.Material.Filled.Lock)" Size="Size.Small" Color="@(context.Item.IsClosed ? Color.Warning : Color.Success)" />
+                                <MudText>@(context.Item.IsClosed ? "Reopen" : "Close")</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudDivider />
+                        <MudMenuItem Disabled="@(!_canDelete || context.Item.IsClosed)" OnClick="@(() => OnDelete(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+                                <MudText>Delete</MudText>
+                            </MudStack>
+                        </MudMenuItem>
                     </MudMenu>
                 </CellTemplate>
             </TemplateColumn>

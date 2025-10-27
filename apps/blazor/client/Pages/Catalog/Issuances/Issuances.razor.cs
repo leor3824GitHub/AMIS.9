@@ -335,6 +335,51 @@ public partial class Issuances
         await ApiHelper.ExecuteCallGuardedAsync(() => ApiClient.UpdateIssuanceEndpointAsync("1", dto.Id.Value, command), Snackbar!);
         await _table.ReloadServerData();
     }
+
+    private string RowStyle(IssuanceResponse issuance, int index)
+    {
+        if (issuance.IsClosed)
+            return "background-color: rgba(76, 175, 80, 0.08);"; // Green tint for closed
+        return string.Empty;
+    }
+
+    private string GetRelativeDateText(DateTime date)
+    {
+        var today = DateTime.Today;
+        var days = (today - date.Date).Days;
+
+        return days switch
+        {
+            0 => "Today",
+            1 => "Yesterday",
+            < 7 => $"{days} days ago",
+            < 30 => $"{days / 7} week{(days / 7 > 1 ? "s" : "")} ago",
+            < 365 => $"{days / 30} month{(days / 30 > 1 ? "s" : "")} ago",
+            _ => $"{days / 365} year{(days / 365 > 1 ? "s" : "")} ago"
+        };
+    }
+
+    private string GetEmployeeInitials(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return "?";
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+            return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+    }
+
+    private string GetItemsCountText(Guid? issuanceId)
+    {
+        if (!issuanceId.HasValue)
+            return "0 items";
+
+        // This is a placeholder - in a real app you'd cache or fetch item counts
+        // For now, show a generic indicator
+        return "View items";
+    }
 }
 
 public class IssuanceEditModel

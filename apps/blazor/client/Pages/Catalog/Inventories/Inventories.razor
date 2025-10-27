@@ -1,34 +1,103 @@
 @page "/catalog/inventories"
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<PageHeader Title="Inventories" Header="Inventory Management" SubHeader="Track product stock levels and average costs" />
 
 <MudPaper Class="pa-4">
-    <MudText Typo="Typo.h5">Inventories</MudText>
-    <MudDivider Class="my-2" />
-
-    <MudStack Row="true" Spacing="2" Class="mb-2">
-        <MudTextField @bind-Value="searchString" Placeholder="Search by Product name" AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" DebounceInterval="300" OnKeyUp="@(async _ => await OnSearch(searchString))" />
+    <MudStack Row="true" Spacing="2" Class="mb-4">
+        <MudTextField @bind-Value="searchString" 
+                      Placeholder="Search by product name..." 
+                      Adornment="Adornment.Start"
+                      AdornmentIcon="@Icons.Material.Filled.Search" 
+                      Immediate="true" 
+                      Disabled="@(!_canSearch)"
+                      DebounceInterval="300" 
+                      OnKeyUp="@(async _ => await OnSearch(searchString))"
+                      Variant="Variant.Outlined" />
         <MudSpacer />
-        <MudButton Disabled="@(!_canCreate)" Color="Color.Primary" Variant="Variant.Filled" OnClick="OnCreate" StartIcon="@Icons.Material.Filled.Add">New</MudButton>
-        <MudButton Disabled="@(!_canDelete || _selectedItems.Count == 0)" Color="Color.Error" Variant="Variant.Outlined" OnClick="OnDeleteChecked" StartIcon="@Icons.Material.Filled.Delete">Delete Selected</MudButton>
+        <MudButton Disabled="@(!_canCreate)" 
+                   Color="Color.Primary" 
+                   Variant="Variant.Filled" 
+                   OnClick="OnCreate" 
+                   StartIcon="@Icons.Material.Filled.Add">New</MudButton>
+        <MudButton Disabled="@(!_canDelete || _selectedItems.Count == 0)" 
+                   Color="Color.Error" 
+                   Variant="Variant.Outlined" 
+                   OnClick="OnDeleteChecked" 
+                   StartIcon="@Icons.Material.Filled.Delete">Delete</MudButton>
     </MudStack>
 
-    <MudDataGrid T="InventoryResponse" @ref="_table" ServerData="ServerReload" Loading="_loading" Dense="true" Hover="true" Bordered="true"
-                 MultiSelection="true" @bind-SelectedItems="_selectedItems">
+    <MudDataGrid T="InventoryResponse" 
+                 @ref="_table" 
+                 ServerData="ServerReload" 
+                 Loading="_loading" 
+                 Dense="true" 
+                 Hover="true" 
+                 Bordered="true"
+                 Striped="true"
+                 MultiSelection="true" 
+                 @bind-SelectedItems="_selectedItems"
+                 RowStyleFunc="@RowStyle">
         <Columns>
-            <PropertyColumn Property="x => x.ProductId" Title="Product">
+            <PropertyColumn Property="x => x.ProductId" Title="Product" Sortable="false">
                 <CellTemplate>
-                    @context.Item.Product?.Name
+                    <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                        @context.Item.Product?.Name
+                    </MudText>
                 </CellTemplate>
             </PropertyColumn>
-            <PropertyColumn Property="x => x.Qty" Title="Quantity" />
-            <PropertyColumn Property="x => x.AvePrice" Title="Average Price">
+            <PropertyColumn Property="x => x.Qty" Title="Stock Level" Sortable="false">
                 <CellTemplate>
-                    @context.Item.AvePrice.ToString("C")
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudChip Size="Size.Small" 
+                                 Color="@GetStockLevelColor(context.Item.Qty)" 
+                                 Variant="Variant.Filled"
+                                 Icon="@GetStockLevelIcon(context.Item.Qty)">
+                            @context.Item.Qty
+                        </MudChip>
+                        <MudText Typo="Typo.caption" Color="Color.Default">
+                            @GetStockLevelText(context.Item.Qty)
+                        </MudText>
+                    </MudStack>
                 </CellTemplate>
             </PropertyColumn>
-            <TemplateColumn Title="Actions">
+            <PropertyColumn Property="x => x.AvePrice" Title="Average Cost" Sortable="false">
                 <CellTemplate>
-                    <MudIconButton Disabled="@(!_canUpdate)" Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(async () => await OnEdit(context.Item))" />
-                    <MudIconButton Disabled="@(!_canDelete)" Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(async () => await OnDelete(context.Item))" />
+                    <MudStack Row="false" Spacing="0">
+                        <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                            @context.Item.AvePrice.ToString("C2")
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">
+                            per unit
+                        </MudText>
+                    </MudStack>
+                </CellTemplate>
+            </PropertyColumn>
+            <TemplateColumn Title="Total Value" Sortable="false">
+                <CellTemplate>
+                    <MudText Typo="Typo.body2" Style="font-weight: 600; color: var(--mud-palette-success);">
+                        @((context.Item.Qty * context.Item.AvePrice).ToString("C2"))
+                    </MudText>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Actions" Sortable="false">
+                <CellTemplate>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
+                        <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(async () => await OnEdit(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+                                <MudText>Edit</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudMenuItem Disabled="@(!_canDelete)" OnClick="@(async () => await OnDelete(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+                                <MudText>Delete</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    </MudMenu>
                 </CellTemplate>
             </TemplateColumn>
         </Columns>
