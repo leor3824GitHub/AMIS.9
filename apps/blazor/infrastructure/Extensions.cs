@@ -13,7 +13,7 @@ using MudBlazor.Services;
 namespace AMIS.Blazor.Infrastructure;
 public static class Extensions
 {
-    private const string ClientName = "FullStackHero.API";
+    private const string ClientName = "AMIS.API";
     public static IServiceCollection AddClientServices(this IServiceCollection services, IConfiguration config)
     {
         services.AddMudServices(configuration =>

@@ -1,0 +1,181 @@
+﻿@page "/catalog/inspectionrequests"
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<PageHeader Title="Inspection Requests" Header="Inspection Request Management" SubHeader="Manage and track purchase inspection requests and assignments" />
+
+<MudPaper Class="pa-4">
+    <MudStack Row="true" Spacing="2" Class="mb-4">
+        @if (_canSearch)
+        {
+            <MudTextField T="string"
+                          ValueChanged="@(s => OnSearch(s))"
+                          Placeholder="Search by purchase, status, or inspector..."
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Search"
+                          Variant="Variant.Outlined"
+                          Disabled="@_loading" />
+        }
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined"
+                   Color="Color.Secondary"
+                   Disabled="@_loading"
+                   OnClick="@OnRefresh"
+                   StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+
+        @if (_canCreate)
+        {
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       Disabled="@_loading"
+                       OnClick="OnCreate"
+                       StartIcon="@Icons.Material.Filled.Add">New Request</MudButton>
+        }
+
+        @if (_canDelete)
+        {
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Error"
+                       Disabled="@(_selectedItems.Count == 0)"
+                       OnClick="OnDeleteChecked"
+                       StartIcon="@Icons.Material.Filled.Delete">Delete Selected</MudButton>
+        }
+    </MudStack>
+
+    <MudDataGrid ServerData="ServerReload"
+                 T="InspectionRequestResponse"
+                 MultiSelection="true"
+                 @bind-SelectedItems="_selectedItems"
+                 @bind-SelectedItem="_currentDto"
+                 Hover="true"
+                 Dense="true"
+                 Bordered="true"
+                 Striped="true"
+                 Loading="@_loading"
+                 @ref="_table"
+                 RowStyleFunc="@RowStyle">
+
+        <Columns>
+            <SelectColumn T="InspectionRequestResponse" />
+            <TemplateColumn Title="Purchase Date" Sortable="false">
+                <CellTemplate>
+                    <MudStack Row="false" Spacing="0">
+                        <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                            @(context.Item.Purchase?.PurchaseDate?.ToString("MMM dd, yyyy") ?? "N/A")
+                        </MudText>
+                        @if (context.Item.Purchase?.PurchaseDate != null)
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">
+                                @GetRelativeDateText(context.Item.Purchase.PurchaseDate.Value)
+                            </MudText>
+                        }
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Supplier" Sortable="false">
+                <CellTemplate>
+                    <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                        <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Color="Color.Primary" />
+                        <MudText Typo="Typo.body2">
+                            @(context.Item.Purchase?.Supplier?.Name ?? "Unknown")
+                        </MudText>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Inspector" Sortable="false">
+                <CellTemplate>
+                    @if (context.Item.InspectorId != null && context.Item.Inspector != null)
+                    {
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                            <MudAvatar Color="Color.Secondary" Size="Size.Small" Style="width: 32px; height: 32px;">
+                                @GetEmployeeInitials(context.Item.Inspector.Name)
+                            </MudAvatar>
+                            <MudStack Row="false" Spacing="0">
+                                <MudText Typo="Typo.body2" Style="font-weight: 500;">
+                                    @context.Item.Inspector.Name
+                                </MudText>
+                                @if (!string.IsNullOrEmpty(context.Item.Inspector.Designation))
+                                {
+                                    <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">
+                                        @context.Item.Inspector.Designation
+                                    </MudText>
+                                }
+                            </MudStack>
+                        </MudStack>
+                    }
+                    else
+                    {
+                        <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.PersonOff">
+                            Unassigned
+                        </MudChip>
+                    }
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Status" Sortable="false">
+                <CellTemplate>
+                    <MudChip Size="Size.Small" 
+                             Color="@GetStatusColor(context.Item.Status)" 
+                             Variant="Variant.Filled"
+                             Icon="@GetStatusIcon(context.Item.Status)">
+                        @context.Item.Status.ToString()
+                    </MudChip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Requested On" Sortable="false">
+                <CellTemplate>
+                    <MudStack Row="false" Spacing="0">
+                        <MudText Typo="Typo.body2">
+                            @context.Item.DateCreated.ToString("MMM dd, yyyy")
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">
+                            @context.Item.DateCreated.ToString("hh:mm tt")
+                        </MudText>
+                    </MudStack>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Actions" Sortable="false">
+                <CellTemplate>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
+                        @if (context.Item.InspectorId == null)
+                        {
+                            <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)" OnClick="@(() => OnAssign(context.Item))">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.AssignmentInd" Size="Size.Small" Color="Color.Info" />
+                                    <MudText>Assign Inspector</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        else
+                        {
+                            <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)" OnClick="@(() => ReAssign(context.Item))">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" Color="Color.Warning" />
+                                    <MudText>Re-Assign</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        <MudMenuItem OnClick="@(() => OnView(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" />
+                                <MudText>View Details</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudDivider />
+                        <MudMenuItem Disabled="@ShouldDisableInspect(context.Item)"
+                                     OnClick="@(() => OnInspect(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" Color="Color.Success" />
+                                <MudText>Start Inspection</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    </MudMenu>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+
+        <PagerContent>
+            <MudDataGridPager />
+        </PagerContent>
+    </MudDataGrid>
+</MudPaper>

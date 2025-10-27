@@ -1,0 +1,110 @@
+@page "/catalog/acceptances"
+
+<PageHeader Title="Acceptances" Header="Acceptances" SubHeader="Track goods received after inspection." />
+
+<MudDataGrid ServerData="ServerReload"
+             MultiSelection
+             @bind-SelectedItems="_selectedItems"
+             @bind-SelectedItem="_current"
+             ColumnResizeMode="ResizeMode.Column"
+             Hover
+             Loading="@_loading"
+             @ref="_table"
+             Outlined>
+
+    <ToolBarContent>
+        <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap">
+            <div class="d-flex align-center gap-1">
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Secondary"
+                           Disabled="@_loading"
+                           OnClick="OnRefresh"
+                           StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+
+                @if (_canCreate)
+                {
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Primary"
+                               Disabled="@_loading"
+                               OnClick="OnCreate"
+                               StartIcon="@Icons.Material.Filled.Add">New</MudButton>
+                }
+
+                @if (_canDelete)
+                {
+                    <MudButton Variant="Variant.Filled"
+                               Color="Color.Error"
+                               Disabled="@(_selectedItems.Count == 0)"
+                               OnClick="OnDeleteChecked"
+                               StartIcon="@Icons.Material.Filled.Delete">Delete</MudButton>
+                }
+            </div>
+            <MudSpacer />
+            @if (_canSearch)
+            {
+                <MudTextField T="string"
+                              ValueChanged="@(s => OnSearch(s))"
+                              Placeholder="Search"
+                              Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search"
+                              Class="mt-0 mb-3" />
+            }
+        </div>
+    </ToolBarContent>
+
+    <Columns>
+    <SelectColumn T="AcceptanceResponse" />
+        <TemplateColumn Title="Acceptance Date">
+            <CellTemplate>
+                @{
+                    var value = context.Item?.AcceptanceDate.ToString("dd/MM/yyyy") ?? "—";
+                }
+                @value
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Supply Officer">
+            <CellTemplate>
+                @GetSupplyOfficerName(context.Item)
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Supplier">
+            <CellTemplate>
+                @GetSupplierName(context.Item)
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Status">
+            <CellTemplate>
+                @if (context.Item is not null)
+                {
+                    <MudChip Color="@GetStatusColor(context.Item)" Size="Size.Small" Variant="Variant.Text">
+                        @context.Item.Status.ToString()
+                    </MudChip>
+                }
+                else
+                {
+                    <span>—</span>
+                }
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Remarks">
+            <CellTemplate>
+                @{
+                    var value = context.Item?.Remarks ?? string.Empty;
+                }
+                @value
+            </CellTemplate>
+        </TemplateColumn>
+        <TemplateColumn Title="Action">
+            <CellTemplate>
+                <MudMenu Icon="@Icons.Material.Filled.Edit" Dense>
+                    <MudMenuItem Disabled="@(!CanEdit(context.Item))" OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
+                    <MudMenuItem Disabled="@(!CanDelete(context.Item))" OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                </MudMenu>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+
+    <PagerContent>
+        <MudDataGridPager />
+    </PagerContent>
+</MudDataGrid>

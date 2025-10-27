@@ -1,0 +1,24 @@
+﻿@using AMIS.Blazor.Client.Pages.Catalog.Products
+
+@inject IAuthorizationService AuthService
+@inject ISnackbar Snackbar
+
+<div class="product-card">
+    <img src="@Product.ImagePath" alt="@Product.Name" class="product-image" />
+    <div class="product-details">
+        <h3>@Product.Name</h3>
+        <p>@Product.Description</p>
+        <button @onclick="AddToCart">Add to Cart</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public ProductResponse Product { get; set; } = default!;
+
+    private async Task AddToCart()
+    {
+        // Implement the logic to add the product to the cart
+        Snackbar.Add($"{Product.Name} added to cart!", Severity.Success);
+    }
+}

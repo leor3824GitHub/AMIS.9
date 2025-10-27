@@ -1,19 +1,27 @@
 ﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 public class Purchase : AuditableEntity, IAggregateRoot
 {
-    public Guid SupplierId { get; private set; }
-    public DateTime PurchaseDate { get; private set; }
-    public decimal TotalAmount { get; private set; }
-    public string? Status { get; private set; }
-    public virtual Supplier Supplier { get; private set; } = default!;
+    public Guid? SupplierId { get; private set; }
+    public DateTime? PurchaseDate { get; private set; }
+    public decimal TotalAmount { get; private set; } = 0;
+    public PurchaseStatus? Status { get; private set; }
+    public virtual Supplier? Supplier { get; private set; }
+    public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
 
+    public virtual ICollection<Inspection> Inspections { get; private set; } = [];
+    public virtual ICollection<Acceptance> Acceptances { get; private set; } = [];
+
+    // Add summary helpers (not mapped)
+    public bool IsFullyInspected => Items.All(i => i.InspectionStatus == PurchaseItemInspectionStatus.Passed);
+    public bool IsFullyAccepted => Items.All(i => i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted);
     private Purchase() { }
 
-    private Purchase(Guid id, Guid supplierId, DateTime purchaseDate, decimal totalAmount, string? status)
+    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
     {
         Id = id;
         SupplierId = supplierId;
@@ -21,15 +29,27 @@ public class Purchase : AuditableEntity, IAggregateRoot
         TotalAmount = totalAmount;
         Status = status;
 
-        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+        QueueDomainEvent(new PurchaseCreated { Purchase = this });
     }
 
-    public static Purchase Create(Guid supplierId, DateTime purchaseDate, decimal totalAmount, string? status)
+    public void AddItem(Guid? productId, int qty, decimal unitPrice, PurchaseStatus? status)
+    {
+        var item = PurchaseItem.Create(this.Id, productId, qty, unitPrice, status);
+        Items.Add(item);
+    }
+
+    public void AddItem(Guid id, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? status)
+    {
+        var item = PurchaseItem.Create(id, productId, qty, unitPrice, status);
+        Items.Add(item);
+    }
+
+    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
     {
         return new Purchase(Guid.NewGuid(), supplierId, purchaseDate, totalAmount, status);
     }
 
-    public Purchase Update(Guid supplierId, DateTime purchaseDate, decimal totalAmount, string? status)
+    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
     {
         bool isUpdated = false;
 
@@ -51,7 +71,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (Status != status)
+        if (!Nullable.Equals(Status, status))
         {
             Status = status;
             isUpdated = true;
@@ -64,5 +84,6 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
         return this;
     }
+    
 }
 

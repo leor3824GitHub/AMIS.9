@@ -1,0 +1,70 @@
+﻿@page "/eshop"
+@using AMIS.Blazor.Client.Components.Dialogs
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Shared.Authorization
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.AspNetCore.Components.Authorization
+@using MudBlazor
+
+<div class="container mt-5">
+    <h1 class="text-center">Product List</h1>
+
+    <div class="d-flex justify-content-between mb-3">
+        <div>
+            @if (_canSearch)
+            {
+                <MudTextField T="string" ValueChanged="@(s => OnSearch(s))" Placeholder="Search" Adornment="Adornment.Start"
+                              AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+            }
+        </div>
+
+        <div>
+            @if (_canCreate)
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
+                           Size="Size.Small" OnClick="OnCreate">
+                    New Product
+                </MudButton>
+            }
+
+            @if (_canDelete && _selectedItems.Any())
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" StartIcon="@Icons.Material.Filled.Delete"
+                           Size="Size.Small" OnClick="OnDeleteChecked">
+                    Delete Selected
+                </MudButton>
+            }
+        </div>
+    </div>
+
+    <div class="catalog-items">
+        @foreach (var product in _entityList)
+        {
+            <div class="catalog-item">
+                <div class="product-card">
+                    <img src="https://via.placeholder.com/150" class="card-img-top" alt="@product.Name">
+                    <div class="card-body">
+                        <h5 class="card-title">@product.Name</h5>
+                        <p class="card-text">@product.Description</p>
+                        <p class="card-text"><strong>SKU:</strong> @product.Sku</p>
+                        <p class="card-text"><strong>Price:</strong> $@product.Unit</p>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-primary btn-sm" @onclick="(() => OnAddToCart(product))">Add to Cart</button>
+                            <button class="btn btn-info btn-sm" @onclick="(() => OnEdit(product))">Edit</button>
+                            <button class="btn btn-danger btn-sm" @onclick="(() => OnDelete(product))">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="text-center mt-4">
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnRefresh">
+            Refresh
+        </MudButton>
+    </div>
+</div>
+
+

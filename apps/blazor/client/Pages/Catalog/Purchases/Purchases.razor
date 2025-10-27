@@ -1,0 +1,132 @@
+﻿@page "/catalog/purchases"
+
+@* <style>
+    .mud-table-container {
+        overflow: auto;
+    }
+</style> *@
+<PageHeader Title="Purchases" Header="Purchases" SubHeader="Manage your Purchases." />
+@* <div class="d-flex flex-column">
+    <div style="line-height: 1; margin-bottom: 4px;">
+        <MudText Typo="Typo.h6" Class="m-0">List of Purchases</MudText>
+    </div> *@
+<MudDataGrid ServerData="ServerReload"
+             MultiSelection="true"
+             @bind-SelectedItems="_selectedItems"
+             @bind-SelectedItem="_currentDto"
+             ColumnResizeMode="ResizeMode.Column"
+             Hover="true"
+             Loading="@_loading" 
+             @ref="_table"
+             Outlined>
+        <ToolBarContent>
+            <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap">
+
+                <!-- 📦 Left: Buttons -->
+                <div class="d-flex align-center flex-nowrap gap-1">
+                    <MudHidden Breakpoint="Breakpoint.SmAndDown">
+                        <MudButton Variant="Variant.Filled"
+                                   Color="Color.Secondary"
+                                   DropShadow="false"
+                                   Disabled="@_loading"
+                                   OnClick="@(() => OnRefresh())"
+                                   StartIcon="@Icons.Material.Filled.Refresh"
+                                   IconColor="Color.Surface">Refresh</MudButton>
+
+                        @if (_canCreate)
+                        {
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Primary"
+                                       DropShadow="false"
+                                       StartIcon="@Icons.Material.Filled.Add"
+                                       Disabled="@_loading"
+                                       OnClick="OnCreate"
+                                       IconColor="Color.Surface">
+                                New
+                            </MudButton>
+
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Tertiary"
+                                       DropShadow="false"
+                                       StartIcon="@Icons.Material.Filled.ContentCopy"
+                                       Disabled="@(_selectedItems.Count != 1)"
+                                       OnClick="OnClone"
+                                       IconColor="Color.Surface">
+                                Clone
+                            </MudButton>
+                        }
+
+                        @if (_canDelete)
+                        {
+                            <MudButton Variant="Variant.Filled"
+                                       Color="Color.Error"
+                                       DropShadow="false"
+                                       StartIcon="@Icons.Material.Filled.Delete"
+                                       Disabled="@(!(_selectedItems.Count > 0))"
+                                       OnClick="OnDeleteChecked"
+                                       IconColor="Color.Surface">
+                                Delete
+                            </MudButton>
+                        }
+                    </MudHidden>
+
+                    <!-- ☰ Actions for Small Screens -->
+                    <MudHidden Breakpoint="Breakpoint.MdAndUp">
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
+                            <MudMenuItem OnClick="@(() => OnRefresh())" Disabled="@_loading">Refresh</MudMenuItem>
+
+                            @if (_canCreate)
+                            {
+                                <MudMenuItem OnClick="OnCreate" Disabled="@_loading">New</MudMenuItem>
+                                <MudMenuItem OnClick="OnClone" Disabled="@(_selectedItems.Count != 1)">Clone</MudMenuItem>
+                            }
+
+                            @if (_canDelete)
+                            {
+                                <MudMenuItem OnClick="OnDeleteChecked" Disabled="@(_selectedItems.Count == 0)">Delete</MudMenuItem>
+                            }
+                        </MudMenu>
+                    </MudHidden>
+                </div>
+            </div>
+            <MudSpacer />
+                <!-- 🔍 Right: Search Box -->
+                @if (_canSearch)
+                {
+                    
+                <MudTextField T="string"
+                               ValueChanged="@(s => OnSearch(s))"
+                               Placeholder="Search"
+                               Adornment="Adornment.Start"
+                               AdornmentIcon="@Icons.Material.Filled.Search"
+                               IconSize="Size.Medium"
+                               Style="width: 100%;"
+                               Class="mt-0 mb-3" />
+                       
+                }
+            
+        </ToolBarContent>
+
+    <Columns>
+        <SelectColumn T="PurchaseResponse" />        
+        <PropertyColumn Property="x => x.Supplier.Name" Title="Supplier" />
+        <PropertyColumn Property="x => x.PurchaseDate" Title="Purchase Date" />
+        <PropertyColumn Property="x => x.TotalAmount" Title="Total Amount" />
+        <PropertyColumn Property="x => x.Status" Title="Status" />
+        <TemplateColumn Title="Action">
+            <CellTemplate>
+                <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
+                         Dense="true"
+                         IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
+
+                    <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                </MudMenu>
+            </CellTemplate>
+        </TemplateColumn>
+    </Columns>
+    <PagerContent>
+        <MudDataGridPager />
+    </PagerContent>
+</MudDataGrid>
+

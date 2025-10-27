@@ -1,0 +1,154 @@
+﻿<!-- Item List Section -->
+<MudPaper Class="pa-4 mb-4" Style="max-height: 80vh; overflow-y: auto;">
+    <MudText Typo="Typo.h6">Purchase Items - @(Items?.Count ?? 0)</MudText>
+
+    <MudTable T="PurchaseItemDto"
+              Items="Items"
+              Hover
+              Breakpoint="Breakpoint.Sm"
+              Class="th-border-separator">
+
+        <HeaderContent>
+            <MudTh Style="width: 500px;">Product</MudTh>
+            <MudTh Style="width: 80px;" >Quantity</MudTh>
+            <MudTh Style="width: 120px;" >Unit Price</MudTh>
+            <MudTh >Amount</MudTh>
+            <MudTh>Status</MudTh>
+            <MudTh >Actions</MudTh>
+        </HeaderContent>
+
+        <RowTemplate Context="item">
+            @if (item == EditingItem)
+            {
+                <MudTd Style="width: 500px;">
+                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Style="width: 100%;" Variant="Variant.Outlined">
+                        @foreach (var product in Products)
+                        {
+                            <MudSelectItem T="Guid?" Value="product.Id"
+                                           Style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
+                                @product.Name
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd Style="width: 80px;">
+                    <MudTextField T="int" @bind-Value="item.Qty" Immediate Variant="Variant.Outlined" />
+                </MudTd>
+                <MudTd Style="width: 120px;">
+                    <MudTextField T="double" @bind-Value="item.UnitPrice" Variant="Variant.Outlined" />
+                </MudTd>
+                @* <MudTd>
+                    @{
+                        var newAmount = Qty * Unitprice;
+                    }
+
+                    <MudText Variant="Variant.Outlined">@newAmount.ToString("N2")</MudText>
+                </MudTd> *@
+                <MudTd>
+                    <MudSelect T="PurchaseStatus" @bind-Value="item.ItemStatus" Dense Variant="Variant.Outlined">
+                        @foreach (var status in PurchaseStatusList)
+                        {
+                            <MudSelectItem T="PurchaseStatus" Value="status">@GetDisplayName(status)</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd class="text-center">
+                    <div class="d-flex justify-center gap-2">
+                        <MudTooltip Text="Save Changes">
+                            <MudIconButton Icon="@Icons.Material.Filled.Check"
+                                           Color="Color.Success"
+                                           OnClick="@(() => SaveEdit())" />
+                        </MudTooltip>
+                        <MudTooltip Text="Cancel Edit">
+                            <MudIconButton Icon="@Icons.Material.Filled.Close"
+                                           Color="Color.Secondary"
+                                           OnClick="@(() => CancelEdit())" />
+                        </MudTooltip>
+                    </div>
+                </MudTd>
+            }
+            else
+            {
+                <MudTd Style="width: 500px;">
+                    @{
+                        var product = Products?.FirstOrDefault(p => p.Id == item.ProductId);
+                    }
+                    <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        @(product is not null ? product.Name : "—")
+                    </span>
+                </MudTd>
+                <MudTd Style="width: 80px;">@item.Qty.ToString("N0")</MudTd>
+                <MudTd Style="width: 120px;">@item.UnitPrice.ToString("N2")</MudTd>
+                @* <MudTd>@(item.Qty * item.UnitPrice)</MudTd> *@
+                <MudTd>
+                    @{
+                        var newAmount = item.Qty * item.UnitPrice;
+                    }
+                    @newAmount.ToString("N2")
+                </MudTd>
+                <MudTd DataLabel="Status">@item.ItemStatus</MudTd>
+                <MudTd class="text-center">
+                    <div class="d-flex justify-center gap-2">
+                        <MudTooltip Text="Edit Item">
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit"
+                                           Color="Color.Primary"
+                                           OnClick="@(() => EditItem(item))" />
+                        </MudTooltip>
+                        <MudTooltip Text="Delete Item">
+                            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                                           Color="Color.Error"
+                                           OnClick="@(() => RemoveItem(item))" />
+                        </MudTooltip>
+                    </div>
+                </MudTd>
+            }
+        </RowTemplate>
+       
+        <FooterContent>
+            <MudTd Style="width: 500px;">
+                <MudSelect T="Guid?" @bind-Value="Productid" Dense Style="width: 100%;" Placeholder="Select Product Here" Variant="Variant.Outlined">
+                    @foreach (var product in Products)
+                    {
+                        <MudSelectItem T="Guid?" Value="product.Id"
+                                       Style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
+                            @product.Name
+                        </MudSelectItem>
+                    }
+                </MudSelect>
+            </MudTd>
+
+            @if (Productid != null)
+            {
+                <MudTd Style="width: 80px;" >
+                    <MudNumericField HideSpinButtons T="int" @bind-Value="Qty" Variant="Variant.Outlined" />
+                </MudTd>
+                <MudTd Style="width: 120px;" >
+                    <MudNumericField HideSpinButtons T="double" @bind-Value="Unitprice" Variant="Variant.Outlined" />
+                </MudTd>
+                <MudTd >
+                    @{
+                        var newAmount = Qty * Unitprice;
+                    }
+                    <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute" Variant="Variant.Outlined" />
+                </MudTd>
+                <MudTd>
+                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly Variant="Variant.Outlined" />
+                </MudTd>
+
+                <MudTd class="text-center">
+                    <MudTooltip Text="Add Item">
+                        <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline"
+                                       Color="Color.Primary"
+                                       OnClick="AddNewItem" />
+                    </MudTooltip>
+                </MudTd>
+            }
+            else
+            {
+                <MudTd colspan="4"></MudTd> @* Empty columns to maintain layout *@
+            }
+            
+        </FooterContent>
+
+    </MudTable>
+</MudPaper>

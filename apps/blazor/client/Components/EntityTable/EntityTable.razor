@@ -13,7 +13,7 @@
 <ErrorBoundary>
     <ChildContent>
 
-        @if (_canSearch && (Context.AdvancedSearchEnabled || AdvancedSearchContent is not null))
+        @* @if (_canSearch && (Context.AdvancedSearchEnabled || AdvancedSearchContent is not null))
         {
             <MudExpansionPanel @bind-bind-Expanded="_advancedSearchExpanded"
                 Style="padding:10px!important; margin-bottom:10px!important;border-radius: var(--mud-default-borderradius) !important;"
@@ -23,7 +23,7 @@
                     AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium"
                     Style="flex:none!important;margin:0px!important" TextChanged="OnSearchStringChanged">
                 </MudTextField>
-                   @* @if (Context.AdvancedSearchEnabled)
+                   @if (Context.AdvancedSearchEnabled)
                    {
                        <div style="margin-top:10px!important">
                            <MudCheckBox Label="All Columns" T="bool" Checked="Context.AllColumnsChecked"
@@ -33,25 +33,38 @@
                                <MudCheckBox T="bool" @bind-Checked="@field.CheckedForSearch" Label="@(field.DisplayName)"></MudCheckBox>
                            }
                        </div>
-                   } *@
+                   }
                 @AdvancedSearchContent
 
             </MudExpansionPanel>
-        }
+        } *@
 
         <FshTable @ref="_table" Outlined ServerData="@ServerReloadFunc" Items="@_entityList" Filter="LocalSearch"
             Loading="@Loading" LoadingProgressColor="@Color.Secondary" ChildRowContent="@ChildRowContent">
 
             <ToolBarContent>
                 <div class="justify-center mud-text-align-center">
+                    <MudButton Variant="Variant.Filled" 
+                               OnClick="ReloadDataAsync" 
+                               DropShadow="false"
+                               StartIcon="@Icons.Material.Filled.Refresh" 
+                               IconColor="Color.Surface" 
+                               Color="Color.Secondary"
+                               Class="mr-2">                  
+                               Reload
+                    </MudButton>
                     @if (_canCreate)
                     {
-                        <MudButton Variant="Variant.Filled" Color="Color.Primary" DropShadow="false"
-                                   OnClick="(() => InvokeModal())" StartIcon="@Icons.Material.Filled.Add"
-                            IconColor="Color.Surface" Class="mr-4">Create</MudButton>
-                    }
-                    <MudButton Variant="Variant.Filled" OnClick="ReloadDataAsync" DropShadow="false"
-                               StartIcon="@Icons.Material.Filled.Refresh" IconColor="Color.Surface" Color="Color.Secondary">Reload</MudButton>
+                        <MudButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" 
+                                   DropShadow="false"
+                                   OnClick="(() => InvokeModal())" 
+                                   StartIcon="@Icons.Material.Filled.Add"
+                                   IconColor="Color.Surface" 
+                                   Class="mr-4">
+                                   Create
+                        </MudButton>
+                    }                    
                 </div>
                 <MudSpacer />
                 @if (_canSearch && !_advancedSearchExpanded)
@@ -109,9 +122,15 @@
                     }
                     else if (HasActions)
                     {
-                        <MudMenu Label="Actions" Variant="Variant.Filled" DropShadow=false
+                        @* <MudMenu Label="Actions" Variant="Variant.Filled" DropShadow=false
                             EndIcon="@Icons.Material.Filled.KeyboardArrowDown" IconColor="Color.Secondary" direction="Direction.Left"
-                            offsetX="true">
+                            offsetX="true"> *@
+                        <MudMenu Icon="@Icons.Material.Filled.Edit" 
+                                 Variant="Variant.Filled" 
+                                 Size="Size.Small"
+                                 Dense="true"
+                                 IconColor="Color.Info" 
+                                 AnchorOrigin="Origin.CenterLeft">
                             @if (CanUpdateEntity(context))
                             {
                                 <MudMenuItem @onclick="@(() => InvokeModal(context))">Edit</MudMenuItem>

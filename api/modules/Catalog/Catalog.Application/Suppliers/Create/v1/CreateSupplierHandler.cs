@@ -13,9 +13,9 @@ public sealed class CreateSupplierHandler(
     public async Task<CreateSupplierResponse> Handle(CreateSupplierCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var supplier = Supplier.Create(request.Name!, request.Address, request.TIN, request.IsVAT, request.ContactNo, request.Emailadd);
+        var supplier = Supplier.Create(request.Name!, request.Address, request.Tin, request.TaxClassification, request.ContactNo, request.Emailadd);
         await repository.AddAsync(supplier, cancellationToken);
-        logger.LogInformation("supplier created {SupplierId}", supplier.Id);
+        logger.LogInformation("Supplier created {SupplierId}", supplier.Id);
         return new CreateSupplierResponse(supplier.Id);
     }
 }

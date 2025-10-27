@@ -108,6 +108,54 @@ public static class FshPermissions
         new("Delete IssuanceItems", FshActions.Delete, FshResources.IssuanceItems),
         new("Export IssuanceItems", FshActions.Export, FshResources.IssuanceItems),
 
+        //inventorytransactions
+        new("View InventoryTransactions", FshActions.View, FshResources.InventoryTransactions, IsBasic: true),
+        new("Search InventoryTransactions", FshActions.Search, FshResources.InventoryTransactions, IsBasic: true),
+        new("Create InventoryTransactions", FshActions.Create, FshResources.InventoryTransactions),
+        new("Update InventoryTransactions", FshActions.Update, FshResources.InventoryTransactions),
+        new("Delete InventoryTransactions", FshActions.Delete, FshResources.InventoryTransactions),
+        new("Export InventoryTransactions", FshActions.Export, FshResources.InventoryTransactions),
+
+        //inpections
+        new("View Inspections", FshActions.View, FshResources.Inspections, IsBasic: true),
+        new("Search Inspections", FshActions.Search, FshResources.Inspections, IsBasic: true),
+        new("Create Inspections", FshActions.Create, FshResources.Inspections),
+        new("Update Inspections", FshActions.Update, FshResources.Inspections),
+        new("Delete Inspections", FshActions.Delete, FshResources.Inspections),
+        new("Export Inspections", FshActions.Export, FshResources.Inspections),
+
+        //inpectionitems
+        new("View InspectionItems", FshActions.View, FshResources.InspectionItems, IsBasic: true),
+        new("Search InspectionItems", FshActions.Search, FshResources.InspectionItems, IsBasic: true),
+        new("Create InspectionItems", FshActions.Create, FshResources.InspectionItems),
+        new("Update InspectionItems", FshActions.Update, FshResources.InspectionItems),
+        new("Delete InspectionItems", FshActions.Delete, FshResources.InspectionItems),
+        new("Export InspectionItems", FshActions.Export, FshResources.InspectionItems),
+
+        //acceptances
+        new("View Acceptances", FshActions.View, FshResources.Acceptances, IsBasic: true),
+        new("Search Acceptances", FshActions.Search, FshResources.Acceptances, IsBasic: true),
+        new("Create Acceptances", FshActions.Create, FshResources.Acceptances),
+        new("Update Acceptances", FshActions.Update, FshResources.Acceptances),
+        new("Delete Acceptances", FshActions.Delete, FshResources.Acceptances),
+        new("Export Acceptances", FshActions.Export, FshResources.Acceptances),
+
+        //acceptanceitems
+        new("View AcceptanceItems", FshActions.View, FshResources.AcceptanceItems, IsBasic: true),
+        new("Search AcceptanceItems", FshActions.Search, FshResources.AcceptanceItems, IsBasic: true),
+        new("Create AcceptanceItems", FshActions.Create, FshResources.AcceptanceItems),
+        new("Update AcceptanceItems", FshActions.Update, FshResources.AcceptanceItems),
+        new("Delete AcceptanceItems", FshActions.Delete, FshResources.AcceptanceItems),
+        new("Export AcceptanceItems", FshActions.Export, FshResources.AcceptanceItems),
+
+        //inspectionrequests
+        new("View InspectionRequests", FshActions.View, FshResources.InspectionRequests, IsBasic: true),
+        new("Search InspectionRequests", FshActions.Search, FshResources.InspectionRequests, IsBasic: true),
+        new("Create InspectionRequests", FshActions.Create, FshResources.InspectionRequests),
+        new("Update InspectionRequests", FshActions.Update, FshResources.InspectionRequests),
+        new("Delete InspectionRequests", FshActions.Delete, FshResources.InspectionRequests),
+        new("Export InspectionRequests", FshActions.Export, FshResources.InspectionRequests),
+
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
         new("Search Todos", FshActions.Search, FshResources.Todos, IsBasic: true),

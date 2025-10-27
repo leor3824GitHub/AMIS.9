@@ -18,8 +18,8 @@ public static class UpdateIssuanceEndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(UpdateIssuanceEndpoint))
-            .WithSummary("update a product")
-            .WithDescription("update a product")
+            .WithSummary("update a issuance")
+            .WithDescription("update a issuance")
             .Produces<UpdateIssuanceResponse>()
             .RequirePermission("Permissions.Issuances.Update")
             .MapToApiVersion(1);

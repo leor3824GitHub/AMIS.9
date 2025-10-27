@@ -1,4 +1,5 @@
 ﻿using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Application.Inventories.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Exceptions;
 using MediatR;
@@ -21,19 +22,21 @@ public sealed class DeletePurchaseItemHandler(
 
         var productId = purchaseItem.ProductId;
         var qty = purchaseItem.Qty;
+        var unitPrice = purchaseItem.UnitPrice;
 
         await repository.DeleteAsync(purchaseItem, cancellationToken);
         logger.LogInformation("purchaseItem with id : {PurchaseItemId} deleted", purchaseItem.Id);
 
         //check if update inventory
-        var inventory = await inventoryRepository.GetByIdAsync(productId, cancellationToken);
+        var spec = new GetInventoryProductIdSpecs(productId);
+        var inventory = await inventoryRepository.FirstOrDefaultAsync(spec, cancellationToken);
         if (inventory == null)
         {
             logger.LogWarning("Inventory not found for ProductId {ProductId}", productId);
             return;
         }
 
-        inventory.DeductStock(qty);
+        inventory.DeductStock(qty, unitPrice);
         await inventoryRepository.UpdateAsync(inventory, cancellationToken);
         logger.LogInformation(" {Qty} quantity of ProductId {ProductId} deducted to Inventory.", qty, productId);
 

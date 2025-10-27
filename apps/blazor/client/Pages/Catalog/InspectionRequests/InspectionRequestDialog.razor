@@ -1,0 +1,156 @@
+﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <MudDialog>
+        <DialogContent>
+            <FshValidation @ref="_customValidation" />
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <MudGrid Spacing="3">
+                <!-- Purchase Order Selection -->
+                <MudItem xs="12">
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Class="mr-2" />
+                        Purchase Order Selection
+                    </MudText>
+                    <MudSelect T="Guid?" 
+                               Label="Purchase Order" 
+                               @bind-Value="Model.PurchaseId"
+                               Placeholder="Select a purchase order by date"
+                               Clearable="@(!ReadOnly)" 
+                               Disabled="@ReadOnly"
+                               Variant="Variant.Outlined"
+                               Adornment="Adornment.Start"
+                               AdornmentIcon="@Icons.Material.Filled.Receipt">
+                        @foreach (var purchase in _purchases)
+                        {
+                            <MudSelectItem T="Guid?" Value="purchase.Id">
+                                @(purchase.PurchaseDate?.ToString("MMM dd, yyyy") ?? "No Date") - @(purchase.Supplier?.Name ?? "Unknown Supplier")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <!-- Purchase Details Card -->
+                @{
+                    var SelectedPurchase = _purchases.FirstOrDefault(s => s.Id == Model.PurchaseId);
+                }
+                @if (SelectedPurchase != null)
+                {
+                    <MudItem xs="12">
+                        <MudPaper Elevation="0" Class="pa-4" Style="background-color: rgba(33, 150, 243, 0.08);">
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-1">
+                                        <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" /> Supplier
+                                    </MudText>
+                                    <MudText Typo="Typo.body1" Class="font-weight-medium">
+                                        @(SelectedPurchase.Supplier?.Name ?? "N/A")
+                                    </MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-1">
+                                        <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" /> Number of Items
+                                    </MudText>
+                                    <MudText Typo="Typo.body1" Class="font-weight-medium">
+                                        @(SelectedPurchase.Items?.Count.ToString() ?? "0") items
+                                    </MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-1">
+                                        <MudIcon Icon="@Icons.Material.Filled.CalendarToday" Size="Size.Small" /> Purchase Date
+                                    </MudText>
+                                    <MudText Typo="Typo.body1" Class="font-weight-medium">
+                                        @(SelectedPurchase.PurchaseDate?.ToString("MMM dd, yyyy") ?? "N/A")
+                                    </MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2" Color="Color.Primary" Class="mb-1">
+                                        <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Size="Size.Small" /> Total Amount
+                                    </MudText>
+                                    <MudText Typo="Typo.body1" Class="font-weight-medium">
+                                        @SelectedPurchase.TotalAmount.ToString("C")
+                                    </MudText>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </MudItem>
+                }
+
+                <!-- Inspector Selection -->
+                <MudItem xs="12" Class="mt-4">
+                    <MudText Typo="Typo.h6" Class="mb-2">
+                        <MudIcon Icon="@Icons.Material.Filled.PersonSearch" Class="mr-2" />
+                        Inspector Assignment
+                    </MudText>
+                    <MudSelect T="Guid?" 
+                               Label="Inspector" 
+                               @bind-Value="Model.InspectorId"
+                               Placeholder="Select an employee to inspect"
+                               Clearable="@(!ReadOnly)" 
+                               Disabled="@ReadOnly"
+                               Variant="Variant.Outlined"
+                               Adornment="Adornment.Start"
+                               AdornmentIcon="@Icons.Material.Filled.Badge">
+                        @foreach (var employee in _employees)
+                        {
+                            <MudSelectItem T="Guid?" Value="employee.Id">
+                                @employee.Name @(!string.IsNullOrEmpty(employee.Designation) ? $"- {employee.Designation}" : "")
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudItem>
+
+                <!-- Inspector Details Card -->
+                @{
+                    var SelectedInspector = _employees.FirstOrDefault(e => e.Id == Model.InspectorId);
+                }
+                @if (SelectedInspector != null)
+                {
+                    <MudItem xs="12">
+                        <MudPaper Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.08);">
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2" Color="Color.Success" Class="mb-1">
+                                        <MudIcon Icon="@Icons.Material.Filled.Work" Size="Size.Small" /> Designation
+                                    </MudText>
+                                    <MudText Typo="Typo.body1" Class="font-weight-medium">
+                                        @(SelectedInspector.Designation ?? "N/A")
+                                    </MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2" Color="Color.Success" Class="mb-1">
+                                        <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Small" /> Responsibility Code
+                                    </MudText>
+                                    <MudText Typo="Typo.body1" Class="font-weight-medium">
+                                        @(SelectedInspector.ResponsibilityCode ?? "N/A")
+                                    </MudText>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    </MudItem>
+                }
+            </MudGrid>
+
+        </DialogContent>
+
+        <DialogActions>
+            @if (!ReadOnly)
+            {
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           ButtonType="ButtonType.Submit"
+                           StartIcon="@Icons.Material.Filled.Save">
+                    Save
+                </MudButton>
+            }
+            <MudButton Variant="Variant.Outlined" 
+                       Color="Color.Secondary" 
+                       OnClick="Cancel"
+                       StartIcon="@(ReadOnly ? Icons.Material.Filled.Close : Icons.Material.Filled.Cancel)">
+                @(ReadOnly ? "Close" : "Cancel")
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+

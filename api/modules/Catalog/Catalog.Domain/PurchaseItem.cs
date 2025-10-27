@@ -1,45 +1,64 @@
 ﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 public class PurchaseItem : AuditableEntity, IAggregateRoot
 {
-    public Guid PurchaseId { get; private set; }
-    public Guid ProductId { get; private set; }
+    public Guid? PurchaseId { get; private set; }
+    public Guid? ProductId { get; private set; }
     public int Qty { get; private set; }
     public decimal UnitPrice { get; private set; }
-    public string? Status { get; private set; }
+    public PurchaseStatus? ItemStatus { get; private set; }
+    public PurchaseItemInspectionStatus? InspectionStatus { get; private set; }
+    public PurchaseItemAcceptanceStatus? AcceptanceStatus { get; private set; }
+
+    // New aggregate fields for summary views
+    public int? QtyInspected { get; private set; }  // Set from InspectionItem
+    public int? QtyPassed { get; private set; }
+    public int? QtyFailed { get; private set; }
+
+    public int? QtyAccepted { get; private set; } // Set from AcceptanceItem
+
+    // Navigation
     public virtual Product Product { get; private set; } = default!;
+    public virtual ICollection<InspectionItem> InspectionItems { get; private set; } = [];
+    public virtual ICollection<AcceptanceItem> AcceptanceItems { get; private set; } = [];
 
     private PurchaseItem() { }
 
-    private PurchaseItem(Guid id, Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
+    private PurchaseItem(Guid id, Guid? purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
         Id = id;
         PurchaseId = purchaseId;
         ProductId = productId;
         Qty = qty;
         UnitPrice = unitPrice;
-        Status = status;
+        ItemStatus = itemstatus;
 
-        QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = this });
+        QueueDomainEvent(new PurchaseItemCreated { PurchaseItem = this });
     }
 
-    public static PurchaseItem Create(Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
+    public static PurchaseItem Create(Guid? purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
-        return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, status);
+        return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, itemstatus);
+    }
+        public void UpdateInspectionSummary(int inspected, int passed, int failed)
+    {
+        QtyInspected = inspected;
+        QtyPassed = passed;
+        QtyFailed = failed;
     }
 
-    public PurchaseItem Update(Guid purchaseId, Guid productId, int qty, decimal unitPrice, string? status)
+    public void UpdateAcceptanceSummary(int accepted)
     {
-        bool isUpdated = false;
+        QtyAccepted = accepted;
+    }
 
-        if (PurchaseId != purchaseId)
-        {
-            PurchaseId = purchaseId;
-            isUpdated = true;
-        }
+    public PurchaseItem Update(Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
+    {
+        bool isUpdated = false;             
 
         if (ProductId != productId)
         {
@@ -59,15 +78,36 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (!string.Equals(Status, status, StringComparison.OrdinalIgnoreCase))
+        if (!Nullable.Equals(ItemStatus, itemstatus))
         {
-            Status = status;
+            ItemStatus = itemstatus;
             isUpdated = true;
         }
 
         if (isUpdated)
         {
             QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = this });
+        }
+
+        return this;
+    }
+    public PurchaseItem UpdateInspectionStatus(PurchaseItemInspectionStatus status)
+    {
+        if (InspectionStatus != status)
+        {
+            InspectionStatus = status;
+            QueueDomainEvent(new PurchaseItemInspected { PurchaseItem = this });
+        }
+
+        return this;
+    }
+
+    public PurchaseItem UpdateAcceptanceStatus(PurchaseItemAcceptanceStatus status)
+    {
+        if (AcceptanceStatus != status)
+        {
+            AcceptanceStatus = status;
+            QueueDomainEvent(new PurchaseItemAccepted { PurchaseItem = this });
         }
 
         return this;

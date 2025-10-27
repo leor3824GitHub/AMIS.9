@@ -5,35 +5,37 @@ using AMIS.WebApi.Catalog.Domain.Events;
 namespace AMIS.WebApi.Catalog.Domain;
 public class Product : AuditableEntity, IAggregateRoot
 {
-    public string Name { get; private set; } = string.Empty;
+    public string Name { get; private set; } = default!;
     public string? Description { get; private set; }
-    public decimal SKU { get; private set; }
+    public decimal Sku { get; private set; }
+    public string Unit { get; private set; } = "pcs";
+    public string? ImagePath { get; private set; }
     public Guid? CategoryId { get; private set; }
-    public virtual Category Category { get; private set; } = default!;
-    public string? Location { get; private set; }
-    public string Unit { get; private set; } = string.Empty;
+    public virtual Category? Category { get; private set; }
+
 
     private Product() { }
 
-    private Product(Guid id, string name, string? description, decimal sku, Guid? categoryId, string? location, string unit)
+    private Product(Guid id, string name, string? description, decimal sku, string unit, string? imagePath, Guid? categoryId)
     {
         Id = id;
         Name = name;
         Description = description;
-        SKU = sku;
-        CategoryId = categoryId;
-        Location = location;
+        Sku = sku;
         Unit = unit;
+        ImagePath = imagePath;
+        CategoryId = categoryId;
+
 
         QueueDomainEvent(new ProductCreated { Product = this });
     }
 
-    public static Product Create(string name, string? description, decimal sku, Guid? categoryId, string? location, string unit)
+    public static Product Create(string name, string? description, decimal sku, string unit, string? imagePath, Guid? categoryId)
     {
-        return new Product(Guid.NewGuid(), name, description, sku, categoryId, location, unit);
+        return new Product(Guid.NewGuid(), name, description, sku, unit, imagePath, categoryId);
     }
 
-    public Product Update(string? name, string? description, decimal? sku, Guid? categoryId, string? location, string? unit)
+    public Product Update(string? name, string? description, decimal? sku, string? unit, string? imagePath, Guid? categoryId)
     {
         bool isUpdated = false;
 
@@ -49,9 +51,9 @@ public class Product : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (sku.HasValue && SKU != sku.Value)
+        if (sku.HasValue && Sku != sku.Value)
         {
-            SKU = sku.Value;
+            Sku = sku.Value;
             isUpdated = true;
         }
 
@@ -61,15 +63,15 @@ public class Product : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (!string.Equals(Location, location, StringComparison.OrdinalIgnoreCase))
-        {
-            Location = location;
-            isUpdated = true;
-        }
-
         if (!string.Equals(Unit, unit, StringComparison.OrdinalIgnoreCase))
         {
             Unit = unit;
+            isUpdated = true;
+        }
+
+        if (!string.Equals(ImagePath, imagePath, StringComparison.OrdinalIgnoreCase))
+        {
+            ImagePath = imagePath;
             isUpdated = true;
         }
 
@@ -78,6 +80,12 @@ public class Product : AuditableEntity, IAggregateRoot
             QueueDomainEvent(new ProductUpdated { Product = this });
         }
 
+        return this;
+    }
+
+    public Product ClearImagePath()
+    {
+        ImagePath = string.Empty;
         return this;
     }
 }

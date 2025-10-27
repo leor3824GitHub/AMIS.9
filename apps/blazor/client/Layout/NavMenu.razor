@@ -2,7 +2,7 @@
 <MudNavMenu>
     <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Start</MudText>
     <MudNavLink Href="" Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Home">Home</MudNavLink>
-    <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink>
+    @* <MudNavLink Href="counter" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Add">Counter</MudNavLink> *@
     @if (_canViewAuditTrails)
     {
         <MudNavLink Match="NavLinkMatch.Prefix" Href="/identity/audit-trail" Icon="@Icons.Material.Filled.WorkHistory">Audit Trail</MudNavLink>
@@ -11,15 +11,43 @@
     <MudNavGroup Title="Catalog" Icon="@Icons.Material.Filled.AddBox">
         @if (_canViewProducts)
         {
-            <MudNavLink Href="/catalog/products" Icon="@Icons.Material.Filled.ShoppingBag" Class="fsh-nav-child">Products</MudNavLink>
+            <MudNavLink Href="/catalog/products" Icon="@Icons.Material.Filled.List" Class="fsh-nav-child">Products</MudNavLink>
         }
-        @if (_canViewBrands)
+        @if (_canViewPurchases)
         {
-            <MudNavLink Href="/catalog/brands" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Brands</MudNavLink>
+            <MudNavLink Href="/catalog/purchases" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Purchases</MudNavLink>
+        }
+        @if (_canViewInspectionRequests)
+        {
+            <MudNavLink Href="/catalog/inspectionrequests" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Inspection Request</MudNavLink>
+        }
+        @if (_canViewInspections)
+        {
+            <MudNavLink Href="/catalog/inspections" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Inspections</MudNavLink>
+        }
+        @if (_canViewIssuances)
+        {
+            <MudNavLink Href="/catalog/issuances" Icon="@Icons.Material.Filled.LocalShipping" Class="fsh-nav-child">Issuances</MudNavLink>
+        }
+        @if (_canViewInventories)
+        {
+            <MudNavLink Href="/catalog/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">Inventories</MudNavLink>
+        }
+        @if (_canViewAcceptances)
+        {
+            <MudNavLink Href="/catalog/acceptances" Icon="@Icons.Material.Filled.AssignmentTurnedIn" Class="fsh-nav-child">Acceptances</MudNavLink>
         }
         @if (_canViewCategories)
         {
             <MudNavLink Href="/catalog/categories" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Categories</MudNavLink>
+        }
+        @if (_canViewSuppliers)
+        {
+            <MudNavLink Href="/catalog/suppliers" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Suppliers</MudNavLink>
+        }
+        @if (_canViewEmployees)
+        {
+            <MudNavLink Href="/catalog/employees" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Employees</MudNavLink>
         }
     </MudNavGroup>
     <MudNavLink Href="/todos" Icon="@Icons.Material.Filled.Checklist" Class="fsh-nav-child">Todos</MudNavLink>

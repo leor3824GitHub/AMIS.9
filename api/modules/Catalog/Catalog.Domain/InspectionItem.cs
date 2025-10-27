@@ -1,126 +1,126 @@
-﻿using System;
-using AMIS.Framework.Core.Domain;
+﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
+using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
+
 public class InspectionItem : AuditableEntity, IAggregateRoot
 {
-    public Guid InspectionId { get; set; }
-    public virtual Inspection Inspection { get; set; } = default!;
-    public Guid PurchaseItemId { get; set; }
-    public virtual PurchaseItem PurchaseItem { get; set; } = default!;
-    public int InspectedQty { get; set; }
-    public bool Accepted { get; set; }
-    public string? Notes { get; set; }
+    public Guid InspectionId { get; private set; }
+    public Guid PurchaseItemId { get; private set; }
+    public int QtyInspected { get; private set; }
+    public int QtyPassed { get; private set; }
+    public int QtyFailed { get; private set; }
+    public string? Remarks { get; private set; }
 
-    // Parameterless constructor for EF / serializers
+    public InspectionItemStatus? InspectionItemStatus { get; private set; }
+
+    public virtual Inspection? Inspection { get; private set; } = default!;
+    public virtual PurchaseItem? PurchaseItem { get; private set; } = default!;
+
     private InspectionItem() { }
 
-    // Internal constructor that sets all fields including Id
-    private InspectionItem(Guid inspectionId, Guid purchaseItemId, int inspectedQty, bool accepted, string? notes)
+    private InspectionItem(
+        Guid id,
+        Guid inspectionId,
+        Guid purchaseItemId,
+        int qtyInspected,
+        int qtyPassed,
+        int qtyFailed,
+        string? remarks,
+        InspectionItemStatus? inspectionItemStatus)
     {
+        Id = id;
         InspectionId = inspectionId;
         PurchaseItemId = purchaseItemId;
-        InspectedQty = inspectedQty;
-        Accepted = accepted;
-        Notes = notes;
+        QtyInspected = qtyInspected;
+        QtyPassed = qtyPassed;
+        QtyFailed = qtyFailed;
+        Remarks = remarks;
+        InspectionItemStatus = inspectionItemStatus;
+
+        QueueDomainEvent(new InspectionItemCreated { InspectionItem = this });
     }
 
-    // Factory method to create a new InspectionItem
-    public static InspectionItem Create(Guid inspectionId, Guid purchaseItemId, int inspectedQty, bool accepted, string? notes)
+    public static InspectionItem Create(
+        Guid inspectionId,
+        Guid purchaseItemId,
+        int qtyInspected,
+        int qtyPassed,
+        int qtyFailed,
+        string? remarks,
+        InspectionItemStatus? inspectionItemStatus)
     {
-        if (inspectedQty < 0) throw new ArgumentException("Inspected quantity cannot be negative.", nameof(inspectedQty));
-        return new InspectionItem(inspectionId, purchaseItemId, inspectedQty, accepted, notes);
+        return new InspectionItem(
+            Guid.NewGuid(),
+            inspectionId,
+            purchaseItemId,
+            qtyInspected,
+            qtyPassed,
+            qtyFailed,
+            remarks,
+            inspectionItemStatus);
     }
 
-    // Domain method: update fields if provided (null means no change)
-    public InspectionItem Update(Guid? purchaseItemId = null, int? inspectedQty = null, bool? accepted = null, string? notes = null)
+    public InspectionItem Update(
+        Guid inspectionId,
+        Guid purchaseItemId,
+        int quantityInspected,
+        int quantityPassed,
+        int quantityFailed,
+        string? remarks,
+        InspectionItemStatus? inspectionItemStatus)
     {
         bool isUpdated = false;
 
-        if (purchaseItemId.HasValue && PurchaseItemId != purchaseItemId.Value)
+        if (InspectionId != inspectionId)
         {
-            PurchaseItemId = purchaseItemId.Value;
+            InspectionId = inspectionId;
             isUpdated = true;
         }
 
-        if (inspectedQty.HasValue)
+        if (PurchaseItemId != purchaseItemId)
         {
-            if (inspectedQty.Value < 0) throw new ArgumentException("Inspected quantity cannot be negative.", nameof(inspectedQty));
-            if (InspectedQty != inspectedQty.Value)
-            {
-                InspectedQty = inspectedQty.Value;
-                isUpdated = true;
-            }
-        }
-
-        if (accepted.HasValue && Accepted != accepted.Value)
-        {
-            Accepted = accepted.Value;
+            PurchaseItemId = purchaseItemId;
             isUpdated = true;
         }
 
-        if (notes is not null)
+        if (QtyInspected != quantityInspected)
         {
-            // Treat empty or whitespace as explicit update to notes (could clear)
-            if (!string.Equals(Notes, notes, StringComparison.Ordinal))
-            {
-                Notes = notes;
-                isUpdated = true;
-            }
+            QtyInspected = quantityInspected;
+            isUpdated = true;
         }
 
-        // If needed, queue domain events here (e.g., InspectionItemUpdated) - not added to avoid referencing missing types.
-        return this;
-    }
-
-    // Domain method: mark this inspection item as accepted
-    public InspectionItem Accept()
-    {
-        // Business rule: inspected quantity must be non-negative (should already be validated elsewhere)
-        if (InspectedQty < 0) throw new InvalidOperationException("Cannot accept an item with negative inspected quantity.");
-        if (!Accepted)
+        if (QtyPassed != quantityPassed)
         {
-            Accepted = true;
-            // Optionally queue domain event here
+            QtyPassed = quantityPassed;
+            isUpdated = true;
         }
-        return this;
-    }
 
-    // Domain method: mark this inspection item as rejected
-    public InspectionItem Reject()
-    {
-        if (Accepted)
+        if (QtyFailed != quantityFailed)
         {
-            Accepted = false;
-            // Optionally queue domain event here
+            QtyFailed = quantityFailed;
+            isUpdated = true;
         }
-        return this;
-    }
 
-    // Domain method: set inspected quantity with validation
-    public InspectionItem SetInspectedQuantity(int qty)
-    {
-        if (qty < 0) throw new ArgumentException("Inspected quantity cannot be negative.", nameof(qty));
-        if (InspectedQty != qty)
+        if (Remarks != remarks)
         {
-            InspectedQty = qty;
-            // Optionally queue domain event here
+            Remarks = remarks;
+            isUpdated = true;
         }
-        return this;
-    }
 
-    // Domain method: add or update notes. Passing null or whitespace clears the notes.
-    public InspectionItem AddOrUpdateNotes(string? notes)
-    {
-        var newNotes = string.IsNullOrWhiteSpace(notes) ? null : notes;
-        if (!string.Equals(Notes, newNotes, StringComparison.Ordinal))
+        if (InspectionItemStatus != inspectionItemStatus)
         {
-            Notes = newNotes;
-            // Optionally queue domain event here
+            InspectionItemStatus = inspectionItemStatus;
+            isUpdated = true;
         }
+
+        if (isUpdated)
+        {
+            QueueDomainEvent(new InspectionItemUpdated { InspectionItem = this });
+        }
+
         return this;
     }
-
-    // add domain methods as needed
 }

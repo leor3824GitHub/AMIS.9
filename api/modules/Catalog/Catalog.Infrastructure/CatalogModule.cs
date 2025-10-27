@@ -3,6 +3,8 @@ using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Infrastructure.Persistence;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.InspectionRequest.v1;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.Inspection.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -23,6 +25,7 @@ public static class CatalogModule
             productGroup.MapGetProductListEndpoint();
             productGroup.MapProductUpdateEndpoint();
             productGroup.MapProductDeleteEndpoint();
+            productGroup.MapProductsDeleteEndpoint();
 
             var brandGroup = app.MapGroup("brands").WithTags("brands");
             brandGroup.MapBrandCreationEndpoint();
@@ -58,6 +61,7 @@ public static class CatalogModule
             purchaseGroup.MapGetPurchaseListEndpoint();
             purchaseGroup.MapPurchaseUpdateEndpoint();
             purchaseGroup.MapPurchaseDeleteEndpoint();
+            purchaseGroup.MapPurchasesDeleteEndpoint();
 
             var purchaseItemGroup = app.MapGroup("purchaseItems").WithTags("purchaseItems");
             purchaseItemGroup.MapPurchaseItemCreationEndpoint();
@@ -86,6 +90,50 @@ public static class CatalogModule
             issuanceItemGroup.MapGetIssuanceItemListEndpoint();
             issuanceItemGroup.MapIssuanceItemUpdateEndpoint();
             issuanceItemGroup.MapIssuanceItemDeleteEndpoint();
+
+            var inventoryTranscationGroup = app.MapGroup("inventoryTranscation").WithTags("inventoryTranscation");
+            inventoryTranscationGroup.MapInventoryTransactionCreationEndpoint();
+            inventoryTranscationGroup.MapInventoryTransactionDeleteEndpoint();
+            inventoryTranscationGroup.MapGetInventoryTransactionEndpoint();
+            inventoryTranscationGroup.MapGetInventoryTransactionListEndpoint();
+            inventoryTranscationGroup.MapInventoryTransactionUpdateEndpoint();
+
+            var inspectionGroup = app.MapGroup("inspection").WithTags("inspection");
+            inspectionGroup.MapInspectionCreationEndpoint();
+            inspectionGroup.MapInspectionDeletionEndpoint();
+            inspectionGroup.MapGetInspectionEndpoint();
+            inspectionGroup.MapGetInspectionListEndpoint();
+            inspectionGroup.MapInspectionUpdateEndpoint();
+            inspectionGroup.MapInspectionApproveEndpoint();
+
+            var inspectionItemGroup = app.MapGroup("inspectionItems").WithTags("inspectionItems");
+            inspectionItemGroup.MapInspectionItemCreationEndpoint();
+            inspectionItemGroup.MapInspectionItemDeletionEndpoint();
+            inspectionItemGroup.MapGetInspectionItemEndpoint();
+            inspectionItemGroup.MapGetInspectionItemListEndpoint();
+            inspectionItemGroup.MapInspectionItemUpdateEndpoint();
+
+            var acceptanceGroup = app.MapGroup("acceptances").WithTags("acceptances");
+            acceptanceGroup.MapAcceptanceCreationEndpoint();
+            acceptanceGroup.MapAcceptanceDeletionEndpoint();
+            acceptanceGroup.MapGetAcceptanceEndpoint();
+            acceptanceGroup.MapGetAcceptanceListEndpoint();
+            acceptanceGroup.MapAcceptanceUpdateEndpoint();
+
+            var acceptanceItemGroup = app.MapGroup("acceptanceItems").WithTags("acceptanceItems");
+            acceptanceItemGroup.MapAcceptanceItemCreationEndpoint();
+            acceptanceItemGroup.MapAcceptanceItemDeletionEndpoint();
+            acceptanceItemGroup.MapGetAcceptanceItemEndpoint();
+            acceptanceItemGroup.MapGetAcceptanceItemListEndpoint();
+            acceptanceItemGroup.MapAcceptanceItemUpdateEndpoint();
+
+            var inspectionRequestGroup = app.MapGroup("inspectionRequests").WithTags("inspectionRequests");
+            inspectionRequestGroup.MapInspectionRequestCreationEndpoint();
+            inspectionRequestGroup.MapInspectionRequestDeletionEndpoint();
+            inspectionRequestGroup.MapInspectionRequestDeletionRangeEndpoint();
+            inspectionRequestGroup.MapGetInspectionRequestEndpoint();
+            inspectionRequestGroup.MapGetInspectionRequestListEndpoint();
+            inspectionRequestGroup.MapInspectionRequestUpdateEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -121,6 +169,23 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
         builder.Services.AddKeyedScoped<IReadRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
 
+        builder.Services.AddKeyedScoped<IRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inventory-transactions");
+        builder.Services.AddKeyedScoped<IReadRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inventory-transactions");
+
+        builder.Services.AddKeyedScoped<IRepository<Inspection>, CatalogRepository<Inspection>>("catalog:inspections");
+        builder.Services.AddKeyedScoped<IReadRepository<Inspection>, CatalogRepository<Inspection>>("catalog:inspections");
+
+        builder.Services.AddKeyedScoped<IRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
+        builder.Services.AddKeyedScoped<IReadRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
+
+        builder.Services.AddKeyedScoped<IRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
+        builder.Services.AddKeyedScoped<IReadRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
+
+        builder.Services.AddKeyedScoped<IRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
+        builder.Services.AddKeyedScoped<IReadRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
+
+        builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
+        builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)

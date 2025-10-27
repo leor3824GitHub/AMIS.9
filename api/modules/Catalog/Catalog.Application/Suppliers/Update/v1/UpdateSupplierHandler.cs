@@ -16,7 +16,7 @@ public sealed class UpdateSupplierHandler(
         ArgumentNullException.ThrowIfNull(request);
         var supplier = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = supplier ?? throw new SupplierNotFoundException(request.Id);
-        var updatedSupplier = supplier.Update(request.Name!, request.Address, request.TIN, request.IsVAT, request.ContactNo, request.Emailadd);
+        var updatedSupplier = supplier.Update(request.Name!, request.Address, request.Tin, request.TaxClassification, request.ContactNo, request.Emailadd);
         await repository.UpdateAsync(updatedSupplier, cancellationToken);
         logger.LogInformation("Supplier with id : {SupplierId} updated.", supplier.Id);
         return new UpdateSupplierResponse(supplier.Id);

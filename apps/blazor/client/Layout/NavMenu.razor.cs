@@ -13,14 +13,18 @@ public partial class NavMenu
     [Inject]
     protected IAuthorizationService AuthService { get; set; } = default!;
 
-    private bool _canViewHangfire;
-    private bool _canViewDashboard;
     private bool _canViewRoles;
     private bool _canViewUsers;
     private bool _canViewProducts;
-    private bool _canViewBrands;
+    private bool _canViewPurchases;
+    private bool _canViewInspectionRequests;
+    private bool _canViewInspections;
+    private bool _canViewAcceptances;
+    private bool _canViewIssuances;
+    private bool _canViewInventories;
     private bool _canViewCategories;
-    private bool _canViewTodos;
+    private bool _canViewSuppliers;
+    private bool _canViewEmployees;
     private bool _canViewTenants;
     private bool _canViewAuditTrails;
     private bool CanViewAdministrationGroup => _canViewUsers || _canViewRoles || _canViewTenants;
@@ -28,14 +32,18 @@ public partial class NavMenu
     protected override async Task OnParametersSetAsync()
     {
         var user = (await AuthState).User;
-        _canViewHangfire = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Hangfire);
-        _canViewDashboard = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Dashboard);
         _canViewRoles = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Roles);
         _canViewUsers = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Users);
         _canViewProducts = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Products);
-        _canViewBrands = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Brands);
+        _canViewPurchases = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Purchases);
+    _canViewInspectionRequests = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.InspectionRequests);
+    _canViewInspections = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Inspections);
+    _canViewAcceptances = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Acceptances);
+    _canViewIssuances = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Issuances);
+    _canViewInventories = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Inventories);
         _canViewCategories = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Categories);
-        _canViewTodos = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Todos);
+        _canViewSuppliers = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Suppliers);
+    _canViewEmployees = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Employees);
         _canViewTenants = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Tenants);
         _canViewAuditTrails = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.AuditTrails);
     }

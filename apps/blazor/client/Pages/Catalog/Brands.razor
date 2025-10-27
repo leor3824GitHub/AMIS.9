@@ -3,11 +3,7 @@
 <PageHeader Title="Brands" Header="Brands" SubHeader="Manage your Brands." />
 
 <EntityTable @ref="_table" TEntity="BrandResponse" TId="Guid" TRequest="BrandViewModel" Context="@Context">
-
-    <AdvancedSearchContent>
-        <!-- Add any advanced search content here if needed -->
-    </AdvancedSearchContent>
-
+        
     <EditFormContent>
         @if (!Context.AddEditModal.IsCreate)
         {
@@ -21,7 +17,7 @@
         <MudItem xs="12" md="6">
             <MudTextField Label="Description" For="@(() => context.Description)" @bind-Value="context.Description" />
         </MudItem>
-        <MudItem xs="12" md="12">
+       @*  <MudItem xs="12" md="12">
             <MudItem>
                 <div>
                     @if(!Context.AddEditModal.IsCreate)
@@ -37,8 +33,8 @@
                         </MudButton>
                     }
                 </div>
-            </MudItem>
-        </MudItem>
+            </MudItem> *@
+        @* </MudItem> *@
     </EditFormContent>
 
 </EntityTable>

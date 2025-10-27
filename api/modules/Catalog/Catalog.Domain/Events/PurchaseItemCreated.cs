@@ -5,3 +5,4 @@ public sealed record PurchaseItemCreated : DomainEvent
 {
     public PurchaseItem? PurchaseItem { get; set; }
 }
+

@@ -1,0 +1,62 @@
+<MudDialog>
+    <DialogContent>
+        <EditForm Model="Model" OnValidSubmit="OnValidSubmit">
+            <FshValidation @ref="_customValidation" />
+            <MudStack Spacing="3">
+                <MudText Typo="Typo.body2" Color="Color.Default">
+                    @(IsCreate.GetValueOrDefault(false) ? "Create a new inventory record for tracking product stock levels." : "Update the inventory details for this product.")
+                </MudText>
+                
+                <MudSelect T="Guid?" 
+                           Label="Product" 
+                           @bind-Value="SelectedProductId" 
+                           Required="true" 
+                           Disabled="!IsCreate.GetValueOrDefault(false)"
+                           Variant="Variant.Outlined"
+                           AdornmentIcon="@Icons.Material.Filled.Inventory"
+                           Adornment="Adornment.Start">
+                    @foreach (var p in Products)
+                    {
+                        <MudSelectItem Value="@p.Id">@p.Name</MudSelectItem>
+                    }
+                </MudSelect>
+                
+                <MudNumericField T="int" 
+                                 Label="Quantity" 
+                                 @bind-Value="Model.Qty" 
+                                 Min="0" 
+                                 Required="true" 
+                                 Variant="Variant.Outlined"
+                                 AdornmentIcon="@Icons.Material.Filled.Warehouse"
+                                 Adornment="Adornment.Start"
+                                 HelperText="Current stock level" />
+                
+                <MudNumericField T="decimal" 
+                                 Label="Average Price" 
+                                 @bind-Value="Model.AvePrice" 
+                                 Min="0.01M" 
+                                 Required="true" 
+                                 Variant="Variant.Outlined"
+                                 AdornmentIcon="@Icons.Material.Filled.AttachMoney"
+                                 Adornment="Adornment.Start"
+                                 Format="N2"
+                                 HelperText="Average cost per unit" />
+
+                <MudDivider />
+                
+                <MudPaper Elevation="0" Class="pa-3" Style="background-color: var(--mud-palette-background-grey);">
+                    <MudStack Row="false" Spacing="1">
+                        <MudText Typo="Typo.caption" Color="Color.Default">Total Inventory Value</MudText>
+                        <MudText Typo="Typo.h6" Color="Color.Success" Style="font-weight: 600;">
+                            @((Model.Qty * Model.AvePrice).ToString("C2"))
+                        </MudText>
+                    </MudStack>
+                </MudPaper>
+            </MudStack>
+        </EditForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Color="Color.Default" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="OnValidSubmit" Color="Color.Primary" Variant="Variant.Filled" StartIcon="@Icons.Material.Filled.Save">Save</MudButton>
+    </DialogActions>
+</MudDialog>

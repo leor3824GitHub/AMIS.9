@@ -1,0 +1,32 @@
+﻿using Microsoft.Extensions.DependencyInjection;
+using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Domain.Exceptions;
+using AMIS.Framework.Core.Caching;
+using MediatR;
+using AMIS.WebApi.Catalog.Domain;
+
+namespace AMIS.WebApi.Catalog.Application.Inspections.Get.v1;
+
+public sealed class GetInspectionHandler(
+    [FromKeyedServices("catalog:inspections")] IReadRepository<Inspection> repository,
+    ICacheService cache)
+    : IRequestHandler<GetInspectionRequest, InspectionResponse>
+{
+    public async Task<InspectionResponse> Handle(GetInspectionRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var inspection = await cache.GetOrSetAsync(
+            $"inspection:{request.Id}",
+            async () =>
+            {
+                var spec = new GetInspectionSpecs(request.Id);
+                var inspectionItem = await repository.FirstOrDefaultAsync(spec, cancellationToken);
+                if (inspectionItem == null) throw new InspectionNotFoundException(request.Id);
+                return inspectionItem;
+            },
+            cancellationToken: cancellationToken);
+
+        return inspection!;
+    }
+}

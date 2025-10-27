@@ -4,7 +4,16 @@
     <AssemblyName>AMIS.WebApi.Catalog.Application</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Purchases\Update\v1\GetUpdatePurchaseSpecs.cs" />
+    <Compile Remove="Purchases\Update\v1\PurchaseItemUpdateDto.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\..\framework\Core\Core.csproj" />
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Inspections\Events\" />
+    <Folder Include="Inspections\Specifications\" />
+    <Folder Include="Inventories\Specifications\" />
   </ItemGroup>
 </Project>

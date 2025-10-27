@@ -4,6 +4,9 @@
     <AssemblyName>AMIS.WebApi.Catalog.Domain</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="ValueObjects\ItemOperationType.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\..\framework\Core\Core.csproj" />
   </ItemGroup>
 </Project>
