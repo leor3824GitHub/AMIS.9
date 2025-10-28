@@ -5,6 +5,7 @@ using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+using System.Linq;
 
 namespace AMIS.Blazor.Client.Pages.Catalog;
 
@@ -108,7 +109,7 @@ public partial class Products_1
         string? extension = Path.GetExtension(file.Name);
 
         // Check if the file has a supported image format
-        if (!AppConstants.SupportedImageFormats.Contains(extension.ToLower()))
+        if (!AppConstants.SupportedImageFormats.Any(f => string.Equals(f, extension, StringComparison.OrdinalIgnoreCase)))
         {
             Snackbar.Add("Image format not supported.", Severity.Error);
             return;
@@ -134,7 +135,7 @@ public partial class Products_1
 
             // Read the file's bytes into a buffer
             byte[] buffer = new byte[imageFile.Size];
-            await imageFile.OpenReadStream(AppConstants.MaxAllowedSize).ReadAsync(buffer);
+            await imageFile.OpenReadStream(AppConstants.MaxAllowedSize).ReadExactlyAsync(buffer);
             string? base64String = $"data:{AppConstants.StandardImageFormat};base64,{Convert.ToBase64String(buffer)}";
             // Convert the image bytes to a Base64 string
             Context.AddEditModal.RequestModel.Image = new FileUploadCommand() { Name = fileName, Data = base64String, Extension = extension };

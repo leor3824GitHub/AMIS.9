@@ -11,7 +11,7 @@
     }
     else
     {
-    <MudTable Items="Inputs" Hover="true" Dense="true" RowClick="OnRowClick">
+    <MudTable Items="Inputs" Hover="true">
             <HeaderContent>
                 <MudTh>Product</MudTh>
                 <MudTh class="text-end">Ordered</MudTh>
@@ -27,7 +27,7 @@
                             <MudText>@(product?.Name ?? "-")</MudText>
                             @if (context.AlreadyInspected)
                             {
-                                <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" Dense>Already inspected</MudChip>
+                                <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">Already inspected</MudChip>
                             }
                         </MudStack>
                     </div>
@@ -36,7 +36,7 @@
                     <div style="cursor:pointer" @onclick="@(() => SelectItem(context))">@context.OrderedQty</div>
                 </MudTd>
                 <MudTd>
-                    <MudCheckBox T="bool?" Checked="@context.IsInspected" CheckedChanged="@((bool? v) => OnInspectedChanged(context, v))" Disabled="@context.AlreadyInspected" />
+                    <MudCheckBox T="bool?" Value="context.IsInspected" ValueChanged="@((bool? v) => OnInspectedChanged(context, v))" Disabled="@context.AlreadyInspected" />
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -56,15 +56,15 @@
                 <MudForm @ref="_form">
                     <MudStack Spacing="2">
                         <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.OrderedQty" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Inspected" Label="Qty Inspected" Disabled="@_selectedItem.AlreadyInspected" />
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Passed" Label="Qty Passed" Disabled="@_selectedItem.AlreadyInspected" />
-                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Dense="true" Style="width: 120px;" Placeholder="Failed" Label="Qty Failed" Disabled="@_selectedItem.AlreadyInspected" />
-                            <MudSelect T="ClientApi.InspectionItemStatus" @bind-Value="_selectedItem.Status" Dense="true" Label="Status" Style="min-width: 200px;" Disabled="@_selectedItem.AlreadyInspected" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyInspected" ValueChanged="@(v => OnQtyInspectedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.OrderedQty" Immediate="true" Style="width: 120px;" Placeholder="Inspected" Label="Qty Inspected" Disabled="@_selectedItem.AlreadyInspected" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyPassed" ValueChanged="@(v => OnQtyPassedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Style="width: 120px;" Placeholder="Passed" Label="Qty Passed" Disabled="@_selectedItem.AlreadyInspected" />
+                            <MudNumericField T="int" HideSpinButtons="true" Value="@_selectedItem.QtyFailed" ValueChanged="@(v => OnQtyFailedChanged(_selectedItem, v))" Min="0" Max="@_selectedItem.QtyInspected" Immediate="true" Style="width: 120px;" Placeholder="Failed" Label="Qty Failed" Disabled="@_selectedItem.AlreadyInspected" />
+                            <MudSelect T="ClientApi.InspectionItemStatus" @bind-Value="_selectedItem.Status" Label="Status" Style="min-width: 200px;" Disabled="@_selectedItem.AlreadyInspected" />
                         </MudStack>
 
-                        <MudTextField T="string" @bind-Value="_selectedItem.Remarks" Dense="true" Placeholder="Remarks" Label="Remarks" />
+                        <MudTextField T="string" @bind-Value="_selectedItem.Remarks" Placeholder="Remarks" Label="Remarks" />
 
-                        <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense="true">
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Text">
                             Single-shot is enforced: if an inspection already exists for a purchase item, you can’t add another here. Tip: Click a row to edit details.
                         </MudAlert>
 
@@ -179,17 +179,48 @@
         // Mark rows that already have an inspection item recorded (single-shot)
         try
         {
+            var tasks = new List<Task>();
             foreach (var input in Inputs)
             {
-                var search = new SearchInspectionItemsCommand
+                tasks.Add(Task.Run(async () =>
                 {
-                    PageNumber = 1,
-                    PageSize = 1,
-                    PurchaseItemId = input.PurchaseItemId
-                };
-                var result = await ApiClient.SearchInspectionItemsEndpointAsync("1", search);
-                input.AlreadyInspected = (result?.Items?.Count ?? 0) > 0;
+                    var search = new SearchInspectionItemsCommand
+                    {
+                        PageNumber = 1,
+                        PageSize = 1,
+                        PurchaseItemId = input.PurchaseItemId
+                    };
+                    var result = await ApiClient.SearchInspectionItemsEndpointAsync("1", search);
+                    var existing = result?.Items?.FirstOrDefault();
+                    if (existing is not null)
+                    {
+                        // Flag as already inspected and hydrate details so the read-only panel shows real values
+                        input.AlreadyInspected = true;
+                        input.IsInspected = existing.QtyInspected > 0;
+                        input.QtyInspected = existing.QtyInspected;
+                        input.QtyPassed = existing.QtyPassed;
+                        input.QtyFailed = existing.QtyFailed;
+                        input.Status = existing.InspectionItemStatus;
+                        input.Remarks = existing.Remarks;
+
+                        // Optional fallback: if persisted values are all zero, display a sensible default for clarity
+                        if (input.QtyInspected == 0 && input.QtyPassed == 0 && input.QtyFailed == 0)
+                        {
+                            input.QtyInspected = input.OrderedQty;
+                            input.QtyPassed = input.QtyInspected;
+                            input.QtyFailed = 0;
+                            input.Status = ClientApi.InspectionItemStatus.Passed;
+                            input.IsInspected = input.QtyInspected > 0;
+                            input.Remarks = string.IsNullOrWhiteSpace(input.Remarks) ? "Inspected" : input.Remarks;
+                        }
+                    }
+                    else
+                    {
+                        input.AlreadyInspected = false;
+                    }
+                }));
             }
+            await Task.WhenAll(tasks);
             StateHasChanged();
         }
         catch
@@ -198,15 +229,21 @@
         }
     }
 
-    private void OnRowClick(TableRowClickEventArgs<InspectionItemInput> args)
-    {
-        _selectedItem = args.Item;
-        StateHasChanged();
-    }
+    // Row selection is handled via explicit click handlers on cells
 
     private void SelectItem(InspectionItemInput item)
     {
         _selectedItem = item;
+        // Auto-fill on selection for fresh (not yet inspected) rows to speed up data entry
+        if (!item.AlreadyInspected && !item.IsInspected && item.QtyInspected == 0 && item.QtyPassed == 0 && item.QtyFailed == 0)
+        {
+            item.QtyInspected = item.OrderedQty;
+            item.QtyPassed = item.QtyInspected;
+            item.QtyFailed = 0;
+            item.Status = ClientApi.InspectionItemStatus.Passed;
+            item.IsInspected = item.QtyInspected > 0;
+            item.Remarks = string.IsNullOrWhiteSpace(item.Remarks) ? "Inspected" : item.Remarks;
+        }
         StateHasChanged();
     }
 

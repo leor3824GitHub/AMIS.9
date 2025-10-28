@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+using System.Linq;
 
 namespace AMIS.Blazor.Client.Pages.Identity.Account;
 
@@ -45,7 +46,7 @@ public partial class Profile
 
         if (_profileModel.FirstName?.Length > 0)
         {
-            _firstLetterOfName = _profileModel.FirstName.ToUpper().FirstOrDefault();
+            _firstLetterOfName = _profileModel.FirstName.ToUpperInvariant().FirstOrDefault();
         }
     }
 
@@ -65,7 +66,7 @@ public partial class Profile
         if (file is not null)
         {
             string? extension = Path.GetExtension(file.Name);
-            if (!AppConstants.SupportedImageFormats.Contains(extension.ToLower()))
+            if (!AppConstants.SupportedImageFormats.Any(f => string.Equals(f, extension, StringComparison.OrdinalIgnoreCase)))
             {
                 Toast.Add("Image Format Not Supported.", Severity.Error);
                 return;
@@ -75,7 +76,7 @@ public partial class Profile
             fileName = fileName[..Math.Min(fileName.Length, 90)];
             var imageFile = await file.RequestImageFileAsync(AppConstants.StandardImageFormat, AppConstants.MaxImageWidth, AppConstants.MaxImageHeight);
             byte[]? buffer = new byte[imageFile.Size];
-            await imageFile.OpenReadStream(AppConstants.MaxAllowedSize).ReadAsync(buffer);
+            await imageFile.OpenReadStream(AppConstants.MaxAllowedSize).ReadExactlyAsync(buffer);
             string? base64String = $"data:{AppConstants.StandardImageFormat};base64,{Convert.ToBase64String(buffer)}";
             _profileModel.Image = new FileUploadCommand() { Name = fileName, Data = base64String, Extension = extension };
 

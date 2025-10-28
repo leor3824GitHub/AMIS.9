@@ -11,5 +11,10 @@ public class SearchInspectionItemSpecs : EntitiesByPaginationFilterSpec<Inspecti
         : base(command) =>
         Query
             .Include(p => p.Inspection)
-            .Where(p => p.InspectionId == command.InspectionId!.Value, command.InspectionId.HasValue);
+            // Filter by InspectionId when provided
+            .Where(p => p.InspectionId == command.InspectionId!.Value, command.InspectionId.HasValue)
+            // Filter by PurchaseItemId when provided
+            .Where(p => p.PurchaseItemId == command.PurchaseItemId!.Value, command.PurchaseItemId.HasValue)
+            // Always order newest first to support deterministic "latest-only" lookups with PageSize = 1
+            .OrderByDescending(p => p.Created);
 }

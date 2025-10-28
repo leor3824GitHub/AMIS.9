@@ -15,7 +15,9 @@ public partial class InspectionDialog
 
     [CascadingParameter]
     private IMudDialogInstance MudDialog { get; set; } = default!;
-    [Parameter] public UpdateInspectionCommand Model { get; set; }
+    [EditorRequired]
+    [Parameter]
+    public required UpdateInspectionCommand Model { get; set; } = default!;
     [Parameter] public EventCallback OnCancel { get; set; }
    
     [Parameter] public Action? Refresh { get; set; }
@@ -27,6 +29,8 @@ public partial class InspectionDialog
     private FshValidation? _customValidation;
 
     private DateTime? _inspectionDate;
+    private bool _isSaving;
+    private bool _inspectorAutoFilled;
 
     private InspectionItemsEditor? _itemsEditor;
     private List<PurchaseItemResponse> _poItems = new();
@@ -59,9 +63,10 @@ public partial class InspectionDialog
         if (Model?.InspectionRequestId != null && Model.InspectorId == null)
         {
             var req = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
-            if (req != null)
+            if (req?.InspectorId != null)
             {
                 Model.InspectorId = req.InspectorId;
+                _inspectorAutoFilled = true;
             }
         }
     }
@@ -72,7 +77,15 @@ public partial class InspectionDialog
 
         // When user changes the request, auto-fill inspector from that request
         var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == requestId);
-        Model.InspectorId = selectedReq?.InspectorId;
+        if (selectedReq?.InspectorId != null)
+        {
+            Model.InspectorId = selectedReq.InspectorId;
+            _inspectorAutoFilled = true;
+        }
+        else
+        {
+            _inspectorAutoFilled = false;
+        }
 
         SyncPoItems();
         StateHasChanged();
@@ -90,9 +103,17 @@ public partial class InspectionDialog
 
     private async Task LoadProducts()
     {
-        // Fetch products for display names
-        var resp = await InspectionClient.SearchProductsEndpointAsync("1", new SearchProductsCommand { PageNumber = 1, PageSize = 1000 });
-        _products = resp?.Items?.ToList() ?? new List<ProductResponse>();
+        try
+        {
+            // Fetch products for display names
+            var resp = await InspectionClient.SearchProductsEndpointAsync("1", new SearchProductsCommand { PageNumber = 1, PageSize = 1000 });
+            _products = resp?.Items?.ToList() ?? new List<ProductResponse>();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load products: {ex.Message}", Severity.Error);
+            _products = new List<ProductResponse>();
+        }
     }
 
     private void OnDateChanged(DateTime? d)
@@ -106,32 +127,52 @@ public partial class InspectionDialog
 
     private async Task OnValidSubmit()
     {
-        // ensure date is set
-        if (!_inspectionDate.HasValue)
-        {
-            Snackbar.Add("Please select an Inspection Date.", Severity.Error);
-            return;
-        }
-        Model.InspectionDate = _inspectionDate.Value;
+        // Set saving state
+        _isSaving = true;
+        StateHasChanged();
 
-        // ensure InspectorId and Request are set
-        if (Model.InspectorId is null || Model.InspectionRequestId is null)
+        try
         {
-            Snackbar.Add("Please select an Inspector and Inspection Request.", Severity.Error);
-            return;
-        }
+            // ensure date is set
+            if (!_inspectionDate.HasValue)
+            {
+                Snackbar.Add("Please select an Inspection Date.", Severity.Error);
+                return;
+            }
+            Model.InspectionDate = _inspectionDate.Value;
 
-        // validate item inputs
-        if (_itemsEditor is null || !_itemsEditor.Validate())
-        {
-            Snackbar.Add("Please check item quantities and status.", Severity.Error);
-            return;
-        }
+            // ensure InspectorId and Request are set
+            if (Model.InspectorId is null || Model.InspectionRequestId is null)
+            {
+                Snackbar.Add("Please select an Inspector and Inspection Request.", Severity.Error);
+                return;
+            }
 
-        Snackbar.Add(IsCreate ? "Creating inspection..." : "Updating inspection...", Severity.Info);
+            // validate item inputs
+            if (_itemsEditor is null || !_itemsEditor.Validate())
+            {
+                Snackbar.Add("Please check item quantities and status.", Severity.Error);
+                return;
+            }
 
-        if (IsCreate)
-        {
+            // Validate that at least one item exists
+            if (_itemsEditor.Inputs?.Count == 0)
+            {
+                Snackbar.Add("Please add at least one inspection item.", Severity.Warning);
+                return;
+            }
+
+            // Validate that at least one item is inspected
+            if (_itemsEditor.Inputs == null || _itemsEditor.Inputs.All(i => i.QtyInspected == 0))
+            {
+                Snackbar.Add("Please inspect at least one item.", Severity.Warning);
+                return;
+            }
+
+            Snackbar.Add(IsCreate ? "Creating inspection..." : "Updating inspection...", Severity.Info);
+
+            if (IsCreate)
+            {
             var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
             var purchaseId = selectedReq?.PurchaseId ?? Guid.Empty;
 
@@ -154,7 +195,8 @@ public partial class InspectionDialog
             if (response?.Id != null && response.Id.Value != Guid.Empty)
             {
                 // Create inspection items from user inputs
-                foreach (var input in _itemsEditor.Inputs)
+                // Skip items that are already inspected (single-shot) and items with zero inspected qty
+                foreach (var input in _itemsEditor.Inputs.Where(i => !i.AlreadyInspected && i.QtyInspected > 0))
                 {
                     var createItem = new CreateInspectionItemCommand
                     {
@@ -192,9 +234,9 @@ public partial class InspectionDialog
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }
-        }
-        else
-        {
+            }
+            else
+            {
             var response = await ApiHelper.ExecuteCallGuardedAsync(
                 () => InspectionClient.UpdateInspectionEndpointAsync("1", Model.Id, Model),
                 Snackbar,
@@ -218,6 +260,12 @@ public partial class InspectionDialog
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
             }
+            }
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
         }
     }
 
@@ -270,7 +318,7 @@ public partial class InspectionDialog
             // Build quick lookup from purchase item id to its details
             var poMap = _poItems.Where(pi => pi.Id.HasValue).ToDictionary(pi => pi.Id!.Value, pi => pi);
 
-            foreach (var input in _itemsEditor.Inputs)
+            foreach (var input in _itemsEditor.Inputs.Where(i => i.QtyPassed > 0))
             {
                 if (input.QtyPassed <= 0) continue;
                 if (!poMap.TryGetValue(input.PurchaseItemId, out var pi)) continue;

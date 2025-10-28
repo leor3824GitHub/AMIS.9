@@ -19,7 +19,9 @@
                     <MudCard Outlined style="margin: 10px !important;">
                         <MudCardHeader>
                             <CardHeaderContent>
-                                <MudAlert Severity="Severity.Success" Typo="Typo.body1">Details for Audit Trail with Id : <strong>@context.Id</strong></MudAlert>
+                                <MudAlert Severity="Severity.Success">
+                                    <MudText Typo="Typo.body1">Details for Audit Trail with Id : <strong>@context.Id</strong></MudText>
+                                </MudAlert>
                             </CardHeaderContent>
                         </MudCardHeader>
                         <MudCardContent>

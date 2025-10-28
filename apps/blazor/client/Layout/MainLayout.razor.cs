@@ -57,7 +57,7 @@ public partial class MainLayout
     {
         _drawerOpen = await ClientPreferences.ToggleDrawerAsync();
     }
-    private void Logout()
+    private async Task Logout()
     {
         var parameters = new DialogParameters
         {
@@ -67,7 +67,7 @@ public partial class MainLayout
             };
 
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
-        DialogService.Show<Components.Dialogs.Logout>("Logout", parameters, options);
+        _ = await DialogService.ShowAsync<Components.Dialogs.Logout>("Logout", parameters, options);
     }
 
     private void Profile()

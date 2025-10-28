@@ -92,7 +92,7 @@
                                                 <MudText>@item.ProductName</MudText>
                                                 @if (item.AlreadyAccepted)
                                                 {
-                                                    <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined" Dense>Already accepted</MudChip>
+                                                    <MudChip T="string" Color="Color.Secondary" Variant="Variant.Outlined">Already accepted</MudChip>
                                                 }
                                             </MudStack>
                                         </MudTd>
@@ -135,13 +135,13 @@
 
                                 @if (!AllowItemEditing)
                                 {
-                                    <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense>
+                                    <MudAlert Severity="Severity.Info" Variant="Variant.Text">
                                         Existing acceptance items are read-only. Update quantities by editing individual acceptance items if needed.
                                     </MudAlert>
                                 }
                                 else
                                 {
-                                    <MudAlert Severity="Severity.Info" Variant="Variant.Text" Dense>
+                                    <MudAlert Severity="Severity.Info" Variant="Variant.Text">
                                         Single-shot is enforced: if an acceptance already exists for a purchase item, you can’t add another.
                                     </MudAlert>
                                 }

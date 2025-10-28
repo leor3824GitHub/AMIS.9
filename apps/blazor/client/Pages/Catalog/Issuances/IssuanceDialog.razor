@@ -17,7 +17,6 @@
                                    @bind-Value="SelectedEmployeeId" 
                                    Required="true" 
                                    Disabled="@(Employees.Count == 0)"
-                                   Dense="true"
                                    Margin="Margin.Dense"
                                    AdornmentIcon="@Icons.Material.Filled.Person"
                                    Adornment="Adornment.Start">
@@ -60,14 +59,13 @@
                                        Variant="Variant.Outlined"
                                        Date="@_issuanceDate"
                                        DateChanged="OnDateChanged"
-                                       Dense="true"
                                        Margin="Margin.Dense"
                                        AdornmentIcon="@Icons.Material.Filled.CalendarToday"
                                        Adornment="Adornment.Start"
                                        Editable />
 
                         <MudPaper Class="pa-3 mt-2" Elevation="0" Style="background-color: var(--mud-palette-background-grey);">
-                            <MudGrid Spacing="2" AlignItems="AlignItems.Center">
+                            <MudGrid Spacing="2">
                                 <MudItem xs="12" sm="6">
                                     <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
                                         <MudIcon Icon="@(Model.IsClosed ? Icons.Material.Filled.Lock : Icons.Material.Filled.LockOpen)" 
@@ -76,8 +74,7 @@
                                             <MudText Typo="Typo.caption" Color="Color.Default">Status</MudText>
                                             <MudChip T="string" 
                                                      Color="@(Model.IsClosed ? Color.Success : Color.Warning)" 
-                                                     Variant="Variant.Filled" 
-                                                     Size="Size.Small">
+                                                     Variant="Variant.Filled">
                                                 @(Model.IsClosed ? "Closed" : "Open")
                                             </MudChip>
                                         </MudStack>

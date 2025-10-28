@@ -5,6 +5,7 @@ using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
+using System.Linq;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Products;
 public partial class ProductDialog
@@ -90,7 +91,7 @@ public partial class ProductDialog
         string? extension = Path.GetExtension(e.File.Name);
 
         // Check if the e.File has a supported image format
-        if (!AppConstants.SupportedImageFormats.Contains(extension.ToLower()))
+        if (!AppConstants.SupportedImageFormats.Any(f => string.Equals(f, extension, StringComparison.OrdinalIgnoreCase)))
         {
             Snackbar.Add("Image format not supported.", Severity.Error);
             return;

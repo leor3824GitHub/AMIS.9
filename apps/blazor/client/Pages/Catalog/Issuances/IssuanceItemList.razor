@@ -19,8 +19,7 @@
             @if (item == EditingItem)
             {
                 <MudTd Style="width: 250px;">
-                    <MudSelect T="Guid ?" @bind-Value="item.ProductId" Dense Size="Size.Small"
-                        Variant="Variant.Outlined">
+                    <MudSelect T="Guid ?" @bind-Value="item.ProductId" Variant="Variant.Outlined">
                         @foreach (var product in Products)
                         {
                             <MudSelectItem T="Guid ?" Value="product.Id"
@@ -35,11 +34,11 @@
                 </MudTd>
                 <MudTd Style="width: 80px;">
                     <MudNumericField HideSpinButtons T="int" @bind-Value="item.Qty" Min="1"
-                        Max="@GetBalanceFor(item.ProductId)" Variant="Variant.Outlined" Size="Size.Small" />
+                        Max="@GetBalanceFor(item.ProductId)" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd Style="width: 120px;">
                     <MudTextField T="string" Value="@GetAvePriceFor(item.ProductId).ToString("N2")" ReadOnly
-                        Variant="Variant.Outlined" Size="Size.Small" />
+                        Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
                     @{
@@ -48,7 +47,7 @@
                     <MudText>@newAmount.ToString("N2")</MudText>
                 </MudTd>
                 <MudTd>
-                    <MudTextField T="string" @bind-Value="item.Status" Variant="Variant.Outlined" Size="Size.Small" />
+                    <MudTextField T="string" @bind-Value="item.Status" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd class="text-center">
                     <div class="d-flex justify-center gap-2">
@@ -100,7 +99,7 @@
 
         <FooterContent>
             <MudTd Style="width: 250px;">
-                <MudSelect T="Guid ?" @bind-Value="ProductId" Dense Size="Size.Small"
+                <MudSelect T="Guid ?" @bind-Value="ProductId"
                     Placeholder="Select Product Here" Variant="Variant.Outlined">
                     @foreach (var product in Products)
                     {
@@ -115,22 +114,22 @@
             @if (ProductId != null)
             {
                 <MudTd Style="width: 120px;">
-                    <MudText T="string">@GetBalanceFor(ProductId).ToString("N0")</MudText>
+                    <MudText>@GetBalanceFor(ProductId).ToString("N0")</MudText>
                 </MudTd>
                 <MudTd Style="width: 100px;">
                     <MudNumericField HideSpinButtons T="int" @bind-Value="Qty" Min="1" Max="@GetBalanceFor(ProductId)"
-                        Variant="Variant.Outlined" Size="Size.Small" />
+                        Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd Style="width: 140px;">
                     <MudTextField T="string" Value="@GetAvePriceFor(ProductId).ToString("N2")" ReadOnly
-                        Variant="Variant.Outlined" Size="Size.Small" />
+                        Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
                     @{
                         var newAmount = Qty * GetAvePriceFor(ProductId);
                     }
                     <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute"
-                        Variant="Variant.Outlined" Size="Size.Small" />
+                        Variant="Variant.Outlined" />
                 </MudTd>               
 
                 <MudTd class="text-center">

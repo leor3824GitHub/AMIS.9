@@ -248,11 +248,11 @@ public partial class EntityTable<TEntity, TId, TRequest>
         parameters.Add(nameof(AddEditModal<TRequest>.Title), title);
         parameters.Add(nameof(AddEditModal<TRequest>.SuccessMessage), successMessage);
 
-        var dialog = DialogService.ShowModal<AddEditModal<TRequest>>(parameters);
+    var dialog = await DialogService.ShowModalAsync<AddEditModal<TRequest>>(parameters);
 
-        Context.SetAddEditModalRef(dialog);
+    Context.SetAddEditModalRef(dialog);
 
-        var result = await dialog.Result;
+    var result = await dialog.Result;
 
         if (!result!.Canceled)
         {
@@ -271,8 +271,8 @@ public partial class EntityTable<TEntity, TId, TRequest>
             { nameof(DeleteConfirmation.ContentText), string.Format(deleteContent, Context.EntityName, id) }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true, BackdropClick = false };
-        var dialog = DialogService.Show<DeleteConfirmation>("Delete", parameters, options);
-        var result = await dialog.Result;
+    var dialog = await DialogService.ShowAsync<DeleteConfirmation>("Delete", parameters, options);
+    var result = await dialog.Result;
         if (!result!.Canceled)
         {
             _ = Context.DeleteFunc ?? throw new InvalidOperationException("DeleteFunc can't be null!");

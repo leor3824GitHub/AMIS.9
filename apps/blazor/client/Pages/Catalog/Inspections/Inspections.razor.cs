@@ -197,7 +197,7 @@ public partial class Inspections
         var dialog = await DialogService.ShowAsync<InspectionDialog>(title, parameters, options);
         var state = await dialog.Result;
 
-        if (!state.Canceled)
+        if (state is { Canceled: false })
         {
             await _table.ReloadServerData();
             _selectedItems.Clear();
@@ -246,7 +246,7 @@ public partial class Inspections
         {
             await ApiHelper.ExecuteCallGuardedAsync(
                 () => inspectionclient.DeleteInspectionEndpointAsync("1", item.Id),
-                Snackbar);
+                Snackbar!);
 
             await _table.ReloadServerData();
         }
@@ -279,7 +279,7 @@ public partial class Inspections
 
                 await ApiHelper.ExecuteCallGuardedAsync(
                     () => inspectionclient.DeleteInspectionEndpointAsync("1", item.Id),
-                    Snackbar);
+                    Snackbar!);
             }
 
             _selectedItems.Clear();
@@ -369,7 +369,7 @@ public partial class Inspections
         return !_hasAcceptanceCache.TryGetValue(inspection.Id, out var has) || !has;
     }
 
-    private string RowStyle(InspectionResponse inspection, int index)
+    private static string RowStyle(InspectionResponse inspection, int index)
     {
         return inspection.Status switch
         {
@@ -381,7 +381,7 @@ public partial class Inspections
         };
     }
 
-    private string GetRelativeDateText(DateTime date)
+    private static string GetRelativeDateText(DateTime date)
     {
         var today = DateTime.Today;
         var days = (today - date.Date).Days;
@@ -397,19 +397,19 @@ public partial class Inspections
         };
     }
 
-    private string GetEmployeeInitials(string? name)
+    private static string GetEmployeeInitials(string? name)
     {
         if (string.IsNullOrWhiteSpace(name))
             return "?";
 
         var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 1)
-            return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+            return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
 
-        return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
 
-    private string GetStatusIcon(InspectionStatus status)
+    private static string GetStatusIcon(InspectionStatus status)
     {
         return status switch
         {

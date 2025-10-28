@@ -300,9 +300,9 @@ public partial class InspectionRequests
 
         var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
         if (parts.Length == 1)
-            return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpper();
+            return parts[0].Substring(0, Math.Min(2, parts[0].Length)).ToUpperInvariant();
 
-        return $"{parts[0][0]}{parts[^1][0]}".ToUpper();
+        return $"{parts[0][0]}{parts[^1][0]}".ToUpperInvariant();
     }
 
     private Color GetStatusColor(InspectionRequestStatus status)

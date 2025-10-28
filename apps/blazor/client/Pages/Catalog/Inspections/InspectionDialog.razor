@@ -6,6 +6,29 @@
             <ValidationSummary />
 
             <MudGrid Spacing="2">
+                <!-- PO Info Display -->
+                @if (Model?.InspectionRequestId != null)
+                {
+                    var req = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
+                    if (req?.Purchase != null)
+                    {
+                        <MudItem xs="12">
+                            <MudAlert Severity="Severity.Info" Dense="true" Class="mb-2" Icon="@Icons.Material.Filled.Receipt">
+                                @{
+                                    var poDate = req.Purchase.PurchaseDate?.ToString("MMM dd, yyyy");
+                                    var poIdShort = req.Purchase.Id?.ToString()?.Substring(0, 8);
+                                }
+                                <strong>PO @poDate</strong> (@poIdShort) -
+                                @req.Purchase.Supplier?.Name
+                                @if (req.Purchase.Items?.Count > 0)
+                                {
+                                    <text> - @req.Purchase.Items.Count item(s)</text>
+                                }
+                            </MudAlert>
+                        </MudItem>
+                    }
+                }
+
                 <!-- Compact horizontal row: Request | Inspector | Date -->
                 <MudItem xs="12">
                     <MudStack Row="true" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
@@ -40,6 +63,7 @@
                                    Margin="Margin.Dense"
                                    Adornment="Adornment.Start"
                                    AdornmentIcon="@Icons.Material.Filled.Badge"
+                                   HelperText="@(_inspectorAutoFilled ? "Auto-filled from request" : "")"
                                    Class="input-field">
                             @foreach (var e in Employees)
                             {
@@ -52,7 +76,6 @@
                                        DateChanged="@(d => OnDateChanged(d))"
                                        Editable
                                        Variant="Variant.Outlined"
-                                       Dense="true"
                                        Margin="Margin.Dense"
                                        Adornment="Adornment.Start"
                                        AdornmentIcon="@Icons.Material.Filled.Event"
@@ -66,7 +89,6 @@
                                   Label="Remarks" 
                                   @bind-Value="Model.Remarks"
                                   Variant="Variant.Outlined"
-                                  Dense="true"
                                   Margin="Margin.Dense"
                                   Lines="3"
                                   Placeholder="Add any additional notes or observations..." />
@@ -74,6 +96,16 @@
 
                 <!-- Inspection Items Section -->
                 <MudItem xs="12">
+                    @if (_itemsEditor?.Inputs != null && _itemsEditor.Inputs.Count > 0)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                            <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" /> 
+                            @_itemsEditor.Inputs.Count item(s) • 
+                            @_itemsEditor.Inputs.Sum(i => i.QtyInspected) inspected • 
+                            @_itemsEditor.Inputs.Sum(i => i.QtyPassed) passed •
+                            @_itemsEditor.Inputs.Sum(i => i.QtyFailed) failed
+                        </MudText>
+                    }
                     <MudPaper Elevation="0" Class="pa-3" Style="background-color: rgba(0, 0, 0, 0.02);">
                         <InspectionItemsEditor @ref="_itemsEditor" PurchaseItems="_poItems" Products="_products" />
                     </MudPaper>
@@ -85,12 +117,22 @@
             <MudButton Variant="Variant.Filled" 
                        Color="Color.Primary" 
                        ButtonType="ButtonType.Submit"
+                       Disabled="@_isSaving"
                        StartIcon="@Icons.Material.Filled.Save">
-                Save Inspection
+                @if (_isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                    <text> Saving...</text>
+                }
+                else
+                {
+                    <text>Save Inspection</text>
+                }
             </MudButton>
             <MudButton Variant="Variant.Outlined" 
                        Color="Color.Secondary" 
                        OnClick="Cancel"
+                       Disabled="@_isSaving"
                        StartIcon="@Icons.Material.Filled.Cancel">
                 Cancel
             </MudButton>
