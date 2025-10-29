@@ -1,4 +1,5 @@
 ﻿using System;
+using Ardalis.Specification;
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
@@ -8,10 +9,22 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace AMIS.WebApi.Catalog.Application.Inspections.Create.v1;
 
+// Specification to load Purchase with Items
+internal sealed class PurchaseWithItemsSpec : Specification<Purchase>
+{
+    public PurchaseWithItemsSpec(Guid purchaseId)
+    {
+        Query
+            .Where(p => p.Id == purchaseId)
+            .Include(p => p.Items);
+    }
+}
+
 public sealed class CreateInspectionHandler(
     ILogger<CreateInspectionHandler> logger,
     [FromKeyedServices("catalog:inspections")] IRepository<Inspection> repository,
-    [FromKeyedServices("catalog:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepository)
+    [FromKeyedServices("catalog:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepository,
+    [FromKeyedServices("catalog:purchases")] IRepository<Purchase> purchaseRepository)
     : IRequestHandler<CreateInspectionCommand, CreateInspectionResponse>
 {
     public async Task<CreateInspectionResponse> Handle(CreateInspectionCommand request, CancellationToken cancellationToken)
@@ -57,6 +70,11 @@ public sealed class CreateInspectionHandler(
         }
 
         await repository.AddAsync(inspection, cancellationToken);
+
+        // Load purchase with items to evaluate inspection status
+        var purchaseSpec = new PurchaseWithItemsSpec(request.PurchaseId);
+        var purchase = await purchaseRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken);
+        inspection.EvaluateAndSetStatus(purchase);
 
         if (inspectionRequest.Status == InspectionRequestStatus.Assigned)
         {

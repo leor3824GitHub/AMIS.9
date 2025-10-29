@@ -154,6 +154,49 @@ public class Inspection : AuditableEntity, IAggregateRoot
         IARDocumentPath = string.IsNullOrWhiteSpace(path) ? null : path;
     }
 
+    // Auto-evaluate and set status based on inspection completion
+    public void EvaluateAndSetStatus(Purchase? purchase)
+    {
+        if (purchase is null || purchase.Items.Count == 0)
+        {
+            // If no purchase or no items, stay InProgress
+            return;
+        }
+
+        // Check if all purchase items have been fully inspected
+        bool allItemsFullyInspected = true;
+        
+        foreach (var purchaseItem in purchase.Items)
+        {
+            // Find corresponding inspection items for this purchase item
+            var inspectionItems = Items.Where(ii => ii.PurchaseItemId == purchaseItem.Id).ToList();
+            
+            if (!inspectionItems.Any())
+            {
+                // This purchase item hasn't been inspected at all
+                allItemsFullyInspected = false;
+                break;
+            }
+
+            // Sum up total inspected quantity for this purchase item
+            var totalInspectedQty = inspectionItems.Sum(ii => ii.QtyInspected);
+            
+            if (totalInspectedQty < purchaseItem.Qty)
+            {
+                // This purchase item hasn't been fully inspected
+                allItemsFullyInspected = false;
+                break;
+            }
+        }
+
+        // Set status based on evaluation
+        if (allItemsFullyInspected && Status == InspectionStatus.InProgress)
+        {
+            ChangeStatus(InspectionStatus.Completed);
+        }
+        // If not all items inspected, it stays InProgress (partial inspection)
+    }
+
     // Convenience queries
     public IEnumerable<InspectionItem> AcceptedItems() => Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation).ToList();
 

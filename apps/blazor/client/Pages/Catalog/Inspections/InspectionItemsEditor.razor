@@ -35,8 +35,8 @@
                 <MudTd Class="text-end">
                     <div style="cursor:pointer" @onclick="@(() => SelectItem(context))">@context.OrderedQty</div>
                 </MudTd>
-                <MudTd>
-                    <MudCheckBox T="bool?" Value="context.IsInspected" ValueChanged="@((bool? v) => OnInspectedChanged(context, v))" Disabled="@context.AlreadyInspected" />
+                <MudTd @onclick:stopPropagation="true">
+                    <MudCheckBox T="bool" Value="context.IsInspected" ValueChanged="@((bool v) => OnInspectedToggle(context, v))" Disabled="@context.AlreadyInspected" />
                 </MudTd>
             </RowTemplate>
         </MudTable>
@@ -247,11 +247,13 @@
         StateHasChanged();
     }
 
-    private void OnInspectedChanged(InspectionItemInput item, bool? value)
+    private void OnInspectedToggle(InspectionItemInput item, bool value)
     {
-        var v = value ?? false;
-        item.IsInspected = v;
-        if (v)
+        // Update the value first
+        item.IsInspected = value;
+        
+        // Apply side effects based on the new value
+        if (item.IsInspected)
         {
             // Default to fully passed when marked inspected
             item.QtyInspected = item.OrderedQty;
