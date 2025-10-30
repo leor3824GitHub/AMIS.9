@@ -1,20 +1,52 @@
-# This script is cross-platform, supporting all OSes that PowerShell Core/7 runs on.
+param(
+	[switch]$NoPrompt
+)
+
+# Regenerate API client using the repository-level AMIS.nswag file
+$ErrorActionPreference = 'Stop'
 
 $currentDirectory = Get-Location
-$rootDirectory = git rev-parse --show-toplevel
-$hostDirectory = Join-Path -Path $rootDirectory -ChildPath 'src/apps/blazor/client'
-$infrastructurePrj = Join-Path -Path $rootDirectory -ChildPath 'src/apps/blazor/infrastructure/Infrastructure.csproj'
+try {
+	$rootDirectory = git rev-parse --show-toplevel
+} catch {
+	Write-Error "This script must be run inside a Git repository (git not found or not a repo)."
+	exit 1
+}
 
-Write-Host "Make sure you have run the WebAPI project. `n"
-Write-Host "Press any key to continue... `n"
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+$nswagFile = Join-Path -Path $rootDirectory -ChildPath 'AMIS.nswag'
+if (-not (Test-Path $nswagFile)) {
+	Write-Error "Could not find AMIS.nswag at $nswagFile"
+	exit 1
+}
 
-Set-Location -Path $hostDirectory
-Write-Host "Host Directory is $hostDirectory `n"
+if (-not $NoPrompt) {
+	Write-Host "Make sure the WebAPI is running (see $($rootDirectory)\api\server)." -ForegroundColor Yellow
+	Write-Host "Press any key to continue...`n"
+	$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+}
 
-<# Run command #>
-dotnet build -t:NSwag $infrastructurePrj
+# Ensure local dotnet tool manifest exists
+if (-not (Test-Path (Join-Path $rootDirectory '.config\dotnet-tools.json'))) {
+	dotnet new tool-manifest --force | Out-Null
+}
 
-Set-Location -Path $currentDirectory
-Write-Host -NoNewLine 'NSwag Regenerated. Press any key to continue...';
-$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+# Ensure NSwag is installed as local tool
+$toolList = dotnet tool list | Out-String
+if ($toolList -notmatch 'nswag') {
+	dotnet tool install NSwag.ConsoleCore | Out-Null
+}
+
+Push-Location $rootDirectory
+try {
+	Write-Host "Running NSwag with $nswagFile ..." -ForegroundColor Cyan
+	dotnet tool run nswag run $nswagFile
+	Write-Host "NSwag client generation completed." -ForegroundColor Green
+}
+finally {
+	Pop-Location
+}
+
+if (-not $NoPrompt) {
+	Write-Host -NoNewLine 'Done. Press any key to exit...';
+	$null = $Host.UI.RawUI.ReadKey('NoEcho,IncludeKeyDown');
+}
