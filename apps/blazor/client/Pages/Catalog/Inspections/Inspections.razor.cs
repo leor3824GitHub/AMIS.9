@@ -184,13 +184,14 @@ public partial class Inspections
         return new GridData<InspectionResponse> { TotalItems = _totalItems, Items = _entityList };
     }
 
-    private async Task ShowEditFormDialog(string title, UpdateInspectionCommand command, bool IsCreate, List<InspectionRequestResponse> inspectionrequests)
+    private async Task ShowEditFormDialog(string title, UpdateInspectionCommand command, bool IsCreate, List<InspectionRequestResponse> inspectionrequests, bool isReadOnly = false)
     {
         var parameters = new DialogParameters
         {
             { nameof(InspectionDialog.Model), command },
             { nameof(InspectionDialog.IsCreate), IsCreate },
             { nameof(InspectionDialog.InspectionRequests), inspectionrequests },
+            { nameof(InspectionDialog.IsReadOnly), isReadOnly },
             { nameof(InspectionDialog.Employees), _employees }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
@@ -223,7 +224,8 @@ public partial class Inspections
         }
 
         var model = item.Adapt<UpdateInspectionCommand>();
-        await ShowEditFormDialog("Edit inspection", model, false, _inspectionrequests);
+    // Only InProgress inspections are editable, see CanEdit
+    await ShowEditFormDialog("Edit inspection", model, false, _inspectionrequests, isReadOnly: false);
     }
 
     private async Task OnDelete(InspectionResponse item)
@@ -296,7 +298,7 @@ public partial class Inspections
             InspectionRequestId = null,
             Remarks = null
         };
-        await ShowEditFormDialog("Create new inspection", model, true, _inspectionrequests);
+    await ShowEditFormDialog("Create new inspection", model, true, _inspectionrequests, isReadOnly: false);
     }
 
     private async Task OnApprove(InspectionResponse item)
@@ -304,7 +306,7 @@ public partial class Inspections
         try
         {
             await inspectionclient.ApproveInspectionEndpointAsync("1", item.Id);
-            Snackbar?.Add("Inspection approved", Severity.Success);
+            Snackbar?.Add("Inspection approved. Inventory updated.", Severity.Success);
             await _table.ReloadServerData();
         }
         catch (Exception ex)

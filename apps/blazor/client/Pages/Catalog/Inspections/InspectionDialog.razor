@@ -107,7 +107,7 @@
                         </MudText>
                     }
                     <MudPaper Elevation="0" Class="pa-3" Style="background-color: rgba(0, 0, 0, 0.02);">
-                        <InspectionItemsEditor @ref="_itemsEditor" PurchaseItems="_poItems" Products="_products" />
+                        <InspectionItemsEditor @ref="_itemsEditor" PurchaseItems="_poItems" Products="_products" ReadOnly="@IsReadOnly" />
                     </MudPaper>
                 </MudItem>
             </MudGrid>
@@ -117,7 +117,7 @@
             <MudButton Variant="Variant.Filled" 
                        Color="Color.Primary" 
                        ButtonType="ButtonType.Submit"
-                       Disabled="@_isSaving"
+                       Disabled="@(_isSaving || IsReadOnly)"
                        StartIcon="@Icons.Material.Filled.Save">
                 @if (_isSaving)
                 {

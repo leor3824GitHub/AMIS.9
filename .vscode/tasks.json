@@ -1,0 +1,29 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "build-debug",
+			"type": "shell",
+			"command": "dotnet build e:\\AMIS.9\\AMIS.9.sln --configuration Debug",
+			"group": "build"
+		},
+		{
+			"label": "test-debug",
+			"type": "shell",
+			"command": "dotnet test e:\\AMIS.9\\TestProject.XUnit\\TestProject.XUnit.csproj --configuration Debug --no-build",
+			"group": "test"
+		},
+		{
+			"label": "build-debug",
+			"type": "shell",
+			"command": "dotnet build e:\\AMIS.9\\AMIS.9.sln --configuration Debug",
+			"group": "build"
+		},
+		{
+			"label": "test-debug",
+			"type": "shell",
+			"command": "dotnet test e:\\AMIS.9\\TestProject.XUnit\\TestProject.XUnit.csproj --configuration Debug --no-build",
+			"group": "test"
+		}
+	]
+}

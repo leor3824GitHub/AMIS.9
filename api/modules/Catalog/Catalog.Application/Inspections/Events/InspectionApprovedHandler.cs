@@ -28,7 +28,7 @@ public sealed class InspectionApprovedHandler : INotificationHandler<InspectionA
         [FromKeyedServices("catalog:inspections")] IReadRepository<Inspection> inspectionReadRepo,
         [FromKeyedServices("catalog:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepo,
         [FromKeyedServices("catalog:inventories")] IRepository<Inventory> inventoryRepo,
-        [FromKeyedServices("catalog:inventoryTransactions")] IRepository<InventoryTransaction> inventoryTxnRepo,
+    [FromKeyedServices("catalog:inventory-transactions")] IRepository<InventoryTransaction> inventoryTxnRepo,
         ILogger<InspectionApprovedHandler> logger)
     {
         _inspectionReadRepo = inspectionReadRepo ?? throw new ArgumentNullException(nameof(inspectionReadRepo));

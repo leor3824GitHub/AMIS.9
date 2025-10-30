@@ -22,6 +22,7 @@ public partial class InspectionDialog
    
     [Parameter] public Action? Refresh { get; set; }
     [Parameter] public bool IsCreate { get; set; } = false;
+    [Parameter] public bool IsReadOnly { get; set; } = false;
     [Parameter] public List<InspectionRequestResponse> InspectionRequests { get; set; } = new();
     [Parameter] public List<EmployeeResponse> Employees { get; set; } = new();
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
@@ -127,6 +128,12 @@ public partial class InspectionDialog
 
     private async Task OnValidSubmit()
     {
+        if (IsReadOnly)
+        {
+            // No-op in read-only mode
+            Snackbar.Add("This inspection is read-only.", Severity.Info);
+            return;
+        }
         // Set saving state
         _isSaving = true;
         StateHasChanged();
@@ -216,8 +223,8 @@ public partial class InspectionDialog
                     );
                 }
 
-                // After creating items, update inventory balances for accepted quantities
-                await UpdateInventoryForAcceptedItemsAsync();
+                // Inventory updates are now handled server-side upon approval via domain events.
+                // No client-side inventory mutation here to avoid duplication.
 
                 // Determine request status: Failed if any item has failures; otherwise Completed
                 var requestStatus = ResolveRequestStatusFromEditor();
@@ -309,69 +316,7 @@ public partial class InspectionDialog
         }
     }
 
-    private async Task UpdateInventoryForAcceptedItemsAsync()
-    {
-        try
-        {
-            if (_itemsEditor is null || _poItems.Count == 0) return;
-
-            // Build quick lookup from purchase item id to its details
-            var poMap = _poItems.Where(pi => pi.Id.HasValue).ToDictionary(pi => pi.Id!.Value, pi => pi);
-
-            foreach (var input in _itemsEditor.Inputs.Where(i => i.QtyPassed > 0))
-            {
-                if (input.QtyPassed <= 0) continue;
-                if (!poMap.TryGetValue(input.PurchaseItemId, out var pi)) continue;
-
-                var productId = pi.ProductId;
-                var qtyToAdd = input.QtyPassed;
-                var unitPrice = pi.UnitPrice; // double per NSwag client
-
-                // find existing inventory for product
-                var invList = await InspectionClient.SearchInventoriesEndpointAsync("1", new SearchInventoriesCommand { ProductId = productId, PageNumber = 1, PageSize = 1 });
-                var existing = invList?.Items?.FirstOrDefault();
-
-                if (existing == null || existing.Id == Guid.Empty)
-                {
-                    // create new inventory
-                    await ApiHelper.ExecuteCallGuardedAsync(
-                        () => InspectionClient.CreateInventoryEndpointAsync("1", new CreateInventoryCommand
-                        {
-                            ProductId = productId,
-                            Qty = qtyToAdd,
-                            AvePrice = unitPrice
-                        }),
-                        Snackbar,
-                        Navigation
-                    );
-                }
-                else
-                {
-                    // compute new average price and qty
-                    var currentQty = existing.Qty;
-                    var currentAve = existing.AvePrice;
-                    var newQty = currentQty + qtyToAdd;
-                    var newAve = newQty > 0 ? ((currentAve * currentQty) + (unitPrice * qtyToAdd)) / newQty : unitPrice;
-
-                    await ApiHelper.ExecuteCallGuardedAsync(
-                        () => InspectionClient.UpdateInventoryEndpointAsync("1", existing.Id!.Value, new UpdateInventoryCommand
-                        {
-                            Id = existing.Id!.Value,
-                            ProductId = productId,
-                            Qty = newQty,
-                            AvePrice = newAve
-                        }),
-                        Snackbar,
-                        Navigation
-                    );
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Inventory update failed: {ex.Message}", Severity.Error);
-        }
-    }
+    // Note: Inventory adjustments are performed by the API when an inspection is approved.
 
     private void Cancel()
     {
