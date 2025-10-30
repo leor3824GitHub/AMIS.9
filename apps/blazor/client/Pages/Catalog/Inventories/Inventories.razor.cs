@@ -2,12 +2,15 @@ using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
+using AMIS.Blazor.Infrastructure.Notifications;
 using AMIS.Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using MediatR.Courier;
+using AMIS.Blazor.Shared.Notifications;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Inventories;
 
@@ -24,6 +27,8 @@ public partial class Inventories
     protected IApiClient ApiClient { get; set; } = default!;
     [Inject]
     private ISnackbar? Snackbar { get; set; }
+    [Inject]
+    protected ICourier Courier { get; set; } = default!;
 
     private string searchString = string.Empty;
     private bool _loading;
@@ -45,6 +50,19 @@ public partial class Inventories
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.Inventories);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Inventories);
         await LoadProductsAsync();
+
+        // Subscribe to inventory change notifications to refresh the grid if this page is open
+        Courier.SubscribeWeak<NotificationWrapper<InventoryChangedNotification>>(wrapper =>
+        {
+            // Marshal back to UI thread and reload without disrupting selection
+            _ = InvokeAsync(async () =>
+            {
+                if (_table is not null)
+                {
+                    await _table.ReloadServerData();
+                }
+            });
+        });
     }
 
     private async Task LoadProductsAsync()

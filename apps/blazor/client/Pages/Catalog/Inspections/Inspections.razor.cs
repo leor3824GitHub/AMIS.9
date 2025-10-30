@@ -3,12 +3,14 @@ using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Client.Pages.Catalog.Products;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
+using AMIS.Blazor.Infrastructure.Notifications;
 using AMIS.Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using AMIS.Blazor.Shared.Notifications;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Inspections;
 
@@ -23,6 +25,8 @@ public partial class Inspections
     protected IAuthorizationService AuthService { get; set; } = default!;
     [Inject]
     protected IApiClient inspectionclient { get; set; } = default!;
+    [Inject]
+    protected INotificationPublisher Notifications { get; set; } = default!;
     [Inject]
     private ISnackbar? Snackbar { get; set; }
     private InspectionResponse _currentDto = new();
@@ -307,6 +311,8 @@ public partial class Inspections
         {
             await inspectionclient.ApproveInspectionEndpointAsync("1", item.Id);
             Snackbar?.Add("Inspection approved. Inventory updated.", Severity.Success);
+            // Broadcast to any listeners (e.g., Inventories page) to refresh
+            await Notifications.PublishAsync(new InventoryChangedNotification());
             await _table.ReloadServerData();
         }
         catch (Exception ex)
