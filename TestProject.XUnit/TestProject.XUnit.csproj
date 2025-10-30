@@ -28,6 +28,9 @@
     <ProjectReference Include="..\apps\blazor\infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\apps\blazor\client\Client.csproj" />
     <ProjectReference Include="..\Shared\Shared.csproj" />
+    <ProjectReference Include="..\api\modules\Catalog\Catalog.Application\Catalog.Application.csproj" />
+    <ProjectReference Include="..\api\modules\Catalog\Catalog.Domain\Catalog.Domain.csproj" />
+    <ProjectReference Include="..\api\framework\Core\Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>
