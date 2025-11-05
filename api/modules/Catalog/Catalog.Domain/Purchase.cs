@@ -84,6 +84,144 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
         return this;
     }
+
+    // Purchase Order Workflow Methods
+    public void SubmitForApproval()
+    {
+        if (Status != PurchaseStatus.Draft)
+            throw new InvalidOperationException("Only draft purchases can be submitted for approval.");
+        
+        Status = PurchaseStatus.PendingApproval;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void Approve()
+    {
+        if (Status != PurchaseStatus.PendingApproval)
+            throw new InvalidOperationException("Only pending purchases can be approved.");
+        
+        Status = PurchaseStatus.Approved;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void Reject(string reason)
+    {
+        if (Status != PurchaseStatus.PendingApproval)
+            throw new InvalidOperationException("Only pending purchases can be rejected.");
+        
+        Status = PurchaseStatus.Rejected;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void Acknowledge()
+    {
+        if (Status != PurchaseStatus.Approved)
+            throw new InvalidOperationException("Only approved purchases can be acknowledged.");
+        
+        Status = PurchaseStatus.Acknowledged;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void MarkInProgress()
+    {
+        if (Status != PurchaseStatus.Acknowledged)
+            throw new InvalidOperationException("Only acknowledged purchases can be marked in progress.");
+        
+        Status = PurchaseStatus.InProgress;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void MarkShipped()
+    {
+        if (Status != PurchaseStatus.InProgress)
+            throw new InvalidOperationException("Only in-progress purchases can be marked as shipped.");
+        
+        Status = PurchaseStatus.Shipped;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void MarkPartiallyReceived()
+    {
+        if (Status != PurchaseStatus.Shipped && Status != PurchaseStatus.Approved)
+            throw new InvalidOperationException("Purchase must be shipped or approved to mark as partially received.");
+        
+        Status = PurchaseStatus.PartiallyReceived;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void MarkFullyReceived()
+    {
+        if (!Items.All(i => i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted || 
+                           i.AcceptanceStatus == PurchaseItemAcceptanceStatus.AcceptedWithDeviation))
+            throw new InvalidOperationException("All items must be accepted before marking as fully received.");
+        
+        Status = PurchaseStatus.FullyReceived;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void MarkPendingInvoice()
+    {
+        if (Status != PurchaseStatus.FullyReceived && Status != PurchaseStatus.PartiallyReceived)
+            throw new InvalidOperationException("Purchase must be received before marking as pending invoice.");
+        
+        Status = PurchaseStatus.PendingInvoice;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void MarkInvoiced()
+    {
+        if (Status != PurchaseStatus.PendingInvoice)
+            throw new InvalidOperationException("Purchase must be pending invoice before marking as invoiced.");
+        
+        Status = PurchaseStatus.Invoiced;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void MarkPendingPayment()
+    {
+        if (Status != PurchaseStatus.Invoiced)
+            throw new InvalidOperationException("Purchase must be invoiced before marking as pending payment.");
+        
+        Status = PurchaseStatus.PendingPayment;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void MarkClosed()
+    {
+        if (Status != PurchaseStatus.PendingPayment && Status != PurchaseStatus.Invoiced)
+            throw new InvalidOperationException("Purchase must be invoiced or pending payment before closing.");
+        
+        Status = PurchaseStatus.Closed;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void PutOnHold(string reason)
+    {
+        if (Status == PurchaseStatus.Closed || Status == PurchaseStatus.Cancelled)
+            throw new InvalidOperationException("Cannot put closed or cancelled purchases on hold.");
+        
+        Status = PurchaseStatus.OnHold;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void ReleaseFromHold()
+    {
+        if (Status != PurchaseStatus.OnHold)
+            throw new InvalidOperationException("Only purchases on hold can be released.");
+        
+        Status = PurchaseStatus.Draft; // Return to draft for re-evaluation
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void Cancel(string reason)
+    {
+        if (Status == PurchaseStatus.Closed)
+            throw new InvalidOperationException("Cannot cancel closed purchases.");
+        
+        Status = PurchaseStatus.Cancelled;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
     
 }
+
 

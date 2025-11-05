@@ -8,9 +8,15 @@ namespace AMIS.WebApi.Catalog.Application.PurchaseItems.Search.v1;
 public class SearchPurchaseItemSpecs : EntitiesByPaginationFilterSpec<PurchaseItem, PurchaseItemResponse>
 {
     public SearchPurchaseItemSpecs(SearchPurchaseItemsCommand command)
-        : base(command) =>
+        : base(command)
+    {
         Query
             .Include(p => p.Product)
-            .OrderBy(c => c.ItemStatus, !command.HasOrderBy())
-            .Where(p => p.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue);
+            .OrderBy(c => c.ItemStatus, !command.HasOrderBy());
+
+        if (command.PurchaseId.HasValue)
+        {
+            Query.Where(p => p.PurchaseId == command.PurchaseId.Value);
+        }
+    }
 }

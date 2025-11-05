@@ -28,3 +28,9 @@ finally
     Log.Information("server shutting down..");
     await Log.CloseAndFlushAsync();
 }
+
+// Make Program class public for integration tests
+namespace AMIS.WebApi.Host
+{
+    public partial class Program { }
+}

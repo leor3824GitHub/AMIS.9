@@ -14,10 +14,27 @@ public class SearchAcceptanceSpecs : EntitiesByPaginationFilterSpec<Acceptance, 
         Query
             .Include(i => i.SupplyOfficer)
             .Include(i => i.Purchase)
-            .OrderBy(i => i.AcceptanceDate, !command.HasOrderBy())
-            .Where(i => i.InspectionId == command.InspectionId!.Value, command.InspectionId.HasValue)
-            .Where(i => i.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)
-            .Where(i => i.AcceptanceDate >= command.FromDate, command.FromDate.HasValue)
-            .Where(i => i.AcceptanceDate <= command.ToDate, command.ToDate.HasValue);
+            .OrderBy(i => i.AcceptanceDate, !command.HasOrderBy());
+
+        if (command.InspectionId.HasValue)
+        {
+            Query.Where(i => i.InspectionId == command.InspectionId.Value);
+        }
+
+        if (command.PurchaseId.HasValue)
+        {
+            Query.Where(i => i.PurchaseId == command.PurchaseId.Value);
+        }
+
+        if (command.FromDate.HasValue)
+        {
+            var from = command.FromDate.Value;
+            Query.Where(i => i.AcceptanceDate >= from);
+        }
+        if (command.ToDate.HasValue)
+        {
+            var to = command.ToDate.Value;
+            Query.Where(i => i.AcceptanceDate <= to);
+        }
     }
 }

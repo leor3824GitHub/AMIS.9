@@ -60,6 +60,7 @@ public partial class Inventories
                 if (_table is not null)
                 {
                     await _table.ReloadServerData();
+                    Snackbar?.Add("Inventory updated", Severity.Info);
                 }
             });
         });

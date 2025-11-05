@@ -55,10 +55,10 @@ public static class Extensions
             ["service.names"] =
                 "AMIS.WebApi.Host", //builder.Configuration["OpenTelemetrySettings:ServiceName"]!, //It's a WA Fix because the service.name tag is not completed automatically by Resource.Builder()...AddService(serviceName) https://github.com/open-telemetry/opentelemetry-dotnet/issues/2027
             ["os.description"] = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
-            ["deployment.environment"] = builder.Environment.EnvironmentName.ToLowerInvariant()
+            ["deployment.environment"] = builder.Environment.EnvironmentName.ToUpperInvariant()
         };
         var resourceBuilder = ResourceBuilder.CreateDefault()
-            .AddService(serviceName: resourceServiceName, serviceVersion: resourceServiceVersion)
+            .AddService(serviceName: resourceServiceName ?? "AMIS.WebApi.Host", serviceVersion: resourceServiceVersion)
             .AddTelemetrySdk()
             //.AddEnvironmentVariableDetector()
             .AddAttributes(attributes);
@@ -66,12 +66,16 @@ public static class Extensions
         #endregion region
 
 
-        builder.Logging.AddOpenTelemetry(logging =>
+    var enableLogsProvider = bool.TryParse(builder.Configuration["OpenTelemetry:EnableLogsProvider"], out var _flag) && _flag;
+        if (enableLogsProvider)
         {
-            logging.IncludeFormattedMessage = true;
-            logging.IncludeScopes = true;
-            logging.SetResourceBuilder(resourceBuilder);
-        });
+            builder.Logging.AddOpenTelemetry(logging =>
+            {
+                logging.IncludeFormattedMessage = true;
+                logging.IncludeScopes = true;
+                logging.SetResourceBuilder(resourceBuilder);
+            });
+        }
 
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics =>

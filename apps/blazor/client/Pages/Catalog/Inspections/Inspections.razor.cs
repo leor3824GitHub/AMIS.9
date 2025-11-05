@@ -124,7 +124,8 @@ public partial class Inspections
             PageNumber = state.Page + 1,
             AdvancedSearch = new()
             {
-                Fields = new[] { "purchaseId", "inspectorId" },
+                // Use exact domain property names for server-side filtering
+                Fields = new[] { "PurchaseId", "EmployeeId" },
                 Keyword = searchString
             }
         };
@@ -148,22 +149,15 @@ public partial class Inspections
                 {
                     try
                     {
-                        // Acceptances are associated with Purchases, not Inspections.
-                        // Use the inspection's PurchaseId to determine if any acceptances exist.
-                        if (insp.PurchaseId.HasValue)
+                        // Acceptances reference Inspections directly.
+                        // Query by InspectionId to determine if any acceptances exist for this inspection.
+                        var acc = await inspectionclient.SearchAcceptancesEndpointAsync("1", new SearchAcceptancesCommand
                         {
-                            var acc = await inspectionclient.SearchAcceptancesEndpointAsync("1", new SearchAcceptancesCommand
-                            {
-                                PurchaseId = insp.PurchaseId.Value,
-                                PageNumber = 1,
-                                PageSize = 1
-                            });
-                            _hasAcceptanceCache[insp.Id] = (acc?.TotalCount ?? 0) > 0;
-                        }
-                        else
-                        {
-                            _hasAcceptanceCache[insp.Id] = false;
-                        }
+                            InspectionId = insp.Id,
+                            PageNumber = 1,
+                            PageSize = 1
+                        });
+                        _hasAcceptanceCache[insp.Id] = (acc?.TotalCount ?? 0) > 0;
                     }
                     catch
                     {
@@ -227,9 +221,43 @@ public partial class Inspections
             return;
         }
 
-        var model = item.Adapt<UpdateInspectionCommand>();
-    // Only InProgress inspections are editable, see CanEdit
-    await ShowEditFormDialog("Edit inspection", model, false, _inspectionrequests, isReadOnly: false);
+        // Find the InspectionRequestId by querying inspection requests that reference this purchase
+        Guid? inspectionRequestId = null;
+        if (item.PurchaseId.HasValue)
+        {
+            try
+            {
+                var requestsResult = await inspectionclient.SearchInspectionRequestsEndpointAsync("1",
+                   new SearchInspectionRequestsCommand
+                   {
+                       PurchaseId = item.PurchaseId,
+                       PageNumber = 1,
+                       PageSize = 1
+                   });
+
+                var request = requestsResult?.Items?.FirstOrDefault();
+                if (request?.Id != null)
+                {
+                    inspectionRequestId = request.Id;
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Warning: Could not load inspection request: {ex.Message}", Severity.Warning);
+            }
+        }
+
+        // Create the command using object initializer (NSwag-generated classes use properties)
+        var model = new UpdateInspectionCommand
+        {
+            Id = item.Id,
+            InspectionDate = item.InspectedOn ?? DateTime.Now,
+            InspectorId = item.EmployeeId,
+            InspectionRequestId = inspectionRequestId,
+            Remarks = item.Remarks
+        };
+
+        await ShowEditFormDialog("Edit inspection", model, false, _inspectionrequests, isReadOnly: false);
     }
 
     private async Task OnDelete(InspectionResponse item)
@@ -266,7 +294,14 @@ public partial class Inspections
             return;
         }
 
-        string deleteContent = "Delete selected inspections?";
+        var deletable = _selectedItems.Where(CanDelete).ToList();
+        if (deletable.Count == 0)
+        {
+            Snackbar?.Add("No selected inspections can be deleted. Only in-progress inspections without related acceptances are deletable.", Severity.Info);
+            return;
+        }
+
+        string deleteContent = $"Delete {deletable.Count} selected inspection(s)? Inspections not eligible will be skipped.";
         var parameters = new DialogParameters
         {
             { nameof(DeleteConfirmation.ContentText), deleteContent }
@@ -276,18 +311,20 @@ public partial class Inspections
         var result = await dialog.Result;
         if (result is { Canceled: false })
         {
-            foreach (var item in _selectedItems.ToList())
+            var success = 0;
+            foreach (var item in deletable)
             {
-                if (!CanDelete(item))
+                try
                 {
-                    continue;
+                    await inspectionclient.DeleteInspectionEndpointAsync("1", item.Id);
+                    success++;
                 }
-
-                await ApiHelper.ExecuteCallGuardedAsync(
-                    () => inspectionclient.DeleteInspectionEndpointAsync("1", item.Id),
-                    Snackbar!);
+                catch (Exception ex)
+                {
+                    Snackbar?.Add($"Failed to delete inspection {item.Id}: {ex.Message}", Severity.Error);
+                }
             }
-
+            Snackbar?.Add(success > 0 ? $"Deleted {success} inspection(s)." : "No inspections were deleted.", success > 0 ? Severity.Success : Severity.Info);
             _selectedItems.Clear();
             await _table.ReloadServerData();
         }
@@ -376,6 +413,7 @@ public partial class Inspections
 
         return !_hasAcceptanceCache.TryGetValue(inspection.Id, out var has) || !has;
     }
+    private bool HasDeletableSelection => _selectedItems.Any(CanDelete);
 
     private static string RowStyle(InspectionResponse inspection, int index)
     {

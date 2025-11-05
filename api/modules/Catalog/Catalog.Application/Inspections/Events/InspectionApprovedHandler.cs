@@ -28,7 +28,7 @@ public sealed class InspectionApprovedHandler : INotificationHandler<InspectionA
         [FromKeyedServices("catalog:inspections")] IReadRepository<Inspection> inspectionReadRepo,
         [FromKeyedServices("catalog:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepo,
         [FromKeyedServices("catalog:inventories")] IRepository<Inventory> inventoryRepo,
-    [FromKeyedServices("catalog:inventory-transactions")] IRepository<InventoryTransaction> inventoryTxnRepo,
+        [FromKeyedServices("catalog:inventory-transactions")] IRepository<InventoryTransaction> inventoryTxnRepo,
         ILogger<InspectionApprovedHandler> logger)
     {
         _inspectionReadRepo = inspectionReadRepo ?? throw new ArgumentNullException(nameof(inspectionReadRepo));
@@ -48,20 +48,27 @@ public sealed class InspectionApprovedHandler : INotificationHandler<InspectionA
             return;
         }
 
-        if (!notification.PurchaseId.HasValue)
-        {
-            return;
-        }
+        // Load the inspection request to get PurchaseId and mark it completed
+        var inspectionRequest = await _inspectionRequestRepo.GetByIdAsync(notification.InspectionRequestId, cancellationToken);
 
-        var requestSpec = new AMIS.WebApi.Catalog.Application.InspectionRequests.Specifications.GetInspectionRequestByPurchaseSpec(notification.PurchaseId.Value);
-        var inspectionRequest = await _inspectionRequestRepo.FirstOrDefaultAsync(requestSpec, cancellationToken);
-
-        if (inspectionRequest != null && inspectionRequest.Status != AMIS.WebApi.Catalog.Domain.ValueObjects.InspectionRequestStatus.Completed)
+        if (inspectionRequest != null)
         {
-            inspectionRequest.MarkCompleted();
-            await _inspectionRequestRepo.UpdateAsync(inspectionRequest, cancellationToken);
-            _logger.LogInformation("Marked InspectionRequest {RequestId} as Completed after Inspection {InspectionId} was approved",
-                inspectionRequest.Id, notification.InspectionId);
+            // Update the event with the actual PurchaseId from InspectionRequest
+            if (inspectionRequest.PurchaseId.HasValue && notification.PurchaseId == Guid.Empty)
+            {
+                // Note: This is a workaround since the event is immutable (record type)
+                // The proper solution is to pass PurchaseId when creating the event in Inspection.Approve()
+                _logger.LogInformation("PurchaseId {PurchaseId} obtained from InspectionRequest {RequestId}",
+                    inspectionRequest.PurchaseId.Value, inspectionRequest.Id);
+            }
+
+            if (inspectionRequest.Status != AMIS.WebApi.Catalog.Domain.ValueObjects.InspectionRequestStatus.Completed)
+            {
+                inspectionRequest.MarkCompleted();
+                await _inspectionRequestRepo.UpdateAsync(inspectionRequest, cancellationToken);
+                _logger.LogInformation("Marked InspectionRequest {RequestId} as Completed after Inspection {InspectionId} was approved",
+                    inspectionRequest.Id, notification.InspectionId);
+            }
         }
 
         // Automatically add passed quantities to Inventory and record Inventory Transactions

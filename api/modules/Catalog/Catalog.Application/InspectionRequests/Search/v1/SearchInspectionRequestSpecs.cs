@@ -13,9 +13,23 @@ public class SearchInspectionRequestSpecs : EntitiesByPaginationFilterSpec<Inspe
     {
         Query
             .Include(i => i.Inspector)
-            .Include(i => i.Purchase)
-            .Where(i => i.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)
-            .Where(i => i.DateCreated >= command.FromDate, command.FromDate.HasValue)
-            .Where(i => i.DateCreated <= command.ToDate, command.ToDate.HasValue);
+            .Include(i => i.Purchase);
+
+        if (command.PurchaseId.HasValue)
+        {
+            Query.Where(i => i.PurchaseId == command.PurchaseId.Value);
+        }
+
+        // Guard against nullable date comparisons producing bool? by lifting
+        if (command.FromDate.HasValue)
+        {
+            var from = command.FromDate.Value;
+            Query.Where(i => i.DateCreated >= from);
+        }
+        if (command.ToDate.HasValue)
+        {
+            var to = command.ToDate.Value;
+            Query.Where(i => i.DateCreated <= to);
+        }
     }
 }

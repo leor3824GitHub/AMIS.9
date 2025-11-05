@@ -6,7 +6,7 @@ namespace AMIS.WebApi.Catalog.Application.Inspections.Get.v1;
 
 public sealed record InspectionResponse(
     Guid Id,
-    DateTime InspectedOn,
+    DateTime? InspectedOn,
     Guid EmployeeId,
     Guid? PurchaseId,
     string? Remarks,

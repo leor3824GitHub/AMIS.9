@@ -1,6 +1,7 @@
 ﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 public class Product : AuditableEntity, IAggregateRoot
@@ -8,7 +9,7 @@ public class Product : AuditableEntity, IAggregateRoot
     public string Name { get; private set; } = default!;
     public string? Description { get; private set; }
     public decimal Sku { get; private set; }
-    public string Unit { get; private set; } = "pcs";
+    public UnitOfMeasure Unit { get; private set; } = UnitOfMeasure.Piece;
     public string? ImagePath { get; private set; }
     public Guid? CategoryId { get; private set; }
     public virtual Category? Category { get; private set; }
@@ -16,7 +17,7 @@ public class Product : AuditableEntity, IAggregateRoot
 
     private Product() { }
 
-    private Product(Guid id, string name, string? description, decimal sku, string unit, string? imagePath, Guid? categoryId)
+    private Product(Guid id, string name, string? description, decimal sku, UnitOfMeasure unit, string? imagePath, Guid? categoryId)
     {
         Id = id;
         Name = name;
@@ -30,12 +31,12 @@ public class Product : AuditableEntity, IAggregateRoot
         QueueDomainEvent(new ProductCreated { Product = this });
     }
 
-    public static Product Create(string name, string? description, decimal sku, string unit, string? imagePath, Guid? categoryId)
+    public static Product Create(string name, string? description, decimal sku, UnitOfMeasure unit, string? imagePath, Guid? categoryId)
     {
         return new Product(Guid.NewGuid(), name, description, sku, unit, imagePath, categoryId);
     }
 
-    public Product Update(string? name, string? description, decimal? sku, string? unit, string? imagePath, Guid? categoryId)
+    public Product Update(string? name, string? description, decimal? sku, UnitOfMeasure? unit, string? imagePath, Guid? categoryId)
     {
         bool isUpdated = false;
 
@@ -63,9 +64,9 @@ public class Product : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
-        if (!string.Equals(Unit, unit, StringComparison.OrdinalIgnoreCase))
+        if (unit.HasValue && Unit != unit.Value)
         {
-            Unit = unit;
+            Unit = unit.Value;
             isUpdated = true;
         }
 
@@ -89,4 +90,5 @@ public class Product : AuditableEntity, IAggregateRoot
         return this;
     }
 }
+
 

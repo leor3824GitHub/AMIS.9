@@ -66,6 +66,7 @@ public static class Extensions
         {
             cfg.RegisterServicesFromAssemblies(assemblies);
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         });
 
         builder.Services.ConfigureRateLimit(builder.Configuration);

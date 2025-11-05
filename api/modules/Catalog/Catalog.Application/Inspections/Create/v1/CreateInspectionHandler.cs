@@ -16,74 +16,91 @@ internal sealed class PurchaseWithItemsSpec : Specification<Purchase>
     {
         Query
             .Where(p => p.Id == purchaseId)
-            .Include(p => p.Items);
+    .Include(p => p.Items);
     }
 }
 
 public sealed class CreateInspectionHandler(
     ILogger<CreateInspectionHandler> logger,
     [FromKeyedServices("catalog:inspections")] IRepository<Inspection> repository,
-    [FromKeyedServices("catalog:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepository,
-    [FromKeyedServices("catalog:purchases")] IRepository<Purchase> purchaseRepository)
+  [FromKeyedServices("catalog:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepo,
+    [FromKeyedServices("catalog:purchases")] IReadRepository<Purchase> purchaseRepo)
     : IRequestHandler<CreateInspectionCommand, CreateInspectionResponse>
 {
     public async Task<CreateInspectionResponse> Handle(CreateInspectionCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var inspectionRequest = await inspectionRequestRepository.GetByIdAsync(request.InspectionRequestId, cancellationToken);
+        // Load inspection request by ID (not through navigation)
+        var inspectionRequest = await inspectionRequestRepo.GetByIdAsync(request.InspectionRequestId, cancellationToken);
+        
         if (inspectionRequest is null)
-        {
+   {
             throw new InvalidOperationException("Create an inspection request before recording an inspection.");
         }
 
-        if (inspectionRequest.PurchaseId != request.PurchaseId)
+   if (inspectionRequest.PurchaseId != request.PurchaseId)
         {
-            throw new InvalidOperationException("The inspection must target the same purchase as its inspection request.");
+throw new InvalidOperationException("The inspection must target the same purchase as its inspection request.");
         }
 
         if (inspectionRequest.Status is InspectionRequestStatus.Pending)
         {
-            throw new InvalidOperationException("Assign an inspector to the request before creating an inspection.");
+       throw new InvalidOperationException("Assign an inspector to the request before creating an inspection.");
         }
 
-        if (inspectionRequest.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
+    if (inspectionRequest.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
         {
-            throw new InvalidOperationException("This inspection request has already been completed. Create a new request for additional inspections.");
+      throw new InvalidOperationException("This inspection request has already been completed. Create a new request for additional inspections.");
         }
 
+      // Create inspection with InspectionRequestId only (following aggregate boundaries)
         var inspection = Inspection.Create(
-            purchaseId: request.PurchaseId,
-            employeeId: request.InspectorId,
-            inspectedOn: request.InspectionDate,
-            approved: false,
-            remarks: request.Remarks
+   inspectionRequestId: request.InspectionRequestId,
+  employeeId: request.InspectorId,
+       inspectedOn: request.InspectionDate,
+         approved: false,
+          remarks: request.Remarks
         );
 
         if (request.Items is not null)
         {
-            foreach (var item in request.Items)
-            {
-                var status = item.InspectionItemStatus ?? InspectionItemStatus.NotInspected;
-                _ = inspection.AddItem(item.PurchaseItemId, item.QtyInspected, item.QtyPassed, item.QtyFailed, item.Remarks, status);
-            }
+   foreach (var item in request.Items)
+        {
+   var status = item.InspectionItemStatus ?? InspectionItemStatus.NotInspected;
+     _ = inspection.AddItem(item.PurchaseItemId, item.QtyInspected, item.QtyPassed, item.QtyFailed, item.Remarks, status);
+       }
         }
 
         await repository.AddAsync(inspection, cancellationToken);
 
-        // Load purchase with items to evaluate inspection status
-        var purchaseSpec = new PurchaseWithItemsSpec(request.PurchaseId);
-        var purchase = await purchaseRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken);
-        inspection.EvaluateAndSetStatus(purchase);
-
-        if (inspectionRequest.Status == InspectionRequestStatus.Assigned)
+  // Evaluate inspection status - fetch purchase data explicitly from its own repository
+        if (inspectionRequest.PurchaseId.HasValue)
         {
-            inspectionRequest.UpdateStatus(InspectionRequestStatus.InProgress);
-            await inspectionRequestRepository.UpdateAsync(inspectionRequest, cancellationToken);
+        var purchaseSpec = new PurchaseWithItemsSpec(inspectionRequest.PurchaseId.Value);
+        var purchase = await purchaseRepo.FirstOrDefaultAsync(purchaseSpec, cancellationToken);
+    
+if (purchase != null)
+      {
+    // Pass data (not entity) across aggregate boundary
+         var purchaseItemData = purchase.Items
+         .Select(pi => new PurchaseItemSummary(pi.Id, pi.Qty))
+  .ToList();
+            
+   inspection.EvaluateAndSetStatus(purchaseItemData);
+            }
         }
 
-        logger.LogInformation("Inspection created {InspectionId}", inspection.Id);
+        // Update inspection request status (use IRepository not IReadRepository)
+if (inspectionRequest.Status == InspectionRequestStatus.Assigned)
+        {
+            inspectionRequest.UpdateStatus(InspectionRequestStatus.InProgress);
+     await inspectionRequestRepo.UpdateAsync(inspectionRequest, cancellationToken);
+        }
 
-        return new CreateInspectionResponse(inspection.Id);
+        logger.LogInformation("Inspection created {InspectionId} for InspectionRequest {InspectionRequestId}", 
+            inspection.Id, request.InspectionRequestId);
+
+     return new CreateInspectionResponse(inspection.Id);
     }
 }

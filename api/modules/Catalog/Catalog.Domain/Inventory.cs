@@ -1,6 +1,7 @@
 ﻿using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 public class Inventory : AuditableEntity, IAggregateRoot
@@ -8,6 +9,12 @@ public class Inventory : AuditableEntity, IAggregateRoot
     public Guid? ProductId { get; private set; }
     public int Qty { get; private set; }
     public decimal AvePrice { get; private set; }
+    public StockStatus StockStatus { get; private set; } = StockStatus.Available;
+    public CostingMethod CostingMethod { get; private set; } = CostingMethod.WeightedAverage;
+    public int ReservedQty { get; private set; }
+    public int AvailableQty => Qty - ReservedQty;
+    public string? Location { get; private set; }
+    public DateTime? LastCountedDate { get; private set; }
     public virtual Product Product { get; private set; } = default!;
 
     private Inventory() { }
@@ -117,5 +124,117 @@ public class Inventory : AuditableEntity, IAggregateRoot
     {
         if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
         if (price <= 0) throw new ArgumentException("Price must be greater than zero.");
+    }
+
+    // Stock Status Management
+    public void SetStockStatus(StockStatus status)
+    {
+        if (StockStatus != status)
+        {
+            StockStatus = status;
+            QueueDomainEvent(new InventoryUpdated { Inventory = this });
+        }
+    }
+
+    public void MarkAsQuarantined(string? location = null)
+    {
+        SetStockStatus(StockStatus.Quarantined);
+        if (!string.IsNullOrWhiteSpace(location))
+        {
+            Location = location;
+        }
+    }
+
+    public void ReleaseFromQuarantine()
+    {
+        if (StockStatus != StockStatus.Quarantined)
+            throw new InvalidOperationException("Inventory is not quarantined.");
+        
+        SetStockStatus(StockStatus.Available);
+    }
+
+    public void MarkAsDamaged()
+    {
+        SetStockStatus(StockStatus.Damaged);
+    }
+
+    public void MarkAsObsolete()
+    {
+        SetStockStatus(StockStatus.Obsolete);
+    }
+
+    // Reservation Management
+    public void ReserveStock(int qty)
+    {
+        if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
+        if (AvailableQty < qty) throw new InvalidOperationException("Not enough available stock to reserve.");
+
+        ReservedQty += qty;
+        if (ReservedQty > 0 && StockStatus == StockStatus.Available)
+        {
+            SetStockStatus(StockStatus.Reserved);
+        }
+        QueueDomainEvent(new InventoryUpdated { Inventory = this });
+    }
+
+    public void ReleaseReservation(int qty)
+    {
+        if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
+        if (ReservedQty < qty) throw new InvalidOperationException("Cannot release more than reserved quantity.");
+
+        ReservedQty -= qty;
+        if (ReservedQty == 0 && StockStatus == StockStatus.Reserved)
+        {
+            SetStockStatus(StockStatus.Available);
+        }
+        QueueDomainEvent(new InventoryUpdated { Inventory = this });
+    }
+
+    public void AllocateToProduction(int qty)
+    {
+        if (qty <= 0) throw new ArgumentException("Quantity must be greater than zero.");
+        if (AvailableQty < qty) throw new InvalidOperationException("Not enough available stock.");
+
+        ReservedQty += qty;
+        SetStockStatus(StockStatus.AllocatedToProduction);
+    }
+
+    // Costing Method Management
+    public void SetCostingMethod(CostingMethod method)
+    {
+        if (CostingMethod != method)
+        {
+            CostingMethod = method;
+            QueueDomainEvent(new InventoryUpdated { Inventory = this });
+        }
+    }
+
+    // Location Management
+    public void SetLocation(string location)
+    {
+        if (string.IsNullOrWhiteSpace(location))
+            throw new ArgumentException("Location cannot be empty.");
+
+        Location = location;
+        QueueDomainEvent(new InventoryUpdated { Inventory = this });
+    }
+
+    // Cycle Count
+    public void RecordCycleCount(int countedQty, DateTime countDate)
+    {
+        if (countedQty < 0) throw new ArgumentException("Counted quantity cannot be negative.");
+
+        int variance = countedQty - Qty;
+        if (variance != 0)
+        {
+            Qty = countedQty;
+            if (variance < 0)
+            {
+                SetStockStatus(StockStatus.UnderCount);
+            }
+        }
+
+        LastCountedDate = countDate;
+        QueueDomainEvent(new InventoryUpdated { Inventory = this });
     }
 }

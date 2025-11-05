@@ -46,8 +46,8 @@ public sealed class InspectionRejectedHandler : INotificationHandler<InspectionR
             }
 
             _logger.LogInformation(
-                "Handling InspectionRejected for Inspection {InspectionId} (Purchase: {PurchaseId}). Reason: {Reason}",
-                notification.InspectionId, notification.PurchaseId, notification.Reason);
+                "Handling InspectionRejected for Inspection {InspectionId} (InspectionRequest: {InspectionRequestId}). Reason: {Reason}",
+                notification.InspectionId, notification.InspectionRequestId, notification.Reason);
 
             foreach (var item in inspection.Items)
             {

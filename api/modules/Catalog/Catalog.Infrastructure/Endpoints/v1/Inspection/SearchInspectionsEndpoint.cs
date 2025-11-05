@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Logging;
 
 namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.Inspection.v1;
 
@@ -15,9 +16,26 @@ public static class SearchInspectionsEndpoint
     internal static RouteHandlerBuilder MapGetInspectionListEndpoint(this IEndpointRouteBuilder endpoints)
     {
         return endpoints
-            .MapPost("/search", async (ISender mediator, [FromBody] SearchInspectionsCommand command) =>
+            .MapPost("/search", async (ISender mediator, [FromBody] SearchInspectionsCommand command, ILoggerFactory loggerFactory) =>
             {
+                var logger = loggerFactory.CreateLogger("SearchInspectionsEndpoint");
+                // Log only non-sensitive metadata about the request
+                logger.LogInformation(
+                    "SearchInspections requested: PageNumber={PageNumber}, PageSize={PageSize}, HasPurchaseId={HasPurchaseId}, HasInspectorId={HasInspectorId}, HasFromDate={HasFromDate}, HasToDate={HasToDate}",
+                    command.PageNumber,
+                    command.PageSize,
+                    command.PurchaseId.HasValue,
+                    command.InspectorId.HasValue,
+                    command.FromDate.HasValue,
+                    command.ToDate.HasValue);
+
                 var response = await mediator.Send(command);
+
+                logger.LogInformation(
+                    "SearchInspections result: TotalCount={Total}, Returned={Returned}",
+                    response.TotalCount,
+                    response.Items?.Count ?? 0);
+
                 return Results.Ok(response);
             })
             .WithName(nameof(SearchInspectionsEndpoint))

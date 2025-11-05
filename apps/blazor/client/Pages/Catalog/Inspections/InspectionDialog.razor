@@ -107,7 +107,11 @@
                         </MudText>
                     }
                     <MudPaper Elevation="0" Class="pa-3" Style="background-color: rgba(0, 0, 0, 0.02);">
-                        <InspectionItemsEditor @ref="_itemsEditor" PurchaseItems="_poItems" Products="_products" ReadOnly="@IsReadOnly" />
+                        <InspectionItemsEditor @ref="_itemsEditor"
+                                              PurchaseItems="_poItems"
+                                              Products="_products"
+                                              ReadOnly="@IsReadOnly"
+                                              CurrentInspectionId="@(IsCreate ? (Guid?)null : Model.Id)" />
                     </MudPaper>
                 </MudItem>
             </MudGrid>

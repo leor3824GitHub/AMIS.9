@@ -1,5 +1,6 @@
 ﻿using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -24,7 +25,7 @@ internal sealed class CatalogDbInitializer(
         const string Description = "A full-size layout QMK/VIA custom mechanical keyboard";
         const decimal Price = 79;
         Guid? CategoryId = null;
-        const string Unit = "pc";
+        var Unit = UnitOfMeasure.Piece;
         if (await context.Products.FirstOrDefaultAsync(t => t.Name == Name, cancellationToken).ConfigureAwait(false) is null)
         {
             var product = Product.Create(Name, Description, Price, Unit, null, CategoryId);
@@ -76,7 +77,7 @@ internal sealed class CatalogDbInitializer(
             if (await context.Products.FirstOrDefaultAsync(t => t.Name == pName, cancellationToken).ConfigureAwait(false) is null)
             {
                 var categoryId = seededCategories.Count > 0 ? seededCategories[(i - 1) % seededCategories.Count].Id : (Guid?)null;
-                var product = Product.Create(pName, $"Description for {pName}", 10m + i, "pcs", null, categoryId);
+                var product = Product.Create(pName, $"Description for {pName}", 10m + i, UnitOfMeasure.Piece, null, categoryId);
                 await context.Products.AddAsync(product, cancellationToken).ConfigureAwait(false);
             }
         }

@@ -24,9 +24,8 @@ public sealed class InspectionCreatedHandler : INotificationHandler<InspectionCr
 
     public async Task Handle(InspectionCreated notification, CancellationToken cancellationToken)
     {
-        // Find inspection request by PurchaseId or InspectorId
-        var spec = new GetInspectionRequestByPurchaseSpec(notification.PurchaseId);
-        var inspectionRequest = await _repository.FirstOrDefaultAsync(spec, cancellationToken);
+        // Load the inspection request directly by ID
+        var inspectionRequest = await _repository.GetByIdAsync(notification.InspectionRequestId, cancellationToken);
 
         if (inspectionRequest != null && inspectionRequest.Status == InspectionRequestStatus.Assigned)
         {

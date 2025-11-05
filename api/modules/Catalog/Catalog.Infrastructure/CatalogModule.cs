@@ -47,6 +47,19 @@ public static class CatalogModule
             inventoryGroup.MapGetInventoryListEndpoint();
             inventoryGroup.MapInventoryUpdateEndpoint();
             inventoryGroup.MapInventoryDeleteEndpoint();
+            inventoryGroup.MapReserveStockEndpoint();
+            inventoryGroup.MapQuarantineInventoryEndpoint();
+            inventoryGroup.MapReleaseReservationEndpoint();
+            inventoryGroup.MapRecordCycleCountEndpoint();
+            // Batch 3 Inventory workflow endpoints
+            inventoryGroup.MapReleaseFromQuarantineEndpoint();
+            inventoryGroup.MapMarkAsDamagedEndpoint();
+            inventoryGroup.MapMarkAsObsoleteEndpoint();
+            // Batch 4 Inventory workflow endpoints
+            inventoryGroup.MapAllocateToProductionEndpoint();
+            inventoryGroup.MapSetLocationEndpoint();
+            // Batch 5 Inventory workflow endpoints
+            inventoryGroup.MapSetCostingMethodEndpoint();
 
             var supplierGroup = app.MapGroup("suppliers").WithTags("suppliers");
             supplierGroup.MapSupplierCreationEndpoint();
@@ -62,6 +75,23 @@ public static class CatalogModule
             purchaseGroup.MapPurchaseUpdateEndpoint();
             purchaseGroup.MapPurchaseDeleteEndpoint();
             purchaseGroup.MapPurchasesDeleteEndpoint();
+            purchaseGroup.MapSubmitPurchaseForApprovalEndpoint();
+            purchaseGroup.MapApprovePurchaseEndpoint();
+            purchaseGroup.MapRejectPurchaseEndpoint();
+            purchaseGroup.MapMarkShippedEndpoint();
+            purchaseGroup.MapMarkFullyReceivedEndpoint();
+            purchaseGroup.MapMarkInvoicedEndpoint();
+            purchaseGroup.MapCancelPurchaseEndpoint();
+            // Batch 3 Purchase workflow endpoints
+            purchaseGroup.MapAcknowledgePurchaseEndpoint();
+            purchaseGroup.MapMarkInProgressEndpoint();
+            purchaseGroup.MapMarkPartiallyReceivedEndpoint();
+            purchaseGroup.MapMarkPendingPaymentEndpoint();
+            // Batch 4 Purchase workflow endpoints
+            purchaseGroup.MapMarkPendingInvoiceEndpoint();
+            purchaseGroup.MapMarkClosedEndpoint();
+            purchaseGroup.MapPutPurchaseOnHoldEndpoint();
+            purchaseGroup.MapReleasePurchaseFromHoldEndpoint();
 
             var purchaseItemGroup = app.MapGroup("purchaseItems").WithTags("purchaseItems");
             purchaseItemGroup.MapPurchaseItemCreationEndpoint();
@@ -105,6 +135,18 @@ public static class CatalogModule
             inspectionGroup.MapGetInspectionListEndpoint();
             inspectionGroup.MapInspectionUpdateEndpoint();
             inspectionGroup.MapInspectionApproveEndpoint();
+            inspectionGroup.MapScheduleInspectionEndpoint();
+            inspectionGroup.MapQuarantineInspectionEndpoint();
+            // Batch 3 Inspection workflow endpoints
+            inspectionGroup.MapConditionallyApproveEndpoint();
+            inspectionGroup.MapRequireReInspectionEndpoint();
+            // Batch 4 Inspection workflow endpoints
+            inspectionGroup.MapPutInspectionOnHoldEndpoint();
+            inspectionGroup.MapReleaseInspectionFromHoldEndpoint();
+            // Batch 5 Inspection workflow endpoints
+            inspectionGroup.MapPartiallyApproveEndpoint();
+            inspectionGroup.MapCompleteInspectionEndpoint();
+            inspectionGroup.MapReleaseInspectionFromQuarantineEndpoint();
 
             var inspectionItemGroup = app.MapGroup("inspectionItems").WithTags("inspectionItems");
             inspectionItemGroup.MapInspectionItemCreationEndpoint();
@@ -134,6 +176,9 @@ public static class CatalogModule
             inspectionRequestGroup.MapGetInspectionRequestEndpoint();
             inspectionRequestGroup.MapGetInspectionRequestListEndpoint();
             inspectionRequestGroup.MapInspectionRequestUpdateEndpoint();
+            // Batch 5 InspectionRequest workflow endpoints
+            inspectionRequestGroup.MapMarkCompletedEndpoint();
+            inspectionRequestGroup.MapMarkAcceptedEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)

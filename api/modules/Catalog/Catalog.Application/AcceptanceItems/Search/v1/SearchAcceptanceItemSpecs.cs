@@ -8,8 +8,14 @@ namespace AMIS.WebApi.Catalog.Application.AcceptanceItems.Search.v1;
 public class SearchAcceptanceItemSpecs : EntitiesByPaginationFilterSpec<AcceptanceItem, AcceptanceItemResponse>
 {
     public SearchAcceptanceItemSpecs(SearchAcceptanceItemsCommand command)
-        : base(command) =>
+        : base(command)
+    {
         Query
-            .Include(p => p.Acceptance)
-            .Where(p => p.AcceptanceId == command.AcceptanceId!.Value, command.AcceptanceId.HasValue);
+            .Include(p => p.Acceptance);
+
+        if (command.AcceptanceId.HasValue)
+        {
+            Query.Where(p => p.AcceptanceId == command.AcceptanceId.Value);
+        }
+    }
 }

@@ -9,7 +9,8 @@ public class GetInspectionSpecs : Specification<Inspection, InspectionResponse>
     {
         Query
             .Where(i => i.Id == id)
-            .Include(i => i.Purchase)
+            .Include(i => i.InspectionRequest)
+                .ThenInclude(ir => ir!.Purchase)
             .Include(i => i.Employee);
     }
 }

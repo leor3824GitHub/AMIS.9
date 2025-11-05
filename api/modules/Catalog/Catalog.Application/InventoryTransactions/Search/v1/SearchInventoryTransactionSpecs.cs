@@ -13,9 +13,17 @@ public sealed class SearchInventoryTransactionSpecs : EntitiesByPaginationFilter
         : base(command)
     {
         Query
-            .OrderByDescending(t => t.Created, !command.HasOrderBy())
-            .Where(t => t.ProductId == command.ProductId!.Value, command.ProductId.HasValue)
-            .Where(t => t.SourceId == command.SourceId!.Value, command.SourceId.HasValue);
+            .OrderByDescending(t => t.Created, !command.HasOrderBy());
+
+        if (command.ProductId.HasValue)
+        {
+            Query.Where(t => t.ProductId == command.ProductId.Value);
+        }
+
+        if (command.SourceId.HasValue)
+        {
+            Query.Where(t => t.SourceId == command.SourceId.Value);
+        }
 
         if (!string.IsNullOrWhiteSpace(command.TransactionType)
             && Enum.TryParse<TransactionType>(command.TransactionType, true, out var parsedType))
