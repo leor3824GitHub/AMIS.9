@@ -42,6 +42,8 @@ public partial class PurchaseDialog
         ? "Draft purchase order"
         : $"Tracking ID: {FormatIdentifier(Model.Id)}";
 
+    private string? Notes { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         Model.Items ??= new List<PurchaseItemDto>();
@@ -305,5 +307,7 @@ public partial class PurchaseDialog
     }
 
     private readonly record struct StatusAdvisory(Severity Severity, string Icon, string Message);
+
+    private string FormattedTotal => Model.TotalAmount.ToString("C", CultureInfo.CurrentCulture);
 
 }

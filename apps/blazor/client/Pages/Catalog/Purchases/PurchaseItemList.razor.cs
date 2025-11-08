@@ -18,10 +18,10 @@ public partial class PurchaseItemList
     [Parameter]
     public ICollection<PurchaseItemDto> Items { get; set; } = new List<PurchaseItemDto>();
     [Parameter] public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
-    [Parameter] public List<SupplierResponse> Suppliers { get; set; } = new();
+    [Parameter] public IReadOnlyList<SupplierResponse> Suppliers { get; set; } = Array.Empty<SupplierResponse>();
     [Parameter] public PurchaseStatus? Status { get; set; }
     [Parameter] public Guid? PurchaseId { get; set; }
-    [Parameter] public Action<Double> OnTotalAmountChanged { get; set; }
+    [Parameter] public Action<double>? OnTotalAmountChanged { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
 
     private Guid? Productid { get; set; }
@@ -31,10 +31,7 @@ public partial class PurchaseItemList
 
     protected override async Task OnInitializedAsync()
     {
-        //Model ??= new UpdatePurchaseCommand();
-        //Model.Items ??= new List<PurchaseItemDto>();
-        //await LoadSupplierAsync();
-        //await LoadProductAsync();
+        // Initialization logic handled in OnParametersSet
     }
 
     protected override void OnParametersSet()
@@ -47,7 +44,7 @@ public partial class PurchaseItemList
         EditingItem = item;
     }
 
-    private void SaveEdit()
+    private async Task SaveEdit()
     {
         if (EditingItem == null || EditingItem.Qty <= 0 || EditingItem.UnitPrice <= 0)
             return;
@@ -57,7 +54,7 @@ public partial class PurchaseItemList
             {
                 var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
 
-                Purchaseclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
+                await Purchaseclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
                 Snackbar?.Add("Item product successfully updated.", Severity.Success);
             }
 
@@ -79,7 +76,7 @@ public partial class PurchaseItemList
         EditingItem = null;
     }
 
-    private void AddNewItem()
+    private async Task AddNewItem()
     {
         if (Productid == null || Qty <= 0 || Unitprice <= 0)
             return;
@@ -102,8 +99,7 @@ public partial class PurchaseItemList
                 model.PurchaseId = PurchaseId.Value;
             }
 
-            // Ideally use await with async method
-            Purchaseclient.CreatePurchaseItemEndpointAsync("1", model);
+            await Purchaseclient.CreatePurchaseItemEndpointAsync("1", model);
             Snackbar?.Add("Item product successfully added.", Severity.Success);
         }
         
@@ -122,7 +118,7 @@ public partial class PurchaseItemList
         StateHasChanged();
     }
 
-    private void RemoveItem(PurchaseItemDto item)
+    private async Task RemoveItem(PurchaseItemDto item)
     {
         if (item.Id == Guid.Empty)
         {
@@ -133,7 +129,7 @@ public partial class PurchaseItemList
         {
             var id = item.Id; // Convert nullable Guid to non-nullable Guid
 
-           Purchaseclient.DeletePurchaseItemEndpointAsync("1", id);
+           await Purchaseclient.DeletePurchaseItemEndpointAsync("1", id);
 
             Snackbar?.Add("Item product successfully removed.", Severity.Success);
             Items.Remove(item);

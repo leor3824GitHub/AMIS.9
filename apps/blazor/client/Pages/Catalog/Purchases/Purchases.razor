@@ -87,17 +87,14 @@
     <Columns>
     <SelectColumn T="PurchaseResponse" />
 
-         <TemplateColumn T="PurchaseResponse" Title="Supplier">
-             <CellTemplate Context="context">
-                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
-                                <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Color="Color.Primary" />
-                                <MudStack Row="false" Spacing="0">
-                                        <MudText Typo="Typo.body2" Style="font-weight: 500;">@((context.Item.Supplier?.Name) ?? "--")</MudText>
-                                        <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">#@context.Item.Id</MudText>
-                                </MudStack>
-                        </MudStack>
-             </CellTemplate>
-         </TemplateColumn>
+             <TemplateColumn T="PurchaseResponse" Title="Supplier">
+                 <CellTemplate Context="context">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+                                    <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Color="Color.Primary" />
+                                    <MudText Typo="Typo.body2" Style="font-weight: 500;">@((context.Item.Supplier?.Name) ?? "--")</MudText>
+                            </MudStack>
+                 </CellTemplate>
+             </TemplateColumn>
 
         <TemplateColumn T="PurchaseResponse" Title="Purchase Date">
             <CellTemplate Context="context">
@@ -157,20 +154,7 @@
         </TemplateColumn>
     </Columns>
 
-    <ChildRowContent>
-     <MudPaper Class="pa-3">
-            <MudGrid>
-                <MudItem xs="12" md="6">
-  <MudText Typo="Typo.subtitle2">Identifiers</MudText>
-         <MudText Typo="Typo.caption">Purchase ID: @context.Item.Id</MudText>
-      </MudItem>
-     <MudItem xs="12" md="6">
-      <MudText Typo="Typo.subtitle2">Supplier</MudText>
- <MudText Typo="Typo.caption">@(context.Item.Supplier?.Name ?? "No supplier")</MudText>
-         </MudItem>
-            </MudGrid>
-      </MudPaper>
-    </ChildRowContent>
+    
 
     <PagerContent>
         <MudDataGridPager PageSizeOptions="new int[] { 10, 25, 50 }" />

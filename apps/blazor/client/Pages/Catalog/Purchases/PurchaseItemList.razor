@@ -39,7 +39,7 @@
                 </MudTd>
                 <MudTd>
                     @{
-                        var newAmount = Qty * Unitprice;
+                        var newAmount = item.Qty * item.UnitPrice;
                     }
 
                     <MudText>@newAmount.ToString("N2")</MudText>
@@ -151,4 +151,19 @@
         </FooterContent>
 
     </MudTable>
+</MudPaper>
+
+<MudPaper Class="pa-3 mt-3" Outlined>
+    <MudText Typo="Typo.h6">Purchase Items Summary</MudText>
+    <MudGrid>
+        <MudItem xs="12" sm="4">
+            <MudText Typo="Typo.body1">Total Items: @Items.Count</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudText Typo="Typo.body1">Total Quantity: @Items.Sum(i => i.Qty)</MudText>
+        </MudItem>
+        <MudItem xs="12" sm="4">
+            <MudText Typo="Typo.body1">Total Amount: @Items.Sum(i => i.Qty * i.UnitPrice).ToString("C", System.Globalization.CultureInfo.CurrentCulture)</MudText>
+        </MudItem>
+    </MudGrid>
 </MudPaper>

@@ -33,135 +33,109 @@
                 </MudAlert>
             }
 
-            <MudGrid Class="mb-4">
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-3" Outlined>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Committed Value</MudText>
-                        <MudText Typo="Typo.h6">@_financialSnapshot.Commitment.ToString("C", CultureInfo.CurrentCulture)</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Lines: @_financialSnapshot.LineItems</MudText>
-                    </MudPaper>
+            <!-- Purchase Overview -->
+            <MudGrid GutterSize="24" Class="mb-4">
+                <MudItem xs="12" md="6">
+                    <MudAutocomplete T="SupplierResponse"
+                                     Label="Supplier"
+                                     Value="@_selectedSupplier"
+                                     ValueChanged="OnSupplierChanged"
+                                     ToStringFunc="@(s => s?.Name ?? string.Empty)"
+                                     SearchFunc="SearchSuppliersAsync"
+                                     Clearable="true"
+                                     Dense="true"
+                                     ResetValueOnEmptyText="true"
+                                     Variant="Variant.Outlined" />
                 </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-3" Outlined>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Average Unit Cost</MudText>
-                        <MudText Typo="Typo.h6">@_financialSnapshot.AverageUnitCost.ToString("C", CultureInfo.CurrentCulture)</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Distinct products: @_financialSnapshot.DistinctProducts</MudText>
-                    </MudPaper>
+                <MudItem xs="12" md="3">
+                    <MudDatePicker @bind-Date="Model.PurchaseDate"
+                                   Label="Purchase Date"
+                                   Variant="Variant.Outlined"
+                                   Dense="true"
+                                   Adornment="Adornment.End"
+                                   AdornmentIcon="@Icons.Material.Filled.Event" />
                 </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-3" Outlined>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Fulfillment</MudText>
-                        <MudProgressLinear Value="@(_financialSnapshot.CompletionRate * 100)" Color="Color.Success" Class="mb-2" />
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">@(_financialSnapshot.CompletionRate * 100).ToString("N0")% complete</MudText>
-                    </MudPaper>
+                <MudItem xs="12" md="3">
+                    <MudSelect T="PurchaseStatus"
+                               Label="Lifecycle Status"
+                               Variant="Variant.Outlined"
+                               Dense="true"
+                               @bind-Value="Model.Status">
+                        @foreach (var status in _statusOptions)
+                        {
+                            <MudSelectItem T="PurchaseStatus" Value="status">
+                                @GetStatusDisplay(status)
+                            </MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudItem>
-                <MudItem xs="12" sm="6" md="3">
-                    <MudPaper Class="pa-3" Outlined>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Outstanding Lines</MudText>
-                        <MudText Typo="Typo.h6">@_financialSnapshot.RemainingItems</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Pending: @_financialSnapshot.PendingItems</MudText>
-                        <MudText Typo="Typo.caption" Color="Color.Secondary">Completed: @_financialSnapshot.CompletedItems</MudText>
-                    </MudPaper>
+                <MudItem xs="12" md="3">
+                    <MudTextField T="string"
+                                  Label="Calculated Total"
+                                  Value="@FormattedTotal"
+                                  ReadOnly="true"
+                                  Variant="Variant.Outlined"
+                                  Adornment="Adornment.Start"
+                                  AdornmentIcon="@Icons.Material.Filled.Payments"
+                                  Dense="true" />
+                </MudItem>
+                <MudItem xs="12" md="9">
+                    @if (_selectedSupplier is not null)
+                    {
+                        <MudPaper Class="pa-3" Outlined>
+                            <MudText Typo="Typo.subtitle2">@_selectedSupplier.Name</MudText>
+                            <MudDivider Class="my-2" />
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Address</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.Address) ? _selectedSupplier.Address : "--")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="3">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">TIN</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.Tin) ? _selectedSupplier.Tin : "--")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="3">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Tax Class</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.TaxClassification) ? _selectedSupplier.TaxClassification : "--")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="3">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Contact</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.ContactNo) ? _selectedSupplier.ContactNo : "--")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="3">
+                                    <MudText Typo="Typo.caption" Color="Color.Secondary">Email</MudText>
+                                    <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.Emailadd) ? _selectedSupplier.Emailadd : "--")</MudText>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Text">
+                            Select a supplier to surface contractual context and contact references.
+                        </MudAlert>
+                    }
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string"
+                                  Label="Purchase Notes"
+                                  @bind-Value="Notes"
+                                  Lines="3"
+                                  Variant="Variant.Outlined"
+                                  Placeholder="Enter any additional notes for this purchase order..." />
                 </MudItem>
             </MudGrid>
 
-            <MudTabs Rounded="true" Class="mb-2">
-                <MudTabPanel Text="Overview" Icon="@Icons.Material.Filled.DashboardCustomize">
-                    <MudGrid GutterSize="24" Class="mt-1">
-                        <MudItem xs="12" md="6">
-                            <MudAutocomplete T="SupplierResponse"
-                                             Label="Supplier"
-                                             Value="@_selectedSupplier"
-                                             ValueChanged="OnSupplierChanged"
-                                             ToStringFunc="@(s => s?.Name ?? string.Empty)"
-                                             SearchFunc="SearchSuppliersAsync"
-                                             Clearable="true"
-                                             Dense="true"
-                                             ResetValueOnEmptyText="true"
-                                             Variant="Variant.Outlined" />
-                        </MudItem>
-                        <MudItem xs="12" md="3">
-                            <MudDatePicker @bind-Date="Model.PurchaseDate"
-                                           Label="Purchase Date"
-                                           Variant="Variant.Outlined"
-                                           Dense="true"
-                                           Adornment="Adornment.End"
-                                           AdornmentIcon="@Icons.Material.Filled.Event" />
-                        </MudItem>
-                        <MudItem xs="12" md="3">
-                            <MudSelect T="PurchaseStatus"
-                                       Label="Lifecycle Status"
-                                       Variant="Variant.Outlined"
-                                       Dense="true"
-                                       @bind-Value="Model.Status">
-                                @foreach (var status in _statusOptions)
-                                {
-                                    <MudSelectItem T="PurchaseStatus" Value="status">
-                                        @GetStatusDisplay(status)
-                                    </MudSelectItem>
-                                }
-                            </MudSelect>
-                        </MudItem>
-                        <MudItem xs="12" md="3">
-                            <MudTextField T="string"
-                                          Label="Calculated Total"
-                                          Value="@Model.TotalAmount.ToString("C", CultureInfo.CurrentCulture)"
-                                          ReadOnly="true"
-                                          Variant="Variant.Outlined"
-                                          Adornment="Adornment.Start"
-                                          AdornmentIcon="@Icons.Material.Filled.Payments"
-                                          Dense="true" />
-                        </MudItem>
-                        <MudItem xs="12" md="9">
-                            @if (_selectedSupplier is not null)
-                            {
-                                <MudPaper Class="pa-3" Outlined>
-                                    <MudText Typo="Typo.subtitle2">@_selectedSupplier.Name</MudText>
-                                    <MudDivider Class="my-2" />
-                                    <MudGrid>
-                                        <MudItem xs="12" sm="6">
-                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Address</MudText>
-                                            <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.Address) ? _selectedSupplier.Address : "--")</MudText>
-                                        </MudItem>
-                                        <MudItem xs="12" sm="3">
-                                            <MudText Typo="Typo.caption" Color="Color.Secondary">TIN</MudText>
-                                            <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.Tin) ? _selectedSupplier.Tin : "--")</MudText>
-                                        </MudItem>
-                                        <MudItem xs="12" sm="3">
-                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Tax Class</MudText>
-                                            <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.TaxClassification) ? _selectedSupplier.TaxClassification : "--")</MudText>
-                                        </MudItem>
-                                        <MudItem xs="12" sm="3">
-                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Contact</MudText>
-                                            <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.ContactNo) ? _selectedSupplier.ContactNo : "--")</MudText>
-                                        </MudItem>
-                                        <MudItem xs="12" sm="3">
-                                            <MudText Typo="Typo.caption" Color="Color.Secondary">Email</MudText>
-                                            <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(_selectedSupplier.Emailadd) ? _selectedSupplier.Emailadd : "--")</MudText>
-                                        </MudItem>
-                                    </MudGrid>
-                                </MudPaper>
-                            }
-                            else
-                            {
-                                <MudAlert Severity="Severity.Info" Variant="Variant.Text">
-                                    Select a supplier to surface contractual context and contact references.
-                                </MudAlert>
-                            }
-                        </MudItem>
-                    </MudGrid>
-                </MudTabPanel>
+            <MudDivider Class="my-4" />
 
-                <MudTabPanel Text="Line Items" Icon="@Icons.Material.Filled.ViewList">
-                    <PurchaseItemList Items="@Model.Items"
-                                      Products="@_products"
-                                      Suppliers="@_suppliers"
-                                      Status="Model.Status"
-                                      PurchaseId="@(Model.Id == Guid.Empty ? (Guid?)null : Model.Id)"
-                                      OnTotalAmountChanged="UpdateTotalAmount"
-                                      IsCreate="IsCreate" />
-                </MudTabPanel>
-            </MudTabs>
+            <!-- Purchase Line Items -->
+            <PurchaseItemList Items="@Model.Items"
+                              Products="@_products"
+                              Suppliers="@_suppliers"
+                              Status="Model.Status"
+                              PurchaseId="@(Model.Id == Guid.Empty ? (Guid?)null : Model.Id)"
+                              OnTotalAmountChanged="UpdateTotalAmount"
+                              IsCreate="IsCreate" />
             </div>
         </DialogContent>
         <DialogActions>
