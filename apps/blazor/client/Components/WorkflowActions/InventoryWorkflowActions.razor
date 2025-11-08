@@ -1,0 +1,380 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Blazor.Client.Components.Dialogs
+@inject IApiClient ApiClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+@* Workflow Actions Menu *@
+<MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small" AnchorOrigin="Origin.BottomLeft">
+    @* Status-based actions removed until API client regeneration adds StockStatus to InventoryResponse *@
+
+    @* Universal Actions (Available regardless of status) *@
+    <MudMenuItem OnClick="@(() => RecordCycleCount())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" Color="Color.Info" />
+            <MudText>Record Cycle Count</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => SetLocation())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.LocationOn" Size="Size.Small" Color="Color.Info" />
+            <MudText>Set Location</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => SetCostingMethod())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Calculate" Size="Size.Small" Color="Color.Info" />
+            <MudText>Set Costing Method</MudText>
+        </MudStack>
+    </MudMenuItem>
+
+    @* Additional Workflow Actions (temporarily always available) *@
+    <MudDivider />
+    <MudMenuItem OnClick="@(() => ReserveStock())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Color="Color.Warning" />
+            <MudText>Reserve Stock</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => ReleaseReservation())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.LockOpen" Size="Size.Small" Color="Color.Success" />
+            <MudText>Release Reservation</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => Quarantine())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" Color="Color.Warning" />
+            <MudText>Quarantine</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => ReleaseFromQuarantine())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success" />
+            <MudText>Release from Quarantine</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => MarkDamaged())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.BrokenImage" Size="Size.Small" Color="Color.Error" />
+            <MudText>Mark as Damaged</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => AllocateToProduction())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Factory" Size="Size.Small" Color="Color.Primary" />
+            <MudText>Allocate to Production</MudText>
+        </MudStack>
+    </MudMenuItem>
+
+    @* Administrative Action *@
+    <MudDivider />
+    <MudMenuItem OnClick="@(() => MarkObsolete())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+            <MudText>Mark as Obsolete</MudText>
+        </MudStack>
+    </MudMenuItem>
+
+    <MudDivider />
+
+    @* Edit and Delete Actions *@
+    <MudMenuItem OnClick="@(() => OnEditCallback.InvokeAsync(Inventory))">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
+            <MudText>Edit</MudText>
+        </MudStack>
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => OnDeleteCallback.InvokeAsync(Inventory))">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+            <MudText>Delete</MudText>
+        </MudStack>
+    </MudMenuItem>
+</MudMenu>
+
+@code {
+    [Parameter]
+    public InventoryResponse Inventory { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnRefresh { get; set; }
+
+    [Parameter]
+    public EventCallback<InventoryResponse> OnEditCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<InventoryResponse> OnDeleteCallback { get; set; }
+
+    private async Task ReserveStock()
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Enter quantity to reserve:" },
+            { "ButtonText", "Reserve" },
+            { "Label", "Quantity" }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>("Reserve Stock", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not { Canceled: false } || string.IsNullOrWhiteSpace(result.Data?.ToString()))
+            return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Stock reserved successfully"
+        );
+    }
+
+    private async Task ReleaseReservation()
+    {
+        var confirmed = await ShowConfirmation(
+            "Release Reservation",
+            "Release reserved stock back to available?"
+        );
+        
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Reservation released successfully"
+        );
+    }
+
+    private async Task Quarantine()
+    {
+        var reason = await ShowReasonDialog("Quarantine Inventory", "Reason for quarantine:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Inventory quarantined successfully"
+        );
+    }
+
+    private async Task ReleaseFromQuarantine()
+    {
+        var confirmed = await ShowConfirmation(
+            "Release from Quarantine",
+            "Release this inventory from quarantine and make it available?"
+        );
+        
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Inventory released from quarantine successfully"
+        );
+    }
+
+    private async Task MarkDamaged()
+    {
+        var reason = await ShowReasonDialog("Mark as Damaged", "Damage description:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Inventory marked as damaged"
+        );
+    }
+
+    private async Task MarkObsolete()
+    {
+        var reason = await ShowReasonDialog("Mark as Obsolete", "Reason for obsolescence:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Inventory marked as obsolete"
+        );
+    }
+
+    private async Task RecordCycleCount()
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Enter counted quantity:" },
+            { "ButtonText", "Record" },
+            { "Label", "Counted Quantity" }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>("Record Cycle Count", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not { Canceled: false } || string.IsNullOrWhiteSpace(result.Data?.ToString()))
+            return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Cycle count recorded successfully"
+        );
+    }
+
+    private async Task AllocateToProduction()
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Enter quantity to allocate to production:" },
+            { "ButtonText", "Allocate" },
+            { "Label", "Quantity" }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>("Allocate to Production", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not { Canceled: false } || string.IsNullOrWhiteSpace(result.Data?.ToString()))
+            return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Inventory allocated to production successfully"
+        );
+    }
+
+    private async Task SetLocation()
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Enter new location:" },
+            { "ButtonText", "Set Location" },
+            { "Label", "Location" }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>("Set Location", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not { Canceled: false } || string.IsNullOrWhiteSpace(result.Data?.ToString()))
+            return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Location updated successfully"
+        );
+    }
+
+    private async Task SetCostingMethod()
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", "Enter costing method (FIFO, LIFO, Average):" },
+            { "ButtonText", "Set Method" },
+            { "Label", "Costing Method" }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>("Set Costing Method", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is not { Canceled: false } || string.IsNullOrWhiteSpace(result.Data?.ToString()))
+            return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update after API regeneration
+                Snackbar.Add("⚠️ API regeneration needed", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Costing method updated successfully"
+        );
+    }
+
+    private async Task<string?> ShowReasonDialog(string title, string label)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Label", label },
+            { "ButtonText", "Confirm" }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>(title, parameters, options);
+        var result = await dialog.Result;
+
+        return result is { Canceled: false } ? result.Data?.ToString() : null;
+    }
+
+    private async Task<bool> ShowConfirmation(string title, string message)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", message },
+            { "ButtonText", "Confirm" },
+            { "Color", Color.Primary }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmation>(title, parameters, options);
+        var result = await dialog.Result;
+
+        return result is { Canceled: false };
+    }
+
+    private async Task ExecuteWorkflowAction(Func<Task> action, string successMessage)
+    {
+        try
+        {
+            await action();
+            Snackbar.Add(successMessage, Severity.Success);
+            await OnRefresh.InvokeAsync();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+}

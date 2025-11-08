@@ -84,20 +84,10 @@
             </TemplateColumn>
             <TemplateColumn Title="Actions" Sortable="false">
                 <CellTemplate>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
-                        <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(async () => await OnEdit(context.Item))">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" />
-                                <MudText>Edit</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                        <MudMenuItem Disabled="@(!_canDelete)" OnClick="@(async () => await OnDelete(context.Item))">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
-                                <MudText>Delete</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                    </MudMenu>
+                    <InventoryWorkflowActions Inventory="@context.Item" 
+                                             OnRefresh="OnRefresh" 
+                                             OnEditCallback="@((i) => OnEdit(i))" 
+                                             OnDeleteCallback="@((i) => OnDelete(i))" />
                 </CellTemplate>
             </TemplateColumn>
         </Columns>

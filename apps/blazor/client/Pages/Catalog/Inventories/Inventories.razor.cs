@@ -214,6 +214,11 @@ public partial class Inventories
         searchString = text;
         await _table.ReloadServerData();
     }
+ 
+    private async Task OnRefresh()
+    {
+        await _table.ReloadServerData();
+    }
 
     private string RowStyle(InventoryResponse inventory, int index)
     {

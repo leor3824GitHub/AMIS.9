@@ -1,0 +1,388 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Shared.Authorization
+@inject IApiClient ApiClient
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudMenu Icon="@Icons.Material.Filled.MoreVert" 
+         Variant="Variant.Filled" 
+         Size="Size.Small"
+         Dense="true"
+         IconColor="Color.Info" 
+         AnchorOrigin="Origin.CenterLeft">
+
+    @* Draft Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.Draft)
+    {
+        <MudMenuItem OnClick="@(() => SubmitForApproval())">
+            <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Small" Class="mr-2" />
+            Submit for Approval
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Cancel())">
+            <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Class="mr-2" />
+            Cancel
+        </MudMenuItem>
+    }
+
+    @* Pending Approval Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.PendingApproval)
+    {
+        <MudMenuItem OnClick="@(() => Approve())">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-2" />
+            Approve
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Reject())">
+            <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Class="mr-2" />
+            Reject
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => PutOnHold())">
+            <MudIcon Icon="@Icons.Material.Filled.Pause" Size="Size.Small" Class="mr-2" />
+            Put on Hold
+        </MudMenuItem>
+    }
+
+    @* Approved Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.Approved)
+    {
+        <MudMenuItem OnClick="@(() => Acknowledge())">
+            <MudIcon Icon="@Icons.Material.Filled.ThumbUp" Size="Size.Small" Class="mr-2" />
+            Acknowledge
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => PutOnHold())">
+            <MudIcon Icon="@Icons.Material.Filled.Pause" Size="Size.Small" Class="mr-2" />
+            Put on Hold
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Cancel())">
+            <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Class="mr-2" />
+            Cancel
+        </MudMenuItem>
+    }
+
+    @* Acknowledged Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.Acknowledged)
+    {
+        <MudMenuItem OnClick="@(() => MarkInProgress())">
+            <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" Class="mr-2" />
+            Mark In Progress
+        </MudMenuItem>
+    }
+
+    @* InProgress Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.InProgress)
+    {
+        <MudMenuItem OnClick="@(() => MarkShipped())">
+            <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Size="Size.Small" Class="mr-2" />
+            Mark Shipped
+        </MudMenuItem>
+    }
+
+    @* Shipped Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.Shipped)
+    {
+        <MudMenuItem OnClick="@(() => MarkPartiallyReceived())">
+            <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" Class="mr-2" />
+            Mark Partially Received
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => MarkFullyReceived())">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-2" />
+            Mark Fully Received
+        </MudMenuItem>
+    }
+
+    @* PartiallyReceived Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.PartiallyReceived)
+    {
+        <MudMenuItem OnClick="@(() => MarkFullyReceived())">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-2" />
+            Mark Fully Received
+        </MudMenuItem>
+    }
+
+    @* FullyReceived Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.FullyReceived)
+    {
+        <MudMenuItem OnClick="@(() => MarkPendingInvoice())">
+            <MudIcon Icon="@Icons.Material.Filled.Receipt" Size="Size.Small" Class="mr-2" />
+            Mark Pending Invoice
+        </MudMenuItem>
+    }
+
+    @* PendingInvoice Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.PendingInvoice)
+    {
+        <MudMenuItem OnClick="@(() => MarkInvoiced())">
+            <MudIcon Icon="@Icons.Material.Filled.Description" Size="Size.Small" Class="mr-2" />
+            Mark Invoiced
+        </MudMenuItem>
+    }
+
+    @* Invoiced Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.Invoiced)
+    {
+        <MudMenuItem OnClick="@(() => MarkPendingPayment())">
+            <MudIcon Icon="@Icons.Material.Filled.Payment" Size="Size.Small" Class="mr-2" />
+            Mark Pending Payment
+        </MudMenuItem>
+    }
+
+    @* PendingPayment Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.PendingPayment)
+    {
+        <MudMenuItem OnClick="@(() => MarkClosed())">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-2" />
+            Mark Closed
+        </MudMenuItem>
+    }
+
+    @* OnHold Status Actions *@
+    @if (Purchase.Status == PurchaseStatus.OnHold)
+    {
+        <MudMenuItem OnClick="@(() => ReleaseFromHold())">
+            <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" Class="mr-2" />
+            Release from Hold
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Cancel())">
+            <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Class="mr-2" />
+            Cancel
+        </MudMenuItem>
+    }
+
+    @* Always Available Actions *@
+    <MudDivider />
+    <MudMenuItem OnClick="@(() => OnEdit())">
+        <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="mr-2" />
+        Edit
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => OnDelete())">
+        <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="mr-2" />
+        Delete
+    </MudMenuItem>
+</MudMenu>
+
+@code {
+    [Parameter]
+    public PurchaseResponse Purchase { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnRefresh { get; set; }
+
+    [Parameter]
+    public EventCallback<PurchaseResponse> OnEditCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<PurchaseResponse> OnDeleteCallback { get; set; }
+
+    private async Task SubmitForApproval()
+    {
+        var confirmed = await ShowConfirmation("Submit for Approval", "Are you sure you want to submit this purchase for approval?");
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.SubmitPurchaseForApprovalEndpointAsync("1", Purchase.Id!.Value),
+            "Purchase submitted for approval successfully"
+        );
+    }
+
+    private async Task Approve()
+    {
+        var confirmed = await ShowConfirmation("Approve Purchase", "Are you sure you want to approve this purchase?");
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.ApprovePurchaseEndpointAsync("1", Purchase.Id!.Value),
+            "Purchase approved successfully"
+        );
+    }
+
+    private async Task Reject()
+    {
+        var reason = await ShowReasonDialog("Reject Purchase", "Please provide a reason for rejection:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.RejectPurchaseEndpointAsync("1", Purchase.Id!.Value, new RejectRequest { Reason = reason }),
+            "Purchase rejected successfully"
+        );
+    }
+
+    private async Task Acknowledge()
+    {
+        var confirmed = await ShowConfirmation("Acknowledge Purchase", "Are you sure you want to acknowledge this purchase?");
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.AcknowledgePurchaseEndpointAsync("1", Purchase.Id!.Value),
+            "Purchase acknowledged successfully"
+        );
+    }
+
+    private async Task MarkInProgress()
+    {
+        var confirmed = await ShowConfirmation("Mark In Progress", "Mark this purchase as in progress?");
+        if (!confirmed) return;
+
+        // Note: This endpoint may need to be added to the API client
+        // await ExecuteWorkflowAction(
+        //     () => ApiClient.MarkPurchaseInProgressEndpointAsync("1", Purchase.Id!.Value),
+        //     "Purchase marked as in progress"
+        // );
+        Snackbar?.Add("This feature will be available after API client regeneration", Severity.Warning);
+    }
+
+    private async Task MarkShipped()
+    {
+        var confirmed = await ShowConfirmation("Mark Shipped", "Mark this purchase as shipped?");
+        if (!confirmed) return;
+
+        // Note: This endpoint may need to be added to the API client
+        Snackbar?.Add("This feature will be available after API client regeneration", Severity.Warning);
+    }
+
+    private async Task MarkPartiallyReceived()
+    {
+        var confirmed = await ShowConfirmation("Mark Partially Received", "Mark this purchase as partially received?");
+        if (!confirmed) return;
+
+        // Note: This endpoint may need to be added to the API client
+        Snackbar?.Add("This feature will be available after API client regeneration", Severity.Warning);
+    }
+
+    private async Task MarkFullyReceived()
+    {
+        var confirmed = await ShowConfirmation("Mark Fully Received", "Mark this purchase as fully received?");
+        if (!confirmed) return;
+
+        // Note: This endpoint may need to be added to the API client
+        Snackbar?.Add("This feature will be available after API client regeneration", Severity.Warning);
+    }
+
+    private async Task MarkPendingInvoice()
+    {
+        var confirmed = await ShowConfirmation("Mark Pending Invoice", "Mark this purchase as pending invoice?");
+        if (!confirmed) return;
+
+        // Note: This endpoint may need to be added to the API client
+        Snackbar?.Add("This feature will be available after API client regeneration", Severity.Warning);
+    }
+
+    private async Task MarkInvoiced()
+    {
+        var confirmed = await ShowConfirmation("Mark Invoiced", "Mark this purchase as invoiced?");
+        if (!confirmed) return;
+
+        // Note: This endpoint may need to be added to the API client
+        Snackbar?.Add("This feature will be available after API client regeneration", Severity.Warning);
+    }
+
+    private async Task MarkPendingPayment()
+    {
+        var confirmed = await ShowConfirmation("Mark Pending Payment", "Mark this purchase as pending payment?");
+        if (!confirmed) return;
+
+        // Note: This endpoint may need to be added to the API client
+        Snackbar?.Add("This feature will be available after API client regeneration", Severity.Warning);
+    }
+
+    private async Task MarkClosed()
+    {
+        var confirmed = await ShowConfirmation("Close Purchase", "Mark this purchase as closed?");
+        if (!confirmed) return;
+
+        // Note: This endpoint may need to be added to the API client
+        Snackbar?.Add("This feature will be available after API client regeneration", Severity.Warning);
+    }
+
+    private async Task PutOnHold()
+    {
+        var reason = await ShowReasonDialog("Put on Hold", "Please provide a reason for putting this purchase on hold:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.PutPurchaseOnHoldEndpointAsync("1", Purchase.Id!.Value, new HoldRequest { Reason = reason }),
+            "Purchase put on hold successfully"
+        );
+    }
+
+    private async Task ReleaseFromHold()
+    {
+        var confirmed = await ShowConfirmation("Release from Hold", "Release this purchase from hold?");
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.ReleasePurchaseFromHoldEndpointAsync("1", Purchase.Id!.Value),
+            "Purchase released from hold successfully"
+        );
+    }
+
+    private async Task Cancel()
+    {
+        var reason = await ShowReasonDialog("Cancel Purchase", "Please provide a reason for cancellation:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.CancelPurchaseEndpointAsync("1", Purchase.Id!.Value, new CancelRequest { Reason = reason }),
+            "Purchase cancelled successfully"
+        );
+    }
+
+    private async Task OnEdit()
+    {
+        await OnEditCallback.InvokeAsync(Purchase);
+    }
+
+    private async Task OnDelete()
+    {
+        await OnDeleteCallback.InvokeAsync(Purchase);
+    }
+
+    private async Task<bool> ShowConfirmation(string title, string message)
+    {
+        var result = await DialogService.ShowMessageBox(
+            title,
+            message,
+            yesText: "Confirm",
+            cancelText: "Cancel");
+        return result == true;
+    }
+
+    private async Task<string?> ShowReasonDialog(string title, string message)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Title", title },
+            { "Message", message }
+        };
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<ReasonDialog>(title, parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return null;
+
+        return result.Data as string;
+    }
+
+    private async Task ExecuteWorkflowAction<T>(Func<Task<T>> action, string successMessage)
+    {
+        try
+        {
+            await action();
+            Snackbar?.Add(successMessage, Severity.Success);
+            await OnRefresh.InvokeAsync();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Unexpected error: {ex.Message}", Severity.Error);
+        }
+    }
+}

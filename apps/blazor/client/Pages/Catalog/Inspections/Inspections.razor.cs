@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using AMIS.Blazor.Shared.Notifications;
+using System.Linq; // ensure LINQ is available
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Inspections;
 
@@ -344,6 +345,14 @@ public partial class Inspections
 
     private async Task OnApprove(InspectionResponse item)
     {
+        // Validate preconditions to avoid server-side InvalidOperationException
+        var canApprove = await ValidateApprovalPreconditionsAsync(item);
+        if (!canApprove.ok)
+        {
+            Snackbar?.Add(canApprove.reason ?? "Inspection cannot be approved.", Severity.Info);
+            return;
+        }
+
         try
         {
             await inspectionclient.ApproveInspectionEndpointAsync("1", item.Id);
@@ -352,9 +361,48 @@ public partial class Inspections
             await Notifications.PublishAsync(new InventoryChangedNotification());
             await _table.ReloadServerData();
         }
+        catch (ApiException ex)
+        {
+            // Surface domain-friendly errors
+            var msg = ex.Message?.Contains("Cannot approve an inspection without items.", StringComparison.OrdinalIgnoreCase) == true
+                ? "Cannot approve an inspection without items. Add inspection items first."
+                : ex.Message;
+            Snackbar?.Add($"Approve failed: {msg}", Severity.Error);
+        }
         catch (Exception ex)
         {
             Snackbar?.Add($"Approve failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task<(bool ok, string? reason)> ValidateApprovalPreconditionsAsync(InspectionResponse item)
+    {
+        try
+        {
+            var itemsResp = await inspectionclient.SearchInspectionItemsEndpointAsync("1", new SearchInspectionItemsCommand
+            {
+                InspectionId = item.Id,
+                PageNumber = 1,
+                PageSize = 100
+            });
+
+            var total = itemsResp?.TotalCount ?? 0;
+            if (total == 0)
+            {
+                return (false, "Inspection has no items. Add inspection items before approving.");
+            }
+
+            var anyAccepted = itemsResp?.Items?.Any(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation) == true;
+            if (!anyAccepted)
+            {
+                return (false, "No items are marked as Passed or Accepted with Deviation. Update item results before approving.");
+            }
+
+            return (true, null);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Unable to verify approval prerequisites: {ex.Message}");
         }
     }
 

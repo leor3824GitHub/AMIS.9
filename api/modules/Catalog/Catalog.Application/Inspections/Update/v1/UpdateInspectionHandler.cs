@@ -45,8 +45,12 @@ public sealed class UpdateInspectionHandler(
 
         // Re-evaluate inspection status - fetch related data from their own repositories
         // This follows DDD principle: aggregates reference each other by ID only
-     // Access InspectionRequestId (public property) instead of InspectionRequest (private navigation)
-        var inspectionRequest = await inspectionRequestRepo.GetByIdAsync(inspection.InspectionRequestId, cancellationToken);
+        // Access InspectionRequestId (public property) instead of InspectionRequest (private navigation)
+        InspectionRequest? inspectionRequest = null;
+        if (inspection.InspectionRequestId.HasValue)
+        {
+            inspectionRequest = await inspectionRequestRepo.GetByIdAsync(inspection.InspectionRequestId.Value, cancellationToken);
+        }
         
         if (inspectionRequest?.PurchaseId != null)
         {

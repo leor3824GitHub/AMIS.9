@@ -7,8 +7,12 @@ public sealed record PurchaseResponse(
     Guid? Id,
     Guid? SupplierId,
     DateTime? PurchaseDate,
-    decimal TotalAmount,
+    decimal? TotalAmount,
     PurchaseStatus? Status,
     SupplierResponse? Supplier,
-    ICollection<PurchaseItemResponse>? Items
+    ICollection<PurchaseItemResponse>? Items,
+    string? ReferenceNumber,
+    DateTime? CreatedOn,
+    string? Notes,
+    string? Currency
     );

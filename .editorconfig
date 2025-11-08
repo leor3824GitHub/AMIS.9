@@ -7,31 +7,32 @@ indent_style = space
 # Xml files
 [*.{xml,csproj,props,targets,ruleset,nuspec,resx}]
 indent_size = 2
+root = true
 
-# Json files
-[*.{json,config,nswag}]
-indent_size = 2
-
-# C# files
 [*.cs]
+# Re-enable analyzers as warnings (not build-blocking), we will fix code incrementally
 
-#### Core EditorConfig Options ####
+dotnet_diagnostic.CA1515.severity = warning    # types can be internal
+dotnet_diagnostic.CA1002.severity = warning    # use Collection<T>
+dotnet_diagnostic.CA2227.severity = warning    # read-only collection properties
+dotnet_diagnostic.CA1012.severity = warning    # abstract class public constructors
 
-# Indentation and spacing
-indent_size = 4
-tab_width = 4
+# IDE / Style
+dotnet_diagnostic.IDE0044.severity = suggestion  # make field readonly
 
-# New line preferences
-end_of_line = lf
-insert_final_newline = true
+# SonarAnalyzer rules (RSPEC-* mapping)
+dotnet_diagnostic.S125.severity = warning       # commented-out code
+dotnet_diagnostic.S1133.severity = warning      # deprecated code
+dotnet_diagnostic.S1135.severity = warning      # TODOs
+dotnet_diagnostic.S1172.severity = warning      # unused parameter
+dotnet_diagnostic.S2365.severity = warning      # property should not copy collections
+dotnet_diagnostic.S3459.severity = warning      # unassigned field
+dotnet_diagnostic.S4487.severity = warning      # unread private field
+dotnet_diagnostic.S3246.severity = warning      # generic variance suggestion
+dotnet_diagnostic.S6580.severity = warning      # DateTime provider when parsing
 
-#### .NET Coding Conventions ####
-[*.{cs,vb}]
-
-# Organize usings
-dotnet_separate_import_directive_groups = false
-dotnet_sort_system_directives_first = true
-file_header_template = unset
+# Prefer not to enforce code style as build errors
+dotnet_analyzer_diagnostic.severity = default
 
 # this. and Me. preferences
 dotnet_style_qualification_for_event = false:silent

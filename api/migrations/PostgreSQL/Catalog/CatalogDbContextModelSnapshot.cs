@@ -321,7 +321,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<DateTime?>("InspectedOn")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<Guid>("InspectionRequestId")
+                    b.Property<Guid?>("InspectionRequestId")
                         .HasColumnType("uuid");
 
                     b.Property<DateTimeOffset>("LastModified")
@@ -384,8 +384,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("InspectionId1")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("InspectionItemStatus")
-                        .HasColumnType("integer");
+                    b.Property<string>("InspectionItemStatus")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
@@ -458,11 +459,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PurchaseId")
+                    b.Property<Guid?>("PurchaseId")
                         .HasColumnType("uuid");
 
-                    b.Property<int>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("TenantId")
                         .IsRequired()
@@ -489,8 +492,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<decimal>("AvePrice")
                         .HasColumnType("numeric");
 
-                    b.Property<int>("CostingMethod")
-                        .HasColumnType("integer");
+                    b.Property<string>("CostingMethod")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("timestamp with time zone");
@@ -514,7 +519,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasColumnType("uuid");
 
                     b.Property<string>("Location")
-                        .HasColumnType("text");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<Guid>("ProductId")
                         .HasColumnType("uuid");
@@ -525,8 +531,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<int>("ReservedQty")
                         .HasColumnType("integer");
 
-                    b.Property<int>("StockStatus")
-                        .HasColumnType("integer");
+                    b.Property<string>("StockStatus")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("TenantId")
                         .IsRequired()
@@ -779,13 +787,14 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("LastModifiedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<DateTime>("PurchaseDate")
+                    b.Property<DateTime?>("PurchaseDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("Status")
-                        .HasColumnType("integer");
+                    b.Property<string>("Status")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
-                    b.Property<Guid>("SupplierId")
+                    b.Property<Guid?>("SupplierId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("TenantId")
@@ -811,8 +820,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("AcceptanceStatus")
-                        .HasColumnType("integer");
+                    b.Property<string>("AcceptanceStatus")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset>("Created")
                         .HasColumnType("timestamp with time zone");
@@ -826,11 +836,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("InspectionStatus")
-                        .HasColumnType("integer");
+                    b.Property<string>("InspectionStatus")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
-                    b.Property<int?>("ItemStatus")
-                        .HasColumnType("integer");
+                    b.Property<string>("ItemStatus")
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
@@ -841,7 +853,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("ProductId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PurchaseId")
+                    b.Property<Guid?>("PurchaseId")
                         .HasColumnType("uuid");
 
                     b.Property<int>("Qty")
@@ -986,8 +998,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.HasOne("AMIS.WebApi.Catalog.Domain.InspectionRequest", "InspectionRequest")
                         .WithMany()
                         .HasForeignKey("InspectionRequestId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", null)
                         .WithMany("Inspections")
@@ -1029,9 +1040,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", "Purchase")
                         .WithMany()
-                        .HasForeignKey("PurchaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PurchaseId");
 
                     b.Navigation("Inspector");
 
@@ -1101,9 +1110,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 {
                     b.HasOne("AMIS.WebApi.Catalog.Domain.Supplier", "Supplier")
                         .WithMany()
-                        .HasForeignKey("SupplierId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SupplierId");
 
                     b.Navigation("Supplier");
                 });
@@ -1116,9 +1123,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", null)
                         .WithMany("Items")
-                        .HasForeignKey("PurchaseId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("PurchaseId");
 
                     b.Navigation("Product");
                 });

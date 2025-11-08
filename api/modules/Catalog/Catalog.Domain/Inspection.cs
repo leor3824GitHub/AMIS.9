@@ -4,6 +4,7 @@ using System.Linq;
 using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.Exceptions;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using System.Diagnostics.CodeAnalysis;
 
@@ -17,8 +18,8 @@ public record PurchaseItemSummary(Guid Id, int Qty);
 
 public class Inspection : AuditableEntity, IAggregateRoot
 {
-    // Link to InspectionRequest (required) - ID only to maintain aggregate boundaries
-    public Guid InspectionRequestId { get; private set; }
+    // Link to InspectionRequest (optional) - ID only to maintain aggregate boundaries
+    public Guid? InspectionRequestId { get; private set; }
     
     /// <summary>
     /// Navigation property for EF Core materialization and query projections ONLY.
@@ -52,7 +53,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     private Inspection() { }
 
     // Internal constructor - use factory Create(...) for creation
-    private Inspection(Guid id, Guid inspectionRequestId, Guid employeeId, DateTime inspectedOn, bool approved, string? remarks, string? iarDocumentPath)
+    private Inspection(Guid id, Guid? inspectionRequestId, Guid employeeId, DateTime inspectedOn, bool approved, string? remarks, string? iarDocumentPath)
     {
         Id = id;
         InspectionRequestId = inspectionRequestId;
@@ -66,9 +67,8 @@ public class Inspection : AuditableEntity, IAggregateRoot
     }
 
     // Factory - ensures Id is generated and sensible defaults are applied
-    public static Inspection Create(Guid inspectionRequestId, Guid employeeId, DateTime? inspectedOn = null, bool approved = false, string? remarks = null, string? iarDocumentPath = null)
+    public static Inspection Create(Guid? inspectionRequestId, Guid employeeId, DateTime? inspectedOn = null, bool approved = false, string? remarks = null, string? iarDocumentPath = null)
     {
-        if (inspectionRequestId == Guid.Empty) throw new ArgumentException("InspectionRequestId must be provided.", nameof(inspectionRequestId));
         if (employeeId == Guid.Empty) throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
         
         var inspectedAt = inspectedOn ?? DateTime.UtcNow;
@@ -261,9 +261,8 @@ public class Inspection : AuditableEntity, IAggregateRoot
     }
 
     // Update inspection request link if needed
-    public void SetInspectionRequest(Guid inspectionRequestId)
+    public void SetInspectionRequest(Guid? inspectionRequestId)
     {
-        if (inspectionRequestId == Guid.Empty) throw new ArgumentException("InspectionRequestId must be provided.", nameof(inspectionRequestId));
         if (InspectionRequestId == inspectionRequestId) return;
         InspectionRequestId = inspectionRequestId;
         InspectionRequest = null!;
@@ -278,7 +277,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
 
         if (!IsValidTransition(Status, newStatus))
         {
-            throw new InvalidOperationException($"Cannot transition inspection from {Status} to {newStatus}.");
+            throw new InvalidInspectionTransitionException(Id, Status, newStatus);
         }
 
         Status = newStatus;
@@ -314,10 +313,10 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public void Schedule(DateTime scheduledDate)
     {
         if (Status != InspectionStatus.Scheduled)
-            throw new InvalidOperationException("Can only schedule inspections in Scheduled status.");
+            throw new InvalidInspectionStatusException(Id, Status.ToString(), "schedule");
         
         if (scheduledDate < DateTime.UtcNow)
-            throw new ArgumentException("Scheduled date cannot be in the past.");
+            throw InspectionValidationException.ForInvalidScheduledDate();
 
         SetInspectedOn(scheduledDate);
     }
@@ -326,7 +325,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public void ConditionallyApprove(string conditions)
     {
         if (string.IsNullOrWhiteSpace(conditions))
-            throw new ArgumentException("Conditions must be specified for conditional approval.");
+            throw InspectionValidationException.ForMissingConditions();
 
         ChangeStatus(InspectionStatus.ConditionallyApproved);
         UpdateRemarks($"Conditionally Approved: {conditions}");
@@ -337,7 +336,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public void PartiallyApprove(string partialDetails)
     {
         if (string.IsNullOrWhiteSpace(partialDetails))
-            throw new ArgumentException("Partial approval details must be specified.");
+            throw InspectionValidationException.ForMissingPartialDetails();
 
         ChangeStatus(InspectionStatus.PartiallyApproved);
         UpdateRemarks($"Partially Approved: {partialDetails}");
@@ -348,7 +347,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public void PutOnHold(string reason)
     {
         if (string.IsNullOrWhiteSpace(reason))
-            throw new ArgumentException("Reason must be specified for putting inspection on hold.");
+            throw InspectionValidationException.ForMissingHoldReason();
 
         ChangeStatus(InspectionStatus.OnHold);
         UpdateRemarks($"On Hold: {reason}");
@@ -359,7 +358,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public void ReleaseFromHold()
     {
         if (Status != InspectionStatus.OnHold)
-            throw new InvalidOperationException("Can only release inspections that are on hold.");
+            throw new InvalidInspectionStatusException(Id, Status.ToString(), "release from hold");
 
         ChangeStatus(InspectionStatus.InProgress);
         QueueDomainEvent(new InspectionUpdated { Inspection = this });
@@ -369,7 +368,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public void Quarantine(string reason)
     {
         if (string.IsNullOrWhiteSpace(reason))
-            throw new ArgumentException("Reason must be specified for quarantine.");
+            throw InspectionValidationException.ForMissingQuarantineReason();
 
         ChangeStatus(InspectionStatus.Quarantined);
         UpdateRemarks($"Quarantined: {reason}");
@@ -380,7 +379,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public void ReleaseFromQuarantine()
     {
         if (Status != InspectionStatus.Quarantined)
-            throw new InvalidOperationException("Can only release inspections that are quarantined.");
+            throw new InvalidInspectionStatusException(Id, Status.ToString(), "release from quarantine");
 
         ChangeStatus(InspectionStatus.InProgress);
         QueueDomainEvent(new InspectionUpdated { Inspection = this });
@@ -390,7 +389,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public void RequireReInspection(string reason)
     {
         if (string.IsNullOrWhiteSpace(reason))
-            throw new ArgumentException("Reason must be specified for re-inspection.");
+            throw InspectionValidationException.ForMissingReInspectionReason();
 
         ChangeStatus(InspectionStatus.ReInspectionRequired);
         UpdateRemarks($"Re-Inspection Required: {reason}");

@@ -49,7 +49,11 @@ public sealed class InspectionApprovedHandler : INotificationHandler<InspectionA
         }
 
         // Load the inspection request to get PurchaseId and mark it completed
-        var inspectionRequest = await _inspectionRequestRepo.GetByIdAsync(notification.InspectionRequestId, cancellationToken);
+        InspectionRequest? inspectionRequest = null;
+        if (notification.InspectionRequestId.HasValue)
+        {
+            inspectionRequest = await _inspectionRequestRepo.GetByIdAsync(notification.InspectionRequestId.Value, cancellationToken);
+        }
 
         if (inspectionRequest != null)
         {

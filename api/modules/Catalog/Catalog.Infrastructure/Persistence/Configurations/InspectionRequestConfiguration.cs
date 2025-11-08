@@ -1,5 +1,6 @@
 ﻿using Finbuckle.MultiTenant;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -13,6 +14,11 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
             builder.IsMultiTenant();   // MultiTenant support for Inspection entity            
             builder.HasKey(x => x.Id);  // Primary key            
             builder.Property(x => x.PurchaseId)  // Property configurations
+                .IsRequired(false);
+
+            builder.Property(x => x.Status)
+                .HasConversion<string>()
+                .HasMaxLength(32)
                 .IsRequired();
         }
     }

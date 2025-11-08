@@ -1,5 +1,6 @@
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.Exceptions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,7 +18,7 @@ public sealed class PutInspectionOnHoldHandler : IRequestHandler<PutInspectionOn
     public async Task<PutInspectionOnHoldResponse> Handle(PutInspectionOnHoldCommand request, CancellationToken cancellationToken)
     {
         var inspection = await _repository.GetByIdAsync(request.InspectionId, cancellationToken)
-            ?? throw new InvalidOperationException($"Inspection with ID {request.InspectionId} not found.");
+            ?? throw new InspectionNotFoundException(request.InspectionId);
 
         inspection.PutOnHold(request.Reason);
         

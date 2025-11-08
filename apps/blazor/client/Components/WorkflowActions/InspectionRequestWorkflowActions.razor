@@ -1,0 +1,113 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Blazor.Client.Components.Dialogs
+@inject IApiClient ApiClient
+@inject IDialogService DialogService
+@inject ISnackbar Snackbar
+
+@* Workflow Actions as menu items - to be inserted into existing MudMenu *@
+
+@* Mark Completed - Available when InProgress *@
+@if (InspectionRequest.Status == InspectionRequestStatus.InProgress)
+{
+    <MudMenuItem OnClick="@(() => MarkCompleted())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success" />
+            <MudText>Mark Completed</MudText>
+        </MudStack>
+    </MudMenuItem>
+}
+
+@* Mark Accepted - Available when Completed *@
+@if (InspectionRequest.Status == InspectionRequestStatus.Completed)
+{
+    <MudMenuItem OnClick="@(() => MarkAccepted())">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+            <MudIcon Icon="@Icons.Material.Filled.ThumbUp" Size="Size.Small" Color="Color.Success" />
+            <MudText>Mark Accepted</MudText>
+        </MudStack>
+    </MudMenuItem>
+}
+
+@code {
+    [Parameter]
+    public InspectionRequestResponse InspectionRequest { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnRefresh { get; set; }
+
+    private async Task MarkCompleted()
+    {
+        var confirmed = await ShowConfirmation(
+            "Mark Completed",
+            "Mark this inspection request as completed?"
+        );
+        
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update this after API regeneration
+                // await ApiClient.MarkCompletedEndpointAsync("1", InspectionRequest.Id!.Value);
+                Snackbar.Add("⚠️ API regeneration needed - MarkCompletedEndpointAsync not yet available", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Inspection request marked as completed successfully"
+        );
+    }
+
+    private async Task MarkAccepted()
+    {
+        var confirmed = await ShowConfirmation(
+            "Mark Accepted",
+            "Mark this inspection request as accepted? This will create an inspection record."
+        );
+        
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            async () =>
+            {
+                // TODO: Update this after API regeneration
+                // await ApiClient.MarkAcceptedEndpointAsync("1", InspectionRequest.Id!.Value);
+                Snackbar.Add("⚠️ API regeneration needed - MarkAcceptedEndpointAsync not yet available", Severity.Warning);
+                throw new NotImplementedException("API method not available yet");
+            },
+            "Inspection request marked as accepted successfully"
+        );
+    }
+
+    private async Task<bool> ShowConfirmation(string title, string message)
+    {
+        var parameters = new DialogParameters
+        {
+            { "ContentText", message },
+            { "ButtonText", "Confirm" },
+            { "Color", Color.Primary }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small };
+        var dialog = await DialogService.ShowAsync<DeleteConfirmation>(title, parameters, options);
+        var result = await dialog.Result;
+
+        return result is { Canceled: false };
+    }
+
+    private async Task ExecuteWorkflowAction(Func<Task> action, string successMessage)
+    {
+        try
+        {
+            await action();
+            Snackbar.Add(successMessage, Severity.Success);
+            await OnRefresh.InvokeAsync();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"An unexpected error occurred: {ex.Message}", Severity.Error);
+        }
+    }
+}

@@ -137,6 +137,11 @@
             <TemplateColumn Title="Actions" Sortable="false">
                 <CellTemplate>
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
+                        @* Workflow Actions *@
+                        <InspectionRequestWorkflowActions InspectionRequest="@context.Item" 
+                                                         OnRefresh="OnRefresh" />
+                        
+                        @* Existing Assignment Actions *@
                         @if (context.Item.InspectorId == null)
                         {
                             <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)" OnClick="@(() => OnAssign(context.Item))">
@@ -155,13 +160,16 @@
                                 </MudStack>
                             </MudMenuItem>
                         }
+                        
+                        <MudDivider />
+                        
                         <MudMenuItem OnClick="@(() => OnView(context.Item))">
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                                 <MudIcon Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" />
                                 <MudText>View Details</MudText>
                             </MudStack>
                         </MudMenuItem>
-                        <MudDivider />
+                        
                         <MudMenuItem Disabled="@ShouldDisableInspect(context.Item)"
                                      OnClick="@(() => OnInspect(context.Item))">
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">

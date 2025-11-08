@@ -2,6 +2,7 @@
 using Ardalis.Specification;
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.Exceptions;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -36,22 +37,22 @@ public sealed class CreateInspectionHandler(
         
         if (inspectionRequest is null)
    {
-            throw new InvalidOperationException("Create an inspection request before recording an inspection.");
+            throw new InspectionRequestNotFoundException(request.InspectionRequestId);
         }
 
    if (inspectionRequest.PurchaseId != request.PurchaseId)
         {
-throw new InvalidOperationException("The inspection must target the same purchase as its inspection request.");
+            throw new InspectionRequestMismatchException(request.InspectionRequestId, inspectionRequest.PurchaseId!.Value, request.PurchaseId);
         }
 
         if (inspectionRequest.Status is InspectionRequestStatus.Pending)
         {
-       throw new InvalidOperationException("Assign an inspector to the request before creating an inspection.");
+            throw new InspectorNotAssignedException(request.InspectionRequestId);
         }
 
     if (inspectionRequest.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
         {
-      throw new InvalidOperationException("This inspection request has already been completed. Create a new request for additional inspections.");
+            throw new InspectionAlreadyCompletedException(request.InspectionRequestId);
         }
 
       // Create inspection with InspectionRequestId only (following aggregate boundaries)

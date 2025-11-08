@@ -165,7 +165,7 @@
         <TemplateColumn Title="Unit" Sortable="false">
             <CellTemplate>
                 <MudText Typo="Typo.body2">
-                    @(context.Item.Unit ?? "—")
+                    @context.Item.Unit.ToString()
                 </MudText>
             </CellTemplate>
         </TemplateColumn>

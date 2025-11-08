@@ -162,30 +162,10 @@
 
             <TemplateColumn Title="Actions" Sortable="false">
                 <CellTemplate>
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
-                        <MudMenuItem Disabled="@(!CanEdit(context.Item))" OnClick="@(() => OnEdit(context.Item))">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Info" />
-                                <MudText>Edit Inspection</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                        @if (_canUpdate)
-                        {
-                            <MudMenuItem Disabled="@(!IsApproveEnabled(context.Item))" OnClick="@(() => OnApprove(context.Item))">
-                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success" />
-                                    <MudText>Approve</MudText>
-                                </MudStack>
-                            </MudMenuItem>
-                        }
-                        <MudDivider />
-                        <MudMenuItem Disabled="@(!CanDelete(context.Item))" OnClick="@(() => OnDelete(context.Item))">
-                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
-                                <MudText>Delete</MudText>
-                            </MudStack>
-                        </MudMenuItem>
-                    </MudMenu>
+                    <InspectionWorkflowActions Inspection="@context.Item" 
+                                             OnRefresh="OnRefresh"
+                                             OnEditCallback="@((i) => OnEdit(i))"
+                                             OnDeleteCallback="@((i) => OnDelete(i))" />
                 </CellTemplate>
             </TemplateColumn>
         </Columns>

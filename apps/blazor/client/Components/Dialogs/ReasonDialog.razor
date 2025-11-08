@@ -1,0 +1,49 @@
+@using MudBlazor
+@using Microsoft.AspNetCore.Components
+
+<MudDialog>
+    <DialogContent>
+        <MudText>@Message</MudText>
+        <MudTextField @bind-Value="Reason" 
+                      Label="Reason" 
+                      Variant="Variant.Outlined"
+                      Lines="3"
+                      AutoGrow
+                      Required
+                      Class="mt-4" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" 
+                   OnClick="Submit"
+                   Disabled="@string.IsNullOrWhiteSpace(Reason)">
+            Confirm
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] 
+    IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public string Title { get; set; } = "Provide Reason";
+
+    [Parameter]
+    public string Message { get; set; } = "Please provide a reason:";
+
+    private string Reason { get; set; } = string.Empty;
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private void Submit()
+    {
+        if (!string.IsNullOrWhiteSpace(Reason))
+        {
+            MudDialog.Close(DialogResult.Ok(Reason));
+        }
+    }
+}

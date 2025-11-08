@@ -1,0 +1,362 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Shared.Authorization
+@inject IApiClient ApiClient
+@inject ISnackbar Snackbar
+@inject IDialogService DialogService
+
+<MudMenu Icon="@Icons.Material.Filled.MoreVert" 
+         Variant="Variant.Filled" 
+         Size="Size.Small"
+         Dense="true"
+         IconColor="Color.Info" 
+         AnchorOrigin="Origin.CenterLeft">
+
+    @* Scheduled Status Actions *@
+    @if (Inspection.Status == InspectionStatus.Scheduled)
+    {
+        <MudMenuItem OnClick="@(() => MarkInProgress())">
+            <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" Class="mr-2" />
+            Start Inspection
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => PutOnHold())">
+            <MudIcon Icon="@Icons.Material.Filled.Pause" Size="Size.Small" Class="mr-2" />
+            Put on Hold
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Cancel())">
+            <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Class="mr-2" />
+            Cancel
+        </MudMenuItem>
+    }
+
+    @* InProgress Status Actions *@
+    @if (Inspection.Status == InspectionStatus.InProgress)
+    {
+        <MudMenuItem OnClick="@(() => Complete())">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Class="mr-2" />
+            Complete Inspection
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Quarantine())">
+            <MudIcon Icon="@Icons.Material.Filled.Block" Size="Size.Small" Class="mr-2" />
+            Quarantine Items
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => PutOnHold())">
+            <MudIcon Icon="@Icons.Material.Filled.Pause" Size="Size.Small" Class="mr-2" />
+            Put on Hold
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Cancel())">
+            <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Class="mr-2" />
+            Cancel
+        </MudMenuItem>
+    }
+
+    @* Completed Status Actions *@
+    @if (Inspection.Status == InspectionStatus.Completed)
+    {
+        <MudMenuItem OnClick="@(() => Approve())">
+            <MudIcon Icon="@Icons.Material.Filled.ThumbUp" Size="Size.Small" Class="mr-2" />
+            Approve
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => ConditionallyApprove())">
+            <MudIcon Icon="@Icons.Material.Filled.CheckCircleOutline" Size="Size.Small" Class="mr-2" />
+            Conditionally Approve
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => PartiallyApprove())">
+            <MudIcon Icon="@Icons.Material.Filled.DoneAll" Size="Size.Small" Class="mr-2" />
+            Partially Approve
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => RequireReInspection())">
+            <MudIcon Icon="@Icons.Material.Filled.Refresh" Size="Size.Small" Class="mr-2" />
+            Require Re-Inspection
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Reject())">
+            <MudIcon Icon="@Icons.Material.Filled.ThumbDown" Size="Size.Small" Class="mr-2" />
+            Reject
+        </MudMenuItem>
+    }
+
+    @* OnHold Status Actions *@
+    @if (Inspection.Status == InspectionStatus.OnHold)
+    {
+        <MudMenuItem OnClick="@(() => ReleaseFromHold())">
+            <MudIcon Icon="@Icons.Material.Filled.PlayArrow" Size="Size.Small" Class="mr-2" />
+            Release from Hold
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Cancel())">
+            <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" Class="mr-2" />
+            Cancel
+        </MudMenuItem>
+    }
+
+    @* Quarantined Status Actions *@
+    @if (Inspection.Status == InspectionStatus.Quarantined)
+    {
+        <MudMenuItem OnClick="@(() => ReleaseFromQuarantine())">
+            <MudIcon Icon="@Icons.Material.Filled.LockOpen" Size="Size.Small" Class="mr-2" />
+            Release from Quarantine
+        </MudMenuItem>
+        <MudMenuItem OnClick="@(() => Reject())">
+            <MudIcon Icon="@Icons.Material.Filled.ThumbDown" Size="Size.Small" Class="mr-2" />
+            Reject
+        </MudMenuItem>
+    }
+
+    @* ReInspectionRequired Status Actions *@
+    @if (Inspection.Status == InspectionStatus.ReInspectionRequired)
+    {
+        <MudMenuItem OnClick="@(() => Schedule())">
+            <MudIcon Icon="@Icons.Material.Filled.Schedule" Size="Size.Small" Class="mr-2" />
+            Schedule Re-Inspection
+        </MudMenuItem>
+    }
+
+    @* Always Available Actions *@
+    <MudDivider />
+    <MudMenuItem OnClick="@(() => OnEdit())">
+        <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Class="mr-2" />
+        Edit
+    </MudMenuItem>
+    <MudMenuItem OnClick="@(() => OnDelete())">
+        <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Class="mr-2" />
+        Delete
+    </MudMenuItem>
+</MudMenu>
+
+@code {
+    [Parameter]
+    public InspectionResponse Inspection { get; set; } = default!;
+
+    [Parameter]
+    public EventCallback OnRefresh { get; set; }
+
+    [Parameter]
+    public EventCallback<InspectionResponse> OnEditCallback { get; set; }
+
+    [Parameter]
+    public EventCallback<InspectionResponse> OnDeleteCallback { get; set; }
+
+    private async Task Schedule()
+    {
+        // Ask for a schedule date (yyyy-MM-dd or full date/time)
+        var input = await ShowReasonDialog("Schedule Inspection", "Enter schedule date (e.g., 2025-11-06 or 2025-11-06T14:00):");
+        if (string.IsNullOrWhiteSpace(input)) return;
+
+        if (!DateTime.TryParse(input, out var scheduled))
+        {
+            Snackbar?.Add("Invalid date format.", Severity.Error);
+            return;
+        }
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.ScheduleInspectionEndpointAsync("1", Inspection.Id, new ScheduleRequest { ScheduledDate = scheduled }),
+            "Inspection scheduled.");
+    }
+
+    private async Task MarkInProgress()
+    {
+        // No API endpoint available to transition Scheduled -> InProgress yet
+        Snackbar?.Add("Start Inspection is not supported by the API yet.", Severity.Info);
+    }
+
+    private async Task Complete()
+    {
+        var confirmed = await ShowConfirmation("Complete Inspection", "Mark this inspection as complete?");
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.CompleteInspectionEndpointAsync("1", Inspection.Id),
+            "Inspection marked as completed.");
+    }
+
+    private async Task Approve()
+    {
+        // Pre-check: must have items and at least one Passed or AcceptedWithDeviation
+        var approvalCheck = await ValidateApprovalPreconditionsAsync();
+        if (!approvalCheck.ok)
+        {
+            Snackbar?.Add(approvalCheck.reason ?? "Inspection cannot be approved.", Severity.Info);
+            return;
+        }
+
+        var confirmed = await ShowConfirmation("Approve Inspection", "Approve this inspection?");
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.ApproveInspectionEndpointAsync("1", Inspection.Id),
+            "Inspection approved.");
+    }
+
+    private async Task<(bool ok, string? reason)> ValidateApprovalPreconditionsAsync()
+    {
+        try
+        {
+            // Fetch minimal data to verify prerequisites
+            var resp = await ApiClient.SearchInspectionItemsEndpointAsync("1", new SearchInspectionItemsCommand
+            {
+                InspectionId = Inspection.Id,
+                PageNumber =1,
+                PageSize =100
+            });
+
+            var total = resp?.TotalCount ??0;
+            if (total ==0)
+            {
+                return (false, "Inspection has no items. Add inspection items before approving.");
+            }
+
+            var anyAccepted = resp?.Items?.Any(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation) == true;
+            if (!anyAccepted)
+            {
+                return (false, "No items are marked as Passed or Accepted with Deviation. Update item results before approving.");
+            }
+
+            return (true, null);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Unable to verify approval prerequisites: {ex.Message}");
+        }
+    }
+
+    private async Task ConditionallyApprove()
+    {
+        var reason = await ShowReasonDialog("Conditional Approval", "Provide conditions for approval:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.ConditionallyApproveEndpointAsync("1", Inspection.Id, new ConditionalApprovalRequest { Conditions = reason }),
+            "Inspection conditionally approved.");
+    }
+
+    private async Task PartiallyApprove()
+    {
+        var details = await ShowReasonDialog("Partial Approval", "Provide details for partial approval:");
+        if (string.IsNullOrWhiteSpace(details)) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.PartiallyApproveEndpointAsync("1", Inspection.Id, new PartialApprovalRequest { PartialDetails = details }),
+            "Inspection partially approved.");
+    }
+
+    private async Task Reject()
+    {
+        // No dedicated reject endpoint exposed in API yet
+        Snackbar?.Add("Reject is not supported by the API yet.", Severity.Info);
+    }
+
+    private async Task Quarantine()
+    {
+        var reason = await ShowReasonDialog("Quarantine Items", "Provide a reason for quarantine:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.QuarantineInspectionEndpointAsync("1", Inspection.Id, new QuarantineInspectionRequest { Reason = reason }),
+            "Inspection quarantined.");
+    }
+
+    private async Task RequireReInspection()
+    {
+        var reason = await ShowReasonDialog("Require Re-Inspection", "Provide a reason for re-inspection:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.RequireReInspectionEndpointAsync("1", Inspection.Id, new ReInspectionRequest { Reason = reason }),
+            "Inspection marked for re-inspection.");
+    }
+
+    private async Task PutOnHold()
+    {
+        var reason = await ShowReasonDialog("Put on Hold", "Provide a reason for putting this inspection on hold:");
+        if (string.IsNullOrWhiteSpace(reason)) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.PutInspectionOnHoldEndpointAsync("1", Inspection.Id, new InspectionHoldRequest { Reason = reason }),
+            "Inspection put on hold.");
+    }
+
+    private async Task ReleaseFromHold()
+    {
+        var confirmed = await ShowConfirmation("Release from Hold", "Release this inspection from hold?");
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.ReleaseInspectionFromHoldEndpointAsync("1", Inspection.Id),
+            "Inspection released from hold.");
+    }
+
+    private async Task ReleaseFromQuarantine()
+    {
+        var confirmed = await ShowConfirmation("Release from Quarantine", "Release items from quarantine?");
+        if (!confirmed) return;
+
+        await ExecuteWorkflowAction(
+            () => ApiClient.ReleaseInspectionFromQuarantineEndpointAsync("1", Inspection.Id),
+            "Inspection released from quarantine.");
+    }
+
+    private async Task Cancel()
+    {
+        // No dedicated cancel endpoint exposed in API yet
+        Snackbar?.Add("Cancel is not supported by the API yet.", Severity.Info);
+    }
+
+    private async Task OnEdit()
+    {
+        await OnEditCallback.InvokeAsync(Inspection);
+    }
+
+    private async Task OnDelete()
+    {
+        await OnDeleteCallback.InvokeAsync(Inspection);
+    }
+
+    private async Task<bool> ShowConfirmation(string title, string message)
+    {
+        var result = await DialogService.ShowMessageBox(
+            title,
+            message,
+            yesText: "Confirm",
+            cancelText: "Cancel");
+        return result == true;
+    }
+
+    private async Task<string?> ShowReasonDialog(string title, string message)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Title", title },
+            { "Message", message }
+        };
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Small,
+            FullWidth = true
+        };
+
+        var dialog = await DialogService.ShowAsync<ReasonDialog>(title, parameters, options);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+            return null;
+
+        return result.Data as string;
+    }
+
+    private async Task ExecuteWorkflowAction<T>(Func<Task<T>> action, string successMessage)
+    {
+        try
+        {
+            await action();
+            Snackbar?.Add(successMessage, Severity.Success);
+            await OnRefresh.InvokeAsync();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Unexpected error: {ex.Message}", Severity.Error);
+        }
+    }
+}

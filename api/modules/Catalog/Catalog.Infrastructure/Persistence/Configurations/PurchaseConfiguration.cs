@@ -1,5 +1,6 @@
 ﻿using Finbuckle.MultiTenant;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -10,7 +11,13 @@ internal sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
     {
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.PurchaseDate).IsRequired();
-        builder.Property(x => x.SupplierId).IsRequired();
+        builder.Property(x => x.PurchaseDate).IsRequired(false);
+        builder.Property(x => x.SupplierId).IsRequired(false);
+
+        // Store status as string to align with text column
+        builder.Property(x => x.Status)
+            .HasConversion<string>()
+            .HasMaxLength(32)
+            .IsRequired(false);
     }
 }

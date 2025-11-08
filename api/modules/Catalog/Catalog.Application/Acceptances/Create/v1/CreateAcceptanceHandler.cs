@@ -3,6 +3,7 @@ using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Application.Inspections.Specifications;
 using AMIS.WebApi.Catalog.Application.InspectionRequests.Specifications;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.Exceptions;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.Logging;
@@ -32,11 +33,15 @@ public sealed class CreateAcceptanceHandler(
                       ?? throw new InvalidOperationException("Specified inspection was not found.");
 
             // Access PurchaseId through InspectionRequest (following aggregate boundaries)
-            var inspectionRequest = await inspectionRequestRepository.GetByIdAsync(insp.InspectionRequestId, cancellationToken);
+            InspectionRequest? inspectionRequest = null;
+            if (insp.InspectionRequestId.HasValue)
+            {
+                inspectionRequest = await inspectionRequestRepository.GetByIdAsync(insp.InspectionRequestId.Value, cancellationToken);
+            }
 
             if (inspectionRequest?.PurchaseId == null)
             {
-                throw new InvalidOperationException("The specified inspection is not linked to a purchase; cannot create acceptance.");
+                throw AcceptanceValidationException.ForInspectionNotLinkedToPurchase();
             }
 
             effectivePurchaseId = inspectionRequest.PurchaseId.Value;
@@ -52,12 +57,12 @@ public sealed class CreateAcceptanceHandler(
 
         if (inspectionRequest2 is null)
         {
-            throw new InvalidOperationException("Submit an inspection request before recording an acceptance.");
+            throw AcceptanceValidationException.ForMissingInspectionRequest();
         }
 
         if (inspectionRequest2.Status is not InspectionRequestStatus.Completed and not InspectionRequestStatus.Accepted)
         {
-            throw new InvalidOperationException("Complete the inspection before recording an acceptance.");
+            throw AcceptanceValidationException.ForInspectionNotCompleted();
         }
 
         Guid? inspectionId = effectiveInspectionId;
@@ -68,7 +73,7 @@ public sealed class CreateAcceptanceHandler(
 
             if (inspection is null)
             {
-                throw new InvalidOperationException("Record an inspection for the purchase before creating an acceptance.");
+                throw AcceptanceValidationException.ForMissingInspection();
             }
 
             inspectionId = inspection.Id;

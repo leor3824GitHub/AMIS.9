@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 {
     /// <inheritdoc />
-    public partial class addinitialCatalogs : Migration
+    public partial class AddCatalogSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -113,7 +113,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     Name = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     Sku = table.Column<decimal>(type: "numeric", nullable: false),
-                    Unit = table.Column<string>(type: "text", nullable: false),
+                    Unit = table.Column<int>(type: "integer", nullable: false),
                     ImagePath = table.Column<string>(type: "text", nullable: true),
                     CategoryId = table.Column<Guid>(type: "uuid", nullable: true),
                     TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
@@ -171,10 +171,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    SupplierId = table.Column<Guid>(type: "uuid", nullable: false),
-                    PurchaseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    SupplierId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PurchaseDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     TotalAmount = table.Column<decimal>(type: "numeric", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: true),
+                    Status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
                     TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -191,8 +191,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         column: x => x.SupplierId,
                         principalSchema: "catalog",
                         principalTable: "Suppliers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -204,6 +203,11 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     ProductId = table.Column<Guid>(type: "uuid", nullable: false),
                     Qty = table.Column<int>(type: "integer", nullable: false),
                     AvePrice = table.Column<decimal>(type: "numeric", nullable: false),
+                    StockStatus = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    CostingMethod = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    ReservedQty = table.Column<int>(type: "integer", nullable: false),
+                    Location = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: true),
+                    LastCountedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -278,6 +282,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 {
                     table.PrimaryKey("PK_IssuanceItems", x => x.Id);
                     table.ForeignKey(
+                        name: "FK_IssuanceItems_Issuances_IssuanceId",
+                        column: x => x.IssuanceId,
+                        principalSchema: "catalog",
+                        principalTable: "Issuances",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
                         name: "FK_IssuanceItems_Products_ProductId",
                         column: x => x.ProductId,
                         principalSchema: "catalog",
@@ -293,10 +304,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     PurchaseId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AcceptedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    SupplyOfficerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InspectionId = table.Column<Guid>(type: "uuid", nullable: true),
                     AcceptanceDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     Remarks = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    AccountableOfficerId = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsPosted = table.Column<bool>(type: "boolean", nullable: false),
+                    PostedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -309,8 +323,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 {
                     table.PrimaryKey("PK_Acceptances", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Acceptances_Employees_AccountableOfficerId",
-                        column: x => x.AccountableOfficerId,
+                        name: "FK_Acceptances_Employees_SupplyOfficerId",
+                        column: x => x.SupplyOfficerId,
                         principalSchema: "catalog",
                         principalTable: "Employees",
                         principalColumn: "Id",
@@ -330,12 +344,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PurchaseId = table.Column<Guid>(type: "uuid", nullable: false),
-                    RequestedById = table.Column<Guid>(type: "uuid", nullable: true),
-                    AssignedInspectorId = table.Column<Guid>(type: "uuid", nullable: true),
-                    Status = table.Column<int>(type: "integer", nullable: false),
+                    PurchaseId = table.Column<Guid>(type: "uuid", nullable: true),
+                    InspectorId = table.Column<Guid>(type: "uuid", nullable: true),
+                    Status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
                     DateCreated = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: true),
                     TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
@@ -348,8 +360,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 {
                     table.PrimaryKey("PK_InspectionRequests", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_InspectionRequests_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
+                        name: "FK_InspectionRequests_Employees_InspectorId",
+                        column: x => x.InspectorId,
                         principalSchema: "catalog",
                         principalTable: "Employees",
                         principalColumn: "Id");
@@ -358,45 +370,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         column: x => x.PurchaseId,
                         principalSchema: "catalog",
                         principalTable: "Purchases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Inspections",
-                schema: "catalog",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PurchaseId = table.Column<Guid>(type: "uuid", nullable: false),
-                    InspectorId = table.Column<Guid>(type: "uuid", nullable: false),
-                    InspectionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Remarks = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Inspections", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_Inspections_Employees_InspectorId",
-                        column: x => x.InspectorId,
-                        principalSchema: "catalog",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_Inspections_Purchases_PurchaseId",
-                        column: x => x.PurchaseId,
-                        principalSchema: "catalog",
-                        principalTable: "Purchases",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -405,13 +379,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PurchaseId = table.Column<Guid>(type: "uuid", nullable: false),
+                    PurchaseId = table.Column<Guid>(type: "uuid", nullable: true),
                     ProductId = table.Column<Guid>(type: "uuid", nullable: true),
                     Qty = table.Column<int>(type: "integer", nullable: false),
                     UnitPrice = table.Column<decimal>(type: "numeric", nullable: false),
-                    ItemStatus = table.Column<int>(type: "integer", nullable: true),
-                    InspectionStatus = table.Column<int>(type: "integer", nullable: true),
-                    AcceptanceStatus = table.Column<int>(type: "integer", nullable: true),
+                    ItemStatus = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    InspectionStatus = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    AcceptanceStatus = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
                     QtyInspected = table.Column<int>(type: "integer", nullable: true),
                     QtyPassed = table.Column<int>(type: "integer", nullable: true),
                     QtyFailed = table.Column<int>(type: "integer", nullable: true),
@@ -438,8 +412,54 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         column: x => x.PurchaseId,
                         principalSchema: "catalog",
                         principalTable: "Purchases",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Inspections",
+                schema: "catalog",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    InspectionRequestId = table.Column<Guid>(type: "uuid", nullable: true),
+                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    InspectedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Approved = table.Column<bool>(type: "boolean", nullable: false),
+                    Status = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
+                    Remarks = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    IARDocumentPath = table.Column<string>(type: "text", nullable: true),
+                    PurchaseId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Inspections", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Inspections_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalSchema: "catalog",
+                        principalTable: "Employees",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Inspections_InspectionRequests_InspectionRequestId",
+                        column: x => x.InspectionRequestId,
+                        principalSchema: "catalog",
+                        principalTable: "InspectionRequests",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Inspections_Purchases_PurchaseId",
+                        column: x => x.PurchaseId,
+                        principalSchema: "catalog",
+                        principalTable: "Purchases",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -463,6 +483,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AcceptanceItems", x => x.Id);
+                    table.CheckConstraint("CK_AcceptanceItems_QtyAccepted_NonNegative", "\"QtyAccepted\" >= 0");
                     table.ForeignKey(
                         name: "FK_AcceptanceItems_Acceptances_AcceptanceId",
                         column: x => x.AcceptanceId,
@@ -491,6 +512,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     QtyPassed = table.Column<int>(type: "integer", nullable: false),
                     QtyFailed = table.Column<int>(type: "integer", nullable: false),
                     Remarks = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    InspectionItemStatus = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
                     InspectionId1 = table.Column<Guid>(type: "uuid", nullable: true),
                     TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -526,28 +548,30 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_AcceptanceItems_AcceptanceId",
+                name: "IX_AcceptanceItems_AcceptanceId_PurchaseItemId",
                 schema: "catalog",
                 table: "AcceptanceItems",
-                column: "AcceptanceId");
+                columns: new[] { "AcceptanceId", "PurchaseItemId" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_AcceptanceItems_PurchaseItemId",
                 schema: "catalog",
                 table: "AcceptanceItems",
-                column: "PurchaseItemId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Acceptances_AccountableOfficerId",
-                schema: "catalog",
-                table: "Acceptances",
-                column: "AccountableOfficerId");
+                column: "PurchaseItemId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Acceptances_PurchaseId",
                 schema: "catalog",
                 table: "Acceptances",
                 column: "PurchaseId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Acceptances_SupplyOfficerId",
+                schema: "catalog",
+                table: "Acceptances",
+                column: "SupplyOfficerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InspectionItems_InspectionId",
@@ -565,13 +589,14 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 name: "IX_InspectionItems_PurchaseItemId",
                 schema: "catalog",
                 table: "InspectionItems",
-                column: "PurchaseItemId");
+                column: "PurchaseItemId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_InspectionRequests_EmployeeId",
+                name: "IX_InspectionRequests_InspectorId",
                 schema: "catalog",
                 table: "InspectionRequests",
-                column: "EmployeeId");
+                column: "InspectorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_InspectionRequests_PurchaseId",
@@ -580,10 +605,16 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 column: "PurchaseId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Inspections_InspectorId",
+                name: "IX_Inspections_EmployeeId",
                 schema: "catalog",
                 table: "Inspections",
-                column: "InspectorId");
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Inspections_InspectionRequestId",
+                schema: "catalog",
+                table: "Inspections",
+                column: "InspectionRequestId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Inspections_PurchaseId",
@@ -602,6 +633,12 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 schema: "catalog",
                 table: "InventoryTransactions",
                 column: "ProductId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_IssuanceItems_IssuanceId",
+                schema: "catalog",
+                table: "IssuanceItems",
+                column: "IssuanceId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_IssuanceItems_ProductId",
@@ -656,10 +693,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 schema: "catalog");
 
             migrationBuilder.DropTable(
-                name: "InspectionRequests",
-                schema: "catalog");
-
-            migrationBuilder.DropTable(
                 name: "Inventories",
                 schema: "catalog");
 
@@ -669,10 +702,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
             migrationBuilder.DropTable(
                 name: "IssuanceItems",
-                schema: "catalog");
-
-            migrationBuilder.DropTable(
-                name: "Issuances",
                 schema: "catalog");
 
             migrationBuilder.DropTable(
@@ -688,11 +717,19 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 schema: "catalog");
 
             migrationBuilder.DropTable(
-                name: "Employees",
+                name: "Issuances",
+                schema: "catalog");
+
+            migrationBuilder.DropTable(
+                name: "InspectionRequests",
                 schema: "catalog");
 
             migrationBuilder.DropTable(
                 name: "Products",
+                schema: "catalog");
+
+            migrationBuilder.DropTable(
+                name: "Employees",
                 schema: "catalog");
 
             migrationBuilder.DropTable(

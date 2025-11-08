@@ -20,7 +20,11 @@ public sealed class ApproveInspectionHandler(
         _ = inspection ?? throw new InspectionNotFoundException(request.Id);
 
         // Load inspection request to get PurchaseId for the domain event
-        var inspectionRequest = await inspectionRequestRepo.GetByIdAsync(inspection.InspectionRequestId, cancellationToken);
+        InspectionRequest? inspectionRequest = null;
+        if (inspection.InspectionRequestId.HasValue)
+        {
+            inspectionRequest = await inspectionRequestRepo.GetByIdAsync(inspection.InspectionRequestId.Value, cancellationToken);
+        }
         var purchaseId = inspectionRequest?.PurchaseId;
 
         inspection.Approve(purchaseId);

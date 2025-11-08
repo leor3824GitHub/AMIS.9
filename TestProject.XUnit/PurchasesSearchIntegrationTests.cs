@@ -69,13 +69,18 @@ internal class TestSearchPurchasesHandler : IRequestHandler<SearchPurchasesComma
         var item = new PurchaseResponse(
             Guid.NewGuid(),
             null,
-            DateTime.UtcNow.Date,
+     DateTime.UtcNow.Date,
             100m,
-            null,
-            null,
-            null);
+      null,
+ null,
+          null,
+            null, // ReferenceNumber
+            null, // CreatedOn
+  null, // Notes
+            null  // Currency
+    );
 
-        var paged = TestProject.XUnit.Testing.Paging.TestPagedList.Build(new[] { item }, request.PageNumber, request.PageSize, 1);
-        return Task.FromResult(paged);
+   var paged = TestProject.XUnit.Testing.Paging.TestPagedList.Build(new[] { item }, request.PageNumber, request.PageSize, 1);
+      return Task.FromResult(paged);
     }
 }

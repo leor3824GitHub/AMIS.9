@@ -3,7 +3,6 @@ using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using Finbuckle.MultiTenant;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
 {
@@ -23,7 +22,8 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
                 .HasForeignKey(i => i.EmployeeId)
                 .OnDelete(DeleteBehavior.Restrict); // Prevent cascade delete if Inspector is deleted
 
-            // Link to InspectionRequest (required relationship)
+            // Map optional InspectionRequestId FK (nullable for backward compatibility)
+            builder.Property(x => x.InspectionRequestId).IsRequired(false);
             builder.HasOne(i => i.InspectionRequest)
                 .WithMany() // Assuming InspectionRequest does NOT have a collection of Inspections
                 .HasForeignKey(i => i.InspectionRequestId)
@@ -37,19 +37,15 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
                 .HasMaxLength(200)
                 .IsRequired(false);
 
-            // Status stored as string; coalesce NULL provider values to a safe default to avoid materialization errors
+            // Store enum as string in DB
             builder.Property(x => x.Status)
-                .HasConversion(
-                    v => v.ToString(),
-                    v => string.IsNullOrEmpty(v) ? InspectionStatus.InProgress : Enum.Parse<InspectionStatus>(v))
+                .HasConversion<string>()
                 .HasMaxLength(32)
                 .IsRequired();
 
-            // Approved may be NULL in legacy data; map NULL to false on read
+            // Approved is required boolean
             builder.Property(x => x.Approved)
-                .HasConversion(new ValueConverter<bool, bool?>(v => v, v => v ?? false))
                 .IsRequired();
-
         }
     }
 }

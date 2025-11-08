@@ -5,6 +5,7 @@ using AMIS.WebApi.Catalog.Application.Inventories.Search.v1;
 using MediatR;
 using TestProject.XUnit.Testing;
 using TestProject.XUnit.Testing.Assertions;
+using AMIS.WebApi.Catalog.Domain.ValueObjects; // Added for StockStatus
 
 namespace TestProject.XUnit;
 
@@ -58,7 +59,16 @@ internal class TestSearchInventoriesHandler : IRequestHandler<SearchInventoriesC
     {
         var items = new List<InventoryResponse>
         {
-            new(Guid.NewGuid(), Guid.NewGuid(), 10, 3.75m, null)
+            // Updated to match InventoryResponse signature: Id, ProductId, Qty, AvePrice, StockStatus, ReservedQty, Location, Product
+            new(
+                Guid.NewGuid(),
+                Guid.NewGuid(),
+                10,
+                3.75m,
+                StockStatus.Available,
+                0,
+                null,
+                null)
         };
         var paged = TestProject.XUnit.Testing.Paging.TestPagedList.Build(items, request.PageNumber, request.PageSize, 1);
         return Task.FromResult(paged);

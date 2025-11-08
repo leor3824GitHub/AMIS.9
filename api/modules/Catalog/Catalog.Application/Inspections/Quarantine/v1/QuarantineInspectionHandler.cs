@@ -1,6 +1,7 @@
 using MediatR;
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.Exceptions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AMIS.WebApi.Catalog.Application.Inspections.Quarantine.v1;
@@ -12,7 +13,7 @@ internal sealed class QuarantineInspectionHandler(
     public async Task<QuarantineInspectionResponse> Handle(QuarantineInspectionCommand request, CancellationToken cancellationToken)
     {
         var inspection = await repository.GetByIdAsync(request.InspectionId, cancellationToken)
-            ?? throw new InvalidOperationException($"Inspection with ID {request.InspectionId} not found.");
+            ?? throw new InspectionNotFoundException(request.InspectionId);
 
         inspection.Quarantine(request.Reason);
 

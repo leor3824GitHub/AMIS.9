@@ -6,7 +6,7 @@ namespace AMIS.WebApi.Catalog.Domain.Events;
 public sealed record InspectionRejected : DomainEvent
 {
     public Guid InspectionId { get; init; }
-    public Guid InspectionRequestId { get; init; }
+    public Guid? InspectionRequestId { get; init; }
     public Guid EmployeeId { get; init; }
     public DateTime RejectedOn { get; init; } = DateTime.UtcNow;
     public string? Reason { get; init; }
