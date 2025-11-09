@@ -1,4 +1,8 @@
 @page "/catalog/purchases"
+
+@using AMIS.Blazor.Client.Components
+@using AMIS.Shared.Authorization
+@using Microsoft.AspNetCore.Authorization
 @using System.Globalization
 
 <PageHeader Title="Purchases" Header="Purchases" SubHeader="Manage and track purchases" />
@@ -97,23 +101,31 @@
             <CellTemplate Context="context">
                 <MudStack Row="false" Spacing="0">
                     <MudText Typo="Typo.body2" Style="font-weight: 500;">
-                        @(context.Item.PurchaseDate?.ToString("MMM dd, yyyy", CultureInfo.CurrentCulture) ?? "N/A")
+                        @(context.Item.PurchaseDate.HasValue ? context.Item.PurchaseDate.Value.ToString("MMM dd, yyyy", CultureInfo.CurrentCulture) : "N/A")
                     </MudText>
-                    @if (context.Item.PurchaseDate is not null)
+                    @if (context.Item.PurchaseDate.HasValue)
                     {
                         <MudText Typo="Typo.caption" Color="Color.Default" Style="opacity: 0.7;">
-                            @GetRelativeDateText(context.Item.PurchaseDate!.Value)
+                            @GetRelativeDateText(context.Item.PurchaseDate.Value)
                         </MudText>
                     }
                 </MudStack>
             </CellTemplate>
         </TemplateColumn>
 
-        <TemplateColumn T="PurchaseResponse" Title="Amount">
-            <CellTemplate Context="context">
-                <MudText Typo="Typo.body2" Class="fw-semibold">@context.Item.TotalAmount.ToString("C", CultureInfo.CurrentCulture)</MudText>
-            </CellTemplate>
-        </TemplateColumn>
+        <PropertyColumn Property="p => p.TotalAmount"
+        Title="Total Amount"
+               Sortable
+="true">
+     <CellTemplate>
+ @if (context.Item.TotalAmount.HasValue)
+           {
+    <MudText Typo="Typo.body2">
+ @context.Item.TotalAmount.Value.ToString("C2", CultureInfo.CurrentCulture)
+        </MudText>
+       }
+      </CellTemplate>
+            </PropertyColumn>
 
         <TemplateColumn T="PurchaseResponse" Title="Status">
       <CellTemplate Context="context">

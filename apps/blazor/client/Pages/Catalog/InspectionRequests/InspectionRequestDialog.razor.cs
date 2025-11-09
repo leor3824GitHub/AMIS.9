@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Shared.Authorization;
-using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
@@ -41,9 +40,11 @@ public partial class InspectionRequestDialog
 
         if (IsCreate.Value) // Create inspection request
         {
-            var model = Model.Adapt<CreateInspectionRequestCommand>();
-
-            // Fix for CS8629: Ensure AssignedInspectorId is not null before casting  
+            var model = new CreateInspectionRequestCommand
+            {
+                PurchaseId = Model.PurchaseId,
+                InspectorId = Model.InspectorId
+            };
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
                 () => InspectionRequestClient.CreateInspectionRequestEndpointAsync("1", model),
@@ -58,7 +59,7 @@ public partial class InspectionRequestDialog
                 Refresh?.Invoke();
             }
         }
-        else // Update product
+        else // Update inspection request
         {
             var response = await ApiHelper.ExecuteCallGuardedAsync(
                 () => InspectionRequestClient.UpdateInspectionRequestEndpointAsync("1", Model.Id, Model),
@@ -74,16 +75,14 @@ public partial class InspectionRequestDialog
             }
         }
     }
-    //private void OnCategoryChanged(List<CategoryResponse> Category)
-    //{
-    //    _categories = Category;
-    //}
+
     protected override async Task OnParametersSetAsync()
     {
         if (Model != null && Model.InspectorId == null && _employees.Count != 0)
         {
             Model.InspectorId = null;
         }
+        await Task.CompletedTask;
     }
 
     private void Cancel()

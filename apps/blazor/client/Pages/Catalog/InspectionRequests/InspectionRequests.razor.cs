@@ -33,7 +33,7 @@ public partial class InspectionRequests
     private bool _loading;
     private string successMessage = "";
 
-    private IEnumerable<InspectionRequestResponse>? _entityList;
+    private IEnumerable<InspectionRequestResponse> _entityList = Array.Empty<InspectionRequestResponse>();
     private int _totalItems;
 
     private bool _canSearch;
@@ -98,24 +98,26 @@ public partial class InspectionRequests
             if (result != null)
             {
                 _totalItems = result.TotalCount;
-                _entityList = result.Items;
+                _entityList = result.Items ?? Array.Empty<InspectionRequestResponse>();
             }
             else
             {
                 _totalItems = 0;
-                _entityList = new List<InspectionRequestResponse>();
+                _entityList = Array.Empty<InspectionRequestResponse>();
             }
         }
         catch (Exception ex)
         {
             Snackbar?.Add($"Error loading data: {ex.Message}", Severity.Error);
+            _totalItems = 0;
+            _entityList = Array.Empty<InspectionRequestResponse>();
         }
         finally
         {
             _loading = false;
         }
 
-        return new GridData<InspectionRequestResponse> { TotalItems = _totalItems, Items = _entityList };
+        return new GridData<InspectionRequestResponse> { TotalItems = _totalItems, Items = _entityList ?? Array.Empty<InspectionRequestResponse>() };
     }
 
     private async Task ShowEditFormDialog(string title, UpdateInspectionRequestCommand command, bool IsCreate, List<EmployeeResponse> employees, List<PurchaseResponse> purchases)
@@ -131,7 +133,7 @@ public partial class InspectionRequests
         var dialog = await DialogService.ShowAsync<InspectionRequestDialog>(title, parameters, options);
         var state = await dialog.Result;
 
-        if (!state.Canceled)
+        if (state is { Canceled: false })
         {
             await _table.ReloadServerData();
             _selectedItems.Clear();
@@ -199,7 +201,7 @@ public partial class InspectionRequests
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<InspectionDialog>("Create Inspection", parameters, options);
         var state = await dialog.Result;
-        if (!state.Canceled)
+        if (state is { Canceled: false })
         {
             await _table.ReloadServerData();
         }
@@ -208,9 +210,9 @@ public partial class InspectionRequests
     private async Task OnDeleteChecked()
     {
         var inspectionrequestid = _selectedItems
-        .Select(item => item.Id)
+    .Select(item => item.Id)
         .Where(id => id.HasValue)
-        .Select(id => id.Value)
+    .Select(id => id!.Value)
         .ToList();
 
         if (inspectionrequestid.Count == 0)
@@ -233,7 +235,7 @@ public partial class InspectionRequests
             {
                 await ApiHelper.ExecuteCallGuardedAsync(
                     () => inspectionrequestclient.DeleteRangeInspectionRequestsEndpointAsync("1", inspectionrequestid),
-                    Snackbar);
+                    Snackbar!);
 
                 await _table.ReloadServerData();
                 _selectedItems.Clear();
