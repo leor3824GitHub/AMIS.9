@@ -32,6 +32,7 @@ public partial class PurchaseItemList
     protected override async Task OnInitializedAsync()
     {
         // Initialization logic handled in OnParametersSet
+        await Task.CompletedTask;
     }
 
     protected override void OnParametersSet()

@@ -1,67 +1,71 @@
 ﻿<!-- Item List Section -->
-<MudPaper Class="pa-4 mb-4" Style="max-height: 80vh; overflow-y: auto;">
-    <MudText Typo="Typo.h6">Purchase Items - @(Items?.Count ?? 0)</MudText>
+<MudPaper Class="pa-2 mb-2" Style="max-height: 80vh; overflow-y: auto;">
+    <MudText Typo="Typo.body1" Class="mb-2">Purchase Items - @(Items?.Count ?? 0)</MudText>
 
     <MudTable T="PurchaseItemDto"
               Items="Items"
               Hover
               Breakpoint="Breakpoint.Sm"
-              Class="th-border-separator">
+              Dense="true"
+              Class="th-border-separator"
+              Style="font-size: 0.875rem;">
 
         <HeaderContent>
-            <MudTh Style="width: 500px;">Product</MudTh>
-            <MudTh Style="width: 80px;" >Quantity</MudTh>
-            <MudTh Style="width: 120px;" >Unit Price</MudTh>
-            <MudTh >Amount</MudTh>
-            <MudTh>Status</MudTh>
-            <MudTh >Actions</MudTh>
+            <MudTh Style="width: 400px; padding: 8px;">Product</MudTh>
+            <MudTh Style="width: 70px; padding: 8px;">Qty</MudTh>
+            <MudTh Style="width: 100px; padding: 8px;">Unit Price</MudTh>
+            <MudTh Style="padding: 8px;">Amount</MudTh>
+            <MudTh Style="padding: 8px;">Status</MudTh>
+            <MudTh Style="padding: 8px;">Actions</MudTh>
         </HeaderContent>
 
         <RowTemplate Context="item">
             @if (item == EditingItem)
             {
-                <MudTd Style="width: 500px;">
-                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Style="width: 100%;" Variant="Variant.Outlined">
+                <MudTd Style="width: 400px; padding: 4px;">
+                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Style="width: 100%; font-size: 0.875rem;" Variant="Variant.Outlined" Margin="Margin.Dense">
                         @foreach (var product in Products)
                         {
                             <MudSelectItem T="Guid?" Value="product.Id"
-                                           Style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
+                                           Style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; font-size: 0.875rem;">
                                 @product.Name
                             </MudSelectItem>
                         }
                     </MudSelect>
                 </MudTd>
-                <MudTd Style="width: 80px;">
-                    <MudTextField T="int" @bind-Value="item.Qty" Immediate Variant="Variant.Outlined" />
+                <MudTd Style="width: 70px; padding: 4px;">
+                    <MudTextField T="int" @bind-Value="item.Qty" Immediate Variant="Variant.Outlined" Dense Margin="Margin.Dense" Style="font-size: 0.875rem;" />
                 </MudTd>
-                <MudTd Style="width: 120px;">
-                    <MudTextField T="double" @bind-Value="item.UnitPrice" Variant="Variant.Outlined" />
+                <MudTd Style="width: 100px; padding: 4px;">
+                    <MudTextField T="double" @bind-Value="item.UnitPrice" Variant="Variant.Outlined" Dense Margin="Margin.Dense" Style="font-size: 0.875rem;" />
                 </MudTd>
-                <MudTd>
+                <MudTd Style="padding: 4px;">
                     @{
                         var newAmount = item.Qty * item.UnitPrice;
                     }
 
-                    <MudText>@newAmount.ToString("N2")</MudText>
+                    <MudText Style="font-size: 0.875rem;">@newAmount.ToString("N2")</MudText>
                 </MudTd>
-                <MudTd>
-                    <MudSelect T="PurchaseStatus" @bind-Value="item.ItemStatus" Dense Variant="Variant.Outlined">
+                <MudTd Style="padding: 4px;">
+                    <MudSelect T="PurchaseStatus" @bind-Value="item.ItemStatus" Dense Variant="Variant.Outlined" Margin="Margin.Dense" Style="font-size: 0.875rem;">
                         @foreach (var status in PurchaseStatusList)
                         {
                             <MudSelectItem T="PurchaseStatus" Value="status">@GetDisplayName(status)</MudSelectItem>
                         }
                     </MudSelect>
                 </MudTd>
-                <MudTd class="text-center">
-                    <div class="d-flex justify-center gap-2">
+                <MudTd class="text-center" Style="padding: 4px;">
+                    <div class="d-flex justify-center gap-1">
                         <MudTooltip Text="Save Changes">
                             <MudIconButton Icon="@Icons.Material.Filled.Check"
                                            Color="Color.Success"
-                                           OnClick="@(() => SaveEdit())" />
+                                           Size="Size.Small"
+                                           OnClick="@(async () => await SaveEdit())" />
                         </MudTooltip>
                         <MudTooltip Text="Cancel Edit">
                             <MudIconButton Icon="@Icons.Material.Filled.Close"
                                            Color="Color.Secondary"
+                                           Size="Size.Small"
                                            OnClick="@(() => CancelEdit())" />
                         </MudTooltip>
                     </div>
@@ -69,35 +73,36 @@
             }
             else
             {
-                <MudTd Style="width: 500px;">
+                <MudTd Style="width: 400px; padding: 4px;">
                     @{
                         var product = Products?.FirstOrDefault(p => p.Id == item.ProductId);
                     }
-                    <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                    <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.875rem;">
                         @(product is not null ? product.Name : "—")
                     </span>
                 </MudTd>
-                <MudTd Style="width: 80px;">@item.Qty.ToString("N0")</MudTd>
-                <MudTd Style="width: 120px;">@item.UnitPrice.ToString("N2")</MudTd>
-                @* <MudTd>@(item.Qty * item.UnitPrice)</MudTd> *@
-                <MudTd>
+                <MudTd Style="width: 70px; padding: 4px; font-size: 0.875rem;">@item.Qty.ToString("N0")</MudTd>
+                <MudTd Style="width: 100px; padding: 4px; font-size: 0.875rem;">@item.UnitPrice.ToString("N2")</MudTd>
+                <MudTd Style="padding: 4px;">
                     @{
                         var newAmount = item.Qty * item.UnitPrice;
                     }
-                    @newAmount.ToString("N2")
+                    <span style="font-size: 0.875rem;">@newAmount.ToString("N2")</span>
                 </MudTd>
-                <MudTd DataLabel="Status">@item.ItemStatus</MudTd>
-                <MudTd class="text-center">
-                    <div class="d-flex justify-center gap-2">
+                <MudTd DataLabel="Status" Style="padding: 4px; font-size: 0.875rem;">@item.ItemStatus</MudTd>
+                <MudTd class="text-center" Style="padding: 4px;">
+                    <div class="d-flex justify-center gap-1">
                         <MudTooltip Text="Edit Item">
                             <MudIconButton Icon="@Icons.Material.Filled.Edit"
                                            Color="Color.Primary"
+                                           Size="Size.Small"
                                            OnClick="@(() => EditItem(item))" />
                         </MudTooltip>
                         <MudTooltip Text="Delete Item">
                             <MudIconButton Icon="@Icons.Material.Filled.Delete"
                                            Color="Color.Error"
-                                           OnClick="@(() => RemoveItem(item))" />
+                                           Size="Size.Small"
+                                           OnClick="@(async () => await RemoveItem(item))" />
                         </MudTooltip>
                     </div>
                 </MudTd>
@@ -105,12 +110,12 @@
         </RowTemplate>
        
         <FooterContent>
-            <MudTd Style="width: 500px;">
-                <MudSelect T="Guid?" @bind-Value="Productid" Dense Style="width: 100%;" Placeholder="Select Product Here" Variant="Variant.Outlined">
+            <MudTd Style="width: 400px; padding: 4px;">
+                <MudSelect T="Guid?" @bind-Value="Productid" Dense Style="width: 100%; font-size: 0.875rem;" Placeholder="Select Product Here" Variant="Variant.Outlined" Margin="Margin.Dense">
                     @foreach (var product in Products)
                     {
                         <MudSelectItem T="Guid?" Value="product.Id"
-                                       Style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;">
+                                       Style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; font-size: 0.875rem;">
                             @product.Name
                         </MudSelectItem>
                     }
@@ -119,27 +124,28 @@
 
             @if (Productid != null)
             {
-                <MudTd Style="width: 80px;" >
-                    <MudNumericField HideSpinButtons T="int" @bind-Value="Qty" Variant="Variant.Outlined" />
+                <MudTd Style="width: 70px; padding: 4px;">
+                    <MudNumericField HideSpinButtons T="int" @bind-Value="Qty" Variant="Variant.Outlined" Dense Margin="Margin.Dense" Style="font-size: 0.875rem;" />
                 </MudTd>
-                <MudTd Style="width: 120px;" >
-                    <MudNumericField HideSpinButtons T="double" @bind-Value="Unitprice" Variant="Variant.Outlined" />
+                <MudTd Style="width: 100px; padding: 4px;">
+                    <MudNumericField HideSpinButtons T="double" @bind-Value="Unitprice" Variant="Variant.Outlined" Dense Margin="Margin.Dense" Style="font-size: 0.875rem;" />
                 </MudTd>
-                <MudTd >
+                <MudTd Style="padding: 4px;">
                     @{
                         var newAmount = Qty * Unitprice;
                     }
-                    <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute" Variant="Variant.Outlined" />
+                    <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute" Variant="Variant.Outlined" Dense Margin="Margin.Dense" Style="font-size: 0.875rem;" />
                 </MudTd>
-                <MudTd>
-                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly Variant="Variant.Outlined" />
+                <MudTd Style="padding: 4px;">
+                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Pending)" ReadOnly Variant="Variant.Outlined" Dense Margin="Margin.Dense" Style="font-size: 0.875rem;" />
                 </MudTd>
 
-                <MudTd class="text-center">
+                <MudTd class="text-center" Style="padding: 4px;">
                     <MudTooltip Text="Add Item">
                         <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline"
                                        Color="Color.Primary"
-                                       OnClick="AddNewItem" />
+                                       Size="Size.Small"
+                                       OnClick="@(async () => await AddNewItem())" />
                     </MudTooltip>
                 </MudTd>
             }
@@ -153,17 +159,17 @@
     </MudTable>
 </MudPaper>
 
-<MudPaper Class="pa-3 mt-3" Outlined>
-    <MudText Typo="Typo.h6">Purchase Items Summary</MudText>
-    <MudGrid>
+<MudPaper Class="pa-2 mt-2" Outlined>
+    <MudText Typo="Typo.body2" Class="mb-1">Purchase Items Summary</MudText>
+    <MudGrid GutterSize="8">
         <MudItem xs="12" sm="4">
-            <MudText Typo="Typo.body1">Total Items: @Items.Count</MudText>
+            <MudText Typo="Typo.body2" Style="font-size: 0.875rem;">Total Items: @Items.Count</MudText>
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudText Typo="Typo.body1">Total Quantity: @Items.Sum(i => i.Qty)</MudText>
+            <MudText Typo="Typo.body2" Style="font-size: 0.875rem;">Total Quantity: @Items.Sum(i => i.Qty)</MudText>
         </MudItem>
         <MudItem xs="12" sm="4">
-            <MudText Typo="Typo.body1">Total Amount: @Items.Sum(i => i.Qty * i.UnitPrice).ToString("C", System.Globalization.CultureInfo.CurrentCulture)</MudText>
+            <MudText Typo="Typo.body2" Style="font-size: 0.875rem;">Total Amount: @Items.Sum(i => i.Qty * i.UnitPrice).ToString("C", System.Globalization.CultureInfo.CurrentCulture)</MudText>
         </MudItem>
     </MudGrid>
 </MudPaper>

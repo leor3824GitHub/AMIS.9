@@ -8,26 +8,36 @@ public class Purchase : AuditableEntity, IAggregateRoot
 {
     public Guid? SupplierId { get; private set; }
     public DateTime? PurchaseDate { get; private set; }
-    public decimal TotalAmount { get; private set; } = 0;
+    public decimal TotalAmount { get; private set; } =0;
     public PurchaseStatus? Status { get; private set; }
-    public virtual Supplier? Supplier { get; private set; }
-    public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
 
-    public virtual ICollection<Inspection> Inspections { get; private set; } = [];
-    public virtual ICollection<Acceptance> Acceptances { get; private set; } = [];
+    // New fields
+    public string? ReferenceNumber { get; private set; }
+    public string? Notes { get; private set; }
+    public string? Currency { get; private set; }
+
+    public virtual Supplier? Supplier { get; private set; }
+    public virtual ICollection<PurchaseItem> Items { get; private set; } = new List<PurchaseItem>();
+
+    public virtual ICollection<Inspection> Inspections { get; private set; } = new List<Inspection>();
+    public virtual ICollection<Acceptance> Acceptances { get; private set; } = new List<Acceptance>();
 
     // Add summary helpers (not mapped)
     public bool IsFullyInspected => Items.All(i => i.InspectionStatus == PurchaseItemInspectionStatus.Passed);
     public bool IsFullyAccepted => Items.All(i => i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted);
+
     private Purchase() { }
 
-    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
+    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status, string? referenceNumber, string? notes, string? currency)
     {
         Id = id;
         SupplierId = supplierId;
         PurchaseDate = purchaseDate;
         TotalAmount = totalAmount;
         Status = status;
+        ReferenceNumber = referenceNumber;
+        Notes = notes;
+        Currency = currency;
 
         QueueDomainEvent(new PurchaseCreated { Purchase = this });
     }
@@ -44,12 +54,12 @@ public class Purchase : AuditableEntity, IAggregateRoot
         Items.Add(item);
     }
 
-    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
+    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status, string? referenceNumber = null, string? notes = null, string? currency = null)
     {
-        return new Purchase(Guid.NewGuid(), supplierId, purchaseDate, totalAmount, status);
+        return new Purchase(Guid.NewGuid(), supplierId, purchaseDate, totalAmount, status, referenceNumber, notes, currency);
     }
 
-    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status)
+    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, decimal totalAmount, PurchaseStatus? status, string? referenceNumber = null, string? notes = null, string? currency = null)
     {
         bool isUpdated = false;
 
@@ -77,6 +87,24 @@ public class Purchase : AuditableEntity, IAggregateRoot
             isUpdated = true;
         }
 
+        if (ReferenceNumber != referenceNumber)
+        {
+            ReferenceNumber = referenceNumber;
+            isUpdated = true;
+        }
+
+        if (Notes != notes)
+        {
+            Notes = notes;
+            isUpdated = true;
+        }
+
+        if (Currency != currency)
+        {
+            Currency = currency;
+            isUpdated = true;
+        }
+
         if (isUpdated)
         {
             QueueDomainEvent(new PurchaseUpdated { Purchase = this });
@@ -90,7 +118,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.Draft)
             throw new InvalidOperationException("Only draft purchases can be submitted for approval.");
-        
+
         Status = PurchaseStatus.PendingApproval;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -99,7 +127,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.PendingApproval)
             throw new InvalidOperationException("Only pending purchases can be approved.");
-        
+
         Status = PurchaseStatus.Approved;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -108,7 +136,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.PendingApproval)
             throw new InvalidOperationException("Only pending purchases can be rejected.");
-        
+
         Status = PurchaseStatus.Rejected;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -117,7 +145,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.Approved)
             throw new InvalidOperationException("Only approved purchases can be acknowledged.");
-        
+
         Status = PurchaseStatus.Acknowledged;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -126,7 +154,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.Acknowledged)
             throw new InvalidOperationException("Only acknowledged purchases can be marked in progress.");
-        
+
         Status = PurchaseStatus.InProgress;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -135,7 +163,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.InProgress)
             throw new InvalidOperationException("Only in-progress purchases can be marked as shipped.");
-        
+
         Status = PurchaseStatus.Shipped;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -144,17 +172,17 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.Shipped && Status != PurchaseStatus.Approved)
             throw new InvalidOperationException("Purchase must be shipped or approved to mark as partially received.");
-        
+
         Status = PurchaseStatus.PartiallyReceived;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
 
     public void MarkFullyReceived()
     {
-        if (!Items.All(i => i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted || 
-                           i.AcceptanceStatus == PurchaseItemAcceptanceStatus.AcceptedWithDeviation))
+        if (!Items.All(i => i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted ||
+                            i.AcceptanceStatus == PurchaseItemAcceptanceStatus.AcceptedWithDeviation))
             throw new InvalidOperationException("All items must be accepted before marking as fully received.");
-        
+
         Status = PurchaseStatus.FullyReceived;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -163,7 +191,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.FullyReceived && Status != PurchaseStatus.PartiallyReceived)
             throw new InvalidOperationException("Purchase must be received before marking as pending invoice.");
-        
+
         Status = PurchaseStatus.PendingInvoice;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -172,7 +200,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.PendingInvoice)
             throw new InvalidOperationException("Purchase must be pending invoice before marking as invoiced.");
-        
+
         Status = PurchaseStatus.Invoiced;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -181,7 +209,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.Invoiced)
             throw new InvalidOperationException("Purchase must be invoiced before marking as pending payment.");
-        
+
         Status = PurchaseStatus.PendingPayment;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -190,7 +218,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.PendingPayment && Status != PurchaseStatus.Invoiced)
             throw new InvalidOperationException("Purchase must be invoiced or pending payment before closing.");
-        
+
         Status = PurchaseStatus.Closed;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -199,7 +227,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status == PurchaseStatus.Closed || Status == PurchaseStatus.Cancelled)
             throw new InvalidOperationException("Cannot put closed or cancelled purchases on hold.");
-        
+
         Status = PurchaseStatus.OnHold;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -208,7 +236,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status != PurchaseStatus.OnHold)
             throw new InvalidOperationException("Only purchases on hold can be released.");
-        
+
         Status = PurchaseStatus.Draft; // Return to draft for re-evaluation
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
@@ -217,11 +245,10 @@ public class Purchase : AuditableEntity, IAggregateRoot
     {
         if (Status == PurchaseStatus.Closed)
             throw new InvalidOperationException("Cannot cancel closed purchases.");
-        
+
         Status = PurchaseStatus.Cancelled;
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
-    
 }
 
 

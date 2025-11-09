@@ -1,0 +1,120 @@
+@page "/catalog/purchaseform/{Id:guid?}"
+@using System.Globalization
+@using MudBlazor
+
+<PageHeader Title="@((IsCreate ?? true) ? "Create Purchase" : "Edit Purchase")"
+            Header="@((IsCreate ?? true) ? "Create Purchase" : "Edit Purchase")"
+            SubHeader="@((IsCreate ?? true) ? "Create a new purchase order" : "Update purchase order details")" />
+
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    @if (_statusAdvisory is not null)
+    {
+        <MudAlert Severity="@_statusAdvisory.Value.Severity"
+                  Variant="Variant.Outlined"
+                  Dense="true"
+                  Icon="@_statusAdvisory.Value.Icon"
+                  Class="mb-2">
+            @_statusAdvisory.Value.Message
+        </MudAlert>
+    }
+
+    <!-- Purchase Overview -->
+    <div Style="font-size: 10px;">
+        <MudGrid GutterSize="8" Class="mb-2">
+        <MudItem xs="12" md="3">
+            <MudAutocomplete T="SupplierResponse"
+                             Label="Supplier *"
+                             Value="@_selectedSupplier"
+                             ValueChanged="OnSupplierChanged"
+                             ToStringFunc="@(s => s?.Name ?? string.Empty)"
+                             SearchFunc="SearchSuppliersAsync"
+                             Clearable="true"
+                             Dense="true"
+                             ResetValueOnEmptyText="true"
+                             Required="true"
+                             RequiredError="Supplier is required"
+                             Variant="Variant.Outlined"
+                             Margin="Margin.Dense" />
+        </MudItem>
+        
+        <MudItem xs="12" md="2">
+            <MudDatePicker @bind-Date="Model.PurchaseDate"
+                           Label="Purchase Date"
+                           Variant="Variant.Outlined"
+                           Dense="true"
+                           Adornment="Adornment.End"
+                           AdornmentIcon="@Icons.Material.Filled.Event"
+                           Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" md="2">
+            <MudSelect T="PurchaseStatus"
+                       Label="Lifecycle Status"
+                       Variant="Variant.Outlined"
+                       Dense="true"
+                       @bind-Value="Model.Status"
+                       Margin="Margin.Dense">
+                @foreach (var status in _statusOptions)
+                {
+                    <MudSelectItem T="PurchaseStatus" Value="status">
+                        @GetStatusDisplay(status)
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        </MudItem>
+        <MudItem xs="12" md="2">
+            <MudTextField T="string"
+                          Label="Calculated Total"
+                          Value="@FormattedTotal"
+                          ReadOnly="true"
+                          Variant="Variant.Outlined"
+                          Adornment="Adornment.Start"
+                          AdornmentIcon="@Icons.Material.Filled.Payments"
+                          Dense="true"
+                          Margin="Margin.Dense" />
+        </MudItem>
+        <MudItem xs="12" md="3">
+            <MudTextField T="string"
+                          Label="Purchase Notes"
+                          @bind-Value="Notes"
+                          Lines="2"
+                          Variant="Variant.Outlined"
+                          Placeholder="Enter any additional notes for this purchase order..."
+                          Dense="true"
+                          Margin="Margin.Dense" />
+        </MudItem>
+    </MudGrid>
+    </div>
+
+    <MudDivider Class="my-2" />
+
+    <!-- Purchase Line Items -->
+    <PurchaseItemList Items="@Model.Items"
+                      Products="@_products"
+                      Suppliers="@_suppliers"
+                      Status="Model.Status"
+                      PurchaseId="@(Model.Id == Guid.Empty ? (Guid?)null : Model.Id)"
+                      OnTotalAmountChanged="UpdateTotalAmount"
+                      IsCreate="IsCreate" />
+
+    <!-- Action Buttons -->
+    <MudPaper Class="pa-2 mt-2">
+        <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="1">
+            <MudButton Variant="Variant.Outlined"
+                       Color="Color.Secondary"
+                       OnClick="Cancel"
+                       Size="Size.Small">
+                Cancel
+            </MudButton>
+            <MudButton Variant="Variant.Filled"
+                       Color="Color.Primary"
+                       ButtonType="ButtonType.Submit"
+                       StartIcon="@Icons.Material.Filled.Save"
+                       Size="Size.Small">
+                @((IsCreate ?? true) ? "Create" : "Update")
+            </MudButton>
+        </MudStack>
+    </MudPaper>
+</EditForm>

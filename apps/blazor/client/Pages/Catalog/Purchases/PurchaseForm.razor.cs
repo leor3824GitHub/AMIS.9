@@ -1,4 +1,4 @@
-﻿using System.ComponentModel;
+using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
@@ -9,22 +9,18 @@ using Mapster;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
-
-
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
 
-[SuppressMessage("Design", "CA1052", Justification = "Blazor components must remain public for the generated markup partial class.")]
-public partial class PurchaseDialog
+public partial class PurchaseForm
 {
     [Inject] private IApiClient PurchaseClient { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
-    [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
-    [Parameter] public CreatePurchaseCommand Model { get; set; } = new();
-    [Parameter] public EventCallback OnCancel { get; set; }
-    [Parameter] public EventCallback Refresh { get; set; }
-    [Parameter] public bool? IsCreate { get; set; }
-    
+    [Parameter] public Guid? Id { get; set; }
+
+    private CreatePurchaseCommand Model { get; set; } = new();
+    private bool? IsCreate { get; set; }
 
     private readonly IReadOnlyList<PurchaseStatus> _statusOptions = Enum.GetValues<PurchaseStatus>();
 
@@ -33,25 +29,50 @@ public partial class PurchaseDialog
     private SupplierResponse? _selectedSupplier;
     private PurchaseFinancialSnapshot _financialSnapshot = PurchaseFinancialSnapshot.Empty;
     private StatusAdvisory? _statusAdvisory;
-
-    private string DialogTitle => (IsCreate ?? Model.Id == Guid.Empty)
-        ? "Create Purchase Order"
-        : "Update Purchase Order";
-
-    private string DialogSubtitle => Model.Id == Guid.Empty
-        ? "Draft purchase order"
-        : $"Tracking ID: {FormatIdentifier(Model.Id)}";
-
     private string? Notes { get; set; }
+
+    private string FormattedTotal => Model.TotalAmount.ToString("C", CultureInfo.CurrentCulture);
 
     protected override async Task OnInitializedAsync()
     {
         Model.Items ??= new List<PurchaseItemDto>();
 
+        // Determine if create or edit based on Id parameter
+        IsCreate = !Id.HasValue || Id.Value == Guid.Empty;
+
+        if (!IsCreate.Value && Id.HasValue)
+        {
+            // Load existing purchase for editing
+            await LoadPurchaseAsync(Id.Value);
+        }
+        else
+        {
+            // Initialize new purchase
+            Model.PurchaseDate = DateTime.Today;
+            Model.Status = PurchaseStatus.Pending;
+        }
+
         await Task.WhenAll(LoadSupplierAsync(), LoadProductAsync());
 
         ResolveSelectedSupplier();
         ComputeFinancialSnapshot();
+    }
+
+    private async Task LoadPurchaseAsync(Guid id)
+    {
+        try
+        {
+            var response = await PurchaseClient.GetPurchaseEndpointAsync("1", id);
+            if (response != null)
+            {
+                Model = response.Adapt<CreatePurchaseCommand>();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Unable to load purchase: {ex.Message}", Severity.Error);
+            NavigationManager.NavigateTo("/catalog/purchases");
+        }
     }
 
     protected override void OnParametersSet()
@@ -169,10 +190,6 @@ public partial class PurchaseDialog
         };
     }
 
-    private static string FormatIdentifier(Guid id) => id == Guid.Empty
-        ? "--"
-        : id.ToString("N")[..8].ToUpperInvariant();
-
     private static string GetStatusDisplay(PurchaseStatus? status)
     {
         if (!status.HasValue)
@@ -184,26 +201,6 @@ public partial class PurchaseDialog
         var description = memberInfo?.GetCustomAttribute<DescriptionAttribute>()?.Description;
         return description ?? status.Value.ToString();
     }
-
-    private static Color GetStatusChipColor(PurchaseStatus? status) => status switch
-    {
-        PurchaseStatus.PendingApproval or PurchaseStatus.Pending => Color.Warning,
-        PurchaseStatus.OnHold or PurchaseStatus.Rejected or PurchaseStatus.Cancelled => Color.Error,
-        PurchaseStatus.FullyReceived or PurchaseStatus.Delivered or PurchaseStatus.Invoiced or PurchaseStatus.PendingPayment or PurchaseStatus.Closed => Color.Success,
-        _ => Color.Info
-    };
-
-    private static string GetStatusIcon(PurchaseStatus? status) => status switch
-    {
-        PurchaseStatus.PendingApproval or PurchaseStatus.Pending => Icons.Material.Filled.Gavel,
-        PurchaseStatus.OnHold => Icons.Material.Filled.PauseCircle,
-        PurchaseStatus.Rejected => Icons.Material.Filled.Block,
-        PurchaseStatus.Cancelled => Icons.Material.Filled.Cancel,
-        PurchaseStatus.FullyReceived or PurchaseStatus.Delivered or PurchaseStatus.Closed => Icons.Material.Filled.Verified,
-        PurchaseStatus.Invoiced => Icons.Material.Filled.ReceiptLong,
-        PurchaseStatus.PendingPayment => Icons.Material.Filled.AccountBalance,
-        _ => Icons.Material.Filled.Inventory2
-    };
 
     private async Task<IEnumerable<SupplierResponse>> SearchSuppliersAsync(string value, CancellationToken cancellationToken = default)
     {
@@ -249,6 +246,13 @@ public partial class PurchaseDialog
             return;
         }
 
+        // Validate that a supplier is selected
+        if (_selectedSupplier is null || !_selectedSupplier.Id.HasValue)
+        {
+            Snackbar.Add("Please select a supplier before saving.", Severity.Warning);
+            return;
+        }
+
         Snackbar.Add(IsCreate.Value ? "Creating purchase order..." : "Updating purchase order...", Severity.Info);
 
         try
@@ -262,7 +266,7 @@ public partial class PurchaseDialog
                 {
                     Model.Id = response.Id.Value;
                     Snackbar.Add("Purchase order created successfully!", Severity.Success);
-                    await Refresh.InvokeAsync();
+                    NavigationManager.NavigateTo("/catalog/purchases");
                 }
             }
             else
@@ -273,7 +277,7 @@ public partial class PurchaseDialog
                 if (response != null)
                 {
                     Snackbar.Add("Purchase order updated successfully!", Severity.Success);
-                    await Refresh.InvokeAsync();
+                    NavigationManager.NavigateTo("/catalog/purchases");
                 }
             }
         }
@@ -281,7 +285,8 @@ public partial class PurchaseDialog
         {
             Snackbar.Add($"Error: {ex.Message}", Severity.Error);
         }
-    }    
+    }
+
     private void UpdateTotalAmount(double value)
     {
         Model.TotalAmount = value;
@@ -289,11 +294,10 @@ public partial class PurchaseDialog
         StateHasChanged();
     }
 
-    private void Cancel() 
+    private static void Cancel()
     {
-        MudDialog.Cancel();
-        Refresh.InvokeAsync();
-    } 
+        // Navigation is handled in the UI
+    }
 
     private readonly record struct PurchaseFinancialSnapshot(double Commitment, int LineItems, int DistinctProducts, int PendingItems, int CompletedItems)
     {
@@ -301,7 +305,4 @@ public partial class PurchaseDialog
     }
 
     private readonly record struct StatusAdvisory(Severity Severity, string Icon, string Message);
-
-    private string FormattedTotal => Model.TotalAmount.ToString("C", CultureInfo.CurrentCulture);
-
 }

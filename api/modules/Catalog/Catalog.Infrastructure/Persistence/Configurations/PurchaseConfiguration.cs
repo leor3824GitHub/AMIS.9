@@ -19,5 +19,18 @@ internal sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
             .HasConversion<string>()
             .HasMaxLength(32)
             .IsRequired(false);
+
+        // New fields
+        builder.Property(x => x.ReferenceNumber)
+            .HasMaxLength(100)
+            .IsRequired(false);
+
+        builder.Property(x => x.Notes)
+            .HasMaxLength(1000)
+            .IsRequired(false);
+
+        builder.Property(x => x.Currency)
+            .HasMaxLength(16)
+            .IsRequired(false);
     }
 }

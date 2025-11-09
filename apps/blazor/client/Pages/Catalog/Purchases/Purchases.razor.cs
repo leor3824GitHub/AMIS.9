@@ -2,7 +2,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Infrastructure.Api;
@@ -44,10 +44,13 @@ public partial class Purchases
     protected IAuthorizationService AuthService { get; set; } = default!;
 
     [Inject]
-    protected IApiClient PurchaseClient { get; set; } = default!;
+    protected IApiClient ApiClient { get; set; } = default!;
 
     [Inject]
-    private ISnackbar Snackbar { get; set; } = default!;
+    private ISnackbar? Snackbar { get; set; }
+
+    [Inject]
+    private NavigationManager NavigationManager { get; set; } = default!;
 
     protected override async Task OnInitializedAsync()
     {
@@ -72,14 +75,14 @@ public partial class Purchases
 
         try
         {
-            var result = await PurchaseClient.SearchPurchasesEndpointAsync("1", request);
+            var result = await ApiClient.SearchPurchasesEndpointAsync("1", request);
             _totalItems = result?.TotalCount ?? 0;
             _entityList = result?.Items?.ToList() ?? new List<PurchaseResponse>();
             // Summary removed.
         }
         catch (Exception ex)
         {
-            Snackbar.Add($"Error loading data: {ex.Message}", Severity.Error);
+            Snackbar?.Add($"Error loading data: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -121,20 +124,10 @@ public partial class Purchases
         }
     }
 
-    private async Task OnCreate()
+    private void OnCreate()
     {
-        var model = CreateDefaultPurchaseCommand();
-        await ShowEditFormDialog("Create new purchase", model, true);
+        NavigationManager.NavigateTo("/catalog/purchaseform");
     }
-
-    private static CreatePurchaseCommand CreateDefaultPurchaseCommand() =>
-        new()
-        {
-            PurchaseDate = DateTime.Today,
-            SupplierId = null,
-            Status = PurchaseStatus.Pending,
-            Items = new List<PurchaseItemDto>()
-        };
 
     // Clone removed in simplified toolbar version.
     private async Task OnClone()
@@ -142,7 +135,7 @@ public partial class Purchases
         var copy = _selectedItems.FirstOrDefault();
         if (copy is null)
         {
-            Snackbar.Add("Select a purchase to clone.", Severity.Info);
+            Snackbar?.Add("Select a purchase to clone.", Severity.Info);
             return;
         }
 
@@ -151,23 +144,24 @@ public partial class Purchases
         await ShowEditFormDialog("Clone purchase", command, true);
     }
 
-    private async Task OnEdit(PurchaseResponse dto)
+    private void OnEdit(PurchaseResponse dto)
     {
         if (!_canUpdate)
         {
-            Snackbar.Add("You do not have permission to edit purchases.", Severity.Warning);
             return;
         }
 
-        var command = dto.Adapt<CreatePurchaseCommand>();
-        await ShowEditFormDialog("Edit the purchase", command, false);
+        if (dto.Id.HasValue)
+        {
+            NavigationManager.NavigateTo($"/catalog/purchaseform/{dto.Id.Value}");
+        }
     }
 
     private async Task OnDelete(PurchaseResponse dto)
     {
         if (!dto.Id.HasValue)
         {
-            Snackbar.Add("Purchase id missing.", Severity.Error);
+            Snackbar?.Add("Purchase id missing.", Severity.Error);
             return;
         }
 
@@ -190,8 +184,8 @@ public partial class Purchases
         if (result is { Canceled: false })
         {
             await ApiHelper.ExecuteCallGuardedAsync(
-                () => PurchaseClient.DeletePurchaseEndpointAsync("1", dto.Id!.Value),
-                Snackbar);
+                () => ApiClient.DeletePurchaseEndpointAsync("1", dto.Id!.Value),
+                Snackbar!);
 
             if (_table is not null)
             {
@@ -210,7 +204,7 @@ public partial class Purchases
 
         if (purchaseIds.Count == 0)
         {
-            Snackbar.Add("No items selected for deletion.", Severity.Warning);
+            Snackbar?.Add("No items selected for deletion.", Severity.Warning);
             return;
         }
 
@@ -233,8 +227,8 @@ public partial class Purchases
         if (result is { Canceled: false })
         {
             await ApiHelper.ExecuteCallGuardedAsync(
-                () => PurchaseClient.DeletePurchasesEndpointAsync("1", purchaseIds),
-                Snackbar);
+                () => ApiClient.DeletePurchasesEndpointAsync("1", purchaseIds),
+                Snackbar!);
 
             if (_table is not null)
             {

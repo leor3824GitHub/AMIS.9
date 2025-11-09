@@ -18,6 +18,9 @@ public sealed record CreatePurchaseCommand(
     DateTime? PurchaseDate,
     PurchaseStatus? Status,
     [property: DefaultValue(0)] decimal TotalAmount = 0,    
-    ICollection<PurchaseItemDto>? Items = null
+    ICollection<PurchaseItemDto>? Items = null,
+    string? ReferenceNumber = null,
+    string? Notes = null,
+    string? Currency = null
 ) : IRequest<CreatePurchaseResponse>;
 

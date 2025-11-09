@@ -18,10 +18,7 @@
 
     .purchase-row--critical {
         background-color: rgba(211, 47, 47, 0.18);
-  }
-    .purchase-row--critical {
-        background-color: rgba(211, 47, 47, 0.18);
-  }
+    }
 </style>
 
 <MudPaper Class="pa-4 mb-4">
@@ -112,15 +109,15 @@
             </CellTemplate>
         </TemplateColumn>
 
-        <TemplateColumn T="PurchaseResponse" Title="Amount" Align="DataGridColumnAlign.Right">
-   <CellTemplate Context="context">
+        <TemplateColumn T="PurchaseResponse" Title="Amount">
+            <CellTemplate Context="context">
                 <MudText Typo="Typo.body2" Class="fw-semibold">@context.Item.TotalAmount.ToString("C", CultureInfo.CurrentCulture)</MudText>
-     </CellTemplate>
+            </CellTemplate>
         </TemplateColumn>
 
         <TemplateColumn T="PurchaseResponse" Title="Status">
       <CellTemplate Context="context">
-    <MudChip Color="@GetStatusChipColor(context.Item.Status)"
+    <MudChip T="string" Color="@GetStatusChipColor(context.Item.Status)"
            Variant="Variant.Filled"
          Icon="@GetStatusIcon(context.Item.Status)">
   @GetStatusDisplay(context.Item.Status)
