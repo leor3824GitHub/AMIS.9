@@ -1,10 +1,9 @@
 ﻿using AMIS.Framework.Core.Domain;
-using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
-public class PurchaseItem : AuditableEntity, IAggregateRoot
+public class PurchaseItem : AuditableEntity
 {
     public Guid? PurchaseId { get; private set; }
     public Guid? ProductId { get; private set; }
@@ -13,6 +12,9 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
     public PurchaseStatus? ItemStatus { get; private set; }
     public PurchaseItemInspectionStatus? InspectionStatus { get; private set; }
     public PurchaseItemAcceptanceStatus? AcceptanceStatus { get; private set; }
+
+    // Convenience computed value for projections and totals
+    public decimal LineTotal => Qty * UnitPrice;
 
     // New aggregate fields for summary views
     public int? QtyInspected { get; private set; }  // Set from InspectionItem
@@ -43,6 +45,16 @@ public class PurchaseItem : AuditableEntity, IAggregateRoot
     public static PurchaseItem Create(Guid? purchaseId, Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemstatus)
     {
         return new PurchaseItem(Guid.NewGuid(), purchaseId, productId, qty, unitPrice, itemstatus);
+    }
+    
+    public void UpdateQuantity(int newQty)
+    {
+        if (newQty <= 0) throw new ArgumentException("Quantity must be greater than zero.", nameof(newQty));
+        if (Qty != newQty)
+        {
+            Qty = newQty;
+            QueueDomainEvent(new PurchaseItemUpdated { PurchaseItem = this });
+        }
     }
         public void UpdateInspectionSummary(int inspected, int passed, int failed)
     {

@@ -6,6 +6,7 @@
   <ItemGroup>
     <Compile Remove="Purchases\Update\v1\GetUpdatePurchaseSpecs.cs" />
     <Compile Remove="Purchases\Update\v1\PurchaseItemUpdateDto.cs" />
+    <Compile Remove="PurchaseItems\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\..\framework\Core\Core.csproj" />

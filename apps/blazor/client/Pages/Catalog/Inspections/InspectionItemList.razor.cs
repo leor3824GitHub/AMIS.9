@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using AMIS.Blazor.Infrastructure.Api;
-using Mapster;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
@@ -9,18 +8,15 @@ namespace AMIS.Blazor.Client.Pages.Catalog.Inspections;
 public partial class InspectionItemList
 {
     [Inject]
-    protected IApiClient Inspectionitemlistclient { get; set; } = default!;
-    [Inject]
     private ISnackbar? Snackbar { get; set; }
     [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Blazor parameter requires setter for binding mutable collection.")]
     [Parameter]
     public ICollection<PurchaseItemDto> Items { get; set; } = new List<PurchaseItemDto>();
     [Parameter] public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
-    //[Parameter] public List<SupplierResponse> Suppliers { get; set; } = new();
     [Parameter] public PurchaseStatus? Status { get; set; }
     [Parameter] public Guid? PurchaseId { get; set; }
-    //[Parameter] public Action<Double> OnTotalAmountChanged { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
+    [Parameter] public EventCallback<ICollection<PurchaseItemDto>> OnItemsChanged { get; set; }
 
     private Guid? Productid { get; set; }
     private int Qty { get; set; }
@@ -29,10 +25,7 @@ public partial class InspectionItemList
 
     protected override async Task OnInitializedAsync()
     {
-        //Model ??= new UpdatePurchaseCommand();
-        //Model.Items ??= new List<PurchaseItemDto>();
-        //await LoadSupplierAsync();
-        //await LoadProductAsync();
+        await Task.CompletedTask;
     }
 
     protected override void OnParametersSet()
@@ -45,30 +38,18 @@ public partial class InspectionItemList
         EditingItem = item;
     }
 
-    private void SaveEdit()
+    private async Task SaveEdit()
     {
         if (EditingItem == null || EditingItem.Qty <= 0 || EditingItem.UnitPrice <= 0)
             return;
-        try 
-        {
-            if (IsCreate == false)
-            {
-                var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
+        // Persisting is now handled by the parent via UpdatePurchaseWithItems aggregate endpoint.
+        // Here we just notify that items changed.
+        EditingItem = null;
+        Snackbar?.Add("Item updated locally. Don't forget to save changes.", Severity.Info);
+        if (OnItemsChanged.HasDelegate)
+            await OnItemsChanged.InvokeAsync(Items);
 
-                Inspectionitemlistclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
-                Snackbar?.Add("Item product successfully updated.", Severity.Success);
-            }
-
-            EditingItem = null;
-
-            StateHasChanged();
-          
-        }
-        catch (ApiException ex)
-        {
-            Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
-            Snackbar?.Add("The item product was not updated.", Severity.Error);
-        }
+        StateHasChanged();
 
     }
 
@@ -77,7 +58,7 @@ public partial class InspectionItemList
         EditingItem = null;
     }
 
-    private void AddNewItem()
+    private async Task AddNewItem()
     {
         if (Productid == null || Qty <= 0 || Unitprice <= 0)
             return;
@@ -91,19 +72,9 @@ public partial class InspectionItemList
             ItemStatus = Status ?? PurchaseStatus.Pending
         };
         Items.Add(newItem);
-
-        if (IsCreate == false)
-        {
-            var model = newItem.Adapt<CreatePurchaseItemCommand>();
-            if (PurchaseId.HasValue)
-            {
-                model.PurchaseId = PurchaseId.Value;
-            }
-
-            // Ideally use await with async method
-            Inspectionitemlistclient.CreatePurchaseItemEndpointAsync("1", model);
-            Snackbar?.Add("Item product successfully added.", Severity.Success);
-        }
+        Snackbar?.Add("Item added locally.", Severity.Success);
+        if (OnItemsChanged.HasDelegate)
+            await OnItemsChanged.InvokeAsync(Items);
         
         // Reset fields after adding
         Productid = null;
@@ -113,28 +84,18 @@ public partial class InspectionItemList
     StateHasChanged();
     }
 
-    private void RemoveItem(PurchaseItemDto item)
+    private async Task RemoveItem(PurchaseItemDto item)
     {
         if (item.Id == Guid.Empty)
         {
             Snackbar?.Add("Item ID is null and cannot be removed.", Severity.Error);
             return;
         }
-        try
-        {
-            var id = item.Id;
-
-           Inspectionitemlistclient.DeletePurchaseItemEndpointAsync("1", id);
-
-            Snackbar?.Add("Item product successfully removed.", Severity.Success);
-            Items.Remove(item);
-            StateHasChanged();
-        }
-        catch (ApiException ex)
-        {
-            Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
-            Snackbar?.Add("The item product was not removed.", Severity.Error);
-        }
+        Items.Remove(item);
+        Snackbar?.Add("Item removed locally.", Severity.Success);
+        if (OnItemsChanged.HasDelegate)
+            await OnItemsChanged.InvokeAsync(Items);
+        StateHasChanged();
     }
 
     private static IReadOnlyList<PurchaseStatus> PurchaseStatusList { get; } = Enum.GetValues<PurchaseStatus>();

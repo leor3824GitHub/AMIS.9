@@ -11,8 +11,6 @@ namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
 public partial class PurchaseItemList
 {
     [Inject]
-    protected IApiClient Purchaseclient { get; set; } = default!;
-    [Inject]
     private ISnackbar? Snackbar { get; set; }
     [SuppressMessage("Usage", "CA2227:Collection properties should be read only", Justification = "Blazor parameter requires setter for binding mutable collection.")]
     [Parameter]
@@ -23,6 +21,8 @@ public partial class PurchaseItemList
     [Parameter] public Guid? PurchaseId { get; set; }
     [Parameter] public Action<double>? OnTotalAmountChanged { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
+    [Parameter] public Action<Guid>? OnItemRemoved { get; set; }
+    [Parameter] public EventCallback<ICollection<PurchaseItemDto>> OnItemsChanged { get; set; }
 
     private Guid? Productid { get; set; }
     private int Qty { get; set; }
@@ -49,26 +49,12 @@ public partial class PurchaseItemList
     {
         if (EditingItem == null || EditingItem.Qty <= 0 || EditingItem.UnitPrice <= 0)
             return;
-        try 
-        {
-            if (IsCreate == false)
-            {
-                var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
-
-                await Purchaseclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
-                Snackbar?.Add("Item product successfully updated.", Severity.Success);
-            }
-
-            EditingItem = null;
-
-            UpdateTotalAmount();
-          
-        }
-        catch (ApiException ex)
-        {
-            Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
-            Snackbar?.Add("The item product was not updated.", Severity.Error);
-        }
+        // Local-only update; persist when the purchase form is saved
+        Snackbar?.Add("Item updated (pending save)", Severity.Info);
+        EditingItem = null;
+        UpdateTotalAmount();
+        if (OnItemsChanged.HasDelegate)
+            await OnItemsChanged.InvokeAsync(Items);
 
     }
 
@@ -92,17 +78,8 @@ public partial class PurchaseItemList
         };
         Items.Add(newItem);
 
-        if (IsCreate == false)
-        {
-            var model = newItem.Adapt<CreatePurchaseItemCommand>();
-            if (PurchaseId.HasValue)
-            {
-                model.PurchaseId = PurchaseId.Value;
-            }
-
-            await Purchaseclient.CreatePurchaseItemEndpointAsync("1", model);
-            Snackbar?.Add("Item product successfully added.", Severity.Success);
-        }
+        // Local-only add; persist when the purchase form is saved
+        Snackbar?.Add("Item added (pending save)", Severity.Info);
         
         // Reset fields after adding
         Productid = null;
@@ -110,6 +87,8 @@ public partial class PurchaseItemList
         Unitprice = 0;
 
         UpdateTotalAmount();
+        if (OnItemsChanged.HasDelegate)
+            await OnItemsChanged.InvokeAsync(Items);
     }
 
     private void UpdateTotalAmount()
@@ -121,26 +100,17 @@ public partial class PurchaseItemList
 
     private async Task RemoveItem(PurchaseItemDto item)
     {
-        if (item.Id == Guid.Empty)
+        // Always remove locally; if the item existed server-side, notify parent for deletion tracking
+        var id = item.Id;
+        Items.Remove(item);
+        if (id != Guid.Empty)
         {
-            Snackbar?.Add("Item ID is null and cannot be removed.", Severity.Error);
-            return;
+            OnItemRemoved?.Invoke(id);
         }
-        try
-        {
-            var id = item.Id; // Convert nullable Guid to non-nullable Guid
-
-           await Purchaseclient.DeletePurchaseItemEndpointAsync("1", id);
-
-            Snackbar?.Add("Item product successfully removed.", Severity.Success);
-            Items.Remove(item);
-            UpdateTotalAmount();
-        }
-        catch (ApiException ex)
-        {
-            Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
-            Snackbar?.Add("The item product was not removed.", Severity.Error);
-        }
+        Snackbar?.Add("Item removed (pending save)", Severity.Info);
+        UpdateTotalAmount();
+        if (OnItemsChanged.HasDelegate)
+            await OnItemsChanged.InvokeAsync(Items);
     }
 
     private static IReadOnlyList<PurchaseStatus> PurchaseStatusList { get; } = Enum.GetValues<PurchaseStatus>();

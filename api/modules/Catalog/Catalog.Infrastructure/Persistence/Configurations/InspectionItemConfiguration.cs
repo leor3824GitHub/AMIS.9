@@ -42,15 +42,18 @@ namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations
                 .HasMaxLength(500)
                 .IsRequired(false); // optional
 
-            // Enforce single-shot inspection per PurchaseItem across all inspections
-            builder.HasIndex(x => x.PurchaseItemId)
+            // Enforce: a PurchaseItem can appear only once per Inspection (but can appear in different Inspections)
+            builder.HasIndex(x => new { x.InspectionId, x.PurchaseItemId })
                 .IsUnique();
+
+            // Optional: keep a non-unique index on PurchaseItemId for query performance
+            builder.HasIndex(x => x.PurchaseItemId);
 
             // Relationships
             builder.HasOne(x => x.Inspection)
-                .WithMany() // Assuming Inspection has no navigation collection
+                .WithMany(i => i.Items) // Maintain one-to-many
                 .HasForeignKey(x => x.InspectionId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.Restrict); // Prevent deleting an Inspection if items exist
         }
     }
 }

@@ -13,6 +13,9 @@ internal sealed class PurchaseItemConfiguration : IEntityTypeConfiguration<Purch
         builder.HasKey(x => x.Id);
         builder.Property(x => x.PurchaseId).IsRequired(false);
 
+        // FK index for efficient lookups by PurchaseId
+        builder.HasIndex(x => x.PurchaseId);
+
         // Persist status enums as string to match text columns if existing
         builder.Property(x => x.ItemStatus)
             .HasConversion<string>()

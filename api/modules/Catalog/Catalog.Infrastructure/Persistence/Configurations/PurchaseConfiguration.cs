@@ -32,5 +32,16 @@ internal sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
         builder.Property(x => x.Currency)
             .HasMaxLength(16)
             .IsRequired(false);
+
+        // Aggregate relationship: Purchase (root) -> PurchaseItems (children)
+        // Explicitly configure FK and delete behavior Restrict to prevent accidental cascade deletions.
+        builder
+            .HasMany(x => x.Items)
+            .WithOne() // No back navigation declared on PurchaseItem
+            .HasForeignKey(pi => pi.PurchaseId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Helpful index for fetching items under a purchase
+        builder.HasIndex(x => x.SupplierId);
     }
 }

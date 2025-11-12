@@ -7,6 +7,7 @@ using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
 using Mapster;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
@@ -30,6 +31,11 @@ public partial class PurchaseForm
     private PurchaseFinancialSnapshot _financialSnapshot = PurchaseFinancialSnapshot.Empty;
     private StatusAdvisory? _statusAdvisory;
     private string? Notes { get; set; }
+    private HashSet<Guid> _originalItemIds = new();
+    private HashSet<Guid> _deletedItemIds = new();
+    private EditContext? _editContext;
+    private bool _isSaving;
+    private bool _isDirty;
 
     private string FormattedTotal => Model.TotalAmount.ToString("C", CultureInfo.CurrentCulture);
 
@@ -56,6 +62,7 @@ public partial class PurchaseForm
 
         ResolveSelectedSupplier();
         ComputeFinancialSnapshot();
+        ResetEditContext();
     }
 
     private async Task LoadPurchaseAsync(Guid id)
@@ -66,6 +73,11 @@ public partial class PurchaseForm
             if (response != null)
             {
                 Model = response.Adapt<CreatePurchaseCommand>();
+                _originalItemIds = response.Items?
+                    .Where(i => i.Id.HasValue)
+                    .Select(i => i.Id!.Value)
+                    .ToHashSet() ?? new HashSet<Guid>();
+                ResetEditContext();
             }
         }
         catch (Exception ex)
@@ -236,13 +248,19 @@ public partial class PurchaseForm
     {
         _selectedSupplier = supplier;
         Model.SupplierId = supplier?.Id;
+        _isDirty = true;
+        // Notify EditContext that SupplierId changed (programmatic update)
+        _editContext?.NotifyFieldChanged(new FieldIdentifier(Model, nameof(Model.SupplierId)));
         return Task.CompletedTask;
     }
 
     private async Task OnValidSubmit()
     {
+        _isSaving = true;
+        StateHasChanged();
         if (IsCreate is not true && IsCreate is not false)
         {
+            _isSaving = false;
             return;
         }
 
@@ -271,19 +289,59 @@ public partial class PurchaseForm
             }
             else
             {
-                var model = Model.Adapt<UpdatePurchaseCommand>();
-                var response = await PurchaseClient.UpdatePurchaseEndpointAsync("1", model.Id, model);
+                // Build aggregate update command
+                var update = new UpdatePurchaseWithItemsCommand
+                {
+                    Id = Model.Id,
+                    SupplierId = Model.SupplierId,
+                    PurchaseDate = Model.PurchaseDate,
+                    // UpdatePurchaseWithItemsCommand.TotalAmount is double per generated client; remove invalid decimal cast.
+                    TotalAmount = Model.TotalAmount,
+                    Status = Model.Status,
+                    ReferenceNumber = Model.ReferenceNumber,
+                    Notes = Notes ?? Model.Notes,
+                    Currency = Model.Currency,
+                    Items = Model.Items?.Select(i => new PurchaseItemUpsert
+                    {
+                        Id = i.Id,
+                        ProductId = i.ProductId,
+                        Qty = i.Qty,
+                        // PurchaseItemUpsert.UnitPrice is double; remove decimal cast.
+                        UnitPrice = i.UnitPrice,
+                        ItemStatus = i.ItemStatus
+                    }).ToList() ?? new List<PurchaseItemUpsert>(),
+                    DeletedItemIds = _deletedItemIds.ToList()
+                };
+
+                var response = await PurchaseClient.UpdatePurchaseWithItemsEndpointAsync("1", update.Id, update);
 
                 if (response != null)
                 {
+                    // Light refresh: fetch the latest purchase from the server and re-bind Model
+                    var refreshed = await PurchaseClient.GetPurchaseEndpointAsync("1", update.Id);
+                    if (refreshed is not null)
+                    {
+                        Model = refreshed.Adapt<CreatePurchaseCommand>();
+                        _originalItemIds = refreshed.Items?.Where(i => i.Id.HasValue).Select(i => i.Id!.Value).ToHashSet() ?? new HashSet<Guid>();
+                        _deletedItemIds.Clear();
+                        ComputeFinancialSnapshot();
+                        _isDirty = false;
+                        ResetEditContext();
+                    }
+
                     Snackbar.Add("Purchase order updated successfully!", Severity.Success);
-                    NavigationManager.NavigateTo("/catalog/purchases");
+                    StateHasChanged();
                 }
             }
         }
         catch (ApiException ex)
         {
             Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
         }
     }
 
@@ -297,6 +355,39 @@ public partial class PurchaseForm
     private static void Cancel()
     {
         // Navigation is handled in the UI
+    }
+
+    private void OnItemRemoved(Guid id)
+    {
+        if (_originalItemIds.Contains(id))
+        {
+            _deletedItemIds.Add(id);
+        }
+        _isDirty = true;
+    }
+
+    private void OnItemsChanged(ICollection<PurchaseItemDto> items)
+    {
+        // Model.Items is already bound by reference; ensure snapshot recomputation and UI update
+        ComputeFinancialSnapshot();
+        _isDirty = true;
+        StateHasChanged();
+    }
+
+    private void ResetEditContext()
+    {
+        if (_editContext != null)
+        {
+            _editContext.OnFieldChanged -= HandleFieldChanged;
+        }
+        _editContext = new EditContext(Model);
+        _editContext.OnFieldChanged += HandleFieldChanged;
+        _isDirty = false;
+    }
+
+    private void HandleFieldChanged(object? sender, FieldChangedEventArgs e)
+    {
+        _isDirty = true;
     }
 
     private readonly record struct PurchaseFinancialSnapshot(double Commitment, int LineItems, int DistinctProducts, int PendingItems, int CompletedItems)

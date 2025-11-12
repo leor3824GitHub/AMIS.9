@@ -19,10 +19,10 @@ public class AcceptancesCreateTests
         // Arrange
         var logger = Mock.Of<ILogger<CreateAcceptanceHandler>>();
 
-        var acceptanceRepo = new Mock<IRepository<Acceptance>>();
-        var inspectionRequestRepo = new Mock<IReadRepository<InspectionRequest>>();
-        var inspectionRepo = new Mock<IReadRepository<Inspection>>();
-        var purchaseItemRepo = new Mock<IReadRepository<PurchaseItem>>();
+    var acceptanceRepo = new Mock<IRepository<Acceptance>>();
+    var inspectionRequestRepo = new Mock<IReadRepository<InspectionRequest>>();
+    var inspectionRepo = new Mock<IReadRepository<Inspection>>();
+    var purchaseReadRepo = new Mock<IReadRepository<Purchase>>();
 
         var inspectionId = Guid.NewGuid();
         var derivedPurchaseId = Guid.NewGuid();
@@ -55,7 +55,7 @@ public class AcceptancesCreateTests
             acceptanceRepo.Object,
             inspectionRequestRepo.Object,
             inspectionRepo.Object,
-            purchaseItemRepo.Object);
+            purchaseReadRepo.Object);
 
         var cmd = new CreateAcceptanceCommand(
             AcceptanceDate: DateTime.UtcNow,

@@ -16,7 +16,7 @@ public sealed class CreateAcceptanceHandler(
     [FromKeyedServices("catalog:acceptances")] IRepository<Acceptance> repository,
     [FromKeyedServices("catalog:inspectionRequests")] IReadRepository<InspectionRequest> inspectionRequestRepository,
     [FromKeyedServices("catalog:inspections")] IReadRepository<Inspection> inspectionRepository,
-    [FromKeyedServices("catalog:purchaseItems")] IReadRepository<PurchaseItem> purchaseItemReadRepository)
+    [FromKeyedServices("catalog:purchases")] IReadRepository<Purchase> purchaseReadRepository)
     : IRequestHandler<CreateAcceptanceCommand, CreateAcceptanceResponse>
 {
     public async Task<CreateAcceptanceResponse> Handle(CreateAcceptanceCommand request, CancellationToken cancellationToken)
@@ -89,18 +89,19 @@ public sealed class CreateAcceptanceHandler(
 
         if (request.Items is not null)
         {
+            // Load the purchase with its items and any prior acceptance items to validate single-shot and quantity rules
+            var purchaseSpec = new AMIS.WebApi.Catalog.Application.Purchases.UpdateWithItems.v1.GetPurchaseWithItemsSpecs(effectivePurchaseId);
+            var purchase = await purchaseReadRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken)
+                          ?? throw new InvalidOperationException($"Purchase {effectivePurchaseId} not found.");
+
             foreach (var item in request.Items)
             {
-                // Load purchase item with existing posted acceptances and inspection summaries
-                var piSpec = new AMIS.WebApi.Catalog.Application.PurchaseItems.Specifications.GetPurchaseItemWithAcceptancesSpec(item.PurchaseItemId);
-                var purchaseItem = await purchaseItemReadRepository.FirstOrDefaultAsync(piSpec, cancellationToken)
-                    ?? throw new InvalidOperationException($"Purchase item {item.PurchaseItemId} not found.");
+                var purchaseItem = purchase.Items.FirstOrDefault(pi => pi.Id == item.PurchaseItemId)
+                    ?? throw new InvalidOperationException($"Purchase item {item.PurchaseItemId} not found in purchase {effectivePurchaseId}.");
 
                 // Single-shot guard: reject if any acceptance already exists for this purchase item
-                if (purchaseItem.AcceptanceItems.Count > 0)
-                {
+                if (purchaseItem.AcceptanceItems != null && purchaseItem.AcceptanceItems.Count > 0)
                     throw new InvalidOperationException($"An acceptance has already been recorded for purchase item {item.PurchaseItemId}. Single-shot acceptance is enforced.");
-                }
 
                 // Ordered-qty guard: do not allow accepting more than ordered
                 if (item.QtyAccepted > purchaseItem.Qty)

@@ -6,7 +6,7 @@
             Header="@((IsCreate ?? true) ? "Create Purchase" : "Edit Purchase")"
             SubHeader="@((IsCreate ?? true) ? "Create a new purchase order" : "Update purchase order details")" />
 
-<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+<EditForm EditContext="@_editContext" OnValidSubmit="OnValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -97,10 +97,15 @@
                       Status="Model.Status"
                       PurchaseId="@(Model.Id == Guid.Empty ? (Guid?)null : Model.Id)"
                       OnTotalAmountChanged="UpdateTotalAmount"
-                      IsCreate="IsCreate" />
+                      OnItemsChanged="OnItemsChanged"
+                      IsCreate="IsCreate"
+                      OnItemRemoved="OnItemRemoved" />
 
     <!-- Action Buttons -->
     <MudPaper Class="pa-2 mt-2">
+        <MudText Align="Align.End" Typo="Typo.caption" Color="@(_isSaving ? Color.Info : (_isDirty ? Color.Warning : Color.Success))">
+            @(_isSaving ? "Saving…" : (_isDirty ? "Unsaved changes" : "All changes saved"))
+        </MudText>
         <MudStack Row="true" Justify="Justify.FlexEnd" Spacing="1">
             <MudButton Variant="Variant.Outlined"
                        Color="Color.Secondary"
@@ -111,9 +116,18 @@
             <MudButton Variant="Variant.Filled"
                        Color="Color.Primary"
                        ButtonType="ButtonType.Submit"
+                       Disabled="@(_isSaving || (IsCreate == false && !_isDirty))"
                        StartIcon="@Icons.Material.Filled.Save"
                        Size="Size.Small">
-                @((IsCreate ?? true) ? "Create" : "Update")
+                @if (_isSaving)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-1" />
+                    <text>Saving…</text>
+                }
+                else
+                {
+                    @((IsCreate ?? true) ? "Create" : "Update")
+                }
             </MudButton>
         </MudStack>
     </MudPaper>

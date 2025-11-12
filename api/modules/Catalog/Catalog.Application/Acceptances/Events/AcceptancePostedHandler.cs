@@ -2,6 +2,7 @@ using System.Linq;
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Application.Acceptances.Specifications;
 using AMIS.WebApi.Catalog.Application.Inventories.Specifications;
+using AMIS.WebApi.Catalog.Application.Purchases.UpdateWithItems.v1;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Events;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
@@ -15,23 +16,20 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
 {
     private readonly IReadRepository<Acceptance> _acceptanceReadRepository;
     private readonly IRepository<Inventory> _inventoryRepository;
-    private readonly IRepository<PurchaseItem> _purchaseItemRepository;
-    private readonly IReadRepository<PurchaseItem> _purchaseItemReadRepository;
+    private readonly IRepository<Purchase> _purchaseRepository;
     private readonly IRepository<InspectionRequest> _inspectionRequestRepository;
     private readonly ILogger<AcceptancePostedHandler> _logger;
 
     public AcceptancePostedHandler(
         [FromKeyedServices("catalog:acceptances")] IReadRepository<Acceptance> acceptanceReadRepository,
         [FromKeyedServices("catalog:inventories")] IRepository<Inventory> inventoryRepository,
-        [FromKeyedServices("catalog:purchaseItems")] IRepository<PurchaseItem> purchaseItemRepository,
-        [FromKeyedServices("catalog:purchaseItems")] IReadRepository<PurchaseItem> purchaseItemReadRepository,
+        [FromKeyedServices("catalog:purchases")] IRepository<Purchase> purchaseRepository,
         [FromKeyedServices("catalog:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepository,
         ILogger<AcceptancePostedHandler> logger)
     {
         _acceptanceReadRepository = acceptanceReadRepository ?? throw new ArgumentNullException(nameof(acceptanceReadRepository));
         _inventoryRepository = inventoryRepository ?? throw new ArgumentNullException(nameof(inventoryRepository));
-        _purchaseItemRepository = purchaseItemRepository ?? throw new ArgumentNullException(nameof(purchaseItemRepository));
-        _purchaseItemReadRepository = purchaseItemReadRepository ?? throw new ArgumentNullException(nameof(purchaseItemReadRepository));
+        _purchaseRepository = purchaseRepository ?? throw new ArgumentNullException(nameof(purchaseRepository));
         _inspectionRequestRepository = inspectionRequestRepository ?? throw new ArgumentNullException(nameof(inspectionRequestRepository));
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
@@ -47,17 +45,24 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
             return;
         }
 
+        // Load purchase with items to apply acceptance effects within aggregate boundary
+        var purchaseSpec = new GetPurchaseWithItemsSpecs(acceptance.PurchaseId);
+        var purchase = await _purchaseRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken);
+        if (purchase is null)
+        {
+            _logger.LogWarning("Purchase {PurchaseId} not found when processing Acceptance {AcceptanceId}.", acceptance.PurchaseId, acceptance.Id);
+            return;
+        }
+
         foreach (var acceptanceItem in acceptance.Items)
         {
             if (acceptanceItem.QtyAccepted <= 0)
-            {
                 continue;
-            }
 
-            var purchaseItem = acceptanceItem.PurchaseItem ?? await _purchaseItemRepository.GetByIdAsync(acceptanceItem.PurchaseItemId, cancellationToken);
+            var purchaseItem = purchase.Items.FirstOrDefault(pi => pi.Id == acceptanceItem.PurchaseItemId);
             if (purchaseItem is null)
             {
-                _logger.LogWarning("PurchaseItem {PurchaseItemId} not found for Acceptance {AcceptanceId}.", acceptanceItem.PurchaseItemId, acceptance.Id);
+                _logger.LogWarning("PurchaseItem {PurchaseItemId} not found in Purchase {PurchaseId} for Acceptance {AcceptanceId}.", acceptanceItem.PurchaseItemId, purchase.Id, acceptance.Id);
                 continue;
             }
 
@@ -73,7 +78,6 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
 
             var inventorySpec = new GetInventoryByProductSpec(productId);
             var inventory = await _inventoryRepository.FirstOrDefaultAsync(inventorySpec, cancellationToken);
-
             if (inventory is null)
             {
                 inventory = Inventory.Create(productId, qtyToAdd, unitCost);
@@ -87,26 +91,23 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
                 _logger.LogInformation("Updated inventory for Product {ProductId} from Acceptance {AcceptanceId}: +{Qty} => Qty {NewQty}.", productId, acceptance.Id, qtyToAdd, inventory.Qty);
             }
 
-            var totalAccepted = purchaseItem.AcceptanceItems.Any()
+            var totalAccepted = purchaseItem.AcceptanceItems != null && purchaseItem.AcceptanceItems.Count > 0
                 ? purchaseItem.AcceptanceItems.Sum(ai => ai.QtyAccepted)
                 : qtyToAdd;
-
             purchaseItem.UpdateAcceptanceSummary(totalAccepted);
 
             var approvedQty = purchaseItem.QtyPassed ?? purchaseItem.Qty;
             var targetStatus = totalAccepted >= approvedQty
                 ? PurchaseItemAcceptanceStatus.Accepted
                 : PurchaseItemAcceptanceStatus.PartiallyAccepted;
-
             purchaseItem.UpdateAcceptanceStatus(targetStatus);
-            await _purchaseItemRepository.UpdateAsync(purchaseItem, cancellationToken);
         }
 
-        // After updating items, update InspectionRequest status (PartiallyAccepted vs Accepted)
-        var purchaseId = acceptance.PurchaseId;
-        var itemsSpec = new AMIS.WebApi.Catalog.Application.PurchaseItems.Specifications.GetPurchaseItemsByPurchaseSpec(purchaseId);
-        var purchaseItems = await _purchaseItemReadRepository.ListAsync(itemsSpec, cancellationToken);
+        // Persist aggregate changes
+        await _purchaseRepository.UpdateAsync(purchase, cancellationToken);
 
+        // Determine overall acceptance progress for inspection request
+        var purchaseItems = purchase.Items;
         var allApprovedQty = purchaseItems.All(pi => (pi.QtyPassed ?? pi.Qty) > 0);
         var allFullyAccepted = purchaseItems.All(pi =>
         {
@@ -116,7 +117,7 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
         });
 
         // Load related inspection request and set status
-        var reqSpec = new AMIS.WebApi.Catalog.Application.InspectionRequests.Specifications.GetInspectionRequestByPurchaseSpec(purchaseId);
+    var reqSpec = new AMIS.WebApi.Catalog.Application.InspectionRequests.Specifications.GetInspectionRequestByPurchaseSpec(purchase.Id);
         var inspectionRequest = await _inspectionRequestRepository.FirstOrDefaultAsync(reqSpec, cancellationToken);
         if (inspectionRequest is not null)
         {
