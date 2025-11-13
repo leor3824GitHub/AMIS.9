@@ -5,6 +5,7 @@ using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace AMIS.Framework.Infrastructure.OpenApi;
+
 public class SwaggerDefaultValues : IOperationFilter
 {
     /// <inheritdoc />
@@ -57,6 +58,26 @@ public class SwaggerDefaultValues : IOperationFilter
             }
 
             parameter.Required |= description.IsRequired;
+        }
+    }
+}
+
+public class IncludeNestedTypesSchemaFilter : ISchemaFilter
+{
+    public void Apply(OpenApiSchema schema, SchemaFilterContext context)
+    {
+        if (context.Type.IsGenericType && context.Type.GetGenericTypeDefinition() == typeof(IReadOnlyList<>))
+        {
+            var elementType = context.Type.GetGenericArguments()[0];
+            if (elementType.IsNested && !elementType.IsGenericTypeParameter)
+            {
+                // Force inclusion of nested types
+                var nestedSchema = context.SchemaGenerator.GenerateSchema(elementType, context.SchemaRepository);
+                if (nestedSchema != null && !context.SchemaRepository.Schemas.ContainsKey(elementType.Name))
+                {
+                    context.SchemaRepository.Schemas.Add(elementType.Name, nestedSchema);
+                }
+            }
         }
     }
 }

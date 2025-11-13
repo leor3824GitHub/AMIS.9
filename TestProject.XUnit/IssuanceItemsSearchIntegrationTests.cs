@@ -1,13 +1,16 @@
 using System.Net.Http.Json;
 using AMIS.Framework.Core.Paging;
-using AMIS.WebApi.Catalog.Application.IssuanceItems.Get.v1;
-using AMIS.WebApi.Catalog.Application.IssuanceItems.Search.v1;
+using AMIS.WebApi.Catalog.Application.Issuances.Get.v1;
+using AMIS.WebApi.Catalog.Application.Issuances.Search.v1;
+using AMIS.WebApi.Catalog.Application.Employees.Get.v1;
 using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using TestProject.XUnit.Testing;
 using TestProject.XUnit.Testing.Assertions;
 
 namespace TestProject.XUnit;
 
+// Renamed intent: this test now targets Issuances search (there is no separate IssuanceItems search endpoint)
 public class IssuanceItemsSearchIntegrationTests : IClassFixture<IssuanceItemsWebAppFactory>
 {
     private readonly IssuanceItemsWebAppFactory _factory;
@@ -18,28 +21,28 @@ public class IssuanceItemsSearchIntegrationTests : IClassFixture<IssuanceItemsWe
     }
 
     [Fact]
-    public async Task SearchIssuanceItems_HappyPath_ReturnsOk()
+    public async Task SearchIssuances_HappyPath_ReturnsOk()
     {
         var client = _factory.CreateClient();
-        var request = new SearchIssuanceItemsCommand { PageNumber = 1, PageSize = 10 };
+        var request = new SearchIssuancesCommand { PageNumber = 1, PageSize = 10 };
 
-        var response = await client.PostAsJsonAsync("/api/v1/catalog/issuanceItems/search", request);
+        var response = await client.PostAsJsonAsync("/api/v1/catalog/issuances/search", request);
         response.EnsureSuccessStatusCode();
 
-        var payload = await response.Content.ReadFromJsonAsync<PagedList<IssuanceItemResponse>>();
+        var payload = await response.Content.ReadFromJsonAsync<PagedList<IssuanceResponse>>();
         PaginationAssert.AssertHasItems(payload);
     }
 
     [Fact]
-    public async Task SearchIssuanceItems_PaginationDefaults_ReturnsOk()
+    public async Task SearchIssuances_PaginationDefaults_ReturnsOk()
     {
         var client = _factory.CreateClient();
-        var request = new SearchIssuanceItemsCommand { PageNumber = 0, PageSize = 0 };
+        var request = new SearchIssuancesCommand { PageNumber = 0, PageSize = 0 };
 
-        var response = await client.PostAsJsonAsync("/api/v1/catalog/issuanceItems/search", request);
+        var response = await client.PostAsJsonAsync("/api/v1/catalog/issuances/search", request);
         response.EnsureSuccessStatusCode();
 
-        var payload = await response.Content.ReadFromJsonAsync<PagedList<IssuanceItemResponse>>();
+        var payload = await response.Content.ReadFromJsonAsync<PagedList<IssuanceResponse>>();
         PaginationAssert.AssertDefaults(payload);
     }
 }
@@ -48,17 +51,24 @@ public class IssuanceItemsWebAppFactory : BaseWebAppFactory
 {
     protected override void ConfigureServices(IServiceCollection services)
     {
-        ReplaceHandler<SearchIssuanceItemsCommand, PagedList<IssuanceItemResponse>, TestSearchIssuanceItemsHandler>(services);
+        ReplaceHandler<SearchIssuancesCommand, PagedList<IssuanceResponse>, TestSearchIssuancesHandler>(services);
     }
 }
 
-internal class TestSearchIssuanceItemsHandler : IRequestHandler<SearchIssuanceItemsCommand, PagedList<IssuanceItemResponse>>
+internal class TestSearchIssuancesHandler : IRequestHandler<SearchIssuancesCommand, PagedList<IssuanceResponse>>
 {
-    public Task<PagedList<IssuanceItemResponse>> Handle(SearchIssuanceItemsCommand request, CancellationToken cancellationToken)
+    public Task<PagedList<IssuanceResponse>> Handle(SearchIssuancesCommand request, CancellationToken cancellationToken)
     {
-        var items = new List<IssuanceItemResponse>
+        var items = new List<IssuanceResponse>
         {
-            new(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), 2, 7.25m, "Open", null)
+            new(
+                Id: Guid.NewGuid(),
+                EmployeeId: Guid.NewGuid(),
+                IssuanceDate: DateTime.UtcNow,
+                TotalAmount: 100m,
+                IsClosed: false,
+                Employee: new EmployeeResponse(Guid.NewGuid(), "Issuer A", "Clerk", "ISS", null)
+            )
         };
         var paged = TestProject.XUnit.Testing.Paging.TestPagedList.Build(items, request.PageNumber, request.PageSize, 1);
         return Task.FromResult(paged);

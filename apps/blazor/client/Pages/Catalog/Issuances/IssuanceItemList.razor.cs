@@ -16,7 +16,7 @@ public partial class IssuanceItemList
     private ISnackbar? Snackbar { get; set; }
 
     [Parameter]
-    public ICollection<IssuanceItemDto> Items { get; set; } = new List<IssuanceItemDto>();
+    public ICollection<IssuanceItemUpsert> Items { get; set; } = new List<IssuanceItemUpsert>();
     [Parameter]
     public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
     [Parameter]
@@ -44,7 +44,7 @@ public partial class IssuanceItemList
     private int Qty { get; set; }
     private double UnitPrice { get; set; }
     private string Status { get; set; } = "Pending";
-    private IssuanceItemDto? EditingItem { get; set; }
+    private IssuanceItemUpsert? EditingItem { get; set; }
 
     private sealed class InventorySnapshot
     {
@@ -56,9 +56,9 @@ public partial class IssuanceItemList
 
     protected override void OnParametersSet()
     {
-        Items ??= new List<IssuanceItemDto>();
+        Items ??= new List<IssuanceItemUpsert>();
         // optional: prefetch inventory for existing items (fire-and-forget)
-        foreach (var pid in Items.Select(i => i.ProductId).Where(pid => pid.HasValue).Select(pid => pid!.Value).Distinct())
+        foreach (var pid in Items.Select(i => i.ProductId).Distinct())
         {
             _ = EnsureInventoryLoadedAsync(pid);
         }
@@ -115,14 +115,14 @@ public partial class IssuanceItemList
         return 0d;
     }
 
-    private void EditItem(IssuanceItemDto item)
+    private void EditItem(IssuanceItemUpsert item)
     {
         EditingItem = item;
     }
 
     private async System.Threading.Tasks.Task SaveEdit()
     {
-        if (EditingItem == null || EditingItem.ProductId is null)
+        if (EditingItem == null)
             return;
 
         try
@@ -137,29 +137,13 @@ public partial class IssuanceItemList
             }
             EditingItem.UnitPrice = GetAvePriceFor(EditingItem.ProductId);
 
-            if (IsCreate == false)
-            {
-                var model = new UpdateIssuanceItemCommand
-                {
-                    Id = EditingItem.Id,
-                    IssuanceId = IssuanceId ?? Guid.Empty,
-                    ProductId = EditingItem.ProductId!.Value,
-                    Qty = EditingItem.Qty,
-                    UnitPrice = EditingItem.UnitPrice,
-                    Status = EditingItem.Status
-                };
-
-                await ApiClient.UpdateIssuanceItemEndpointAsync("1", model.Id, model);
-                Snackbar?.Add("Item updated.", Severity.Success);
-            }
-
+            // No individual API call needed - aggregate operation will handle this
             EditingItem = null;
             UpdateTotalAmount();
         }
-        catch (ApiException ex)
+        catch (Exception ex)
         {
             Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
-            Snackbar?.Add("The item wasn't updated.", Severity.Error);
         }
     }
 
@@ -190,11 +174,10 @@ public partial class IssuanceItemList
         }
         UnitPrice = GetAvePriceFor(ProductId);
 
-        var newItem = new IssuanceItemDto
+        var newItem = new IssuanceItemUpsert
         {
             Id = Guid.NewGuid(),
-            IssuanceId = IssuanceId,
-            ProductId = ProductId,
+            ProductId = ProductId.Value,
             Qty = Qty,
             UnitPrice = UnitPrice,
             Status = Status
@@ -202,20 +185,7 @@ public partial class IssuanceItemList
 
         Items.Add(newItem);
 
-        if (IsCreate == false)
-        {
-            var model = new CreateIssuanceItemCommand
-            {
-                IssuanceId = IssuanceId ?? Guid.Empty,
-                ProductId = newItem.ProductId!.Value,
-                Qty = newItem.Qty,
-                UnitPrice = newItem.UnitPrice,
-                Status = newItem.Status
-            };
-
-            await ApiClient.CreateIssuanceItemEndpointAsync("1", model);
-            Snackbar?.Add("Item added.", Severity.Success);
-        }
+        // No individual API call needed - aggregate operation will handle this
 
         // Reset fields after adding
         ProductId = null;
@@ -226,28 +196,17 @@ public partial class IssuanceItemList
         UpdateTotalAmount();
     }
 
-    private async System.Threading.Tasks.Task RemoveItem(IssuanceItemDto item)
+    private async System.Threading.Tasks.Task RemoveItem(IssuanceItemUpsert item)
     {
-        if (item.Id == Guid.Empty)
-        {
-            Snackbar?.Add("Item ID is empty and cannot be removed.", Severity.Error);
-            return;
-        }
         try
         {
-            if (IsCreate == false)
-            {
-                await ApiClient.DeleteIssuanceItemEndpointAsync("1", item.Id);
-                Snackbar?.Add("Item removed.", Severity.Success);
-            }
-
+            // No individual API call needed - aggregate operation will handle deletion by comparing with existing items
             Items.Remove(item);
             UpdateTotalAmount();
         }
-        catch (ApiException ex)
+        catch (Exception ex)
         {
             Snackbar?.Add($"Error: {ex.Message}", Severity.Error);
-            Snackbar?.Add("The item wasn't removed.", Severity.Error);
         }
     }
 

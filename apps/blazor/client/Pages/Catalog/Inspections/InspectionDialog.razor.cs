@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using MudBlazor;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Inspections;
+
 public partial class InspectionDialog
 {
     [Inject]
@@ -19,7 +20,7 @@ public partial class InspectionDialog
     [Parameter]
     public required UpdateInspectionCommand Model { get; set; } = default!;
     [Parameter] public EventCallback OnCancel { get; set; }
-   
+
     [Parameter] public Action? Refresh { get; set; }
     [Parameter] public bool IsCreate { get; set; } = false;
     [Parameter] public bool IsReadOnly { get; set; } = false;
@@ -178,55 +179,62 @@ public partial class InspectionDialog
 
             Snackbar.Add(IsCreate ? "Creating inspection..." : "Updating inspection...", Severity.Info);
 
-            if (IsCreate)
-            {
+            // Build the aggregate command with items
             var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
             var purchaseId = selectedReq?.PurchaseId ?? Guid.Empty;
 
-            var model = new CreateInspectionCommand
+            var items = new List<InspectionItemUpsert>();
+            var deletedItemIds = new List<Guid>();
+
+            if (_itemsEditor?.Inputs != null)
             {
+                foreach (var input in _itemsEditor.Inputs)
+                {
+                    // Skip rows that are locked due to being inspected elsewhere
+                    if (input.AlreadyInspectedElsewhere)
+                        continue;
+
+                    if (input.IsInspected || input.ExistingInspectionItemId.HasValue)
+                    {
+                        // Include inspected items or existing items that should be updated
+                        items.Add(new InspectionItemUpsert
+                        {
+                            Id = input.ExistingInspectionItemId,
+                            PurchaseItemId = input.PurchaseItemId,
+                            QtyInspected = input.QtyInspected,
+                            QtyPassed = input.QtyPassed,
+                            QtyFailed = input.QtyFailed,
+                            Remarks = input.Remarks ?? string.Empty,
+                            InspectionItemStatus = input.Status
+                        });
+                    }
+                    else if (input.ExistingInspectionItemId.HasValue && !input.IsInspected)
+                    {
+                        // Mark existing items for deletion if they're unchecked
+                        deletedItemIds.Add(input.ExistingInspectionItemId.Value);
+                    }
+                }
+            }
+
+            var aggregateCommand = new UpdateInspectionWithItemsCommand
+            {
+                Id = IsCreate ? Guid.NewGuid() : Model.Id,
+                InspectorId = Model.InspectorId,
                 InspectionDate = Model.InspectionDate,
-                InspectorId = Model.InspectorId.Value,
-                InspectionRequestId = Model.InspectionRequestId.Value,
-                PurchaseId = purchaseId,
-                Remarks = Model.Remarks ?? string.Empty,
-                Items = new List<InspectionItemDto>()
+                Remarks = Model.Remarks,
+                Items = items,
+                DeletedItemIds = deletedItemIds
             };
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
-                () => InspectionClient.CreateInspectionEndpointAsync("1", model),
+                () => InspectionClient.UpdateInspectionWithItemsEndpointAsync("1", aggregateCommand.Id, aggregateCommand),
                 Snackbar,
                 Navigation
             );
 
-            if (response?.Id != null && response.Id.Value != Guid.Empty)
+            if (response != null)
             {
-                // Create inspection items from user inputs
-                // Skip items that are already inspected (single-shot) and items with zero inspected qty
-                foreach (var input in _itemsEditor.Inputs.Where(i => !i.AlreadyInspected && i.QtyInspected > 0))
-                {
-                    var createItem = new CreateInspectionItemCommand
-                    {
-                        InspectionId = response.Id.Value,
-                        PurchaseItemId = input.PurchaseItemId,
-                        QtyInspected = input.QtyInspected,
-                        QtyPassed = input.QtyPassed,
-                        QtyFailed = input.QtyFailed,
-                        Remarks = input.Remarks ?? string.Empty,
-                        InspectionItemStatus = input.Status
-                    };
-
-                    await ApiHelper.ExecuteCallGuardedAsync(
-                        () => InspectionClient.CreateInspectionItemEndpointAsync("1", createItem),
-                        Snackbar,
-                        Navigation
-                    );
-                }
-
-                // Inventory updates are now handled server-side upon approval via domain events.
-                // No client-side inventory mutation here to avoid duplication.
-
-                // Determine request status: Failed if any item has failures; otherwise Completed
+                // Determine request status after operation
                 var requestStatus = ResolveRequestStatusFromEditor();
 
                 // Update inspection request status accordingly
@@ -236,103 +244,10 @@ public partial class InspectionDialog
                     Model.InspectorId,
                     requestStatus);
 
-                _successMessage = "Inspection created successfully!";
+                _successMessage = IsCreate ? "Inspection created successfully!" : "Inspection updated successfully!";
                 Snackbar.Add(_successMessage, Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
                 Refresh?.Invoke();
-            }
-            }
-            else
-            {
-                var response = await ApiHelper.ExecuteCallGuardedAsync(
-                    () => InspectionClient.UpdateInspectionEndpointAsync("1", Model.Id, Model),
-                    Snackbar,
-                    Navigation
-                );
-
-                if (response != null)
-                {
-                    // Persist item edits:
-                    // - Update existing items belonging to this inspection
-                    // - Create new items if user inspected a purchase item not previously inspected
-                    // - Delete items if user unchecked inspection on an existing item
-                    if (_itemsEditor?.Inputs is not null)
-                    {
-                        foreach (var input in _itemsEditor.Inputs)
-                        {
-                            // Skip rows that are locked due to being inspected elsewhere
-                            if (input.AlreadyInspectedElsewhere)
-                                continue;
-
-                            if (input.ExistingInspectionItemId.HasValue)
-                            {
-                                if (!input.IsInspected)
-                                {
-                                    // delete item
-                                    await ApiHelper.ExecuteCallGuardedAsync(
-                                        () => InspectionClient.DeleteInspectionItemEndpointAsync("1", input.ExistingInspectionItemId.Value),
-                                        Snackbar,
-                                        Navigation
-                                    );
-                                }
-                                else
-                                {
-                                    // update item
-                                    var updateItem = new UpdateInspectionItemCommand
-                                    {
-                                        Id = input.ExistingInspectionItemId.Value,
-                                        QtyInspected = input.QtyInspected,
-                                        QtyPassed = input.QtyPassed,
-                                        QtyFailed = input.QtyFailed,
-                                        Remarks = input.Remarks ?? string.Empty,
-                                        InspectionItemStatus = input.Status
-                                    };
-
-                                    await ApiHelper.ExecuteCallGuardedAsync(
-                                        () => InspectionClient.UpdateInspectionItemEndpointAsync("1", input.ExistingInspectionItemId.Value, updateItem),
-                                        Snackbar,
-                                        Navigation
-                                    );
-                                }
-                            }
-                            else if (input.IsInspected)
-                            {
-                                // create new item for this inspection
-                                var createItem = new CreateInspectionItemCommand
-                                {
-                                    InspectionId = Model.Id,
-                                    PurchaseItemId = input.PurchaseItemId,
-                                    QtyInspected = input.QtyInspected,
-                                    QtyPassed = input.QtyPassed,
-                                    QtyFailed = input.QtyFailed,
-                                    Remarks = input.Remarks ?? string.Empty,
-                                    InspectionItemStatus = input.Status
-                                };
-
-                                await ApiHelper.ExecuteCallGuardedAsync(
-                                    () => InspectionClient.CreateInspectionItemEndpointAsync("1", createItem),
-                                    Snackbar,
-                                    Navigation
-                                );
-                            }
-                        }
-                    }
-
-                    // Determine request status after update
-                    var purchaseId = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId)?.PurchaseId;
-                    var requestStatus = ResolveRequestStatusFromEditor();
-
-                    await UpdateInspectionRequestStatusAsync(
-                        Model.InspectionRequestId,
-                        purchaseId,
-                        Model.InspectorId,
-                        requestStatus);
-
-                    _successMessage = "Inspection updated successfully!";
-                    Snackbar.Add(_successMessage, Severity.Success);
-                    MudDialog.Close(DialogResult.Ok(true));
-                    Refresh?.Invoke();
-                }
             }
         }
         finally

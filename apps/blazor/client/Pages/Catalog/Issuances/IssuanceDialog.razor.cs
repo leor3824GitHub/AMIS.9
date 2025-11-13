@@ -73,62 +73,105 @@ public partial class IssuanceDialog
 
         if (IsCreate.Value)
         {
-            var command = new CreateIssuanceCommand
+            // Use aggregate method for create with items
+            var aggregateCommand = new UpdateIssuanceWithItemsCommand
             {
+                Id = Guid.NewGuid(),
                 EmployeeId = Model.EmployeeId,
                 IssuanceDate = Model.IssuanceDate,
-                TotalAmount = (double)Model.TotalAmount
+                TotalAmount = (double)Model.TotalAmount,
+                IsClosed = Model.IsClosed,
+                Items = Model.Items?.Select(item => new IssuanceItemUpsert
+                {
+                    ProductId = item.ProductId!.Value,
+                    Qty = item.Qty,
+                    UnitPrice = item.UnitPrice,
+                    Status = item.Status
+                }).ToList() ?? new List<IssuanceItemUpsert>(),
+                DeletedItemIds = new List<Guid>()
             };
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
-                () => ApiClient.CreateIssuanceEndpointAsync("1", command),
+                () => ApiClient.UpdateIssuanceWithItemsEndpointAsync("1", aggregateCommand.Id, aggregateCommand),
                 Snackbar,
                 Navigation,
                 _customValidation);
 
             if (response != null)
             {
-                // If there are items captured during creation, persist them now using the returned issuance Id
-                if (Model.Items?.Count > 0 && response.Id.HasValue)
-                {
-                    var createdId = response.Id.Value;
-                    foreach (var item in Model.Items)
-                    {
-                        try
-                        {
-                            var createItem = new CreateIssuanceItemCommand
-                            {
-                                IssuanceId = createdId,
-                                ProductId = item.ProductId!.Value,
-                                Qty = item.Qty,
-                                UnitPrice = item.UnitPrice,
-                                Status = item.Status
-                            };
-                            await ApiClient.CreateIssuanceItemEndpointAsync("1", createItem);
-                        }
-                        catch (ApiException ex)
-                        {
-                            Snackbar.Add($"Failed to add an item: {ex.Message}", Severity.Error);
-                        }
-                    }
-                }
                 Snackbar.Add("Issuance created successfully!", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
             }
         }
         else
         {
-            var command = new UpdateIssuanceCommand
+            // For update, we need to get existing items and determine what to update/delete
+            var existingItems = await ApiClient.SearchIssuanceItemsEndpointAsync("1", new SearchIssuanceItemsCommand
+            {
+                IssuanceId = Model.Id,
+                PageNumber = 1,
+                PageSize = 1000
+            });
+
+            var itemsToUpdate = new List<IssuanceItemUpsert>();
+            var deletedItemIds = new List<Guid>();
+
+            // Process existing items
+            if (existingItems?.Items != null)
+            {
+                foreach (var existing in existingItems.Items)
+                {
+                    if (!existing.Id.HasValue) continue;
+
+                    var currentInput = Model.Items?.FirstOrDefault(i => i.Id == existing.Id);
+                    if (currentInput != null)
+                    {
+                        // Update existing item
+                        itemsToUpdate.Add(new IssuanceItemUpsert
+                        {
+                            Id = existing.Id,
+                            ProductId = currentInput.ProductId!.Value,
+                            Qty = currentInput.Qty,
+                            UnitPrice = currentInput.UnitPrice,
+                            Status = currentInput.Status
+                        });
+                    }
+                    else
+                    {
+                        // Mark for deletion
+                        deletedItemIds.Add(existing.Id.Value);
+                    }
+                }
+            }
+
+            // Add new items
+            if (Model.Items != null)
+            {
+                foreach (var newItem in Model.Items.Where(i => i.Id == Guid.Empty))
+                {
+                    itemsToUpdate.Add(new IssuanceItemUpsert
+                    {
+                        ProductId = newItem.ProductId!.Value,
+                        Qty = newItem.Qty,
+                        UnitPrice = newItem.UnitPrice,
+                        Status = newItem.Status
+                    });
+                }
+            }
+
+            var aggregateCommand = new UpdateIssuanceWithItemsCommand
             {
                 Id = Model.Id,
                 EmployeeId = Model.EmployeeId,
                 IssuanceDate = Model.IssuanceDate,
                 TotalAmount = (double)Model.TotalAmount,
-                IsClosed = Model.IsClosed
+                IsClosed = Model.IsClosed,
+                Items = itemsToUpdate,
+                DeletedItemIds = deletedItemIds
             };
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
-                () => ApiClient.UpdateIssuanceEndpointAsync("1", command.Id, command),
+                () => ApiClient.UpdateIssuanceWithItemsEndpointAsync("1", Model.Id, aggregateCommand),
                 Snackbar,
                 Navigation,
                 _customValidation);

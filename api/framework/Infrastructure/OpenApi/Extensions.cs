@@ -20,6 +20,7 @@ public static class Extensions
             .AddSwaggerGen(options =>
             {
                 options.OperationFilter<SwaggerDefaultValues>();
+                options.SchemaFilter<IncludeNestedTypesSchemaFilter>();
                 options.AddSecurityDefinition("bearerAuth", new OpenApiSecurityScheme
                 {
                     Type = SecuritySchemeType.Http,

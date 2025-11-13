@@ -345,22 +345,29 @@ public partial class AcceptanceDialog
 
         if (IsCreate)
         {
-            var command = new CreateAcceptanceCommand
+            // Use aggregate method for create with items
+            var aggregateCommand = new UpdateAcceptanceWithItemsCommand
             {
+                Id = Guid.NewGuid(),
+                SupplyOfficerId = Model.SupplyOfficerId,
                 AcceptanceDate = Model.AcceptanceDate,
-                SupplyOfficerId = Model.SupplyOfficerId.Value,
-                PurchaseId = Model.PurchaseId.Value,
-                Remarks = Model.Remarks ?? string.Empty,
-                Items = itemsToSubmit
+                Remarks = Model.Remarks,
+                Items = itemsToSubmit.Select(i => new AcceptanceItemUpsert
+                {
+                    PurchaseItemId = i.PurchaseItemId,
+                    QtyAccepted = i.QtyAccepted,
+                    Remarks = i.Remarks
+                }).ToList(),
+                DeletedItemIds = new List<Guid>()
             };
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
-                () => ApiClient.CreateAcceptanceEndpointAsync("1", command),
+                () => ApiClient.UpdateAcceptanceWithItemsEndpointAsync("1", aggregateCommand.Id, aggregateCommand),
                 Snackbar,
                 Navigation,
                 _validation);
 
-            if (response?.Id is Guid id && id != Guid.Empty)
+            if (response != null)
             {
                 Snackbar.Add("Acceptance created successfully.", Severity.Success);
                 MudDialog.Close(DialogResult.Ok(true));
@@ -374,17 +381,69 @@ public partial class AcceptanceDialog
                 return;
             }
 
-            var command = new UpdateAcceptanceCommand
+            // For update, we need to get existing items and determine what to update/delete
+            var existingItems = await ApiClient.SearchAcceptanceItemsEndpointAsync("1", new SearchAcceptanceItemsCommand
+            {
+                AcceptanceId = Model.Id.Value,
+                PageNumber = 1,
+                PageSize = 1000
+            });
+
+            var itemsToUpdate = new List<AcceptanceItemUpsert>();
+            var deletedItemIds = new List<Guid>();
+
+            // Process existing items
+            if (existingItems?.Items != null)
+            {
+                foreach (var existing in existingItems.Items)
+                {
+                    var currentInput = Model.Items.FirstOrDefault(i => i.PurchaseItemId == existing.PurchaseItemId);
+                    if (currentInput != null && currentInput.QtyAccepted > 0)
+                    {
+                        // Update existing item
+                        itemsToUpdate.Add(new AcceptanceItemUpsert
+                        {
+                            Id = existing.Id,
+                            PurchaseItemId = existing.PurchaseItemId,
+                            QtyAccepted = currentInput.QtyAccepted,
+                            Remarks = currentInput.Remarks ?? string.Empty
+                        });
+                    }
+                    else
+                    {
+                        // Mark for deletion
+                        deletedItemIds.Add(existing.Id);
+                    }
+                }
+            }
+
+            // Add new items
+            foreach (var newItem in itemsToSubmit)
+            {
+                var existingItem = existingItems?.Items?.FirstOrDefault(i => i.PurchaseItemId == newItem.PurchaseItemId);
+                if (existingItem == null)
+                {
+                    itemsToUpdate.Add(new AcceptanceItemUpsert
+                    {
+                        PurchaseItemId = newItem.PurchaseItemId,
+                        QtyAccepted = newItem.QtyAccepted,
+                        Remarks = newItem.Remarks
+                    });
+                }
+            }
+
+            var aggregateCommand = new UpdateAcceptanceWithItemsCommand
             {
                 Id = Model.Id.Value,
+                SupplyOfficerId = Model.SupplyOfficerId,
                 AcceptanceDate = Model.AcceptanceDate,
-                SupplyOfficerId = Model.SupplyOfficerId.Value,
-                PurchaseId = Model.PurchaseId.Value,
-                Remarks = Model.Remarks ?? string.Empty
+                Remarks = Model.Remarks,
+                Items = itemsToUpdate,
+                DeletedItemIds = deletedItemIds
             };
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
-                () => ApiClient.UpdateAcceptanceEndpointAsync("1", Model.Id.Value, command),
+                () => ApiClient.UpdateAcceptanceWithItemsEndpointAsync("1", Model.Id.Value, aggregateCommand),
                 Snackbar,
                 Navigation,
                 _validation);

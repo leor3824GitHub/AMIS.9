@@ -5,7 +5,7 @@ using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 
-public class InspectionItem : AuditableEntity, IAggregateRoot
+public class InspectionItem : AuditableEntity
 {
     public Guid InspectionId { get; private set; }
     public Guid PurchaseItemId { get; private set; }

@@ -4,7 +4,7 @@
 <MudPaper Class="pa-4 mb-4 editor-font-size-scope" Style="max-height: 80vh; overflow-y: auto;">
     <MudText Typo="Typo.h6">Issuance Items - @(Items?.Count ?? 0)</MudText>
 
-    <MudTable T="IssuanceItemDto" Items="Items" Hover Breakpoint="Breakpoint.Sm" Class="th-border-separator">
+    <MudTable T="IssuanceItemUpsert" Items="Items" Hover Breakpoint="Breakpoint.Sm" Class="th-border-separator">
 
         <HeaderContent>
             <MudTh Style="width: 250px;">Product</MudTh>
@@ -99,8 +99,8 @@
 
         <FooterContent>
             <MudTd Style="width: 250px;">
-                <MudSelect T="Guid ?" @bind-Value="ProductId"
-                    Placeholder="Select Product Here" Variant="Variant.Outlined">
+                <MudSelect T="Guid ?" @bind-Value="ProductId" Placeholder="Select Product Here"
+                    Variant="Variant.Outlined">
                     @foreach (var product in Products)
                     {
                         <MudSelectItem T="Guid ?" Value="product.Id"
@@ -130,7 +130,7 @@
                     }
                     <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute"
                         Variant="Variant.Outlined" />
-                </MudTd>               
+                </MudTd>
 
                 <MudTd class="text-center">
                     <MudTooltip Text="Add Item">

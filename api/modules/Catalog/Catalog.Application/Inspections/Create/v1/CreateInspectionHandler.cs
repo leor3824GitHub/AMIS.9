@@ -1,6 +1,7 @@
 ﻿using System;
 using Ardalis.Specification;
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Application.Inspections.Specifications;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Exceptions;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
@@ -34,13 +35,13 @@ public sealed class CreateInspectionHandler(
 
         // Load inspection request by ID (not through navigation)
         var inspectionRequest = await inspectionRequestRepo.GetByIdAsync(request.InspectionRequestId, cancellationToken);
-        
+
         if (inspectionRequest is null)
-   {
+        {
             throw new InspectionRequestNotFoundException(request.InspectionRequestId);
         }
 
-   if (inspectionRequest.PurchaseId != request.PurchaseId)
+        if (inspectionRequest.PurchaseId != request.PurchaseId)
         {
             throw new InspectionRequestMismatchException(request.InspectionRequestId, inspectionRequest.PurchaseId!.Value, request.PurchaseId);
         }
@@ -50,12 +51,12 @@ public sealed class CreateInspectionHandler(
             throw new InspectorNotAssignedException(request.InspectionRequestId);
         }
 
-    if (inspectionRequest.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
+        if (inspectionRequest.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
         {
             throw new InspectionAlreadyCompletedException(request.InspectionRequestId);
         }
 
-      // Create inspection with InspectionRequestId only (following aggregate boundaries)
+        // Create inspection with InspectionRequestId only (following aggregate boundaries)
         var inspection = Inspection.Create(
    inspectionRequestId: request.InspectionRequestId,
   employeeId: request.InspectorId,
@@ -66,42 +67,53 @@ public sealed class CreateInspectionHandler(
 
         if (request.Items is not null)
         {
-   foreach (var item in request.Items)
-        {
-   var status = item.InspectionItemStatus ?? InspectionItemStatus.NotInspected;
-     _ = inspection.AddItem(item.PurchaseItemId, item.QtyInspected, item.QtyPassed, item.QtyFailed, item.Remarks, status);
-       }
+            // Single-shot validation: ensure no purchase item is inspected more than once
+            foreach (var item in request.Items)
+            {
+                var existingInspectionSpec = new InspectionItemExistsForPurchaseItemSpec(item.PurchaseItemId);
+                var existingInspection = await repository.FirstOrDefaultAsync(existingInspectionSpec, cancellationToken);
+                if (existingInspection != null)
+                {
+                    throw new InvalidOperationException($"Purchase item {item.PurchaseItemId} has already been inspected. Single-shot inspection is enforced.");
+                }
+            }
+
+            foreach (var item in request.Items)
+            {
+                var status = item.InspectionItemStatus ?? InspectionItemStatus.NotInspected;
+                _ = inspection.AddItem(item.PurchaseItemId, item.QtyInspected, item.QtyPassed, item.QtyFailed, item.Remarks, status);
+            }
         }
 
         await repository.AddAsync(inspection, cancellationToken);
 
-  // Evaluate inspection status - fetch purchase data explicitly from its own repository
+        // Evaluate inspection status - fetch purchase data explicitly from its own repository
         if (inspectionRequest.PurchaseId.HasValue)
         {
-        var purchaseSpec = new PurchaseWithItemsSpec(inspectionRequest.PurchaseId.Value);
-        var purchase = await purchaseRepo.FirstOrDefaultAsync(purchaseSpec, cancellationToken);
-    
-if (purchase != null)
-      {
-    // Pass data (not entity) across aggregate boundary
-         var purchaseItemData = purchase.Items
-         .Select(pi => new PurchaseItemSummary(pi.Id, pi.Qty))
-  .ToList();
-            
-   inspection.EvaluateAndSetStatus(purchaseItemData);
+            var purchaseSpec = new PurchaseWithItemsSpec(inspectionRequest.PurchaseId.Value);
+            var purchase = await purchaseRepo.FirstOrDefaultAsync(purchaseSpec, cancellationToken);
+
+            if (purchase != null)
+            {
+                // Pass data (not entity) across aggregate boundary
+                var purchaseItemData = purchase.Items
+                .Select(pi => new PurchaseItemSummary(pi.Id, pi.Qty))
+         .ToList();
+
+                inspection.EvaluateAndSetStatus(purchaseItemData);
             }
         }
 
         // Update inspection request status (use IRepository not IReadRepository)
-if (inspectionRequest.Status == InspectionRequestStatus.Assigned)
+        if (inspectionRequest.Status == InspectionRequestStatus.Assigned)
         {
             inspectionRequest.UpdateStatus(InspectionRequestStatus.InProgress);
-     await inspectionRequestRepo.UpdateAsync(inspectionRequest, cancellationToken);
+            await inspectionRequestRepo.UpdateAsync(inspectionRequest, cancellationToken);
         }
 
-        logger.LogInformation("Inspection created {InspectionId} for InspectionRequest {InspectionRequestId}", 
+        logger.LogInformation("Inspection created {InspectionId} for InspectionRequest {InspectionRequestId}",
             inspection.Id, request.InspectionRequestId);
 
-     return new CreateInspectionResponse(inspection.Id);
+        return new CreateInspectionResponse(inspection.Id);
     }
 }

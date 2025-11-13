@@ -24,8 +24,8 @@ public partial class Employees
             {
                 new(employee => employee.Name, "Name", "Name"),
                 new(employee => employee.Designation, "Designation", "Designation"),
-                new(employee => employee.ResponsibilityCode, "Responsibilitycode", "Responsibilitycode"),
-                new(employee => employee.UserId, "UserId", "UserId")
+                new(employee => employee.ResponsibilityCode, "Responsibilitycode", "Responsibilitycode")
+                // Removed UserId field as it's now automatically set from current user
             },
             enableAdvancedSearch: true,
             idFunc: employee => employee.Id!.Value,

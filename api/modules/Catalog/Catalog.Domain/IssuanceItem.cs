@@ -3,7 +3,8 @@ using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
 
 namespace AMIS.WebApi.Catalog.Domain;
-public class IssuanceItem : AuditableEntity, IAggregateRoot
+
+public class IssuanceItem : AuditableEntity
 {
     public Guid IssuanceId { get; private set; }
     public Guid ProductId { get; private set; }

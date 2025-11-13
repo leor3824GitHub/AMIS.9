@@ -4,7 +4,7 @@ using AMIS.WebApi.Catalog.Domain.Events;
 
 namespace AMIS.WebApi.Catalog.Domain;
 
-public class AcceptanceItem : AuditableEntity, IAggregateRoot
+public class AcceptanceItem : AuditableEntity
 {
     public Guid AcceptanceId { get; private set; }
     public Guid PurchaseItemId { get; private set; }

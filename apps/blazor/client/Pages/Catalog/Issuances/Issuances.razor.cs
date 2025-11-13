@@ -203,10 +203,9 @@ public partial class Issuances
                 });
 
                 model.Items = itemsResp?.Items?
-                    .Select(x => new IssuanceItemDto
+                    .Select(x => new IssuanceItemUpsert
                     {
-                        Id = x.Id ?? Guid.Empty,
-                        IssuanceId = x.IssuanceId,
+                        Id = x.Id,
                         ProductId = x.ProductId,
                         Qty = x.Qty,
                         UnitPrice = x.UnitPrice,
@@ -389,5 +388,5 @@ public class IssuanceEditModel
     public DateTime IssuanceDate { get; set; }
     public decimal TotalAmount { get; set; }
     public bool IsClosed { get; set; }
-    public List<IssuanceItemDto> Items { get; set; } = new();
+    public List<IssuanceItemUpsert> Items { get; set; } = new();
 }

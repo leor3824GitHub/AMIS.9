@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AMIS.WebApi.Catalog.Infrastructure;
+
 public static class CatalogModule
 {
     public class Endpoints : CarterModule
@@ -108,14 +109,8 @@ public static class CatalogModule
             issuanceGroup.MapGetIssuanceEndpoint();
             issuanceGroup.MapGetIssuanceListEndpoint();
             issuanceGroup.MapIssuanceUpdateEndpoint();
+            issuanceGroup.MapUpdateIssuanceWithItemsEndpoint();
             issuanceGroup.MapIssuanceDeleteEndpoint();
-
-            var issuanceItemGroup = app.MapGroup("issuanceItems").WithTags("issuanceItems");
-            issuanceItemGroup.MapIssuanceItemCreationEndpoint();
-            issuanceItemGroup.MapGetIssuanceItemEndpoint();
-            issuanceItemGroup.MapGetIssuanceItemListEndpoint();
-            issuanceItemGroup.MapIssuanceItemUpdateEndpoint();
-            issuanceItemGroup.MapIssuanceItemDeleteEndpoint();
 
             var inventoryTranscationGroup = app.MapGroup("inventoryTranscation").WithTags("inventoryTranscation");
             inventoryTranscationGroup.MapInventoryTransactionCreationEndpoint();
@@ -130,6 +125,7 @@ public static class CatalogModule
             inspectionGroup.MapGetInspectionEndpoint();
             inspectionGroup.MapGetInspectionListEndpoint();
             inspectionGroup.MapInspectionUpdateEndpoint();
+            inspectionGroup.MapUpdateInspectionWithItemsEndpoint();
             inspectionGroup.MapInspectionApproveEndpoint();
             inspectionGroup.MapScheduleInspectionEndpoint();
             inspectionGroup.MapQuarantineInspectionEndpoint();
@@ -144,26 +140,13 @@ public static class CatalogModule
             inspectionGroup.MapCompleteInspectionEndpoint();
             inspectionGroup.MapReleaseInspectionFromQuarantineEndpoint();
 
-            var inspectionItemGroup = app.MapGroup("inspectionItems").WithTags("inspectionItems");
-            inspectionItemGroup.MapInspectionItemCreationEndpoint();
-            inspectionItemGroup.MapInspectionItemDeletionEndpoint();
-            inspectionItemGroup.MapGetInspectionItemEndpoint();
-            inspectionItemGroup.MapGetInspectionItemListEndpoint();
-            inspectionItemGroup.MapInspectionItemUpdateEndpoint();
-
             var acceptanceGroup = app.MapGroup("acceptances").WithTags("acceptances");
             acceptanceGroup.MapAcceptanceCreationEndpoint();
             acceptanceGroup.MapAcceptanceDeletionEndpoint();
             acceptanceGroup.MapGetAcceptanceEndpoint();
             acceptanceGroup.MapGetAcceptanceListEndpoint();
             acceptanceGroup.MapAcceptanceUpdateEndpoint();
-
-            var acceptanceItemGroup = app.MapGroup("acceptanceItems").WithTags("acceptanceItems");
-            acceptanceItemGroup.MapAcceptanceItemCreationEndpoint();
-            acceptanceItemGroup.MapAcceptanceItemDeletionEndpoint();
-            acceptanceItemGroup.MapGetAcceptanceItemEndpoint();
-            acceptanceItemGroup.MapGetAcceptanceItemListEndpoint();
-            acceptanceItemGroup.MapAcceptanceItemUpdateEndpoint();
+            acceptanceGroup.MapUpdateAcceptanceWithItemsEndpoint();
 
             var inspectionRequestGroup = app.MapGroup("inspectionRequests").WithTags("inspectionRequests");
             inspectionRequestGroup.MapInspectionRequestCreationEndpoint();
@@ -198,7 +181,7 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<Purchase>, CatalogRepository<Purchase>>("catalog:purchases");
         builder.Services.AddKeyedScoped<IReadRepository<Purchase>, CatalogRepository<Purchase>>("catalog:purchases");
 
-    // Do not expose repositories for PurchaseItem; enforce aggregate boundary via Purchase
+        // Do not expose repositories for PurchaseItem; enforce aggregate boundary via Purchase
 
         builder.Services.AddKeyedScoped<IRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
         builder.Services.AddKeyedScoped<IReadRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
@@ -206,8 +189,7 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<Issuance>, CatalogRepository<Issuance>>("catalog:issuances");
         builder.Services.AddKeyedScoped<IReadRepository<Issuance>, CatalogRepository<Issuance>>("catalog:issuances");
 
-        builder.Services.AddKeyedScoped<IRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
-        builder.Services.AddKeyedScoped<IReadRepository<IssuanceItem>, CatalogRepository<IssuanceItem>>("catalog:issuanceItems");
+        // Do not expose repositories for IssuanceItem; enforce aggregate boundary via Issuance
 
         builder.Services.AddKeyedScoped<IRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inventory-transactions");
         builder.Services.AddKeyedScoped<IReadRepository<InventoryTransaction>, CatalogRepository<InventoryTransaction>>("catalog:inventory-transactions");
@@ -215,14 +197,8 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<Inspection>, CatalogRepository<Inspection>>("catalog:inspections");
         builder.Services.AddKeyedScoped<IReadRepository<Inspection>, CatalogRepository<Inspection>>("catalog:inspections");
 
-        builder.Services.AddKeyedScoped<IRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
-        builder.Services.AddKeyedScoped<IReadRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
-
         builder.Services.AddKeyedScoped<IRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
         builder.Services.AddKeyedScoped<IReadRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
-
-        builder.Services.AddKeyedScoped<IRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
-        builder.Services.AddKeyedScoped<IReadRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
 
         builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");

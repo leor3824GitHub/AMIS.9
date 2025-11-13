@@ -124,6 +124,6 @@ public class Acceptance : AuditableEntity, IAggregateRoot
         PostedOn = postedOnUtc ?? DateTime.UtcNow;
         Status = AcceptanceStatus.Posted;
 
-        QueueDomainEvent(new AcceptancePosted { AcceptanceId = Id });
+        // Event removed - inventory updates now happen synchronously
     }
 }

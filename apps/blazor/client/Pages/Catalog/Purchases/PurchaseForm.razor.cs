@@ -295,7 +295,7 @@ public partial class PurchaseForm
                     Id = Model.Id,
                     SupplierId = Model.SupplierId,
                     PurchaseDate = Model.PurchaseDate,
-                    // UpdatePurchaseWithItemsCommand.TotalAmount is double per generated client; remove invalid decimal cast.
+                    // UpdatePurchaseWithItemsCommand.TotalAmount is double per generated client
                     TotalAmount = Model.TotalAmount,
                     Status = Model.Status,
                     ReferenceNumber = Model.ReferenceNumber,
@@ -306,7 +306,7 @@ public partial class PurchaseForm
                         Id = i.Id,
                         ProductId = i.ProductId,
                         Qty = i.Qty,
-                        // PurchaseItemUpsert.UnitPrice is double; remove decimal cast.
+                        // PurchaseItemUpsert.UnitPrice is double
                         UnitPrice = i.UnitPrice,
                         ItemStatus = i.ItemStatus
                     }).ToList() ?? new List<PurchaseItemUpsert>(),

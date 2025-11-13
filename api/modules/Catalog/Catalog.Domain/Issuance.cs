@@ -5,6 +5,7 @@ using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
 
 namespace AMIS.WebApi.Catalog.Domain;
+
 public class Issuance : AuditableEntity, IAggregateRoot
 {
     public Guid EmployeeId { get; private set; }
@@ -31,6 +32,18 @@ public class Issuance : AuditableEntity, IAggregateRoot
     {
         EnsureNonNegative(totalAmount);
         return new Issuance(Guid.NewGuid(), employeeId, issuanceDate, totalAmount);
+    }
+
+    public void AddItem(Guid productId, int qty, decimal unitPrice, string? status)
+    {
+        var item = IssuanceItem.Create(this.Id, productId, qty, unitPrice, status);
+        Items.Add(item);
+    }
+
+    public void AddItem(Guid id, Guid productId, int qty, decimal unitPrice, string? status)
+    {
+        var item = IssuanceItem.Create(id, productId, qty, unitPrice, status);
+        Items.Add(item);
     }
 
     public Issuance Update(Guid employeeId, DateTime issuanceDate, decimal totalAmount, bool isClosed)

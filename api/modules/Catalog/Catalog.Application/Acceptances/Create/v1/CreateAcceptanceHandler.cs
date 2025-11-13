@@ -1,7 +1,9 @@
 ﻿using System;
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Application.Acceptances.Specifications;
 using AMIS.WebApi.Catalog.Application.Inspections.Specifications;
 using AMIS.WebApi.Catalog.Application.InspectionRequests.Specifications;
+using AMIS.WebApi.Catalog.Application.Inventories.Specifications;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Domain.Exceptions;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
@@ -16,7 +18,9 @@ public sealed class CreateAcceptanceHandler(
     [FromKeyedServices("catalog:acceptances")] IRepository<Acceptance> repository,
     [FromKeyedServices("catalog:inspectionRequests")] IReadRepository<InspectionRequest> inspectionRequestRepository,
     [FromKeyedServices("catalog:inspections")] IReadRepository<Inspection> inspectionRepository,
-    [FromKeyedServices("catalog:purchases")] IReadRepository<Purchase> purchaseReadRepository)
+    [FromKeyedServices("catalog:purchases")] IRepository<Purchase> purchaseRepository,
+    [FromKeyedServices("catalog:inventories")] IRepository<Inventory> inventoryRepository,
+    [FromKeyedServices("catalog:inventory-transactions")] IRepository<InventoryTransaction> inventoryTransactionRepository)
     : IRequestHandler<CreateAcceptanceCommand, CreateAcceptanceResponse>
 {
     public async Task<CreateAcceptanceResponse> Handle(CreateAcceptanceCommand request, CancellationToken cancellationToken)
@@ -91,7 +95,7 @@ public sealed class CreateAcceptanceHandler(
         {
             // Load the purchase with its items and any prior acceptance items to validate single-shot and quantity rules
             var purchaseSpec = new AMIS.WebApi.Catalog.Application.Purchases.UpdateWithItems.v1.GetPurchaseWithItemsSpecs(effectivePurchaseId);
-            var purchase = await purchaseReadRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken)
+            var purchase = await purchaseRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken)
                           ?? throw new InvalidOperationException($"Purchase {effectivePurchaseId} not found.");
 
             foreach (var item in request.Items)
@@ -99,9 +103,13 @@ public sealed class CreateAcceptanceHandler(
                 var purchaseItem = purchase.Items.FirstOrDefault(pi => pi.Id == item.PurchaseItemId)
                     ?? throw new InvalidOperationException($"Purchase item {item.PurchaseItemId} not found in purchase {effectivePurchaseId}.");
 
-                // Single-shot guard: reject if any acceptance already exists for this purchase item
-                if (purchaseItem.AcceptanceItems != null && purchaseItem.AcceptanceItems.Count > 0)
+                // Single-shot guard: check if any acceptance already exists for this purchase item
+                var existingAcceptanceSpec = new AcceptanceItemExistsForPurchaseItemSpec(item.PurchaseItemId);
+                var existingAcceptance = await repository.FirstOrDefaultAsync(existingAcceptanceSpec, cancellationToken);
+                if (existingAcceptance != null)
+                {
                     throw new InvalidOperationException($"An acceptance has already been recorded for purchase item {item.PurchaseItemId}. Single-shot acceptance is enforced.");
+                }
 
                 // Ordered-qty guard: do not allow accepting more than ordered
                 if (item.QtyAccepted > purchaseItem.Qty)
@@ -120,6 +128,64 @@ public sealed class CreateAcceptanceHandler(
 
         if (request.PostToInventory && acceptance.Items.Count > 0)
         {
+            // Update inventory synchronously within the acceptance aggregate boundary
+            var purchaseSpec = new AMIS.WebApi.Catalog.Application.Purchases.UpdateWithItems.v1.GetPurchaseWithItemsSpecs(effectivePurchaseId);
+            var purchase = await purchaseRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken)
+                          ?? throw new InvalidOperationException($"Purchase {effectivePurchaseId} not found for inventory posting.");
+
+            foreach (var acceptanceItem in acceptance.Items)
+            {
+                var purchaseItem = purchase.Items.FirstOrDefault(pi => pi.Id == acceptanceItem.PurchaseItemId);
+                if (purchaseItem?.ProductId is not { } productId)
+                {
+                    logger.LogWarning("PurchaseItem {PurchaseItemId} has no ProductId. Skipping inventory update for Acceptance {AcceptanceId}.", acceptanceItem.PurchaseItemId, acceptance.Id);
+                    continue;
+                }
+                var qtyToAdd = acceptanceItem.QtyAccepted;
+                var unitCost = purchaseItem.UnitPrice;
+
+                var inventorySpec = new GetInventoryByProductSpec(productId);
+                var inventory = await inventoryRepository.FirstOrDefaultAsync(inventorySpec, cancellationToken);
+                if (inventory is null)
+                {
+                    inventory = Inventory.Create(productId, qtyToAdd, unitCost);
+                    await inventoryRepository.AddAsync(inventory, cancellationToken);
+                    logger.LogInformation("Created inventory for Product {ProductId} from Acceptance {AcceptanceId} with Qty {Qty}.", productId, acceptance.Id, qtyToAdd);
+                }
+                else
+                {
+                    inventory.AddStock(qtyToAdd, unitCost);
+                    await inventoryRepository.UpdateAsync(inventory, cancellationToken);
+                    logger.LogInformation("Updated inventory for Product {ProductId} from Acceptance {AcceptanceId}: +{Qty} => Qty {NewQty}.", productId, acceptance.Id, qtyToAdd, inventory.Qty);
+                }
+
+                // Create inventory transaction record for audit trail (always created)
+                var transaction = InventoryTransaction.Create(
+                    productId: productId,
+                    qty: qtyToAdd,
+                    purchasePrice: unitCost,
+                    location: inventory.Location, // Use inventory's location if available
+                    sourceId: acceptance.Id,
+                    transactionType: TransactionType.Purchase
+                );
+                await inventoryTransactionRepository.AddAsync(transaction, cancellationToken);
+                logger.LogInformation("Created inventory transaction for Acceptance {AcceptanceId}, Product {ProductId}.", acceptance.Id, productId);
+
+                // Update purchase item acceptance status
+                var totalAccepted = acceptanceItem.QtyAccepted; // For new acceptance, this is the total
+                purchaseItem.UpdateAcceptanceSummary(totalAccepted);
+
+                var approvedQty = purchaseItem.QtyPassed ?? purchaseItem.Qty;
+                var targetStatus = totalAccepted >= approvedQty
+                    ? PurchaseItemAcceptanceStatus.Accepted
+                    : PurchaseItemAcceptanceStatus.PartiallyAccepted;
+                purchaseItem.UpdateAcceptanceStatus(targetStatus);
+            }
+
+            // Update purchase with acceptance status changes
+            await purchaseRepository.UpdateAsync(purchase, cancellationToken);
+
+            // Post the acceptance
             acceptance.PostAcceptance();
         }
 
