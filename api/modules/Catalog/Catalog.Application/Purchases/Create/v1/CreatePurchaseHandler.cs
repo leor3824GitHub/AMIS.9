@@ -14,8 +14,8 @@ public sealed class CreatePurchaseHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
         
-        // Create the purchase entity
-        var purchase = Purchase.Create(request.SupplierId, request.PurchaseDate, request.TotalAmount, request.Status);
+        // Create the purchase entity - totalAmount is calculated automatically
+        var purchase = Purchase.Create(request.SupplierId, request.PurchaseDate);
 
         // Add items if any
         if (request.Items is not null && request.Items.Count > 0)

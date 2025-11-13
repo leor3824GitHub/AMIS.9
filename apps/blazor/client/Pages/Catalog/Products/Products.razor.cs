@@ -53,7 +53,7 @@ public partial class Products
     {
         if (_categories.Count == 0)
         {
-            var response = await productclient.SearchCategorysEndpointAsync("1", new SearchCategorysCommand());
+            var response = await productclient.SearchCategoriesEndpointAsync("1", new SearchCategorysCommand { PageNumber = 1, PageSize = 200 });
             if (response?.Items != null)
             {
                 _categories = response.Items.ToList();

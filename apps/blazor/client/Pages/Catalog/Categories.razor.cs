@@ -1,4 +1,4 @@
-﻿using AMIS.Blazor.Client.Components.EntityTable;
+using AMIS.Blazor.Client.Components.EntityTable;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Shared.Authorization;
 using Mapster;
@@ -30,7 +30,7 @@ public partial class Categories
             searchFunc: async filter =>
             {
                 var categoryFilter = filter.Adapt<SearchCategorysCommand>();
-                var result = await _client.SearchCategorysEndpointAsync("1", categoryFilter);
+                var result = await _client.SearchCategoriesEndpointAsync("1", categoryFilter);
                 return result.Adapt<PaginationResponse<CategoryResponse>>();
             },
             createFunc: async category =>

@@ -12,8 +12,20 @@
     <ProjectReference Include="..\Catalog.Domain\Catalog.Domain.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="AcceptanceItems\Create\v1\" />
+    <Folder Include="AcceptanceItems\Delete\v1\" />
+    <Folder Include="AcceptanceItems\Search\v1\" />
+    <Folder Include="AcceptanceItems\Update\v1\" />
+    <Folder Include="InspectionItems\Create\v1\" />
+    <Folder Include="InspectionItems\Search\v1\" />
     <Folder Include="Inspections\Events\" />
     <Folder Include="Inspections\Specifications\" />
     <Folder Include="Inventories\Specifications\" />
+    <Folder Include="PurchaseItems\Create\v1\" />
+    <Folder Include="PurchaseItems\Create\v2\" />
+    <Folder Include="PurchaseItems\Delete\v1\" />
+    <Folder Include="PurchaseItems\Get\v1\" />
+    <Folder Include="PurchaseItems\Search\v1\" />
+    <Folder Include="PurchaseItems\Update\v2\" />
   </ItemGroup>
 </Project>

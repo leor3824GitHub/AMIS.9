@@ -31,7 +31,6 @@ public partial class Inspections
     private ISnackbar? Snackbar { get; set; }
     private InspectionResponse _currentDto = new();
     private List<InspectionRequestResponse> _inspectionrequests = new List<InspectionRequestResponse>();
-    private List<InspectionItemResponse> _inspectionitems = new List<InspectionItemResponse>();
     private List<EmployeeResponse> _employees = new List<EmployeeResponse>();
     private List<PurchaseResponse> _purchases = new List<PurchaseResponse>();
 
@@ -59,11 +58,9 @@ public partial class Inspections
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.Inspections);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Inspections);
 
-        await LoadInspectionItemsAsync();
         await LoadInspectionRequestsAsync();
         await LoadPurchasesAsync();
         await LoadEmployeesAsync();
-
     }
 
     private async Task LoadInspectionRequestsAsync()
@@ -74,17 +71,6 @@ public partial class Inspections
             if (response?.Items != null)
             {
                 _inspectionrequests = response.Items.ToList();
-            }
-        }
-    }
-    private async Task LoadInspectionItemsAsync()
-    {
-        if (_inspectionitems.Count == 0)
-        {
-            var response = await inspectionclient.SearchInspectionItemsEndpointAsync("1", new SearchInspectionItemsCommand());
-            if (response?.Items != null)
-            {
-                _inspectionitems = response.Items.ToList();
             }
         }
     }
@@ -334,12 +320,14 @@ public partial class Inspections
 
         try
         {
-            // enable if there exists at least one inspection item with status Passed or AcceptedWithDeviation
-            var itemsResp = inspectionclient.SearchInspectionItemsEndpointAsync("1", new SearchInspectionItemsCommand { InspectionId = item.Id, PageNumber = 1, PageSize = 1 });
-            itemsResp.Wait();
-            var any = itemsResp.Result?.Items?.Any(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation) == true;
-            _approveEnabledCache[item.Id] = any;
-            return any;
+            // Check if inspection has items with passed items through the aggregate
+            // Inspections are loaded with items in InspectionResponse, check those instead
+            var hasPassedItems = item.Items?.Any(i => 
+                i.InspectionItemStatus == InspectionItemStatus.Passed || 
+                i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation) == true;
+            
+            _approveEnabledCache[item.Id] = hasPassedItems;
+            return hasPassedItems;
         }
         catch
         {

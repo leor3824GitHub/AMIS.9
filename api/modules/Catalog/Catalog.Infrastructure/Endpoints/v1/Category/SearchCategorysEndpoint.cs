@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Routing;
 
 namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
 
-public static class SearchCategorysEndpoint
+public static class SearchCategoriesEndpoint
 {
-    internal static RouteHandlerBuilder MapGetCategoryListEndpoint(this IEndpointRouteBuilder endpoints)
+    internal static RouteHandlerBuilder MapSearchCategoriesEndpoint(this IEndpointRouteBuilder endpoints)
     {
         return endpoints
             .MapPost("/search", async (ISender mediator, [FromBody] SearchCategorysCommand command) =>
@@ -20,9 +20,9 @@ public static class SearchCategorysEndpoint
                 var response = await mediator.Send(command);
                 return Results.Ok(response);
             })
-            .WithName(nameof(SearchCategorysEndpoint))
-            .WithSummary("Gets a list of brands")
-            .WithDescription("Gets a list of brands with pagination and filtering support")
+            .WithName(nameof(SearchCategoriesEndpoint))
+            .WithSummary("Search categories")
+            .WithDescription("Search categories with pagination and filtering support")
             .Produces<PagedList<CategoryResponse>>()
             .RequirePermission("Permissions.Categories.View")
             .MapToApiVersion(1);

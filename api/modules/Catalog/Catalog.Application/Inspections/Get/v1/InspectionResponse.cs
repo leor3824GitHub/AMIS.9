@@ -13,6 +13,7 @@ public sealed record InspectionResponse(
     EmployeeResponse Employee,
     PurchaseResponse? Purchase,
     bool Approved,
-    InspectionStatus Status
+    InspectionStatus Status,
+    ICollection<InspectionItemResponse>? Items
 );
 

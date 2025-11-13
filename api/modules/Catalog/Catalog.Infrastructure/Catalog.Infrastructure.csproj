@@ -12,4 +12,9 @@
     <ProjectReference Include="..\..\..\framework\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\Catalog.Application\Catalog.Application.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Endpoints\v1\AcceptanceItem\" />
+    <Folder Include="Endpoints\v1\InspectionItem\" />
+    <Folder Include="Endpoints\v1\PurchaseItem\" />
+  </ItemGroup>
 </Project>

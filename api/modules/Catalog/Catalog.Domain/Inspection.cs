@@ -28,6 +28,18 @@ public class Inspection : AuditableEntity, IAggregateRoot
     // Use InspectionItem for line items
     public virtual ICollection<InspectionItem> Items { get; private set; } = new List<InspectionItem>();
 
+    // Computed properties
+    public bool HasItems => Items.Any();
+    public int TotalInspectedQuantity => Items.Sum(i => i.QtyInspected);
+    public int TotalPassedQuantity => Items.Sum(i => i.QtyPassed);
+    public int TotalFailedQuantity => Items.Sum(i => i.QtyFailed);
+    public bool HasAnyPassed => Items.Any(i => 
+        i.InspectionItemStatus == InspectionItemStatus.Passed || 
+        i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation);
+    public bool HasAnyFailed => Items.Any(i => 
+        i.InspectionItemStatus == InspectionItemStatus.Failed || 
+        i.InspectionItemStatus == InspectionItemStatus.Rejected);
+
     // Parameterless ctor for EF
     private Inspection() { }
 
@@ -41,16 +53,18 @@ public class Inspection : AuditableEntity, IAggregateRoot
         Approved = approved;
         Remarks = remarks;
         IARDocumentPath = iarDocumentPath;
-    Items = new List<InspectionItem>();
-    Status = InspectionStatus.InProgress;
+        Items = new List<InspectionItem>();
+        Status = InspectionStatus.InProgress;
     }
 
     // Factory - ensures Id is generated and sensible defaults are applied
-    public static Inspection Create(Guid? purchaseId, Guid employeeId, DateTime? inspectedOn = null, bool approved = false, string? remarks = null, string? iarDocumentPath = null)
+    public static Inspection Create(Guid? purchaseId, Guid employeeId, DateTime? inspectedOn = null, string? remarks = null, string? iarDocumentPath = null)
     {
-        if (employeeId == Guid.Empty) throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
+        if (employeeId == Guid.Empty)
+            throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
+
         var inspectedAt = inspectedOn ?? DateTime.UtcNow;
-        var inspection = new Inspection(Guid.NewGuid(), purchaseId, employeeId, inspectedAt, approved, remarks, iarDocumentPath);
+        var inspection = new Inspection(Guid.NewGuid(), purchaseId, employeeId, inspectedAt, false, remarks, iarDocumentPath);
 
         // Queue domain event for creation
         inspection.QueueDomainEvent(new InspectionCreated
@@ -68,16 +82,21 @@ public class Inspection : AuditableEntity, IAggregateRoot
     {
         ArgumentNullException.ThrowIfNull(item);
 
-        // Ensure the item points to this inspection; use the domain Update method on the item
+        if (Status != InspectionStatus.InProgress)
+        {
+            throw new InvalidOperationException($"Cannot add items to an inspection with status {Status}.");
+        }
+
+        // Ensure the item points to this inspection
         if (item.InspectionId != this.Id)
         {
-            item.Update(this.Id,
-                        item.PurchaseItemId,
-                        item.QtyInspected,
-                        item.QtyPassed,
-                        item.QtyFailed,
-                        item.Remarks,
-                        item.InspectionItemStatus);
+            item.Update(this.Id, item.PurchaseItemId, item.QtyInspected, item.QtyPassed, item.QtyFailed, item.Remarks, item.InspectionItemStatus);
+        }
+
+        // Check if item already exists for this purchase item
+        if (Items.Any(i => i.PurchaseItemId == item.PurchaseItemId && i.Id != item.Id))
+        {
+            throw new InvalidOperationException($"Inspection item for purchase item {item.PurchaseItemId} already exists.");
         }
 
         Items.Add(item);
@@ -86,34 +105,69 @@ public class Inspection : AuditableEntity, IAggregateRoot
     // Convenience overload: create and add item in one call
     public InspectionItem AddItem(Guid purchaseItemId, int qtyInspected, int qtyPassed, int qtyFailed, string? remarks = null, InspectionItemStatus? inspectionItemStatus = null)
     {
+        if (Status != InspectionStatus.InProgress)
+        {
+            throw new InvalidOperationException($"Cannot add items to an inspection with status {Status}.");
+        }
+
+        if (qtyInspected <= 0)
+        {
+            throw new ArgumentException("Inspected quantity must be greater than zero.", nameof(qtyInspected));
+        }
+
+        if (qtyPassed + qtyFailed != qtyInspected)
+        {
+            throw new ArgumentException("Passed + Failed quantities must equal Inspected quantity.");
+        }
+
+        // Check if item already exists for this purchase item
+        if (Items.Any(i => i.PurchaseItemId == purchaseItemId))
+        {
+            throw new InvalidOperationException($"Inspection item for purchase item {purchaseItemId} already exists.");
+        }
+
         var item = InspectionItem.Create(this.Id, purchaseItemId, qtyInspected, qtyPassed, qtyFailed, remarks, inspectionItemStatus);
         Items.Add(item);
         return item;
     }
 
+    public void RemoveItem(Guid itemId)
+    {
+        if (Status != InspectionStatus.InProgress)
+        {
+            throw new InvalidOperationException($"Cannot remove items from an inspection with status {Status}.");
+        }
+
+        var item = Items.FirstOrDefault(i => i.Id == itemId);
+        if (item is not null)
+        {
+            Items.Remove(item);
+        }
+    }
+
     public void RemoveItem(InspectionItem item)
     {
-    ArgumentNullException.ThrowIfNull(item);
-        if (Items.Remove(item))
-        {
-            // detach navigation - keep InspectionId as-is for audit/history; do not set to Guid.Empty to avoid losing historic link
-        }
+        ArgumentNullException.ThrowIfNull(item);
+        RemoveItem(item.Id);
     }
 
     // Approve the inspection and emit domain event
     public void Approve()
     {
-        if (Items.Count == 0)
+        if (!HasItems)
             throw new InvalidOperationException("Cannot approve an inspection without items.");
 
-        // Business invariant: at least one accepted/passed item to consider approval meaningful
-        if (!Items.Any(i => i.InspectionItemStatus == InspectionItemStatus.Passed ||
-                            i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation))
+        if (!HasAnyPassed)
             throw new InvalidOperationException("Cannot approve an inspection where no items are passed/accepted.");
 
         if (Status == InspectionStatus.InProgress)
         {
             ChangeStatus(InspectionStatus.Completed);
+        }
+
+        if (Status != InspectionStatus.Completed)
+        {
+            throw new InvalidOperationException($"Cannot approve an inspection with status {Status}. Must be Completed first.");
         }
 
         ChangeStatus(InspectionStatus.Approved);
@@ -132,8 +186,24 @@ public class Inspection : AuditableEntity, IAggregateRoot
     // Reject the inspection and emit domain event
     public void Reject(string? reason = null)
     {
+        if (Status == InspectionStatus.Approved)
+        {
+            throw new InvalidOperationException("Cannot reject an approved inspection.");
+        }
+
+        if (Status == InspectionStatus.Rejected)
+        {
+            return; // Already rejected
+        }
+
         ChangeStatus(InspectionStatus.Rejected);
         Approved = false;
+        
+        if (!string.IsNullOrWhiteSpace(reason))
+        {
+            Remarks = string.IsNullOrWhiteSpace(Remarks) ? reason : $"{Remarks}\nRejection: {reason}";
+        }
+
         QueueDomainEvent(new InspectionRejected
         {
             InspectionId = this.Id,
@@ -144,8 +214,33 @@ public class Inspection : AuditableEntity, IAggregateRoot
         });
     }
 
+    public void Cancel(string? reason = null)
+    {
+        if (Status == InspectionStatus.Approved)
+        {
+            throw new InvalidOperationException("Cannot cancel an approved inspection.");
+        }
+
+        if (Status == InspectionStatus.Cancelled)
+        {
+            return; // Already cancelled
+        }
+
+        if (!string.IsNullOrWhiteSpace(reason))
+        {
+            Remarks = string.IsNullOrWhiteSpace(Remarks) ? reason : $"{Remarks}\nCancellation: {reason}";
+        }
+
+        ChangeStatus(InspectionStatus.Cancelled);
+    }
+
     public void UpdateRemarks(string? remarks)
     {
+        if (Status == InspectionStatus.Approved || Status == InspectionStatus.Cancelled)
+        {
+            throw new InvalidOperationException($"Cannot update remarks for an inspection with status {Status}.");
+        }
+
         Remarks = string.IsNullOrWhiteSpace(remarks) ? null : remarks;
     }
 
@@ -157,10 +252,14 @@ public class Inspection : AuditableEntity, IAggregateRoot
     // Auto-evaluate and set status based on inspection completion
     public void EvaluateAndSetStatus(Purchase? purchase)
     {
-        if (purchase is null || purchase.Items.Count == 0)
+        if (Status != InspectionStatus.InProgress)
         {
-            // If no purchase or no items, stay InProgress
-            return;
+            return; // Only evaluate for in-progress inspections
+        }
+
+        if (purchase is null || !purchase.Items.Any())
+        {
+            return; // If no purchase or no items, stay InProgress
         }
 
         // Check if all purchase items have been fully inspected
@@ -173,7 +272,6 @@ public class Inspection : AuditableEntity, IAggregateRoot
             
             if (!inspectionItems.Any())
             {
-                // This purchase item hasn't been inspected at all
                 allItemsFullyInspected = false;
                 break;
             }
@@ -183,41 +281,55 @@ public class Inspection : AuditableEntity, IAggregateRoot
             
             if (totalInspectedQty < purchaseItem.Qty)
             {
-                // This purchase item hasn't been fully inspected
                 allItemsFullyInspected = false;
                 break;
             }
         }
 
         // Set status based on evaluation
-        if (allItemsFullyInspected && Status == InspectionStatus.InProgress)
+        if (allItemsFullyInspected)
         {
-            ChangeStatus(InspectionStatus.Completed);
+            Complete();
         }
-        // If not all items inspected, it stays InProgress (partial inspection)
     }
 
     // Convenience queries
-    public IEnumerable<InspectionItem> AcceptedItems() => Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation).ToList();
+    public IEnumerable<InspectionItem> AcceptedItems() => 
+        Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Passed || 
+                        i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation)
+             .ToList();
 
-    public int TotalInspectedQuantity() => Items.Sum(i => i.QtyInspected);
-
-    public int TotalAcceptedQuantity() => Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Passed || i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation)
-                                              .Sum(i => i.QtyPassed);
+    public IEnumerable<InspectionItem> RejectedItems() => 
+        Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Failed || 
+                        i.InspectionItemStatus == InspectionItemStatus.Rejected)
+             .ToList();
 
     // Set inspection date (with validation)
     public void SetInspectedOn(DateTime inspectedOn)
     {
         if (inspectedOn == default)
             throw new ArgumentException("InspectedOn must be a valid date.", nameof(inspectedOn));
+        
+        if (inspectedOn > DateTime.UtcNow)
+            throw new ArgumentException("InspectedOn cannot be in the future.", nameof(inspectedOn));
+
         InspectedOn = inspectedOn;
     }
 
     // Update the employee (inspector) if needed
     public void SetEmployee(Guid employeeId)
     {
-        if (employeeId == Guid.Empty) throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
-        if (EmployeeId == employeeId) return;
+        if (employeeId == Guid.Empty)
+            throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
+        
+        if (Status == InspectionStatus.Approved)
+        {
+            throw new InvalidOperationException("Cannot change employee for an approved inspection.");
+        }
+
+        if (EmployeeId == employeeId)
+            return;
+
         EmployeeId = employeeId;
         Employee = null!;
     }
@@ -225,10 +337,51 @@ public class Inspection : AuditableEntity, IAggregateRoot
     // Update purchase link if needed
     public void SetPurchase(Guid? purchaseId)
     {
+        if (Status == InspectionStatus.Approved)
+        {
+            throw new InvalidOperationException("Cannot change purchase for an approved inspection.");
+        }
+
         PurchaseId = purchaseId;
     }
 
-    public void ChangeStatus(InspectionStatus newStatus)
+    public void Complete()
+    {
+        if (!HasItems)
+        {
+            throw new InvalidOperationException("Cannot complete an inspection without items.");
+        }
+
+        ChangeStatus(InspectionStatus.Completed);
+    }
+
+    public void UpdateItem(Guid itemId, int qtyInspected, int qtyPassed, int qtyFailed, string? remarks = null, InspectionItemStatus? inspectionItemStatus = null)
+    {
+        if (Status != InspectionStatus.InProgress)
+        {
+            throw new InvalidOperationException($"Cannot update items in an inspection with status {Status}.");
+        }
+
+        if (qtyInspected <= 0)
+        {
+            throw new ArgumentException("Inspected quantity must be greater than zero.", nameof(qtyInspected));
+        }
+
+        if (qtyPassed + qtyFailed != qtyInspected)
+        {
+            throw new ArgumentException("Passed + Failed quantities must equal Inspected quantity.");
+        }
+
+        var item = Items.FirstOrDefault(i => i.Id == itemId);
+        if (item is null)
+        {
+            throw new InvalidOperationException($"Inspection item with ID {itemId} not found.");
+        }
+
+        item.Update(this.Id, item.PurchaseItemId, qtyInspected, qtyPassed, qtyFailed, remarks, inspectionItemStatus);
+    }
+
+    private void ChangeStatus(InspectionStatus newStatus)
     {
         if (Status == newStatus)
         {
@@ -244,16 +397,11 @@ public class Inspection : AuditableEntity, IAggregateRoot
         QueueDomainEvent(new InspectionUpdated { Inspection = this });
     }
 
-    public void Complete()
-    {
-        ChangeStatus(InspectionStatus.Completed);
-    }
-
     private static bool IsValidTransition(InspectionStatus current, InspectionStatus next)
     {
         var validTransitions = new Dictionary<InspectionStatus, InspectionStatus[]>
         {
-            { InspectionStatus.InProgress, new[] { InspectionStatus.Completed, InspectionStatus.Approved, InspectionStatus.Rejected, InspectionStatus.Cancelled } },
+            { InspectionStatus.InProgress, new[] { InspectionStatus.Completed, InspectionStatus.Rejected, InspectionStatus.Cancelled } },
             { InspectionStatus.Completed, new[] { InspectionStatus.Approved, InspectionStatus.Rejected } },
             { InspectionStatus.Approved, Array.Empty<InspectionStatus>() },
             { InspectionStatus.Rejected, Array.Empty<InspectionStatus>() },

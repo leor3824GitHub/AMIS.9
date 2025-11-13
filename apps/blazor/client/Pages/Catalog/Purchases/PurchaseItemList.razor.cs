@@ -55,10 +55,10 @@ public partial class PurchaseItemList
         {
             if (IsCreate == false)
             {
-                var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
-
-                Purchaseclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
-                Snackbar?.Add("Item product successfully updated.", Severity.Success);
+                // TODO: Use nested endpoint /purchases/{purchaseId}/items/{itemId}
+                // var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
+                // await ApiClient.UpdatePurchaseItemAsync(PurchaseId, EditingItem.Id, model);
+                Snackbar?.Add("Item editing temporarily disabled. Use purchase management instead.", Severity.Warning);
             }
 
             EditingItem = null;
@@ -96,15 +96,10 @@ public partial class PurchaseItemList
 
         if (IsCreate == false)
         {
-            var model = newItem.Adapt<CreatePurchaseItemCommand>();
-            if (PurchaseId.HasValue)
-            {
-                model.PurchaseId = PurchaseId.Value;
-            }
-
-            // Ideally use await with async method
-            Purchaseclient.CreatePurchaseItemEndpointAsync("1", model);
-            Snackbar?.Add("Item product successfully added.", Severity.Success);
+            // TODO: Use nested endpoint POST /purchases/{purchaseId}/items
+            // var model = new { PurchaseId, ProductId, Qty, UnitPrice, ItemStatus };
+            // await ApiClient.AddPurchaseItemAsync(PurchaseId, model);
+            Snackbar?.Add("Item addition temporarily disabled. Use purchase management instead.", Severity.Warning);
         }
         
         // Reset fields after adding
@@ -131,11 +126,12 @@ public partial class PurchaseItemList
         }
         try
         {
-            var id = item.Id; // Convert nullable Guid to non-nullable Guid
+            var id = item.Id;
 
-           Purchaseclient.DeletePurchaseItemEndpointAsync("1", id);
+            // TODO: Use nested endpoint DELETE /purchases/{purchaseId}/items/{itemId}
+            // await ApiClient.DeletePurchaseItemAsync(PurchaseId, id);
+            Snackbar?.Add("Item deletion temporarily disabled. Use purchase management instead.", Severity.Warning);
 
-            Snackbar?.Add("Item product successfully removed.", Severity.Success);
             Items.Remove(item);
             UpdateTotalAmount();
         }

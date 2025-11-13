@@ -166,12 +166,19 @@ public partial class Acceptances
         {
             var acceptance = await ApiClient.GetAcceptanceEndpointAsync("1", dto.Id);
 
+            // Get purchase with items to resolve product names
+            PurchaseResponse? purchase = null;
+            if (acceptance.PurchaseId != Guid.Empty)
+            {
+                purchase = await ApiClient.GetPurchaseEndpointAsync("1", acceptance.PurchaseId);
+            }
+
             if (!_purchaseLookup.Any(p => p.Id == acceptance.PurchaseId))
             {
-                _purchaseLookup.Add(new PurchaseResponse
+                if (purchase != null)
                 {
-                    Id = acceptance.PurchaseId
-                });
+                    _purchaseLookup.Add(purchase);
+                }
             }
 
             var model = new AcceptanceFormModel
@@ -183,14 +190,20 @@ public partial class Acceptances
                 Remarks = acceptance.Remarks
             };
 
-            var items = acceptance.Items?.Select(item => new AcceptanceFormModel.AcceptanceItemInput
+            var items = acceptance.Items?.Select(item =>
             {
-                AcceptanceItemId = item.Id,
-                PurchaseItemId = item.PurchaseItemId,
-                OrderedQty = item.PurchaseItem?.Qty ?? 0,
-                QtyAccepted = item.QtyAccepted,
-                ProductName = item.PurchaseItem?.Product?.Name ?? string.Empty,
-                Remarks = item.Remarks
+                // Find matching purchase item to get product info
+                var purchaseItem = purchase?.Items?.FirstOrDefault(pi => pi.Id == item.PurchaseItemId);
+                
+                return new AcceptanceFormModel.AcceptanceItemInput
+                {
+                    AcceptanceItemId = item.Id,
+                    PurchaseItemId = item.PurchaseItemId,
+                    OrderedQty = purchaseItem?.Qty ?? 0,
+                    QtyAccepted = item.QtyAccepted,
+                    ProductName = purchaseItem?.Product?.Name ?? "Unknown Product",
+                    Remarks = item.Remarks
+                };
             }) ?? Enumerable.Empty<AcceptanceFormModel.AcceptanceItemInput>();
 
             model.ReplaceItems(items);

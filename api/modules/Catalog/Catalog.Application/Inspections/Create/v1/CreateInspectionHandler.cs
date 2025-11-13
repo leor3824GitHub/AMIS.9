@@ -56,7 +56,6 @@ public sealed class CreateInspectionHandler(
             purchaseId: request.PurchaseId,
             employeeId: request.InspectorId,
             inspectedOn: request.InspectionDate,
-            approved: false,
             remarks: request.Remarks
         );
 

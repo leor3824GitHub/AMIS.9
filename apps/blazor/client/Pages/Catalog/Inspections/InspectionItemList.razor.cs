@@ -53,10 +53,9 @@ public partial class InspectionItemList
         {
             if (IsCreate == false)
             {
-                var model = EditingItem.Adapt<UpdatePurchaseItemCommand>();
-
-                Inspectionitemlistclient.UpdatePurchaseItemEndpointAsync("1", model.Id, model);
-                Snackbar?.Add("Item product successfully updated.", Severity.Success);
+                // TODO: Use nested endpoint /purchases/{purchaseId}/items/{itemId}
+                // Items in inspections should be managed through the inspection aggregate
+                Snackbar?.Add("Item editing temporarily disabled. Use inspection item management.", Severity.Warning);
             }
 
             EditingItem = null;
@@ -94,15 +93,9 @@ public partial class InspectionItemList
 
         if (IsCreate == false)
         {
-            var model = newItem.Adapt<CreatePurchaseItemCommand>();
-            if (PurchaseId.HasValue)
-            {
-                model.PurchaseId = PurchaseId.Value;
-            }
-
-            // Ideally use await with async method
-            Inspectionitemlistclient.CreatePurchaseItemEndpointAsync("1", model);
-            Snackbar?.Add("Item product successfully added.", Severity.Success);
+            // TODO: Use nested endpoint POST /purchases/{purchaseId}/items
+            // Items in inspections should be managed through the inspection aggregate
+            Snackbar?.Add("Item addition temporarily disabled. Use inspection item management.", Severity.Warning);
         }
         
         // Reset fields after adding
@@ -124,9 +117,10 @@ public partial class InspectionItemList
         {
             var id = item.Id;
 
-           Inspectionitemlistclient.DeletePurchaseItemEndpointAsync("1", id);
+            // TODO: Use nested endpoint DELETE /purchases/{purchaseId}/items/{itemId}
+            // Items in inspections should be managed through the inspection aggregate
+            Snackbar?.Add("Item deletion temporarily disabled. Use inspection item management.", Severity.Warning);
 
-            Snackbar?.Add("Item product successfully removed.", Severity.Success);
             Items.Remove(item);
             StateHasChanged();
         }

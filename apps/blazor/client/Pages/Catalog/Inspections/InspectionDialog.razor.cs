@@ -34,8 +34,14 @@ public partial class InspectionDialog
     private bool _inspectorAutoFilled;
 
     private InspectionItemsEditor? _itemsEditor;
-    private List<PurchaseItemResponse> _poItems = new();
     private List<ProductResponse> _products = new();
+
+    private ICollection<PurchaseItemResponse>? GetPurchaseItemsForSelectedRequest()
+    {
+        if (Model?.InspectionRequestId == null) return null;
+        var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
+        return selectedReq?.Purchase?.Items;
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -58,7 +64,6 @@ public partial class InspectionDialog
 
         _inspectionDate = Model?.InspectionDate == default ? DateTime.Now : Model?.InspectionDate;
         await LoadProducts();
-        SyncPoItems();
 
         // Auto-fill inspector from the selected request if not already set
         if (Model?.InspectionRequestId != null && Model.InspectorId == null)
@@ -88,18 +93,7 @@ public partial class InspectionDialog
             _inspectorAutoFilled = false;
         }
 
-        SyncPoItems();
         StateHasChanged();
-    }
-
-    private void SyncPoItems()
-    {
-        _poItems.Clear();
-        var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
-        if (selectedReq?.Purchase?.Items != null)
-        {
-            _poItems = selectedReq.Purchase.Items.ToList();
-        }
     }
 
     private async Task LoadProducts()
@@ -183,6 +177,21 @@ public partial class InspectionDialog
             var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
             var purchaseId = selectedReq?.PurchaseId ?? Guid.Empty;
 
+            // Convert editor inputs to InspectionItemDto
+            var itemsToSubmit = _itemsEditor?.Inputs?
+                .Where(i => !i.AlreadyInspected && i.QtyInspected > 0)
+                .Select(i => new InspectionItemDto
+                {
+                    InspectionId = Guid.Empty, // Will be set by the command handler
+                    PurchaseItemId = i.PurchaseItemId,
+                    QtyInspected = i.QtyInspected,
+                    QtyPassed = i.QtyPassed,
+                    QtyFailed = i.QtyFailed,
+                    Remarks = i.Remarks ?? string.Empty,
+                    InspectionItemStatus = i.Status
+                })
+                .ToList();
+
             var model = new CreateInspectionCommand
             {
                 InspectionDate = Model.InspectionDate,
@@ -190,7 +199,7 @@ public partial class InspectionDialog
                 InspectionRequestId = Model.InspectionRequestId.Value,
                 PurchaseId = purchaseId,
                 Remarks = Model.Remarks ?? string.Empty,
-                Items = new List<InspectionItemDto>()
+                Items = itemsToSubmit
             };
 
             var response = await ApiHelper.ExecuteCallGuardedAsync(
@@ -201,28 +210,6 @@ public partial class InspectionDialog
 
             if (response?.Id != null && response.Id.Value != Guid.Empty)
             {
-                // Create inspection items from user inputs
-                // Skip items that are already inspected (single-shot) and items with zero inspected qty
-                foreach (var input in _itemsEditor.Inputs.Where(i => !i.AlreadyInspected && i.QtyInspected > 0))
-                {
-                    var createItem = new CreateInspectionItemCommand
-                    {
-                        InspectionId = response.Id.Value,
-                        PurchaseItemId = input.PurchaseItemId,
-                        QtyInspected = input.QtyInspected,
-                        QtyPassed = input.QtyPassed,
-                        QtyFailed = input.QtyFailed,
-                        Remarks = input.Remarks ?? string.Empty,
-                        InspectionItemStatus = input.Status
-                    };
-
-                    await ApiHelper.ExecuteCallGuardedAsync(
-                        () => InspectionClient.CreateInspectionItemEndpointAsync("1", createItem),
-                        Snackbar,
-                        Navigation
-                    );
-                }
-
                 // Inventory updates are now handled server-side upon approval via domain events.
                 // No client-side inventory mutation here to avoid duplication.
 

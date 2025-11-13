@@ -18,7 +18,9 @@ public sealed class UpdatePurchaseHandler(
         var purchase = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = purchase ?? throw new PurchaseNotFoundException(request.Id);
 
-        var updatedPurchase = purchase.Update(request.Id, request.PurchaseDate, request.TotalAmount, request.Status);
+        // Update only supports changing supplier, date, and remarks - not totalAmount or status
+        // TotalAmount is calculated automatically, Status has dedicated methods
+        var updatedPurchase = purchase.Update(request.SupplierId, request.PurchaseDate, null, null);
         await repository.UpdateAsync(updatedPurchase, cancellationToken);
         logger.LogInformation("purchase with id : {PurchaseId} updated.", purchase.Id);
         return new UpdatePurchaseResponse(purchase.Id);

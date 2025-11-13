@@ -81,6 +81,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.HasKey("Id");
 
+                    b.HasIndex("InspectionId");
+
                     b.HasIndex("PurchaseId");
 
                     b.HasIndex("SupplyOfficerId");
@@ -134,7 +136,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PurchaseItemId");
+                    b.HasIndex("PurchaseItemId")
+                        .IsUnique();
 
                     b.HasIndex("AcceptanceId", "PurchaseItemId")
                         .IsUnique();
@@ -378,7 +381,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("InspectionId1")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("InspectionItemStatus")
+                    b.Property<int>("InspectionItemStatus")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("LastModified")
@@ -414,7 +417,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.HasIndex("InspectionId1");
 
-                    b.HasIndex("PurchaseItemId");
+                    b.HasIndex("PurchaseItemId")
+                        .IsUnique();
 
                     b.ToTable("InspectionItems", "catalog");
 
@@ -665,6 +669,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.HasKey("Id");
 
+                    b.HasIndex("IssuanceId");
+
                     b.HasIndex("ProductId");
 
                     b.ToTable("IssuanceItems", "catalog");
@@ -759,7 +765,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<DateTime>("PurchaseDate")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int?>("Status")
+                    b.Property<string>("ReferenceNumber")
+                        .HasColumnType("text");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("text");
+
+                    b.Property<int>("Status")
                         .HasColumnType("integer");
 
                     b.Property<Guid>("SupplierId")
@@ -788,7 +800,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("AcceptanceStatus")
+                    b.Property<int>("AcceptanceStatus")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("Created")
@@ -803,10 +815,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<Guid?>("DeletedBy")
                         .HasColumnType("uuid");
 
-                    b.Property<int?>("InspectionStatus")
+                    b.Property<int>("InspectionStatus")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ItemStatus")
+                    b.Property<int>("ItemStatus")
                         .HasColumnType("integer");
 
                     b.Property<DateTimeOffset>("LastModified")
@@ -824,16 +836,16 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Property<int>("Qty")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("QtyAccepted")
+                    b.Property<int>("QtyAccepted")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("QtyFailed")
+                    b.Property<int>("QtyFailed")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("QtyInspected")
+                    b.Property<int>("QtyInspected")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("QtyPassed")
+                    b.Property<int>("QtyPassed")
                         .HasColumnType("integer");
 
                     b.Property<string>("TenantId")
@@ -916,6 +928,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Acceptance", b =>
                 {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Inspection", "Inspection")
+                        .WithMany()
+                        .HasForeignKey("InspectionId");
+
                     b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", "Purchase")
                         .WithMany("Acceptances")
                         .HasForeignKey("PurchaseId")
@@ -927,6 +943,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasForeignKey("SupplyOfficerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Inspection");
 
                     b.Navigation("Purchase");
 
@@ -1045,6 +1063,12 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.IssuanceItem", b =>
                 {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Issuance", null)
+                        .WithMany("Items")
+                        .HasForeignKey("IssuanceId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("AMIS.WebApi.Catalog.Domain.Product", "Product")
                         .WithMany()
                         .HasForeignKey("ProductId")
@@ -1080,13 +1104,15 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .WithMany()
                         .HasForeignKey("ProductId");
 
-                    b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", null)
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Purchase", "Purchase")
                         .WithMany("Items")
                         .HasForeignKey("PurchaseId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Product");
+
+                    b.Navigation("Purchase");
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Acceptance", b =>
@@ -1095,6 +1121,11 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Inspection", b =>
+                {
+                    b.Navigation("Items");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Issuance", b =>
                 {
                     b.Navigation("Items");
                 });

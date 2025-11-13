@@ -37,7 +37,7 @@ public static class CatalogModule
             var categoryGroup = app.MapGroup("categories").WithTags("categories");
             categoryGroup.MapCategoryCreationEndpoint();
             categoryGroup.MapGetCategoryEndpoint();
-            categoryGroup.MapGetCategoryListEndpoint();
+            categoryGroup.MapSearchCategoriesEndpoint();
             categoryGroup.MapCategoryUpdateEndpoint();
             categoryGroup.MapCategoryDeleteEndpoint();
 
@@ -64,11 +64,8 @@ public static class CatalogModule
             purchaseGroup.MapPurchasesDeleteEndpoint();
 
             var purchaseItemGroup = app.MapGroup("purchaseItems").WithTags("purchaseItems");
-            purchaseItemGroup.MapPurchaseItemCreationEndpoint();
-            purchaseItemGroup.MapGetPurchaseItemEndpoint();
-            purchaseItemGroup.MapGetPurchaseItemListEndpoint();
-            purchaseItemGroup.MapPurchaseItemUpdateEndpoint();
-            purchaseItemGroup.MapPurchaseItemDeleteEndpoint();
+            // Register purchase item management endpoints (CQRS vertical slice)
+            purchaseGroup.MapPurchaseItemManagementEndpoints();
 
             var employeeGroup = app.MapGroup("employees").WithTags("employees");
             employeeGroup.MapEmployeeCreationEndpoint();
@@ -105,13 +102,8 @@ public static class CatalogModule
             inspectionGroup.MapGetInspectionListEndpoint();
             inspectionGroup.MapInspectionUpdateEndpoint();
             inspectionGroup.MapInspectionApproveEndpoint();
-
-            var inspectionItemGroup = app.MapGroup("inspectionItems").WithTags("inspectionItems");
-            inspectionItemGroup.MapInspectionItemCreationEndpoint();
-            inspectionItemGroup.MapInspectionItemDeletionEndpoint();
-            inspectionItemGroup.MapGetInspectionItemEndpoint();
-            inspectionItemGroup.MapGetInspectionItemListEndpoint();
-            inspectionItemGroup.MapInspectionItemUpdateEndpoint();
+            inspectionGroup.MapInspectionRejectEndpoint();
+            inspectionGroup.MapInspectionCancelEndpoint();
 
             var acceptanceGroup = app.MapGroup("acceptances").WithTags("acceptances");
             acceptanceGroup.MapAcceptanceCreationEndpoint();
@@ -121,11 +113,8 @@ public static class CatalogModule
             acceptanceGroup.MapAcceptanceUpdateEndpoint();
 
             var acceptanceItemGroup = app.MapGroup("acceptanceItems").WithTags("acceptanceItems");
-            acceptanceItemGroup.MapAcceptanceItemCreationEndpoint();
-            acceptanceItemGroup.MapAcceptanceItemDeletionEndpoint();
-            acceptanceItemGroup.MapGetAcceptanceItemEndpoint();
-            acceptanceItemGroup.MapGetAcceptanceItemListEndpoint();
-            acceptanceItemGroup.MapAcceptanceItemUpdateEndpoint();
+            // Register acceptance item management endpoints (CQRS vertical slice)
+            acceptanceGroup.MapAcceptanceItemManagementEndpoints();
 
             var inspectionRequestGroup = app.MapGroup("inspectionRequests").WithTags("inspectionRequests");
             inspectionRequestGroup.MapInspectionRequestCreationEndpoint();
@@ -156,9 +145,7 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<Purchase>, CatalogRepository<Purchase>>("catalog:purchases");
         builder.Services.AddKeyedScoped<IReadRepository<Purchase>, CatalogRepository<Purchase>>("catalog:purchases");
-
-        builder.Services.AddKeyedScoped<IRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
-        builder.Services.AddKeyedScoped<IReadRepository<PurchaseItem>, CatalogRepository<PurchaseItem>>("catalog:purchaseItems");
+        // Domain event handlers for PurchaseItem inspection/acceptance live in Catalog.Application (MediatR scans automatically).
 
         builder.Services.AddKeyedScoped<IRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
         builder.Services.AddKeyedScoped<IReadRepository<Employee>, CatalogRepository<Employee>>("catalog:employees");
@@ -175,14 +162,8 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<Inspection>, CatalogRepository<Inspection>>("catalog:inspections");
         builder.Services.AddKeyedScoped<IReadRepository<Inspection>, CatalogRepository<Inspection>>("catalog:inspections");
 
-        builder.Services.AddKeyedScoped<IRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
-        builder.Services.AddKeyedScoped<IReadRepository<InspectionItem>, CatalogRepository<InspectionItem>>("catalog:inspectionItems");
-
         builder.Services.AddKeyedScoped<IRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
         builder.Services.AddKeyedScoped<IReadRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
-
-        builder.Services.AddKeyedScoped<IRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
-        builder.Services.AddKeyedScoped<IReadRepository<AcceptanceItem>, CatalogRepository<AcceptanceItem>>("catalog:acceptanceItems");
 
         builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");

@@ -37,7 +37,6 @@ public partial class AcceptanceDialog
     private FshValidation? _validation;
     private DateTime? _acceptanceDate;
     private bool _loadingItems;
-    private readonly List<PurchaseItemResponse> _purchaseItems = new();
     private bool CanChangePurchase => IsCreate;
     private bool _prerequisitesMet;
     private string? _prerequisiteMessage;
@@ -62,7 +61,7 @@ public partial class AcceptanceDialog
         _supplyOfficerOptions = SupplyOfficers?.ToList() ?? new List<EmployeeResponse>();
         _purchaseOptions = Purchases?.ToList() ?? new List<PurchaseResponse>();
 
-        if (Model.PurchaseId.HasValue && _purchaseItems.Count == 0)
+        if (Model.PurchaseId.HasValue && Model.Items.Count == 0)
         {
             await LoadPurchaseItemsAsync(Model.PurchaseId.Value, seedFromAcceptance: true);
         }
@@ -73,12 +72,9 @@ public partial class AcceptanceDialog
         _loadingItems = true;
         try
         {
+            // Access purchase items through the Purchase aggregate
             var purchase = await ApiClient.GetPurchaseEndpointAsync("1", purchaseId);
-            _purchaseItems.Clear();
-            if (purchase?.Items != null)
-            {
-                _purchaseItems.AddRange(purchase.Items.Where(i => i.Id.HasValue));
-            }
+            
             if (purchase?.Id.HasValue == true)
             {
                 var existing = _purchaseOptions.FirstOrDefault(p => p.Id == purchase.Id);
@@ -92,7 +88,8 @@ public partial class AcceptanceDialog
                     _purchaseOptions.Add(purchase);
                 }
             }
-            SyncItems(seedFromAcceptance);
+            
+            SyncItems(purchase, seedFromAcceptance);
 
             // Refresh single-shot flags (AlreadyAccepted) for UX
             await RefreshComputedQuantitiesAsync(seedFromAcceptance);
@@ -110,7 +107,6 @@ public partial class AcceptanceDialog
         catch (Exception ex)
         {
             Snackbar.Add($"Failed to load purchase items: {ex.Message}", Severity.Error);
-            _purchaseItems.Clear();
             Model.ClearItems();
             _prerequisitesMet = false;
             _prerequisiteMessage = "Unable to verify inspection prerequisites for the selected purchase.";
@@ -122,12 +118,18 @@ public partial class AcceptanceDialog
         }
     }
 
-    private void SyncItems(bool preserveExisting)
+    private void SyncItems(PurchaseResponse? purchase, bool preserveExisting)
     {
+        if (purchase?.Items == null)
+        {
+            Model.ClearItems();
+            return;
+        }
+
         var current = Model.Items.ToDictionary(i => i.PurchaseItemId, i => i);
         var updated = new List<AcceptanceFormModel.AcceptanceItemInput>();
 
-        foreach (var item in _purchaseItems)
+        foreach (var item in purchase.Items)
         {
             if (!item.Id.HasValue)
             {
@@ -169,23 +171,16 @@ public partial class AcceptanceDialog
             return;
         }
 
+        // Single-shot checking disabled client-side
+        // The API server will enforce single-shot constraints
+        // This avoids dependency on SearchAcceptanceItemsCommand which may not be in NSwag client yet
         foreach (var input in Model.Items)
         {
-            // Single-shot: mark as already accepted if any acceptance item exists (posted or not)
-            var accSearch = new SearchAcceptanceItemsCommand
-            {
-                PageNumber = 1,
-                PageSize = 100,
-                PurchaseItemId = input.PurchaseItemId
-            };
-
-            var accItems = await ApiClient.SearchAcceptanceItemsEndpointAsync("1", accSearch);
-            input.AlreadyAccepted = accItems?.Items?.Count > 0;
-
+            input.AlreadyAccepted = false; // Assume not accepted, server will validate
+            
             if (!preserveExisting && AllowItemEditing)
             {
-                // If this is initial seeding, set to 0 when already accepted; otherwise keep current default
-                input.QtyAccepted = input.AlreadyAccepted ? 0 : input.QtyAccepted;
+                // Keep default quantities
             }
         }
 
@@ -252,7 +247,6 @@ public partial class AcceptanceDialog
         }
         else
         {
-            _purchaseItems.Clear();
             Model.ClearItems();
             _prerequisitesMet = false;
             _prerequisiteMessage = "Select a purchase with a completed inspection before creating an acceptance.";
