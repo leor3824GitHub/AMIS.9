@@ -31,6 +31,22 @@ Features use CQRS with MediatR in `Features/[Operation]/v[N]/` structure:
 - `[Operation]Response.cs` - Output model
 
 Example: `Todo/Features/Create/v1/CreateTodoCommand.cs`
+## SYSTEM WORKflow
+I. Asset User's Request 
+1. Purchase Request; Action - Internal user identifies a need and creates a formal Purchase Request (PR).
+2. PR Approval; Action - The PR is reviewed and approved by the designated authority based on organizational policies.
+II. Procurement  
+1. Canvass and Abstract; Action - The procurement team canvasses suppliers and selects the best offer, then creates a Purchase Order (PO).
+2. Goods Delivery; Action - The supplier delivers the goods/services as per the PO terms.
+III. Asset Receiving 
+1. Receiving Items; Action - Supply officer receives and requests inspection of delivered items.
+2. Inspection; Action - the inspector verifies the quality and quantity of received items. 
+3. Acceptance; Action - Upon successful inspection, the supply officer, items are formally accepted into inventory.
+IV. Asset Tagging and Recording 
+1. Asset Tagging; Action - Each accepted asset is tagged with a unique identifier or propertycode for tracking and recorded in the Asset Management Information System (AMIS) for inventory management.
+V. Asset Utilization and Maintenance 
+1. Asset Assignment; Action - Assets are assigned to users or departments as needed, with records updated in AMIS.
+2. Maintenance Scheduling; Action - Regular maintenance schedules are created and tracked in AMIS to ensure asset longevity and performance.
 
 ## Development Workflows
 

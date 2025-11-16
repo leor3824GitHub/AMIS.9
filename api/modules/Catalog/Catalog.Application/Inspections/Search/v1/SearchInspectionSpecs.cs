@@ -39,7 +39,8 @@ public class SearchInspectionSpecs : EntitiesByPaginationFilterSpec<Inspection, 
                     i.Purchase.TotalAmount,
                     i.Purchase.Status,
                     null,
-                    null
+                    null,
+                    i.Purchase.DeliveryAddress
                 ),
                 i.Approved,
                 i.Status,

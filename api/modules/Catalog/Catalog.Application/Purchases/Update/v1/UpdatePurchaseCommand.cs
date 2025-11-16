@@ -7,5 +7,6 @@ public sealed record UpdatePurchaseCommand(
     Guid? SupplierId,          // The optional supplier ID (could be null)
     DateTime? PurchaseDate,    // The optional purchase date
     decimal TotalAmount,       // The total amount (could be recalculated)
-    PurchaseStatus? Status           // The optional purchase status
+    PurchaseStatus? Status,           // The optional purchase status
+    string? DeliveryAddress = null    // Optional delivery address
 ) : IRequest<UpdatePurchaseResponse>;

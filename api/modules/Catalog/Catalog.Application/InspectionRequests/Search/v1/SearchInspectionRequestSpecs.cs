@@ -3,6 +3,7 @@ using AMIS.Framework.Core.Paging;
 using AMIS.WebApi.Catalog.Application.InspectionRequests.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.Framework.Core.Specifications;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Application.InspectionRequests.Search.v1;
 
@@ -16,6 +17,7 @@ public class SearchInspectionRequestSpecs : EntitiesByPaginationFilterSpec<Inspe
             .Include(i => i.Purchase)
             .Where(i => i.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)
             .Where(i => i.DateCreated >= command.FromDate, command.FromDate.HasValue)
-            .Where(i => i.DateCreated <= command.ToDate, command.ToDate.HasValue);
+            .Where(i => i.DateCreated <= command.ToDate, command.ToDate.HasValue)
+            .Where(i => command.Statuses!.Contains(i.Status), command.Statuses != null && command.Statuses.Count > 0);
     }
 }

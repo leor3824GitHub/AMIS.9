@@ -48,7 +48,7 @@ public sealed class PurchaseItemInspectedHandler : INotificationHandler<Purchase
         }
 
         bool anyInspected = purchase.Items.Any(i => i.InspectionStatus != PurchaseItemInspectionStatus.NotInspected);
-        bool fullyInspected = purchase.Items.Any() && purchase.Items.All(i => 
+        bool fullyInspected = purchase.Items.Count > 0 && purchase.Items.All(i => 
             i.InspectionStatus == PurchaseItemInspectionStatus.Passed || 
             i.InspectionStatus == PurchaseItemInspectionStatus.Failed);
 
@@ -107,8 +107,8 @@ public sealed class PurchaseItemAcceptedHandler : INotificationHandler<PurchaseI
             return;
         }
 
-        bool fullyAccepted = purchase.Items.Any() && purchase.Items.All(i => i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted);
-        bool fullyInspected = purchase.Items.Any() && purchase.Items.All(i => 
+        bool fullyAccepted = purchase.Items.Count > 0 && purchase.Items.All(i => i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted);
+        bool fullyInspected = purchase.Items.Count > 0 && purchase.Items.All(i => 
             i.InspectionStatus == PurchaseItemInspectionStatus.Passed || 
             i.InspectionStatus == PurchaseItemInspectionStatus.Failed);
 

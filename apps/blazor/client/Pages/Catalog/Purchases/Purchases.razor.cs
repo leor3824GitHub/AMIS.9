@@ -9,12 +9,14 @@ using MudBlazor;
 using AMIS.Blazor.Infrastructure.Auth;
 using MapsterMapper;
 using Mapster;
+using System.Linq;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
 public partial class Purchases
 {
     private MudDataGrid<PurchaseResponse> _table = default!;
     private HashSet<PurchaseResponse> _selectedItems = new();
+    private const string FilterOperatorEqual = "eq";
 
     [CascadingParameter]
     protected Task<AuthenticationState> AuthState { get; set; } = default!;
@@ -29,14 +31,13 @@ public partial class Purchases
 
     private string searchString = "";
     private bool _loading;
-    private string successMessage = "";
 
     private IEnumerable<PurchaseResponse>? _entityList;
     private int _totalItems;
+    private bool _supplierDeliveredOnly;
 
     private bool _canSearch;
     private bool _canCreate;
-    private bool _canUpdate;
     private bool _canDelete;
 
     protected override async Task OnInitializedAsync()
@@ -44,7 +45,6 @@ public partial class Purchases
         var user = (await AuthState).User;
         _canSearch = await AuthService.HasPermissionAsync(user, FshActions.Search, FshResources.Purchases);
         _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.Purchases);
-        _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.Purchases);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.Purchases);
 
 
@@ -61,7 +61,15 @@ public partial class Purchases
             {
                 Fields = new[] { "name" },
                 Keyword = searchString
-            }
+            },
+            AdvancedFilter = _supplierDeliveredOnly
+                ? new Filter
+                {
+                    Field = nameof(PurchaseResponse.Status),
+                    Operator = FilterOperatorEqual,
+                    Value = PurchaseStatus.Delivered.ToString()
+                }
+                : null
         };
 
         try
@@ -88,7 +96,7 @@ public partial class Purchases
             _loading = false;
         }
 
-        return new GridData<PurchaseResponse> { TotalItems = _totalItems, Items = _entityList };
+        return new GridData<PurchaseResponse> { TotalItems = _totalItems, Items = _entityList ?? Enumerable.Empty<PurchaseResponse>() };
     }
 
     private async Task ShowEditFormDialog(string title, CreatePurchaseCommand command, bool IsCreate)
@@ -110,7 +118,7 @@ public partial class Purchases
         var dialog = await DialogService.ShowAsync<PurchaseDialog>(title, parameters, options);
         var state = await dialog.Result;
 
-        if (!state.Canceled)
+        if (state != null && !state.Canceled)
         {
             await _table.ReloadServerData();
             _selectedItems.Clear();
@@ -141,7 +149,6 @@ public partial class Purchases
         if (copy != null)
         {
             var command = new Mapper().Map<PurchaseResponse, CreatePurchaseCommand>(copy);
-            //var command = copy.Adapt<PurchaseViewModel>();
             command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
             await ShowEditFormDialog("Clone a purchase", command, true);
         }
@@ -179,7 +186,7 @@ public partial class Purchases
         var purchaseIds = _selectedItems
        .Select(item => item.Id)
        .Where(id => id.HasValue)
-       .Select(id => id.Value)
+       .Select(id => id!.Value)
        .ToList();
 
         if (purchaseIds.Count == 0)
@@ -202,7 +209,7 @@ public partial class Purchases
             {
                 await ApiHelper.ExecuteCallGuardedAsync(
                     () => purchaseclient.DeletePurchasesEndpointAsync("1", purchaseIds),
-                    Snackbar);
+                    Snackbar!);
 
                 await _table.ReloadServerData();
                 _selectedItems.Clear();
@@ -224,6 +231,67 @@ public partial class Purchases
     {
         searchString = text;
         return _table.ReloadServerData();
+    }
+
+    private static bool IsSupplierDelivered(PurchaseResponse purchase)
+        => purchase.Status == PurchaseStatus.Delivered
+           || purchase.Items?.Any(item => item.ItemStatus == PurchaseStatus.Delivered) == true;
+
+    private static Color GetStatusColor(PurchaseStatus status)
+        => status switch
+        {
+            PurchaseStatus.Delivered => Color.Success,
+            PurchaseStatus.PartiallyDelivered => Color.Warning,
+            PurchaseStatus.Cancelled => Color.Error,
+            PurchaseStatus.Closed => Color.Info,
+            PurchaseStatus.Submitted => Color.Primary,
+            PurchaseStatus.Pending => Color.Secondary,
+            _ => Color.Default
+        };
+
+    private static string GetStatusIcon(PurchaseStatus status)
+        => status switch
+        {
+            PurchaseStatus.Draft => Icons.Material.Filled.Edit,
+            PurchaseStatus.Pending => Icons.Material.Filled.HourglassEmpty,
+            PurchaseStatus.Submitted => Icons.Material.Filled.Send,
+            PurchaseStatus.PartiallyDelivered => Icons.Material.Filled.LocalShipping,
+            PurchaseStatus.Delivered => Icons.Material.Filled.Inventory,
+            PurchaseStatus.Closed => Icons.Material.Filled.CheckCircle,
+            PurchaseStatus.Cancelled => Icons.Material.Filled.Cancel,
+            _ => Icons.Material.Filled.Help
+        };
+
+    private static bool CanRecordDelivery(PurchaseResponse purchase)
+        => purchase.Status == PurchaseStatus.Submitted 
+           || purchase.Status == PurchaseStatus.PartiallyDelivered;
+
+    private async Task OnRecordDelivery(PurchaseResponse dto)
+    {
+        var command = dto.Adapt<CreatePurchaseCommand>();
+        
+        var parameters = new DialogParameters
+        {
+            { nameof(GoodsReceiptDialog.Purchase), command }
+        };
+        
+        var options = new DialogOptions 
+        { 
+            CloseButton = true, 
+            MaxWidth = MaxWidth.Large, 
+            FullWidth = true, 
+            BackdropClick = false, 
+            Position = DialogPosition.Center 
+        };
+        
+        var dialog = await DialogService.ShowAsync<GoodsReceiptDialog>("Record Goods Receipt", parameters, options);
+        var result = await dialog.Result;
+
+        if (result != null && !result.Canceled)
+        {
+            await _table.ReloadServerData();
+            Snackbar?.Add("Goods receipt recorded successfully. Inspection task created.", Severity.Success);
+        }
     }
 
 }

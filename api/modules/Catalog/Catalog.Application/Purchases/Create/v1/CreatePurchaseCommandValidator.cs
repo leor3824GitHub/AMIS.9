@@ -7,5 +7,6 @@ public class CreatePurchaseCommandValidator : AbstractValidator<CreatePurchaseCo
     {
         RuleFor(p => p.SupplierId).NotEmpty();
         RuleFor(p => p.PurchaseDate).NotEmpty();
+        RuleFor(p => p.DeliveryAddress).MaximumLength(256);
     }
 }

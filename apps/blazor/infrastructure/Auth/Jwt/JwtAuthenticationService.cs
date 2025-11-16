@@ -115,12 +115,11 @@ public sealed class JwtAuthenticationService : AuthenticationStateProvider, IAut
 
             string? token = await GetCachedAuthTokenAsync();
 
-            //// Check if token needs to be refreshed (when its expiration time is less than 1 minute away)
+            // Check if token needs to be refreshed (when its expiration time is less than 1 minute away)
             var expTime = authState.User.GetExpiration();
             var diff = expTime - DateTime.UtcNow;
             if (diff.TotalMinutes <= 1)
             {
-                //return new AccessTokenResult(AccessTokenResultStatus.RequiresRedirect, new(), "/login", default);
                 string? refreshToken = await GetCachedRefreshTokenAsync();
                 (bool succeeded, var response) = await TryRefreshTokenAsync(new RefreshTokenCommand { Token = token, RefreshToken = refreshToken });
                 if (!succeeded)

@@ -84,6 +84,22 @@ public static class FshPermissions
         new("Delete PurchaseItems", FshActions.Delete, FshResources.PurchaseItems),
         new("Export PurchaseItems", FshActions.Export, FshResources.PurchaseItems),
 
+            //purchaserequests
+            new("View PurchaseRequests", FshActions.View, FshResources.PurchaseRequests, IsBasic: true),
+            new("Search PurchaseRequests", FshActions.Search, FshResources.PurchaseRequests, IsBasic: true),
+            new("Create PurchaseRequests", FshActions.Create, FshResources.PurchaseRequests),
+            new("Update PurchaseRequests", FshActions.Update, FshResources.PurchaseRequests),
+            new("Delete PurchaseRequests", FshActions.Delete, FshResources.PurchaseRequests),
+            new("Export PurchaseRequests", FshActions.Export, FshResources.PurchaseRequests),
+
+            //purchaserequestitems
+            new("View PurchaseRequestItems", FshActions.View, FshResources.PurchaseRequestItems, IsBasic: true),
+            new("Search PurchaseRequestItems", FshActions.Search, FshResources.PurchaseRequestItems, IsBasic: true),
+            new("Create PurchaseRequestItems", FshActions.Create, FshResources.PurchaseRequestItems),
+            new("Update PurchaseRequestItems", FshActions.Update, FshResources.PurchaseRequestItems),
+            new("Delete PurchaseRequestItems", FshActions.Delete, FshResources.PurchaseRequestItems),
+            new("Export PurchaseRequestItems", FshActions.Export, FshResources.PurchaseRequestItems),
+
         //employees
         new("View Employees", FshActions.View, FshResources.Employees, IsBasic: true),
         new("Search Employees", FshActions.Search, FshResources.Employees, IsBasic: true),

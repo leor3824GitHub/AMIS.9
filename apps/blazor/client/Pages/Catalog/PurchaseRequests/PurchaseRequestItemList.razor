@@ -1,0 +1,109 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudPaper Class="pa-4 mb-4" Style="max-height: 70vh; overflow-y: auto;">
+    <MudText Typo="Typo.h6">Request Items - @(Items?.Count ?? 0)</MudText>
+
+    <MudTable T="PurchaseRequestItemDto" Items="Items" Hover Bordered Striped>
+        <HeaderContent>
+            <MudTh Style="width: 40%">Product</MudTh>
+            <MudTh Style="width: 10%">Qty</MudTh>
+            <MudTh Style="width: 25%">Description</MudTh>
+            <MudTh Style="width: 25%">Justification</MudTh>
+            <MudTh>Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate Context="item">
+            @if (EditingItem == item)
+            {
+                <MudTd>
+                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Style="width: 100%;" Variant="Variant.Outlined">
+                        @foreach (var p in Products)
+                        {
+                            <MudSelectItem T="Guid?" Value="p.Id">@p.Name</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd>
+                    <MudNumericField HideSpinButtons T="int" @bind-Value="item.Qty" Variant="Variant.Outlined" />
+                </MudTd>
+                <MudTd>
+                    <MudTextField T="string" @bind-Value="item.Description" Variant="Variant.Outlined" />
+                </MudTd>
+                <MudTd>
+                    <MudTextField T="string" @bind-Value="item.Justification" Variant="Variant.Outlined" />
+                </MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" OnClick="SaveEdit" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Secondary" OnClick="CancelEdit" />
+                </MudTd>
+            }
+            else
+            {
+                <MudTd>@Products.FirstOrDefault(x => x.Id == item.ProductId)?.Name</MudTd>
+                <MudTd>@item.Qty</MudTd>
+                <MudTd>@item.Description</MudTd>
+                <MudTd>@item.Justification</MudTd>
+                <MudTd>
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditItem(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveItem(item)" />
+                </MudTd>
+            }
+        </RowTemplate>
+        <FooterContent>
+            <MudTd>
+                <MudSelect T="Guid?" @bind-Value="NewProductId" Dense Style="width: 100%;" Placeholder="Select product" Variant="Variant.Outlined">
+                    @foreach (var p in Products)
+                    {
+                        <MudSelectItem T="Guid?" Value="p.Id">@p.Name</MudSelectItem>
+                    }
+                </MudSelect>
+            </MudTd>
+            <MudTd>
+                <MudNumericField HideSpinButtons T="int" @bind-Value="NewQty" Variant="Variant.Outlined" />
+            </MudTd>
+            <MudTd>
+                <MudTextField T="string" @bind-Value="NewDescription" Variant="Variant.Outlined" />
+            </MudTd>
+            <MudTd>
+                <MudTextField T="string" @bind-Value="NewJustification" Variant="Variant.Outlined" />
+            </MudTd>
+            <MudTd>
+                <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" Color="Color.Primary" OnClick="AddItem" />
+            </MudTd>
+        </FooterContent>
+    </MudTable>
+</MudPaper>
+
+@code {
+    [Parameter] public ICollection<PurchaseRequestItemDto> Items { get; set; } = new List<PurchaseRequestItemDto>();
+    [Parameter] public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
+
+    private PurchaseRequestItemDto? EditingItem { get; set; }
+
+    private Guid? NewProductId { get; set; }
+    private int NewQty { get; set; }
+    private string? NewDescription { get; set; }
+    private string? NewJustification { get; set; }
+
+    private void EditItem(PurchaseRequestItemDto item) => EditingItem = item;
+    private void SaveEdit() => EditingItem = null;
+    private void CancelEdit() => EditingItem = null;
+
+    private void AddItem()
+    {
+        if (NewProductId == null || NewQty <= 0) return;
+        Items.Add(new PurchaseRequestItemDto
+        {
+            ProductId = NewProductId,
+            Qty = NewQty,
+            Description = NewDescription ?? string.Empty,
+            Justification = NewJustification ?? string.Empty
+        });
+        NewProductId = null; NewQty = 0; NewDescription = null; NewJustification = null;
+    }
+
+    private void RemoveItem(PurchaseRequestItemDto item)
+    {
+        Items.Remove(item);
+    }
+}

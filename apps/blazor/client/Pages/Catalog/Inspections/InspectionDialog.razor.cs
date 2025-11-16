@@ -35,6 +35,7 @@ public partial class InspectionDialog
 
     private InspectionItemsEditor? _itemsEditor;
     private List<ProductResponse> _products = new();
+    private List<IBrowserFile> _uploadedFiles = new();
 
     private ICollection<PurchaseItemResponse>? GetPurchaseItemsForSelectedRequest()
     {
@@ -64,6 +65,39 @@ public partial class InspectionDialog
 
         _inspectionDate = Model?.InspectionDate == default ? DateTime.Now : Model?.InspectionDate;
         await LoadProducts();
+
+        // Load allowed (Assigned/InProgress) requests from API when dialog is used for creating
+        if (IsCreate)
+        {
+            try
+            {
+                var statuses = new List<InspectionRequestStatus> { InspectionRequestStatus.Assigned, InspectionRequestStatus.InProgress };
+                var resp = await InspectionClient.SearchInspectionRequestsEndpointAsync("1", new SearchInspectionRequestsCommand
+                {
+                    PageNumber = 1,
+                    PageSize = 200,
+                    Statuses = statuses
+                });
+                var serverList = resp?.Items?.ToList() ?? new List<InspectionRequestResponse>();
+                // Merge if parent passed some items (e.g., single pre-selected) to keep selection stable
+                if (InspectionRequests.Count == 0)
+                {
+                    InspectionRequests = serverList;
+                }
+                else
+                {
+                    var existing = InspectionRequests.Select(r => r.Id).ToHashSet();
+                    foreach (var r in serverList)
+                    {
+                        if (!existing.Contains(r.Id)) InspectionRequests.Add(r);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Snackbar.Add($"Failed to load requests: {ex.Message}", Severity.Error);
+            }
+        }
 
         // Auto-fill inspector from the selected request if not already set
         if (Model?.InspectionRequestId != null && Model.InspectorId == null)
@@ -304,6 +338,77 @@ public partial class InspectionDialog
     }
 
     // Note: Inventory adjustments are performed by the API when an inspection is approved.
+
+    private void OnFilesChanged(InputFileChangeEventArgs e)
+    {
+        _uploadedFiles.Clear();
+        foreach (var file in e.GetMultipleFiles(5))
+        {
+            _uploadedFiles.Add(file);
+        }
+        StateHasChanged();
+    }
+
+    private void RemoveFile(IBrowserFile file)
+    {
+        _uploadedFiles.Remove(file);
+        StateHasChanged();
+    }
+
+    private string FormatFileSize(long bytes)
+    {
+        string[] sizes = { "B", "KB", "MB", "GB" };
+        double len = bytes;
+        int order = 0;
+        while (len >= 1024 && order < sizes.Length - 1)
+        {
+            order++;
+            len = len / 1024;
+        }
+        return $"{len:0.##} {sizes[order]}";
+    }
+
+    private async Task ApproveInspection()
+    {
+        if (IsReadOnly)
+        {
+            Snackbar.Add("This inspection is read-only.", Severity.Info);
+            return;
+        }
+
+        var confirmed = await DialogService.ShowMessageBox(
+            "Accept & Add to Inventory",
+            "Are you sure you want to approve this inspection? This will automatically update the inventory with accepted quantities.",
+            yesText: "Accept", cancelText: "Cancel");
+
+        if (confirmed != true) return;
+
+        _isSaving = true;
+        StateHasChanged();
+
+        try
+        {
+            // Call the approve endpoint
+            await ApiHelper.ExecuteCallGuardedAsync(
+                () => InspectionClient.ApproveInspectionEndpointAsync("1", Model.Id),
+                Snackbar,
+                Navigation
+            );
+
+            Snackbar.Add("Inspection approved successfully. Inventory has been updated.", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+            Refresh?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error approving inspection: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isSaving = false;
+            StateHasChanged();
+        }
+    }
 
     private void Cancel()
     {

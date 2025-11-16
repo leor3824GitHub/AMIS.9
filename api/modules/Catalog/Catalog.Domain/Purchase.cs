@@ -13,6 +13,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
     public PurchaseStatus Status { get; private set; }
     public string? ReferenceNumber { get; private set; }
     public string? Remarks { get; private set; }
+    public string? DeliveryAddress { get; private set; }
     
     public virtual Supplier? Supplier { get; private set; }
     public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
@@ -20,12 +21,12 @@ public class Purchase : AuditableEntity, IAggregateRoot
     public virtual ICollection<Acceptance> Acceptances { get; private set; } = [];
 
     // Computed properties - not persisted
-    public bool HasItems => Items.Any();
+    public bool HasItems => Items.Count > 0;
     public int TotalItemsCount => Items.Sum(i => i.Qty);
-    public bool IsFullyInspected => Items.Any() && Items.All(i => 
+    public bool IsFullyInspected => Items.Count > 0 && Items.All(i => 
         i.InspectionStatus == PurchaseItemInspectionStatus.Passed || 
         i.InspectionStatus == PurchaseItemInspectionStatus.Failed);
-    public bool IsFullyAccepted => Items.Any() && Items.All(i => 
+    public bool IsFullyAccepted => Items.Count > 0 && Items.All(i => 
         i.AcceptanceStatus == PurchaseItemAcceptanceStatus.Accepted);
     public bool IsPartiallyInspected => Items.Any(i => 
         i.InspectionStatus != PurchaseItemInspectionStatus.NotInspected);
@@ -35,7 +36,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
     private Purchase() { }
 
-    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, PurchaseStatus status, string? referenceNumber, string? remarks)
+    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, PurchaseStatus status, string? referenceNumber, string? remarks, string? deliveryAddress)
     {
         Id = id;
         SupplierId = supplierId;
@@ -43,18 +44,19 @@ public class Purchase : AuditableEntity, IAggregateRoot
         Status = status;
         ReferenceNumber = referenceNumber;
         Remarks = remarks;
+        DeliveryAddress = deliveryAddress;
         TotalAmount = 0;
 
         QueueDomainEvent(new PurchaseCreated { Purchase = this });
     }
 
-    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate = null, string? referenceNumber = null, string? remarks = null)
+    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate = null, string? referenceNumber = null, string? remarks = null, string? deliveryAddress = null)
     {
-        var purchase = new Purchase(Guid.NewGuid(), supplierId, purchaseDate, PurchaseStatus.Draft, referenceNumber, remarks);
+        var purchase = new Purchase(Guid.NewGuid(), supplierId, purchaseDate, PurchaseStatus.Draft, referenceNumber, remarks, deliveryAddress);
         return purchase;
     }
 
-    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, string? referenceNumber, string? remarks)
+    public Purchase Update(Guid? supplierId, DateTime? purchaseDate, string? referenceNumber, string? remarks, string? deliveryAddress)
     {
         if (Status == PurchaseStatus.Closed || Status == PurchaseStatus.Cancelled)
         {
@@ -84,6 +86,12 @@ public class Purchase : AuditableEntity, IAggregateRoot
         if (Remarks != remarks)
         {
             Remarks = remarks;
+            isUpdated = true;
+        }
+
+        if (DeliveryAddress != deliveryAddress)
+        {
+            DeliveryAddress = deliveryAddress;
             isUpdated = true;
         }
 
@@ -163,12 +171,12 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
     public void Submit()
     {
-        if (Status != PurchaseStatus.Draft)
+        if (Status != PurchaseStatus.Draft && Status != PurchaseStatus.Pending)
         {
             throw new InvalidOperationException($"Cannot submit a purchase with status {Status}.");
         }
 
-        if (!Items.Any())
+        if (Items.Count == 0)
         {
             throw new InvalidOperationException("Cannot submit a purchase without items.");
         }
@@ -246,7 +254,6 @@ public class Purchase : AuditableEntity, IAggregateRoot
             throw new InvalidOperationException($"Cannot transition purchase from {Status} to {newStatus}.");
         }
 
-        var oldStatus = Status;
         Status = newStatus;
 
         QueueDomainEvent(new PurchaseUpdated { Purchase = this });

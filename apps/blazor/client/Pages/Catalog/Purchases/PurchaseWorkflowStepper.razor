@@ -1,0 +1,162 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudPaper Elevation="2" Class="pa-4 mb-3">
+    <MudText Typo="Typo.h6" Class="mb-3">Procurement Workflow Progress</MudText>
+    
+    <MudStepper @ref="_stepper" 
+                ActiveIndex="@GetActiveStepIndex()" 
+                Color="Color.Primary"
+                HeaderTextView="HeaderTextView.All"
+                Linear="false"
+                DisableAnimation="false">
+        
+        <!-- Step 1: Purchase Order Creation -->
+        <MudStep Title="PO Creation" 
+                 Icon="@Icons.Material.Filled.Receipt">
+            <ChildContent>
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.subtitle1">Step 1: Purchase Order Creation</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Create a formal, trackable order for goods from a supplier
+                    </MudText>
+                    <MudDivider />
+                    <MudList T="string" Dense="true">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Pending, PurchaseStatus.Submitted)">
+                            PO Number: <strong>@(ReferenceNumber ?? "-")</strong>
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Pending, PurchaseStatus.Submitted)">
+                            Supplier Selected
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Submitted)">
+                            PO Submitted for Approval
+                        </MudListItem>
+                    </MudList>
+                    @if (Status == PurchaseStatus.Draft || Status == PurchaseStatus.Pending)
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true">
+                            Current Status: <strong>@Status</strong> - Complete PO details and submit for approval
+                        </MudAlert>
+                    }
+                    else if (Status == PurchaseStatus.Submitted)
+                    {
+                        <MudAlert Severity="Severity.Success" Dense="true">
+                            ✓ Step Complete - PO has been submitted and is ready to be issued
+                        </MudAlert>
+                    }
+                </MudStack>
+            </ChildContent>
+        </MudStep>
+
+        <!-- Step 2: Goods Receipt -->
+        <MudStep Title="Goods Receipt" 
+                 Icon="@Icons.Material.Filled.LocalShipping">
+            <ChildContent>
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.subtitle1">Step 2: Goods Receipt (Delivery)</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Record what was actually received versus what was ordered
+                    </MudText>
+                    <MudDivider />
+                    <MudList T="string" Dense="true">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.PartiallyDelivered, PurchaseStatus.Delivered)">
+                            Delivery Note Recorded
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.PartiallyDelivered, PurchaseStatus.Delivered)">
+                            Quantities Verified
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Delivered)">
+                            All Items Received
+                        </MudListItem>
+                    </MudList>
+                    @if (Status == PurchaseStatus.Submitted)
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true">
+                            <strong>Action Required:</strong> Use "Record Delivery" to log received items
+                        </MudAlert>
+                    }
+                    else if (Status == PurchaseStatus.PartiallyDelivered)
+                    {
+                        <MudAlert Severity="Severity.Warning" Dense="true">
+                            Partial delivery recorded - awaiting remaining items
+                        </MudAlert>
+                    }
+                    else if (Status == PurchaseStatus.Delivered)
+                    {
+                        <MudAlert Severity="Severity.Success" Dense="true">
+                            ✓ Step Complete - All items have been delivered
+                        </MudAlert>
+                    }
+                </MudStack>
+            </ChildContent>
+        </MudStep>
+
+        <!-- Step 3: Inspection & Acceptance -->
+        <MudStep Title="Inspection" 
+                 Icon="@Icons.Material.Filled.Checklist">
+            <ChildContent>
+                <MudStack Spacing="2">
+                    <MudText Typo="Typo.subtitle1">Step 3: Inspection & Acceptance</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">
+                        Quality assurance team verifies items meet specifications
+                    </MudText>
+                    <MudDivider />
+                    <MudList T="string" Dense="true">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Closed)">
+                            Items Inspected
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Closed)">
+                            Quality Verified
+                        </MudListItem>
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Closed)">
+                            Accepted Items Added to Inventory
+                        </MudListItem>
+                    </MudList>
+                    @if (Status == PurchaseStatus.Delivered)
+                    {
+                        <MudAlert Severity="Severity.Info" Dense="true">
+                            <strong>Action Required:</strong> Create inspection to verify quality
+                        </MudAlert>
+                    }
+                    else if (Status == PurchaseStatus.Closed)
+                    {
+                        <MudAlert Severity="Severity.Success" Dense="true">
+                            ✓ Workflow Complete - Items have been inspected and added to inventory
+                        </MudAlert>
+                    }
+                </MudStack>
+            </ChildContent>
+        </MudStep>
+
+    </MudStepper>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public PurchaseStatus Status { get; set; }
+    
+    [Parameter]
+    public string? ReferenceNumber { get; set; }
+
+    private MudStepper? _stepper;
+
+    private int GetActiveStepIndex()
+    {
+        return Status switch
+        {
+            PurchaseStatus.Draft => 0,
+            PurchaseStatus.Pending => 0,
+            PurchaseStatus.Submitted => 1,
+            PurchaseStatus.PartiallyDelivered => 1,
+            PurchaseStatus.Delivered => 2,
+            PurchaseStatus.Closed => 2,
+            PurchaseStatus.Cancelled => 0,
+            _ => 0
+        };
+    }
+
+    private Color GetCheckColor(PurchaseStatus current, params PurchaseStatus[] requiredStatuses)
+    {
+        return requiredStatuses.Contains(current) ? Color.Success : Color.Default;
+    }
+}

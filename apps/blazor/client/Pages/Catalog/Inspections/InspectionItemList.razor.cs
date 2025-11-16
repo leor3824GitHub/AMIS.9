@@ -16,10 +16,8 @@ public partial class InspectionItemList
     [Parameter]
     public ICollection<PurchaseItemDto> Items { get; set; } = new List<PurchaseItemDto>();
     [Parameter] public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
-    //[Parameter] public List<SupplierResponse> Suppliers { get; set; } = new();
     [Parameter] public PurchaseStatus? Status { get; set; }
     [Parameter] public Guid? PurchaseId { get; set; }
-    //[Parameter] public Action<Double> OnTotalAmountChanged { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
 
     private Guid? Productid { get; set; }
@@ -115,8 +113,6 @@ public partial class InspectionItemList
         }
         try
         {
-            var id = item.Id;
-
             // TODO: Use nested endpoint DELETE /purchases/{purchaseId}/items/{itemId}
             // Items in inspections should be managed through the inspection aggregate
             Snackbar?.Add("Item deletion temporarily disabled. Use inspection item management.", Severity.Warning);

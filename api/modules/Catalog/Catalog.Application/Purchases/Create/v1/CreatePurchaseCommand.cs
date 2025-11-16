@@ -17,7 +17,8 @@ public sealed record CreatePurchaseCommand(
     Guid? SupplierId,
     DateTime? PurchaseDate,
     PurchaseStatus? Status,
-    [property: DefaultValue(0)] decimal TotalAmount = 0,    
-    ICollection<PurchaseItemDto>? Items = null
+    [property: DefaultValue(0)] decimal TotalAmount = 0,
+    ICollection<PurchaseItemDto>? Items = null,
+    string? DeliveryAddress = null
 ) : IRequest<CreatePurchaseResponse>;
 

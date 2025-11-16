@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using AMIS.Blazor.Client.Pages.Catalog.Inspections; // for InspectionDialog
+using System.Linq; // ensure LINQ
 
 namespace AMIS.Blazor.Client.Pages.Catalog.InspectionRequests;
 public partial class InspectionRequests
@@ -70,7 +71,7 @@ public partial class InspectionRequests
     {
         if (_purchases.Count == 0)
         {
-            var response = await inspectionrequestclient.SearchPurchasesEndpointAsync("1", new SearchPurchasesCommand());
+            var response = await inspectionrequestclient.SearchPurchasesEndpointAsync("1", new SearchPurchasesCommand { OnlyWithoutInspectionRequest = true, PageNumber = 1, PageSize = 200 });
             if (response?.Items != null)
             {
                 _purchases = response.Items.ToList();
@@ -118,14 +119,17 @@ public partial class InspectionRequests
         return new GridData<InspectionRequestResponse> { TotalItems = _totalItems, Items = _entityList };
     }
 
-    private async Task ShowEditFormDialog(string title, UpdateInspectionRequestCommand command, bool IsCreate, List<EmployeeResponse> employees, List<PurchaseResponse> purchases)
+    private async Task ShowEditFormDialog(string title, UpdateInspectionRequestCommand command, bool IsCreate, List<EmployeeResponse> employees, List<PurchaseResponse> purchases, List<InspectionRequestResponse> inspectionrequests)
     {
+        // Purchases already filtered server-side to exclude those with existing inspection requests
+        var selectablePurchases = purchases;
+
         var parameters = new DialogParameters
         {
             { nameof(InspectionRequestDialog.Model), command },
             { nameof(InspectionRequestDialog.IsCreate), IsCreate },
             { nameof(InspectionRequestDialog._employees), employees },
-            { nameof(InspectionRequestDialog._purchases), purchases }
+            { nameof(InspectionRequestDialog._purchases), selectablePurchases }
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<InspectionRequestDialog>(title, parameters, options);
@@ -150,14 +154,15 @@ public partial class InspectionRequests
 
     private async Task ReAssign(InspectionRequestResponse item)
     {
-        // Open reassign inspector dialog or redirect
-        var model = item.Adapt<UpdateInspectionRequestCommand>(); // Fix: Change the type to match the expected argument
-        await ShowEditFormDialog("Re-assign to other inspector", model, false, _employees, _purchases);
+        var model = item.Adapt<UpdateInspectionRequestCommand>();
+        var currentRequests = (_entityList ?? Enumerable.Empty<InspectionRequestResponse>()).ToList();
+        await ShowEditFormDialog("Re-assign to other inspector", model, false, _employees, _purchases, currentRequests);
     }
     private async Task OnAssign(InspectionRequestResponse item)
     {
-        var model = item.Adapt<UpdateInspectionRequestCommand>(); // Fix: Change the type to match the expected argument
-        await ShowEditFormDialog("Assign a inspector", model, false, _employees, _purchases);
+        var model = item.Adapt<UpdateInspectionRequestCommand>();
+        var currentRequests = (_entityList ?? Enumerable.Empty<InspectionRequestResponse>()).ToList();
+        await ShowEditFormDialog("Assign a inspector", model, false, _employees, _purchases, currentRequests);
     }
 
     private async Task OnView(InspectionRequestResponse item)
@@ -247,9 +252,9 @@ public partial class InspectionRequests
 
     private async Task OnCreate()
     {
-        // Confirm and delete selected requests InspectionRequestDialog
-        var model = _currentDto.Adapt<UpdateInspectionRequestCommand>(); // Fix: Change the type to match the expected argument
-        await ShowEditFormDialog("Create new inspection request", model, true, _employees, _purchases);
+        var model = _currentDto.Adapt<UpdateInspectionRequestCommand>();
+        var currentRequests = (_entityList ?? Enumerable.Empty<InspectionRequestResponse>()).ToList();
+        await ShowEditFormDialog("Create new inspection request", model, true, _employees, _purchases, currentRequests);
     }
 
     private static bool IsAlreadyInspected(InspectionRequestResponse request) =>

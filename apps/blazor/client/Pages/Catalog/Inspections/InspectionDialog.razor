@@ -1,5 +1,11 @@
 ﻿<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
     <MudDialog>
+        <TitleContent>
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.Checklist" Class="mr-2" />
+                @(IsCreate ? "New Inspection - Step 3" : IsReadOnly ? "View Inspection" : "Edit Inspection")
+            </MudText>
+        </TitleContent>
         <DialogContent>
             <FshValidation @ref="_customValidation" />
             <DataAnnotationsValidator />
@@ -34,7 +40,7 @@
                     <MudStack Row="true" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
                         <MudSelect T="Guid?" 
                                    Label="Inspection Request"
-                                   Value="@Model.InspectionRequestId"
+                                   Value="@Model?.InspectionRequestId"
                                    ValueChanged="OnRequestChanged"
                                    For="@(() => Model.InspectionRequestId)"
                                    Placeholder="Select inspection request"
@@ -45,7 +51,7 @@
                                    Adornment="Adornment.Start"
                                    AdornmentIcon="@Icons.Material.Filled.RequestPage"
                                    Class="input-field request-field">
-                            @foreach (var r in InspectionRequests)
+                            @foreach (var r in InspectionRequests.Where(r => r.Status == InspectionRequestStatus.Assigned || r.Status == InspectionRequestStatus.InProgress))
                             {
                                 <MudSelectItem T="Guid?" Value="@r.Id">
                                     @r.DateCreated.ToString("MMM dd, yyyy") - @(r.Purchase?.Supplier?.Name ?? "Unknown Supplier")
@@ -87,7 +93,7 @@
                 <MudItem xs="12">
                     <MudTextField T="string" 
                                   Label="Remarks" 
-                                  @bind-Value="Model.Remarks"
+                                  @bind-Value="Model!.Remarks"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
                                   Lines="3"
@@ -96,49 +102,117 @@
 
                 <!-- Inspection Items Section -->
                 <MudItem xs="12">
-                    @if (_itemsEditor?.Inputs != null && _itemsEditor.Inputs.Count > 0)
-                    {
-                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
-                            <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" /> 
-                            @_itemsEditor.Inputs.Count item(s) • 
-                            @_itemsEditor.Inputs.Sum(i => i.QtyInspected) inspected • 
-                            @_itemsEditor.Inputs.Sum(i => i.QtyPassed) passed •
-                            @_itemsEditor.Inputs.Sum(i => i.QtyFailed) failed
-                        </MudText>
-                    }
-                    <MudPaper Elevation="0" Class="pa-3" Style="background-color: rgba(0, 0, 0, 0.02);">
+                    <MudPaper Elevation="2" Class="pa-3">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-3">
+                            <MudText Typo="Typo.h6">
+                                <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" /> 
+                                Inspection Checklist
+                            </MudText>
+                            <MudSpacer />
+                            @if (_itemsEditor?.Inputs != null && _itemsEditor.Inputs.Count > 0)
+                            {
+                                <MudChip T="string" Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small">
+                                    @_itemsEditor.Inputs.Sum(i => i.QtyPassed) Passed
+                                </MudChip>
+                                <MudChip T="string" Icon="@Icons.Material.Filled.Cancel" Color="Color.Error" Size="Size.Small">
+                                    @_itemsEditor.Inputs.Sum(i => i.QtyFailed) Failed
+                                </MudChip>
+                                <MudChip T="string" Icon="@Icons.Material.Filled.Info" Color="Color.Info" Size="Size.Small">
+                                    @_itemsEditor.Inputs.Sum(i => i.QtyInspected) / @_itemsEditor.Inputs.Sum(i => i.OrderedQty) Inspected
+                                </MudChip>
+                            }
+                        </MudStack>
                         <InspectionItemsEditor @ref="_itemsEditor" 
                                              PurchaseItems="@GetPurchaseItemsForSelectedRequest()" 
                                              Products="_products" 
                                              ReadOnly="@IsReadOnly" />
                     </MudPaper>
                 </MudItem>
+
+                <!-- Evidence Upload Section --  >
+                <MudItem xs="12">
+                    <MudPaper Elevation="1" Class="pa-3">
+                        <MudText Typo="Typo.subtitle2" Class="mb-2">
+                            <MudIcon Icon="@Icons.Material.Filled.AttachFile" Size="Size.Small" />
+                            Upload Evidence (Optional)
+                        </MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">
+                            Attach photos or documents for damaged or rejected items
+                        </MudText>
+                        <MudFileUpload T="IReadOnlyList<IBrowserFile>" 
+                                       OnFilesChanged="OnFilesChanged"
+                                       MaximumFileCount="5"
+                                       Accept="image/*,.pdf"
+                                       Disabled="@IsReadOnly">
+                            <ActivatorContent>
+                                <MudButton Variant="Variant.Outlined"
+                                           Color="Color.Primary"
+                                           StartIcon="@Icons.Material.Filled.CloudUpload"
+                                           Disabled="@IsReadOnly">
+                                    Upload Files
+                                </MudButton>
+                            </ActivatorContent>
+                        </MudFileUpload>
+                        @if (_uploadedFiles?.Count > 0)
+                        {
+                            <MudList Dense="true" Class="mt-2">
+                                @foreach (var file in _uploadedFiles)
+                                {
+                                    <MudListItem>
+                                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                            <MudIcon Icon="@Icons.Material.Filled.AttachFile" Size="Size.Small" />
+                                            <MudText Typo="Typo.body2">@file.Name (@FormatFileSize(file.Size))</MudText>
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" 
+                                                           Size="Size.Small" 
+                                                           Color="Color.Error"
+                                                           OnClick="@(() => RemoveFile(file))"
+                                                           Disabled="@IsReadOnly" />
+                                        </MudStack>
+                                    </MudListItem>
+                                }
+                            </MudList>
+                        }
+                    </MudPaper>
+                </MudItem-->
             </MudGrid>
         </DialogContent>
 
         <DialogActions>
-            <MudButton Variant="Variant.Filled" 
-                       Color="Color.Primary" 
-                       ButtonType="ButtonType.Submit"
-                       Disabled="@(_isSaving || IsReadOnly)"
-                       StartIcon="@Icons.Material.Filled.Save">
-                @if (_isSaving)
+            <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Class="flex-grow-1">
+                <MudButton Variant="Variant.Outlined" 
+                           Color="Color.Secondary" 
+                           OnClick="Cancel"
+                           Disabled="@_isSaving"
+                           StartIcon="@Icons.Material.Filled.Cancel">
+                    Cancel
+                </MudButton>
+                <MudSpacer />
+                @if (!IsReadOnly && !IsCreate)
                 {
-                    <MudProgressCircular Size="Size.Small" Indeterminate="true" />
-                    <text> Saving...</text>
+                    <MudButton Variant="Variant.Filled" 
+                               Color="Color.Success" 
+                               OnClick="ApproveInspection"
+                               Disabled="@_isSaving"
+                               StartIcon="@Icons.Material.Filled.CheckCircle">
+                        Accept & Add to Inventory
+                    </MudButton>
                 }
-                else
-                {
-                    <text>Save Inspection</text>
-                }
-            </MudButton>
-            <MudButton Variant="Variant.Outlined" 
-                       Color="Color.Secondary" 
-                       OnClick="Cancel"
-                       Disabled="@_isSaving"
-                       StartIcon="@Icons.Material.Filled.Cancel">
-                Cancel
-            </MudButton>
+                <MudButton Variant="Variant.Filled" 
+                           Color="Color.Primary" 
+                           ButtonType="ButtonType.Submit"
+                           Disabled="@(_isSaving || IsReadOnly)"
+                           StartIcon="@Icons.Material.Filled.Save">
+                    @if (_isSaving)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" />
+                        <text> Saving...</text>
+                    }
+                    else
+                    {
+                        <text>@(IsCreate ? "Create Inspection" : "Update Inspection")</text>
+                    }
+                </MudButton>
+            </MudStack>
         </DialogActions>
     </MudDialog>
 </EditForm>

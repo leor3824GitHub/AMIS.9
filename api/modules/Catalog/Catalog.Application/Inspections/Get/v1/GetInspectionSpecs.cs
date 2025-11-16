@@ -32,7 +32,8 @@ public class GetInspectionSpecs : Specification<Inspection, InspectionResponse>
                     i.Purchase.TotalAmount,
                     i.Purchase.Status,
                     null,
-                    null
+                    null,
+                    i.Purchase.DeliveryAddress
                 ),
                 i.Approved,
                 i.Status,

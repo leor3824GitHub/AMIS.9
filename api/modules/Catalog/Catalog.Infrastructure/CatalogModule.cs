@@ -63,8 +63,6 @@ public static class CatalogModule
             purchaseGroup.MapPurchaseDeleteEndpoint();
             purchaseGroup.MapPurchasesDeleteEndpoint();
 
-            var purchaseItemGroup = app.MapGroup("purchaseItems").WithTags("purchaseItems");
-            // Register purchase item management endpoints (CQRS vertical slice)
             purchaseGroup.MapPurchaseItemManagementEndpoints();
 
             var employeeGroup = app.MapGroup("employees").WithTags("employees");
@@ -112,8 +110,6 @@ public static class CatalogModule
             acceptanceGroup.MapGetAcceptanceListEndpoint();
             acceptanceGroup.MapAcceptanceUpdateEndpoint();
 
-            var acceptanceItemGroup = app.MapGroup("acceptanceItems").WithTags("acceptanceItems");
-            // Register acceptance item management endpoints (CQRS vertical slice)
             acceptanceGroup.MapAcceptanceItemManagementEndpoints();
 
             var inspectionRequestGroup = app.MapGroup("inspectionRequests").WithTags("inspectionRequests");
@@ -123,6 +119,16 @@ public static class CatalogModule
             inspectionRequestGroup.MapGetInspectionRequestEndpoint();
             inspectionRequestGroup.MapGetInspectionRequestListEndpoint();
             inspectionRequestGroup.MapInspectionRequestUpdateEndpoint();
+
+            var purchaseRequestGroup = app.MapGroup("purchaseRequests").WithTags("purchaseRequests");
+            purchaseRequestGroup.MapPurchaseRequestCreationEndpoint();
+            purchaseRequestGroup.MapGetPurchaseRequestEndpoint();
+            purchaseRequestGroup.MapGetPurchaseRequestListEndpoint();
+            purchaseRequestGroup.MapPurchaseRequestSubmitEndpoint();
+            purchaseRequestGroup.MapPurchaseRequestApproveEndpoint();
+            purchaseRequestGroup.MapPurchaseRequestRejectEndpoint();
+            purchaseRequestGroup.MapPurchaseRequestCancelEndpoint();
+            purchaseRequestGroup.MapPurchaseRequestItemManagementEndpoints();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -167,6 +173,8 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
+        builder.Services.AddKeyedScoped<IRepository<PurchaseRequest>, CatalogRepository<PurchaseRequest>>("catalog:purchaseRequests");
+        builder.Services.AddKeyedScoped<IReadRepository<PurchaseRequest>, CatalogRepository<PurchaseRequest>>("catalog:purchaseRequests");
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)

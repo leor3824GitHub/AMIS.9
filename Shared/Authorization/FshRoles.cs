@@ -13,8 +13,6 @@ public static class FshRoles
         Basic
     });
 
-    // public static bool IsDefault(string roleName) => DefaultRoles.Any(r => r == roleName);
-    
     /// <summary>
     /// Checks if the given role name is one of the default roles.
     /// </summary>

@@ -1,0 +1,129 @@
+@using AMIS.Blazor.Shared.Purchases
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Class="mr-2" />
+            Goods Receipt - Step 2
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm Model="@_command" @ref="@_form" ValidationDelay="0">
+            
+            <!-- Header Information -->
+            <MudPaper Class="pa-3 mb-3" Elevation="1">
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Info" Dense="true" Icon="@Icons.Material.Filled.Receipt">
+                            <strong>Purchase Order:</strong> @(Purchase.Id.ToString().Substring(0, 8))
+                            | <strong>Supplier ID:</strong> @(Purchase.SupplierId?.ToString().Substring(0, 8) ?? "-")
+                        </MudAlert>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField Label="Delivery Note #" 
+                                      @bind-Value="_command.DeliveryNoteNumber" 
+                                      For="@(() => _command.DeliveryNoteNumber)"
+                                      Variant="Variant.Outlined"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Description"
+                                      Placeholder="Enter supplier's packing slip number" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudDatePicker Label="Delivery Date" 
+                                       @bind-Date="_command.DeliveryDate" 
+                                       For="@(() => _command.DeliveryDate)"
+                                       Variant="Variant.Outlined"
+                                       Adornment="Adornment.Start"
+                                       AdornmentIcon="@Icons.Material.Filled.CalendarToday" />
+                    </MudItem>
+                </MudGrid>
+            </MudPaper>
+
+            <!-- Received Items Table -->
+            <MudText Typo="Typo.subtitle1" Class="mb-2">
+                <MudIcon Icon="@Icons.Material.Filled.Inventory" Size="Size.Small" /> Received Items
+            </MudText>
+            <MudTable Items="@_command.Items" 
+                      Hover="true" 
+                      Dense="true"
+                      Striped="true"
+                      Elevation="2">
+                <HeaderContent>
+                    <MudTh>Product</MudTh>
+                    <MudTh Style="text-align: center;">Qty Ordered</MudTh>
+                    <MudTh Style="text-align: center;">Qty Previously Received</MudTh>
+                    <MudTh Style="text-align: center; min-width: 120px;">Qty Received</MudTh>
+                    <MudTh Style="min-width: 150px;">Condition</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Product">
+                        <MudText Typo="Typo.body2">@context.ProductName</MudText>
+                    </MudTd>
+                    <MudTd DataLabel="Qty Ordered" Style="text-align: center;">
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">@context.QtyOrdered</MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Qty Previously Received" Style="text-align: center;">
+                        <MudChip T="string" Size="Size.Small" 
+                                 Variant="Variant.Filled" 
+                                 Color="@(context.QtyPreviouslyReceived > 0 ? Color.Info : Color.Default)">
+                            @context.QtyPreviouslyReceived
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Qty Received" Style="text-align: center;">
+                        <MudNumericField @bind-Value="context.QtyReceived" 
+                                         For="@(() => context.QtyReceived)" 
+                                         Min="0" 
+                                         Max="@(context.QtyOrdered - context.QtyPreviouslyReceived)"
+                                         Variant="Variant.Outlined"
+                                         Margin="Margin.Dense"
+                                         HideSpinButtons="false"
+                                         Style="max-width: 120px;" />
+                    </MudTd>
+                    <MudTd DataLabel="Condition">
+                        <MudSelect T="ItemCondition" 
+                                   @bind-Value="context.Condition"
+                                   Variant="Variant.Outlined"
+                                   Dense="true"
+                                   Margin="Margin.Dense">
+                            <MudSelectItem T="ItemCondition" Value="ItemCondition.Good">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success" />
+                                    <MudText>Good</MudText>
+                                </MudStack>
+                            </MudSelectItem>
+                            <MudSelectItem T="ItemCondition" Value="ItemCondition.Damaged">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Warning" Size="Size.Small" Color="Color.Warning" />
+                                    <MudText>Damaged</MudText>
+                                </MudStack>
+                            </MudSelectItem>
+                            <MudSelectItem T="ItemCondition" Value="ItemCondition.Incorrect">
+                                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Error" Size="Size.Small" Color="Color.Error" />
+                                    <MudText>Incorrect</MudText>
+                                </MudStack>
+                            </MudSelectItem>
+                        </MudSelect>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" 
+                   Variant="Variant.Outlined" 
+                   Color="Color.Secondary"
+                   StartIcon="@Icons.Material.Filled.Cancel">
+            Cancel
+        </MudButton>
+        <MudButton Color="Color.Success" 
+                   OnClick="Submit"
+                   Variant="Variant.Filled"
+                   StartIcon="@Icons.Material.Filled.Send">
+            Submit & Send to Inspection
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    private MudForm _form = default!;
+}

@@ -10,5 +10,6 @@ public sealed record PurchaseResponse(
     decimal TotalAmount,
     PurchaseStatus? Status,
     SupplierResponse? Supplier,
-    ICollection<PurchaseItemResponse>? Items
+    ICollection<PurchaseItemResponse>? Items,
+    string? DeliveryAddress
 );

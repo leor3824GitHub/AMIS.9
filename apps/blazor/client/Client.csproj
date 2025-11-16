@@ -9,6 +9,16 @@
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
 	</PropertyGroup>
 
+	<!-- Disable compression negotiation only for Debug builds to avoid MSB4018 on appsettings.json -->
+	<PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+		<StaticWebAssetsEnableCompression>false</StaticWebAssetsEnableCompression>
+	</PropertyGroup>
+
+	<!-- Keep default behavior for non-Debug builds (Publish/Release) -->
+	<PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
+		<StaticWebAssetsEnableCompression>true</StaticWebAssetsEnableCompression>
+	</PropertyGroup>
+
 	<ItemGroup>
 	  <Compile Remove="Pages\Catalog\Product\**" />
 	  <Content Remove="Pages\Catalog\Product\**" />

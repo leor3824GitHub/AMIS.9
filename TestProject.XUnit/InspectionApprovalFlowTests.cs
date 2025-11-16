@@ -26,9 +26,9 @@ namespace AMIS.Tests.Catalog
             var purchaseId = Guid.NewGuid();
             var employeeId = Guid.NewGuid();
 
-            var purchaseItem = PurchaseItem.Create(purchaseId, productId, qty: 10, unitPrice: 100m, itemstatus: PurchaseStatus.Submitted);
+            var purchaseItem = PurchaseItem.Create(purchaseId, productId, qty: 10, unitPrice: 100m, itemStatus: PurchaseStatus.Submitted);
 
-            var inspection = Inspection.Create(purchaseId, employeeId, inspectedOn: DateTime.UtcNow, approved: false, remarks: null);
+            var inspection = Inspection.Create(purchaseId, employeeId, inspectedOn: DateTime.UtcNow, remarks: null);
             var item = inspection.AddItem(purchaseItemId: purchaseItem.Id, qtyInspected: 5, qtyPassed: 5, qtyFailed: 0, remarks: null, inspectionItemStatus: InspectionItemStatus.Passed);
 
             // Inject navigation for unit test via reflection (normally EF Core does this on Include)
@@ -63,11 +63,20 @@ namespace AMIS.Tests.Catalog
                 .Setup(r => r.AddAsync(It.IsAny<InventoryTransaction>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync((InventoryTransaction tx, CancellationToken ct) => tx);
 
+            var purchaseRepo = new Mock<IRepository<Purchase>>();
+            purchaseRepo
+                .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Purchase?)null);
+            purchaseRepo
+                .Setup(r => r.UpdateAsync(It.IsAny<Purchase>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
             var logger = new Mock<ILogger<InspectionApprovedHandler>>();
 
             var handler = new InspectionApprovedHandler(
                 inspectionReadRepo.Object,
                 inspectionRequestRepo.Object,
+                purchaseRepo.Object,
                 inventoryRepo.Object,
                 inventoryTxnRepo.Object,
                 logger.Object);
@@ -108,7 +117,7 @@ namespace AMIS.Tests.Catalog
             var purchaseId = Guid.NewGuid();
             var employeeId = Guid.NewGuid();
 
-            var purchaseItem = PurchaseItem.Create(purchaseId, productId, qty: 3, unitPrice: 50m, itemstatus: PurchaseStatus.Submitted);
+            var purchaseItem = PurchaseItem.Create(purchaseId, productId, qty: 3, unitPrice: 50m, itemStatus: PurchaseStatus.Submitted);
 
             var inspection = Inspection.Create(purchaseId, employeeId);
             var item = inspection.AddItem(purchaseItem.Id, qtyInspected: 3, qtyPassed: 3, qtyFailed: 0, remarks: null, inspectionItemStatus: InspectionItemStatus.Passed);
@@ -152,11 +161,20 @@ namespace AMIS.Tests.Catalog
                 .Callback((InventoryTransaction tx, CancellationToken _) => capturedTxn = tx)
                 .ReturnsAsync((InventoryTransaction tx, CancellationToken _) => tx);
 
+            var purchaseRepo = new Mock<IRepository<Purchase>>();
+            purchaseRepo
+                .Setup(r => r.GetByIdAsync(It.IsAny<Guid>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((Purchase?)null);
+            purchaseRepo
+                .Setup(r => r.UpdateAsync(It.IsAny<Purchase>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.CompletedTask);
+
             var logger = new Mock<ILogger<InspectionApprovedHandler>>();
 
             var handler = new InspectionApprovedHandler(
                 inspectionReadRepo.Object,
                 inspectionRequestRepo.Object,
+                purchaseRepo.Object,
                 inventoryRepo.Object,
                 inventoryTxnRepo.Object,
                 logger.Object);

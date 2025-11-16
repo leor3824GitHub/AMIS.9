@@ -49,7 +49,7 @@ public static class SpecificationBuilderExtensions
     {
         if (!string.IsNullOrEmpty(search?.Keyword))
         {
-            if (search.Fields?.Any() is true)
+            if (search.Fields?.Count > 0)
             {
                 // search seleted fields (can contain deeper nested fields)
                 foreach (string field in search.Fields)

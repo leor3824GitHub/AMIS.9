@@ -23,9 +23,9 @@ public class Acceptance : AuditableEntity, IAggregateRoot
     public virtual ICollection<AcceptanceItem> Items { get; private set; } = [];
 
     // Computed properties
-    public bool HasItems => Items.Any();
+    public bool HasItems => Items.Count > 0;
     public int TotalAcceptedQuantity => Items.Sum(i => i.QtyAccepted);
-    public bool IsFullAcceptance => Items.Any() && Items.All(i => i.QtyAccepted >= i.PurchaseItem.Qty);
+    public bool IsFullAcceptance => Items.Count > 0 && Items.All(i => i.QtyAccepted >= i.PurchaseItem.Qty);
     public bool IsPartialAcceptance => Items.Any(i => i.QtyAccepted < i.PurchaseItem.Qty && i.QtyAccepted > 0);
 
     private Acceptance() { }

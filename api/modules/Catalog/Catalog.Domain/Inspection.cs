@@ -29,7 +29,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public virtual ICollection<InspectionItem> Items { get; private set; } = new List<InspectionItem>();
 
     // Computed properties
-    public bool HasItems => Items.Any();
+    public bool HasItems => Items.Count > 0;
     public int TotalInspectedQuantity => Items.Sum(i => i.QtyInspected);
     public int TotalPassedQuantity => Items.Sum(i => i.QtyPassed);
     public int TotalFailedQuantity => Items.Sum(i => i.QtyFailed);
@@ -257,7 +257,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
             return; // Only evaluate for in-progress inspections
         }
 
-        if (purchase is null || !purchase.Items.Any())
+        if (purchase is null || purchase.Items.Count == 0)
         {
             return; // If no purchase or no items, stay InProgress
         }
@@ -270,7 +270,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
             // Find corresponding inspection items for this purchase item
             var inspectionItems = Items.Where(ii => ii.PurchaseItemId == purchaseItem.Id).ToList();
             
-            if (!inspectionItems.Any())
+            if (inspectionItems.Count == 0)
             {
                 allItemsFullyInspected = false;
                 break;

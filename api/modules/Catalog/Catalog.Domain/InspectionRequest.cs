@@ -21,7 +21,6 @@ public class InspectionRequest : AuditableEntity, IAggregateRoot
     {
         Id = id;
         PurchaseId = purchaseId;
-        //RequestedById = requestedById;
         InspectorId = inspectorId;
 
         Status = inspectorId.HasValue

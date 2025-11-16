@@ -4,6 +4,7 @@ using AMIS.WebApi.Catalog.Domain.Exceptions;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using AMIS.WebApi.Catalog.Application.Inspections.Specifications; // added for spec
 
 namespace AMIS.WebApi.Catalog.Application.Inspections.Approve.v1;
 
@@ -15,10 +16,13 @@ public sealed class ApproveInspectionHandler(
     public async Task<ApproveInspectionResponse> Handle(ApproveInspectionCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var inspection = await repository.GetByIdAsync(request.Id, cancellationToken);
+
+        // Load with items to satisfy domain invariants in Approve()
+        var spec = new GetInspectionWithItemsSpec(request.Id);
+        var inspection = await repository.FirstOrDefaultAsync(spec, cancellationToken);
         _ = inspection ?? throw new InspectionNotFoundException(request.Id);
 
-        inspection.Approve();
+        inspection.Approve(); // Domain will validate items & passed status
 
         await repository.UpdateAsync(inspection, cancellationToken);
         logger.LogInformation("Inspection {InspectionId} approved.", inspection.Id);

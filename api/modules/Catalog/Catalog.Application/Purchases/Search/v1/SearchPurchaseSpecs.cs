@@ -13,5 +13,6 @@ public class SearchPurchaseSpecs : EntitiesByPaginationFilterSpec<Purchase, Purc
             .Include(p => p.Supplier)
             .Include(o => o.Items)
             .OrderBy(c => c.PurchaseDate, !command.HasOrderBy())
-            .Where(p => p.SupplierId == command.SupplierId!.Value, command.SupplierId.HasValue);
+            .Where(p => p.SupplierId == command.SupplierId!.Value, command.SupplierId.HasValue)
+            .Where(p => p.Inspections.Count == 0 && p.Acceptances.Count == 0, command.OnlyWithoutInspectionRequest);
 }

@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "--root",
+        "E:\\AMIS.9"
+      ]
+    },
+    "git": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-git",
+        "--repo",
+        "E:\\AMIS.9"
+      ]
+    },
+    "openapi-webapi": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-openapi",
+        "--spec",
+        "http://localhost:PORT/swagger/v1/swagger.json",
+        "--name",
+        "AMIS WebAPI"
+      ]
+    },
+    "http": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-http"
+      ]
+    }
+  }
+}

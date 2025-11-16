@@ -12,5 +12,6 @@ internal sealed class PurchaseConfiguration : IEntityTypeConfiguration<Purchase>
         builder.HasKey(x => x.Id);
         builder.Property(x => x.PurchaseDate).IsRequired();
         builder.Property(x => x.SupplierId).IsRequired();
+        builder.Property(x => x.DeliveryAddress).HasMaxLength(256);
     }
 }

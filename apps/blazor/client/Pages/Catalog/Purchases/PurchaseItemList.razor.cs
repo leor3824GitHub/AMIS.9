@@ -126,8 +126,6 @@ public partial class PurchaseItemList
         }
         try
         {
-            var id = item.Id;
-
             // TODO: Use nested endpoint DELETE /purchases/{purchaseId}/items/{itemId}
             // await ApiClient.DeletePurchaseItemAsync(PurchaseId, id);
             Snackbar?.Add("Item deletion temporarily disabled. Use purchase management instead.", Severity.Warning);

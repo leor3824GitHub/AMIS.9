@@ -20,7 +20,7 @@
              @ref="_table"
              Outlined>
         <ToolBarContent>
-            <div class="d-flex align-center justify-between w-100 gap-2 flex-nowrap">
+            <div class="d-flex align-center justify-between w-100 gap-2 flex-wrap">
 
                 <!-- 📦 Left: Buttons -->
                 <div class="d-flex align-center flex-nowrap gap-1">
@@ -88,39 +88,127 @@
                         </MudMenu>
                     </MudHidden>
                 </div>
+
+                <div class="d-flex align-center gap-2 flex-grow-1 justify-end flex-wrap">
+                    @if (_canSearch)
+                    {
+                        <MudTextField T="string"
+                                      ValueChanged="@(s => OnSearch(s))"
+                                      Placeholder="Search"
+                                      Adornment="Adornment.Start"
+                                      AdornmentIcon="@Icons.Material.Filled.Search"
+                                      IconSize="Size.Medium"
+                                      Style="min-width: 220px;"
+                                      Class="mt-0"
+                                      Dense="true" />
+                    }
+
+                    <MudSwitch Checked="_supplierDeliveredOnly"
+                               CheckedChanged="OnSupplierDeliveredChanged"
+                               Disabled="@_loading"
+                               Color="Color.Success"
+                               Class="mt-0"
+                               Label="Supplier delivered only" />
+                </div>
             </div>
-            <MudSpacer />
-                <!-- 🔍 Right: Search Box -->
-                @if (_canSearch)
-                {
-                    
-                <MudTextField T="string"
-                               ValueChanged="@(s => OnSearch(s))"
-                               Placeholder="Search"
-                               Adornment="Adornment.Start"
-                               AdornmentIcon="@Icons.Material.Filled.Search"
-                               IconSize="Size.Medium"
-                               Style="width: 100%;"
-                               Class="mt-0 mb-3" />
-                       
-                }
-            
         </ToolBarContent>
 
     <Columns>
-        <SelectColumn T="PurchaseResponse" />        
-        <PropertyColumn Property="x => x.Supplier.Name" Title="Supplier" />
+        <SelectColumn T="PurchaseResponse" />
+        
+        <TemplateColumn Title="PO Number" Sortable="false">
+            <CellTemplate>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                    <MudIcon Icon="@Icons.Material.Filled.Receipt" Size="Size.Small" Color="Color.Primary" />
+                    <MudText Typo="Typo.body2" Style="font-family: monospace;">
+                        @(context.Item.Id.HasValue ? context.Item.Id.Value.ToString().Substring(0, 8) : "-")
+                    </MudText>
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
+        
+        <TemplateColumn Title="Supplier" Sortable="false">
+            <CellTemplate>
+                @{
+                    var supplierName = context.Item.Supplier?.Name ?? "-";
+                }
+
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1" Class="flex-wrap">
+                    <MudText Typo="Typo.body2">@supplierName</MudText>
+
+                    @if (IsSupplierDelivered(context.Item))
+                    {
+                        <MudChip Color="Color.Success"
+                                 Variant="Variant.Outlined"
+                                 Size="Size.Small"
+                                 StartIcon="@Icons.Material.Filled.LocalShipping">
+                            Supplier Delivered
+                        </MudChip>
+                    }
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
         <PropertyColumn Property="x => x.PurchaseDate" Title="Purchase Date" />
         <PropertyColumn Property="x => x.TotalAmount" Title="Total Amount" />
-        <PropertyColumn Property="x => x.Status" Title="Status" />
+        <TemplateColumn Title="Status" Sortable="false">
+            <CellTemplate>
+                <MudStack Row="false" Spacing="1">
+                    <MudChip Color="@GetStatusColor(context.Item.Status)"
+                             Variant="Variant.Filled"
+                             Size="Size.Small"
+                             Icon="@GetStatusIcon(context.Item.Status)"
+                             Class="text-uppercase">
+                        @context.Item.Status
+                    </MudChip>
+                    @if (context.Item.Status == PurchaseStatus.Draft || context.Item.Status == PurchaseStatus.Pending)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Step 1: PO Creation</MudText>
+                    }
+                    else if (context.Item.Status == PurchaseStatus.Submitted || context.Item.Status == PurchaseStatus.PartiallyDelivered)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Step 2: Goods Receipt</MudText>
+                    }
+                    else if (context.Item.Status == PurchaseStatus.Delivered)
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Step 3: Inspection</MudText>
+                    }
+                </MudStack>
+            </CellTemplate>
+        </TemplateColumn>
         <TemplateColumn Title="Action">
             <CellTemplate>
-                <MudMenu Icon="@Icons.Material.Filled.Edit" Variant="Variant.Filled" Size="Size.Small"
+                <MudMenu Icon="@Icons.Material.Filled.MoreVert" 
+                         Variant="Variant.Filled" 
+                         Size="Size.Small"
                          Dense="true"
-                         IconColor="Color.Info" AnchorOrigin="Origin.CenterLeft">
+                         IconColor="Color.Info" 
+                         AnchorOrigin="Origin.CenterLeft">
 
-                    <MudMenuItem OnClick="@(() => OnEdit(context.Item))">Edit</MudMenuItem>
-                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">Delete</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => OnEdit(context.Item))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Info" />
+                            <MudText>Edit</MudText>
+                        </MudStack>
+                    </MudMenuItem>
+
+                    @if (CanRecordDelivery(context.Item))
+                    {
+                        <MudMenuItem OnClick="@(() => OnRecordDelivery(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Size="Size.Small" Color="Color.Success" />
+                                <MudText>Record Delivery</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                    }
+
+                    <MudDivider />
+                    
+                    <MudMenuItem OnClick="@(() => OnDelete(context.Item))">
+                        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                            <MudIcon Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error" />
+                            <MudText>Delete</MudText>
+                        </MudStack>
+                    </MudMenuItem>
                 </MudMenu>
             </CellTemplate>
         </TemplateColumn>
