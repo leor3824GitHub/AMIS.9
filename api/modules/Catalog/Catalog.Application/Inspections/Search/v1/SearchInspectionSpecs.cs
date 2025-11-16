@@ -2,6 +2,7 @@
 using AMIS.Framework.Core.Paging;
 using AMIS.WebApi.Catalog.Application.Inspections.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using AMIS.Framework.Core.Specifications;
 using AMIS.WebApi.Catalog.Application.Employees.Get.v1;
 using AMIS.WebApi.Catalog.Application.Purchases.Get.v1;
@@ -24,14 +25,25 @@ public class SearchInspectionSpecs : EntitiesByPaginationFilterSpec<Inspection, 
             .Where(i => i.InspectedOn >= command.FromDate, command.FromDate.HasValue)
             .Where(i => i.InspectedOn <= command.ToDate, command.ToDate.HasValue);
         
-        Query.PostProcessingAction(inspections => inspections
-            .Select(i => new InspectionResponse(
+        Query.Select(i => new InspectionResponse(
                 i.Id,
                 i.InspectedOn,
                 i.EmployeeId,
                 i.PurchaseId,
                 i.Remarks,
-                new EmployeeResponse(i.Employee.Id, i.Employee.Name, i.Employee.Designation, i.Employee.ResponsibilityCode, i.Employee.UserId),
+                new EmployeeResponse(
+                    i.Employee.Id,
+                    i.Employee.Name,
+                    i.Employee.Designation,
+                    i.Employee.ResponsibilityCode,
+                    i.Employee.Department,
+                    i.Employee.ContactInfo.Email,
+                    i.Employee.ContactInfo.PhoneNumber,
+                    i.Employee.Status,
+                    i.Employee.HireDate,
+                    i.Employee.TerminationDate,
+                    i.Employee.SupervisorId,
+                    i.Employee.UserId),
                 i.Purchase == null ? null : new PurchaseResponse(
                     i.Purchase.Id,
                     i.Purchase.SupplierId,
@@ -54,7 +66,6 @@ public class SearchInspectionSpecs : EntitiesByPaginationFilterSpec<Inspection, 
                     item.Remarks,
                     item.InspectionItemStatus
                 )).ToList()
-            ))
-        );
+            ));
     }
 }

@@ -13,7 +13,16 @@ public sealed class CreateEmployeeHandler(
     public async Task<CreateEmployeeResponse> Handle(CreateEmployeeCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var employee = Employee.Create(request.Name!, request.Designation, request.ResponsibilityCode!, request.UserId);
+        var employee = Employee.Create(
+            request.Name,
+            request.Designation,
+            request.ResponsibilityCode,
+            request.Department,
+            request.Email,
+            request.PhoneNumber,
+            request.HireDate,
+            request.SupervisorId,
+            request.UserId);
         await repository.AddAsync(employee, cancellationToken);
         logger.LogInformation("employee created {EmployeeId}", employee.Id);
         return new CreateEmployeeResponse(employee.Id);

@@ -15,7 +15,7 @@ public sealed class CreatePurchaseRequestHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var pr = PurchaseRequest.Create(request.RequestedBy, request.Purpose);
+        var pr = PurchaseRequest.Create(request.RequestedBy, request.Purpose, request.RequestDate);
 
         if (request.Items is not null && request.Items.Count > 0)
         {

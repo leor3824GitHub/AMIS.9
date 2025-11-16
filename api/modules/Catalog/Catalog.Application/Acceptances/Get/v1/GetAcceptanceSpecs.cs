@@ -1,5 +1,6 @@
 ﻿using Ardalis.Specification;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using AMIS.WebApi.Catalog.Application.Employees.Get.v1;
 using AMIS.WebApi.Catalog.Application.AcceptanceItems.Get.v1;
 using System.Linq;
@@ -17,8 +18,7 @@ public class GetAcceptanceSpecs : Specification<Acceptance, AcceptanceResponse>
                 .ThenInclude(item => item.PurchaseItem)
             .Include(a => a.SupplyOfficer);
         
-        Query.PostProcessingAction(acceptances => acceptances
-            .Select(a => new AcceptanceResponse(
+        Query.Select(a => new AcceptanceResponse(
                 a.Id,
                 a.PurchaseId,
                 a.SupplyOfficerId,
@@ -27,7 +27,19 @@ public class GetAcceptanceSpecs : Specification<Acceptance, AcceptanceResponse>
                 a.IsPosted,
                 a.PostedOn,
                 a.Status,
-                new EmployeeResponse(a.SupplyOfficer.Id, a.SupplyOfficer.Name, a.SupplyOfficer.Designation, a.SupplyOfficer.ResponsibilityCode, a.SupplyOfficer.UserId),
+                new EmployeeResponse(
+                    a.SupplyOfficer.Id,
+                    a.SupplyOfficer.Name,
+                    a.SupplyOfficer.Designation,
+                    a.SupplyOfficer.ResponsibilityCode,
+                    a.SupplyOfficer.Department,
+                    a.SupplyOfficer.ContactInfo.Email,
+                    a.SupplyOfficer.ContactInfo.PhoneNumber,
+                    a.SupplyOfficer.Status,
+                    a.SupplyOfficer.HireDate,
+                    a.SupplyOfficer.TerminationDate,
+                    a.SupplyOfficer.SupervisorId,
+                    a.SupplyOfficer.UserId),
                 a.Items.Select(item => new AcceptanceItemResponse(
                     item.Id,
                     item.AcceptanceId,
@@ -35,7 +47,6 @@ public class GetAcceptanceSpecs : Specification<Acceptance, AcceptanceResponse>
                     item.QtyAccepted,
                     item.Remarks
                 )).ToList()
-            ))
-        );
+            ));
     }
 }

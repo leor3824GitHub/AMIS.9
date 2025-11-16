@@ -91,10 +91,11 @@ public partial class PurchaseRequests
 
     private async Task OnCreate()
     {
+        var requesterEmployeeId = await GetCurrentEmployeeIdAsync();
         var model = new CreatePurchaseRequestCommand
         {
             RequestDate = DateTime.UtcNow,
-            RequestedBy = GetCurrentUserId(),
+            RequestedBy = requesterEmployeeId,
             Purpose = string.Empty,
             Items = new List<PurchaseRequestItemDto>()
         };
@@ -105,10 +106,34 @@ public partial class PurchaseRequests
         };
         var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
         var dialog = await DialogService.ShowAsync<PurchaseRequestDialog>("Create Purchase Request", parameters, options);
-        var state = await dialog.Result;
-        if (state != null && !state.Canceled)
+        var result = await dialog.Result;
+        if (result != null && !result.Canceled)
         {
+            Snackbar?.Add("Purchase request created successfully.", Severity.Success);
             await _table.ReloadServerData();
+        }
+    }
+
+    private async Task<Guid> GetCurrentEmployeeIdAsync()
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            if (userId == Guid.Empty) return Guid.Empty;
+
+            var employees = await Api.SearchEmployeesEndpointAsync("1", new SearchEmployeesCommand
+            {
+                PageNumber = 1,
+                PageSize = 1,
+                UsrId = userId
+            });
+
+            var empId = employees?.Items?.FirstOrDefault()?.Id ?? Guid.Empty;
+            return empId;
+        }
+        catch
+        {
+            return Guid.Empty;
         }
     }
 

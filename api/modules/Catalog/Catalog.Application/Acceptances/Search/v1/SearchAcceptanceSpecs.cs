@@ -2,6 +2,7 @@
 using AMIS.Framework.Core.Paging;
 using AMIS.WebApi.Catalog.Application.Acceptances.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using AMIS.Framework.Core.Specifications;
 using AMIS.WebApi.Catalog.Application.Employees.Get.v1;
 using AMIS.WebApi.Catalog.Application.AcceptanceItems.Get.v1;
@@ -25,8 +26,7 @@ public class SearchAcceptanceSpecs : EntitiesByPaginationFilterSpec<Acceptance, 
             .Where(a => a.AcceptanceDate >= command.FromDate, command.FromDate.HasValue)
             .Where(a => a.AcceptanceDate <= command.ToDate, command.ToDate.HasValue);
         
-        Query.PostProcessingAction(acceptances => acceptances
-            .Select(a => new AcceptanceResponse(
+        Query.Select(a => new AcceptanceResponse(
                 a.Id,
                 a.PurchaseId,
                 a.SupplyOfficerId,
@@ -35,7 +35,19 @@ public class SearchAcceptanceSpecs : EntitiesByPaginationFilterSpec<Acceptance, 
                 a.IsPosted,
                 a.PostedOn,
                 a.Status,
-                new EmployeeResponse(a.SupplyOfficer.Id, a.SupplyOfficer.Name, a.SupplyOfficer.Designation, a.SupplyOfficer.ResponsibilityCode, a.SupplyOfficer.UserId),
+                new EmployeeResponse(
+                    a.SupplyOfficer.Id,
+                    a.SupplyOfficer.Name,
+                    a.SupplyOfficer.Designation,
+                    a.SupplyOfficer.ResponsibilityCode,
+                    a.SupplyOfficer.Department,
+                    a.SupplyOfficer.ContactInfo.Email,
+                    a.SupplyOfficer.ContactInfo.PhoneNumber,
+                    a.SupplyOfficer.Status,
+                    a.SupplyOfficer.HireDate,
+                    a.SupplyOfficer.TerminationDate,
+                    a.SupplyOfficer.SupervisorId,
+                    a.SupplyOfficer.UserId),
                 a.Items.Select(item => new AcceptanceItemResponse(
                     item.Id,
                     item.AcceptanceId,
@@ -43,7 +55,6 @@ public class SearchAcceptanceSpecs : EntitiesByPaginationFilterSpec<Acceptance, 
                     item.QtyAccepted,
                     item.Remarks
                 )).ToList()
-            ))
-        );
+            ));
     }
 }

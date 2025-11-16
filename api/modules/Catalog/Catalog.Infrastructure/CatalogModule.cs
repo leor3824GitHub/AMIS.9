@@ -3,8 +3,10 @@ using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Infrastructure.Persistence;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Employee;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.InspectionRequest.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.Inspection.v1;
+using AMIS.WebApi.Catalog.Infrastructure.Middleware;
 using AMIS.WebApi.Catalog.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -71,6 +73,8 @@ public static class CatalogModule
             employeeGroup.MapGetEmployeeListEndpoint();
             employeeGroup.MapEmployeeUpdateEndpoint();
             employeeGroup.MapEmployeeDeleteEndpoint();
+            employeeGroup.MapCheckEmployeeRegistrationEndpoint();
+            employeeGroup.MapSelfRegisterEmployeeEndpoint();
 
             var issuanceGroup = app.MapGroup("issuances").WithTags("issuances");
             issuanceGroup.MapIssuanceCreationEndpoint();
@@ -179,6 +183,8 @@ public static class CatalogModule
     }
     public static WebApplication UseCatalogModule(this WebApplication app)
     {
+        // Register employee registration middleware
+        app.UseMiddleware<EmployeeRegistrationMiddleware>();
         return app;
     }
 }

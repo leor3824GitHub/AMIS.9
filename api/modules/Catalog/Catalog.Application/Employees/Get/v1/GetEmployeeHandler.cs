@@ -20,7 +20,19 @@ public sealed class GetEmployeeHandler(
             {
                 var employee = await repository.GetByIdAsync(request.Id, cancellationToken);
                 if (employee == null) throw new EmployeeNotFoundException(request.Id);
-                return new EmployeeResponse(employee.Id, employee.Name, employee.Designation, employee.ResponsibilityCode, employee.UserId);
+                return new EmployeeResponse(
+                    employee.Id,
+                    employee.Name,
+                    employee.Designation,
+                    employee.ResponsibilityCode,
+                    employee.Department,
+                    employee.ContactInfo.Email,
+                    employee.ContactInfo.PhoneNumber,
+                    employee.Status,
+                    employee.HireDate,
+                    employee.TerminationDate,
+                    employee.SupervisorId,
+                    employee.UserId);
             },
             cancellationToken: cancellationToken);
         return item!;

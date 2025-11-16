@@ -137,3 +137,13 @@ Note: Replace `<Name>` with a descriptive label (e.g., `AddInspectionAndAcceptan
 ---
 
 If you get stuck or see inconsistencies, check `.github/copilot-instructions.md` for project-specific guidance and architecture conventions.
+
+## Employee Registration Enforcement Flow
+
+- User logs in → Identity system authenticates
+- User attempts to access any API endpoint
+- Middleware checks if `Employee.UserId` matches authenticated user's ID
+- If not found → Returns 403 with message to complete registration
+- User calls `/self-register` endpoint with employee details
+- Employee record created with `UserId` linking to Identity
+- Subsequent requests pass through middleware successfully

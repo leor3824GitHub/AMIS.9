@@ -6,11 +6,13 @@ public static class FshRoles
 {
     public const string Admin = nameof(Admin);
     public const string Basic = nameof(Basic);
+    public const string SupplyOfficer = nameof(SupplyOfficer);
 
     public static IReadOnlyList<string> DefaultRoles { get; } = new ReadOnlyCollection<string>(new[]
     {
         Admin,
-        Basic
+        Basic,
+        SupplyOfficer
     });
 
     /// <summary>

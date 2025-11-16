@@ -1,10 +1,10 @@
 @using AMIS.Blazor.Infrastructure.Api
 @using MudBlazor
 
-<MudPaper Class="pa-4 mb-4" Style="max-height: 70vh; overflow-y: auto;">
-    <MudText Typo="Typo.h6">Request Items - @(Items?.Count ?? 0)</MudText>
+<MudPaper Class="pa-2 mb-2" Style="max-height: 50vh; overflow-y: auto;">
+    <MudText Typo="Typo.subtitle1" Class="mb-1">Request Items - @(Items?.Count ?? 0)</MudText>
 
-    <MudTable T="PurchaseRequestItemDto" Items="Items" Hover Bordered Striped>
+    <MudTable T="PurchaseRequestItemDto" Items="Items" Hover Bordered Striped Dense="true">
         <HeaderContent>
             <MudTh Style="width: 40%">Product</MudTh>
             <MudTh Style="width: 10%">Qty</MudTh>
@@ -16,7 +16,7 @@
             @if (EditingItem == item)
             {
                 <MudTd>
-                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Style="width: 100%;" Variant="Variant.Outlined">
+                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Margin="Margin.Dense" Style="width: 100%;" Variant="Variant.Outlined">
                         @foreach (var p in Products)
                         {
                             <MudSelectItem T="Guid?" Value="p.Id">@p.Name</MudSelectItem>
@@ -24,17 +24,17 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd>
-                    <MudNumericField HideSpinButtons T="int" @bind-Value="item.Qty" Variant="Variant.Outlined" />
+                    <MudNumericField HideSpinButtons T="int" @bind-Value="item.Qty" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    <MudTextField T="string" @bind-Value="item.Description" Variant="Variant.Outlined" />
+                    <MudTextField T="string" @bind-Value="item.Description" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    <MudTextField T="string" @bind-Value="item.Justification" Variant="Variant.Outlined" />
+                    <MudTextField T="string" @bind-Value="item.Justification" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" OnClick="SaveEdit" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Secondary" OnClick="CancelEdit" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small" OnClick="SaveEdit" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Secondary" Size="Size.Small" OnClick="CancelEdit" />
                 </MudTd>
             }
             else
@@ -44,14 +44,14 @@
                 <MudTd>@item.Description</MudTd>
                 <MudTd>@item.Justification</MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="() => EditItem(item)" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveItem(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="() => EditItem(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveItem(item)" />
                 </MudTd>
             }
         </RowTemplate>
         <FooterContent>
             <MudTd>
-                <MudSelect T="Guid?" @bind-Value="NewProductId" Dense Style="width: 100%;" Placeholder="Select product" Variant="Variant.Outlined">
+                <MudSelect T="Guid?" @bind-Value="NewProductId" Dense Margin="Margin.Dense" Style="width: 100%;" Placeholder="Select product" Variant="Variant.Outlined">
                     @foreach (var p in Products)
                     {
                         <MudSelectItem T="Guid?" Value="p.Id">@p.Name</MudSelectItem>
@@ -59,16 +59,16 @@
                 </MudSelect>
             </MudTd>
             <MudTd>
-                <MudNumericField HideSpinButtons T="int" @bind-Value="NewQty" Variant="Variant.Outlined" />
+                <MudNumericField HideSpinButtons T="int" @bind-Value="NewQty" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
             </MudTd>
             <MudTd>
-                <MudTextField T="string" @bind-Value="NewDescription" Variant="Variant.Outlined" />
+                <MudTextField T="string" @bind-Value="NewDescription" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
             </MudTd>
             <MudTd>
-                <MudTextField T="string" @bind-Value="NewJustification" Variant="Variant.Outlined" />
+                <MudTextField T="string" @bind-Value="NewJustification" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
             </MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" Color="Color.Primary" OnClick="AddItem" />
+                <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" Color="Color.Primary" Size="Size.Small" OnClick="AddItem" />
             </MudTd>
         </FooterContent>
     </MudTable>
@@ -77,6 +77,7 @@
 @code {
     [Parameter] public ICollection<PurchaseRequestItemDto> Items { get; set; } = new List<PurchaseRequestItemDto>();
     [Parameter] public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
+    [Parameter] public Action? OnItemsChanged { get; set; }
 
     private PurchaseRequestItemDto? EditingItem { get; set; }
 
@@ -86,7 +87,13 @@
     private string? NewJustification { get; set; }
 
     private void EditItem(PurchaseRequestItemDto item) => EditingItem = item;
-    private void SaveEdit() => EditingItem = null;
+    
+    private void SaveEdit() 
+    { 
+        EditingItem = null;
+        OnItemsChanged?.Invoke();
+    }
+    
     private void CancelEdit() => EditingItem = null;
 
     private void AddItem()
@@ -100,10 +107,12 @@
             Justification = NewJustification ?? string.Empty
         });
         NewProductId = null; NewQty = 0; NewDescription = null; NewJustification = null;
+        OnItemsChanged?.Invoke();
     }
 
     private void RemoveItem(PurchaseRequestItemDto item)
     {
         Items.Remove(item);
+        OnItemsChanged?.Invoke();
     }
 }

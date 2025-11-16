@@ -14,6 +14,11 @@ internal sealed class PurchaseRequestConfiguration : IEntityTypeConfiguration<Pu
         builder.Property(x => x.RequestedBy).IsRequired();
         builder.Property(x => x.Purpose).HasMaxLength(512).IsRequired();
         builder.Property(x => x.ApprovalRemarks).HasMaxLength(1024);
+        // Relationship: PurchaseRequest.RequestedBy -> Employee.Id
+        builder
+            .HasOne(pr => pr.RequestedByEmployee)
+            .WithMany()
+            .HasForeignKey(pr => pr.RequestedBy);
         builder.HasMany(x => x.Items).WithOne(i => i.PurchaseRequest).HasForeignKey(i => i.PurchaseRequestId);
     }
 }

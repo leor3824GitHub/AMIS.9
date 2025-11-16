@@ -12,10 +12,10 @@
     <DialogContent>
         @if (IsCreate)
         {
-            <MudStack Spacing="2">
-                <MudDatePicker @bind-Date="RequestDateValue" Label="Request Date" />
-                <MudTextField T="string" @bind-Value="CreateModel.Purpose" Label="Purpose" />
-                <PurchaseRequestItemList Items="CreateModel.Items" Products="_products" />
+            <MudStack Spacing="1">
+                <MudDatePicker @bind-Date="RequestDateValue" Label="Request Date" Dense="true" Margin="Margin.Dense" />
+                <MudTextField T="string" @bind-Value="CreateModel.Purpose" Label="Purpose" Dense="true" Margin="Margin.Dense" Required="true" />
+                <PurchaseRequestItemList Items="CreateModel.Items" Products="_products" OnItemsChanged="StateHasChanged" />
             </MudStack>
         }
         else if (ReadOnly)
@@ -45,7 +45,7 @@
         <MudButton DropShadow=false StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel">Close</MudButton>
         @if (IsCreate)
         {
-            <MudButton DropShadow=false StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary" Variant="Variant.Filled" Disabled="!CanSave()" OnClick="Save">Create</MudButton>
+            <MudButton DropShadow=false StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary" Variant="Variant.Filled" Disabled="@(!CanSave())" OnClick="Save">Create</MudButton>
         }
     </DialogActions>
 </MudDialog>
@@ -58,6 +58,7 @@
     [Parameter] public bool ReadOnly { get; set; }
 
     [Inject] protected IApiClient Api { get; set; } = default!;
+    [Inject] protected ISnackbar Snackbar { get; set; } = default!;
 
     private IReadOnlyList<ProductResponse> _products = Array.Empty<ProductResponse>();
 
@@ -73,7 +74,10 @@
     {
         if (RequestDateValue.HasValue)
             CreateModel.RequestDate = RequestDateValue.Value;
-        return CreateModel.RequestDate != default && CreateModel.Items != null && CreateModel.Items.Any();
+        return CreateModel.RequestDate != default && 
+               !string.IsNullOrWhiteSpace(CreateModel.Purpose) &&
+               CreateModel.Items != null && 
+               CreateModel.Items.Count > 0;
     }
 
     private async Task Save()
@@ -83,9 +87,10 @@
             var result = await Api.CreatePurchaseRequestEndpointAsync("1", CreateModel);
             MudDialog.Close(DialogResult.Ok(result));
         }
-        catch (ApiException)
+        catch (ApiException ex)
         {
-            MudDialog.Close(DialogResult.Cancel());
+            Snackbar.Add($"Failed to create purchase request: {ex.Message}", Severity.Error);
+            // Don't close dialog on error so user can retry
         }
     }
 

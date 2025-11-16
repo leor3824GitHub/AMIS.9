@@ -11,6 +11,7 @@ public sealed record PurchaseRequestItemCreateDto(
 );
 
 public sealed record CreatePurchaseRequestCommand(
+    DateTime RequestDate,
     Guid RequestedBy,
     string Purpose,
     ICollection<PurchaseRequestItemCreateDto>? Items = null

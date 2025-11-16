@@ -1,5 +1,6 @@
 ﻿using Ardalis.Specification;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using AMIS.WebApi.Catalog.Application.Employees.Get.v1;
 using AMIS.WebApi.Catalog.Application.Purchases.Get.v1;
 using System.Linq;
@@ -17,14 +18,25 @@ public class GetInspectionSpecs : Specification<Inspection, InspectionResponse>
             .Include(i => i.Items)
                 .ThenInclude(item => item.PurchaseItem);
         
-        Query.PostProcessingAction(inspections => inspections
-            .Select(i => new InspectionResponse(
+        Query.Select(i => new InspectionResponse(
                 i.Id,
                 i.InspectedOn,
                 i.EmployeeId,
                 i.PurchaseId,
                 i.Remarks,
-                new EmployeeResponse(i.Employee.Id, i.Employee.Name, i.Employee.Designation, i.Employee.ResponsibilityCode, i.Employee.UserId),
+                new EmployeeResponse(
+                    i.Employee.Id,
+                    i.Employee.Name,
+                    i.Employee.Designation,
+                    i.Employee.ResponsibilityCode,
+                    i.Employee.Department,
+                    i.Employee.ContactInfo.Email,
+                    i.Employee.ContactInfo.PhoneNumber,
+                    i.Employee.Status,
+                    i.Employee.HireDate,
+                    i.Employee.TerminationDate,
+                    i.Employee.SupervisorId,
+                    i.Employee.UserId),
                 i.Purchase == null ? null : new PurchaseResponse(
                     i.Purchase.Id,
                     i.Purchase.SupplierId,
@@ -47,7 +59,6 @@ public class GetInspectionSpecs : Specification<Inspection, InspectionResponse>
                     item.Remarks,
                     item.InspectionItemStatus
                 )).ToList()
-            ))
-        );
+            ));
     }
 }

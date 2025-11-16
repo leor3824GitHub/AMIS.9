@@ -8,7 +8,10 @@ namespace AMIS.WebApi.Catalog.Domain;
 public class PurchaseRequest : AuditableEntity, IAggregateRoot
 {
     public DateTime RequestDate { get; private set; }
+    // FK to Employee
     public Guid RequestedBy { get; private set; }
+    // Navigation to Employee who requested
+    public virtual Employee? RequestedByEmployee { get; private set; }
     public string Purpose { get; private set; } = string.Empty;
     public PurchaseRequestStatus Status { get; private set; }
     public string? ApprovalRemarks { get; private set; }

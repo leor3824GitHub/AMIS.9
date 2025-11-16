@@ -89,7 +89,16 @@ internal sealed class CatalogDbInitializer(
             var eName = $"Employee {i}";
             if (await context.Employees.FirstOrDefaultAsync(t => t.Name == eName, cancellationToken).ConfigureAwait(false) is null)
             {
-                var emp = Employee.Create(eName, "Staff", $"RESP{i:000}", null);
+                var emp = Employee.Create(
+                    eName,
+                    "Staff",
+                    $"RESP{i:000}",
+                    "General Services",
+                    $"employee{i}@example.com",
+                    $"+1234567890{i}",
+                    DateTime.UtcNow,
+                    null,
+                    null);
                 await context.Employees.AddAsync(emp, cancellationToken).ConfigureAwait(false);
             }
         }
