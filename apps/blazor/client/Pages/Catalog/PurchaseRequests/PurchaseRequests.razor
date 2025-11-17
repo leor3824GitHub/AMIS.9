@@ -68,7 +68,7 @@
                                 <MudText>View</MudText>
                             </MudStack>
                         </MudMenuItem>
-                        @if (context.Item.Status == 0)
+                        @if (context.Item.Status == PurchaseRequestStatus.Draft)
                         {
                             <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnSubmit(context.Item))">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
@@ -83,7 +83,7 @@
                                 </MudStack>
                             </MudMenuItem>
                         }
-                        @if (context.Item.Status == 1)
+                        @if (context.Item.Status == PurchaseRequestStatus.Submitted)
                         {
                             <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnApprove(context.Item))">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="1">

@@ -4,7 +4,7 @@
 <MudPaper Class="pa-2 mb-2" Style="max-height: 50vh; overflow-y: auto;">
     <MudText Typo="Typo.subtitle1" Class="mb-1">Request Items - @(Items?.Count ?? 0)</MudText>
 
-    <MudTable T="PurchaseRequestItemDto" Items="Items" Hover Bordered Striped Dense="true">
+    <MudTable T="PurchaseRequestItemCreateDto" Items="Items" Hover Bordered Striped Dense="true">
         <HeaderContent>
             <MudTh Style="width: 40%">Product</MudTh>
             <MudTh Style="width: 10%">Qty</MudTh>
@@ -75,18 +75,18 @@
 </MudPaper>
 
 @code {
-    [Parameter] public ICollection<PurchaseRequestItemDto> Items { get; set; } = new List<PurchaseRequestItemDto>();
+    [Parameter] public ICollection<PurchaseRequestItemCreateDto> Items { get; set; } = new List<PurchaseRequestItemCreateDto>();
     [Parameter] public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
     [Parameter] public Action? OnItemsChanged { get; set; }
 
-    private PurchaseRequestItemDto? EditingItem { get; set; }
+    private PurchaseRequestItemCreateDto? EditingItem { get; set; }
 
     private Guid? NewProductId { get; set; }
     private int NewQty { get; set; }
     private string? NewDescription { get; set; }
     private string? NewJustification { get; set; }
 
-    private void EditItem(PurchaseRequestItemDto item) => EditingItem = item;
+    private void EditItem(PurchaseRequestItemCreateDto item) => EditingItem = item;
     
     private void SaveEdit() 
     { 
@@ -99,7 +99,7 @@
     private void AddItem()
     {
         if (NewProductId == null || NewQty <= 0) return;
-        Items.Add(new PurchaseRequestItemDto
+        Items.Add(new PurchaseRequestItemCreateDto
         {
             ProductId = NewProductId,
             Qty = NewQty,
@@ -110,7 +110,7 @@
         OnItemsChanged?.Invoke();
     }
 
-    private void RemoveItem(PurchaseRequestItemDto item)
+    private void RemoveItem(PurchaseRequestItemCreateDto item)
     {
         Items.Remove(item);
         OnItemsChanged?.Invoke();

@@ -13,6 +13,7 @@ public class SearchInspectionRequestSpecs : EntitiesByPaginationFilterSpec<Inspe
         : base(command)
     {
         Query
+            .AsNoTracking()
             .Include(i => i.Inspector)
             .Include(i => i.Purchase)
             .Where(i => i.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)

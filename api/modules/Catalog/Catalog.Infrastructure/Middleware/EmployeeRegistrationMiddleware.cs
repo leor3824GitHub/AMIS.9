@@ -16,10 +16,12 @@ public class EmployeeRegistrationMiddleware
     // Paths that should be excluded from registration check
     private static readonly HashSet<string> ExcludedPaths = new(StringComparer.OrdinalIgnoreCase)
     {
-        "/api/v1/employees/check-registration",
-        "/api/v1/employees/self-register",
+        "/api/v1/catalog/employees/check-registration",
+        "/api/v1/catalog/employees/self-register",
         "/api/tokens",
         "/api/identity",
+        "/api/users",
+        "/api/personal",
         "/swagger",
         "/health",
         "/_framework",
@@ -85,7 +87,8 @@ public class EmployeeRegistrationMiddleware
                     {
                         error = "EmployeeRegistrationRequired",
                         message = "You must complete your employee registration before accessing this resource.",
-                        registrationUrl = "/api/v1/employees/self-register"
+                        // Corrected path includes module base 'catalog'
+                        registrationUrl = "/api/v1/catalog/employees/self-register"
                     });
                     return;
                 }

@@ -30,7 +30,9 @@ public static class ApiHelper
             if (ex.StatusCode == 401)
             {
                 navigationManager.NavigateTo("/logout");
+                return default;
             }
+
             var message = ex.Message switch
             {
                 "TypeError: Failed to fetch" => "Unable to Reach API",

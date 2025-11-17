@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AMIS.WebApi.Catalog.Infrastructure;
+
 public static class CatalogModule
 {
     public class Endpoints : CarterModule
@@ -183,8 +184,8 @@ public static class CatalogModule
     }
     public static WebApplication UseCatalogModule(this WebApplication app)
     {
-        // Register employee registration middleware
-        app.UseMiddleware<EmployeeRegistrationMiddleware>();
+        // Employee registration middleware disabled - users can access all features
+        // app.UseMiddleware<EmployeeRegistrationMiddleware>();
         return app;
     }
 }

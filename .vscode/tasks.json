@@ -36,6 +36,12 @@
 			"type": "shell",
 			"command": "dotnet test e:\\AMIS.9\\TestProject.XUnit\\TestProject.XUnit.csproj --configuration Debug --no-build",
 			"group": "test"
+		},
+		{
+			"label": "build-debug-fixed",
+			"type": "shell",
+			"command": "dotnet build d:\\VB\\AMIS.9\\AMIS.9.sln --configuration Debug",
+			"group": "build"
 		}
 	]
 }

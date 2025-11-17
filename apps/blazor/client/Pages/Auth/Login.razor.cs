@@ -64,6 +64,7 @@ public partial class Login()
             _customValidation))
         {
             Toast.Add($"Logged in as {_tokenRequest.Email}", Severity.Info);
+            Navigation.NavigateTo("/");
         }
 
         BusySubmitting = false;

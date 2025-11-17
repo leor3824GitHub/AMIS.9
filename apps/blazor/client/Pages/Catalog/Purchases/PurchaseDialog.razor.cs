@@ -9,6 +9,7 @@ using MudBlazor;
 
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
+
 public partial class PurchaseDialog
 {
     [Inject] private IApiClient PurchaseClient { get; set; } = default!;
@@ -19,7 +20,7 @@ public partial class PurchaseDialog
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback Refresh { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
-    
+
 
     private List<SupplierResponse> _suppliers = new();
     private List<ProductResponse> _products = new();
@@ -38,15 +39,9 @@ public partial class PurchaseDialog
         return attr?.Name ?? value.ToString();
     }
     protected override async Task OnInitializedAsync()
-    {       
+    {
         await LoadSupplierAsync();
         await LoadProductAsync();
-
-        // Auto-generate PO Number for new purchases
-        if (IsCreate == true && string.IsNullOrEmpty(Model.ReferenceNumber))
-        {
-            Model.ReferenceNumber = $"PO-{DateTime.Now:yyyy-MMdd}-{Guid.NewGuid().ToString()[..5].ToUpper()}";
-        }
     }
 
     private async Task LoadProductAsync()
@@ -121,18 +116,18 @@ public partial class PurchaseDialog
                 //}
                 //else
                 //{
-                    Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
                 //}
             }
         }
-    }    
+    }
     private void UpdateTotalAmount(double value)
     {
         Model.TotalAmount = value;
         StateHasChanged();
     }
 
-    private void Cancel() 
+    private void Cancel()
     {
         MudDialog.Cancel();
         Refresh.InvokeAsync();
