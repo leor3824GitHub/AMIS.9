@@ -4,8 +4,13 @@ namespace AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 public sealed record ContactInformation
 {
-    public string Email { get; }
-    public string PhoneNumber { get; }
+    public string Email { get; private set; } = default!;
+    public string PhoneNumber { get; private set; } = default!;
+
+    // EF Core constructor
+    private ContactInformation()
+    {
+    }
 
     private ContactInformation(string email, string phoneNumber)
     {

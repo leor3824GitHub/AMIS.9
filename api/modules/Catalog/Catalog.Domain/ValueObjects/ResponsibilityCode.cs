@@ -4,7 +4,12 @@ namespace AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 public sealed record ResponsibilityCode
 {
-    public string Value { get; }
+    public string Value { get; private set; } = default!;
+
+    // EF Core constructor
+    private ResponsibilityCode()
+    {
+    }
 
     private ResponsibilityCode(string value)
     {
@@ -26,7 +31,7 @@ public sealed record ResponsibilityCode
     }
 
     public static implicit operator string(ResponsibilityCode code) => code.Value;
-    
+
     public static implicit operator ResponsibilityCode(string code) => Create(code);
 
     public override string ToString() => Value;
