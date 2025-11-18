@@ -37,11 +37,6 @@ public sealed class SelfRegisterEmployeeHandler(
             request.Name,
             request.Designation,
             request.ResponsibilityCode,
-            request.Department,
-            request.Email,
-            request.PhoneNumber,
-            request.HireDate ?? DateTime.UtcNow,
-            request.SupervisorId,
             userId);
 
         await repository.AddAsync(employee, cancellationToken);

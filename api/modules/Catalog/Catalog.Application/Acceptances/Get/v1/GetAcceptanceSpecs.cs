@@ -32,13 +32,6 @@ public class GetAcceptanceSpecs : Specification<Acceptance, AcceptanceResponse>
                     a.SupplyOfficer.Name,
                     a.SupplyOfficer.Designation,
                     a.SupplyOfficer.ResponsibilityCode,
-                    a.SupplyOfficer.Department,
-                    a.SupplyOfficer.ContactInfo.Email,
-                    a.SupplyOfficer.ContactInfo.PhoneNumber,
-                    a.SupplyOfficer.Status,
-                    a.SupplyOfficer.HireDate,
-                    a.SupplyOfficer.TerminationDate,
-                    a.SupplyOfficer.SupervisorId,
                     a.SupplyOfficer.UserId),
                 a.Items.Select(item => new AcceptanceItemResponse(
                     item.Id,

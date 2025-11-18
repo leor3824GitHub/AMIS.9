@@ -16,16 +16,7 @@ public sealed class UpdateEmployeeHandler(
         ArgumentNullException.ThrowIfNull(request);
         var employee = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = employee ?? throw new EmployeeNotFoundException(request.Id);
-        var updatedEmployee = employee.Update(
-            request.Name,
-            request.Designation,
-            request.ResponsibilityCode,
-            request.Department,
-            request.Email,
-            request.PhoneNumber,
-            request.HireDate,
-            request.SupervisorId,
-            request.UserId);
+        var updatedEmployee = employee.Update(request.Name!, request.Designation, request.ResponsibilityCode, request.UserId);
         await repository.UpdateAsync(updatedEmployee, cancellationToken);
         logger.LogInformation("Employee with id : {EmployeeId} updated.", employee.Id);
         return new UpdateEmployeeResponse(employee.Id);

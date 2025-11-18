@@ -93,11 +93,6 @@ internal sealed class CatalogDbInitializer(
                     eName,
                     "Staff",
                     $"RESP{i:000}",
-                    "General Services",
-                    $"employee{i}@example.com",
-                    $"+1234567890{i}",
-                    DateTime.UtcNow,
-                    null,
                     null);
                 await context.Employees.AddAsync(emp, cancellationToken).ConfigureAwait(false);
             }

@@ -29,13 +29,6 @@ public class GetInspectionSpecs : Specification<Inspection, InspectionResponse>
                     i.Employee.Name,
                     i.Employee.Designation,
                     i.Employee.ResponsibilityCode,
-                    i.Employee.Department,
-                    i.Employee.ContactInfo.Email,
-                    i.Employee.ContactInfo.PhoneNumber,
-                    i.Employee.Status,
-                    i.Employee.HireDate,
-                    i.Employee.TerminationDate,
-                    i.Employee.SupervisorId,
                     i.Employee.UserId),
                 i.Purchase == null ? null : new PurchaseResponse(
                     i.Purchase.Id,

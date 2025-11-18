@@ -14,22 +14,5 @@ public class SelfRegisterEmployeeCommandValidator : AbstractValidator<SelfRegist
         RuleFor(x => x.Designation)
             .NotEmpty()
             .MaximumLength(100);
-
-        RuleFor(x => x.ResponsibilityCode)
-            .NotEmpty()
-            .MaximumLength(10);
-
-        RuleFor(x => x.Department)
-            .NotEmpty()
-            .MaximumLength(100);
-
-        RuleFor(x => x.Email)
-            .NotEmpty()
-            .EmailAddress()
-            .MaximumLength(200);
-
-        RuleFor(x => x.PhoneNumber)
-            .NotEmpty()
-            .MaximumLength(20);
     }
 }

@@ -183,8 +183,7 @@ public static class CatalogModule
     }
     public static WebApplication UseCatalogModule(this WebApplication app)
     {
-        // Register employee registration middleware
-        app.UseMiddleware<EmployeeRegistrationMiddleware>();
+        // Employee registration middleware removed
         return app;
     }
 }
