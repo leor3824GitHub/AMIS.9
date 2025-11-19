@@ -1,172 +1,291 @@
 # AMIS.9 Copilot Instructions
 
+Asset Management Information System - A modular Clean Architecture .NET 9 application for tracking procurement, inspections, and asset lifecycle.
+
 ## Architecture Overview
 
-This is a modular Clean Architecture .NET 9 application with microservices patterns:
+Three-layer modular architecture with strict boundaries:
+- **Framework** (`api/framework/`): Core domain primitives + Infrastructure cross-cutting concerns
+- **Modules** (`api/modules/`): Self-contained business domains (Catalog, Todo) with Domain/Application/Infrastructure
+- **Host** (`api/server/`): Bootstrap, DI wiring, module orchestration via `Program.cs` + `Extensions.cs`
 
-- **Framework Layer**: `api/framework/` contains Core and Infrastructure with cross-cutting concerns
-- **Modules**: Self-contained business domains in `api/modules/` (Catalog, Todo) with Domain/Application/Infrastructure layers
-- **Host**: `api/server/` bootstraps and configures the application
-- **Blazor Client**: Full-stack web app in `apps/blazor/`
-- **Aspire Orchestration**: Local development orchestration in `aspire/`
+## Adding Features (Vertical Slices)
 
-## Module Structure Pattern
+Features follow CQRS in `Features/[Operation]/v[N]/` folders:
 
-Each module follows strict layering:
 ```
-api/modules/[ModuleName]/
-├── Domain/           # Entities, value objects, domain events
-├── Application/      # Use cases, DTOs, interfaces
-├── Infrastructure/   # Data access, external services
-└── [ModuleName]Module.cs  # Registration and endpoints
+Features/Create/v1/
+├── CreateCommand.cs         # IRequest<Response> - input model
+├── CreateHandler.cs         # IRequestHandler - business logic
+├── CreateEndpoint.cs        # Carter endpoint mapping
+├── CreateValidator.cs       # FluentValidation rules
+└── CreateResponse.cs        # Output DTO
 ```
 
-## Feature Organization (Vertical Slices)
-
-Features use CQRS with MediatR in `Features/[Operation]/v[N]/` structure:
-- `[Operation]Command.cs` - Input model with IRequest<Response>
-- `[Operation]Handler.cs` - Business logic with IRequestHandler
-- `[Operation]Endpoint.cs` - HTTP endpoint mapping with Carter
-- `[Operation]Validator.cs` - FluentValidation rules
-- `[Operation]Response.cs` - Output model
-
-Example: `Todo/Features/Create/v1/CreateTodoCommand.cs`
-## SYSTEM WORKflow
-I. Asset User's Request 
-1. Purchase Request; Action - Internal user identifies a need and creates a formal Purchase Request (PR).
-2. PR Approval; Action - The PR is reviewed and approved by the designated authority based on organizational policies.
-II. Procurement  
-1. Canvass and Abstract; Action - The procurement team canvasses suppliers and selects the best offer, then creates a Purchase Order (PO).
-2. Goods Delivery; Action - The supplier delivers the goods/services as per the PO terms.
-III. Asset Receiving 
-1. Receiving Items; Action - Supply officer receives and requests inspection of delivered items.
-2. Inspection; Action - the inspector verifies the quality and quantity of received items. 
-3. Acceptance; Action - Upon successful inspection, the supply officer, items are formally accepted into inventory.
-IV. Asset Tagging and Recording 
-1. Asset Tagging; Action - Each accepted asset is tagged with a unique identifier or propertycode for tracking and recorded in the Asset Management Information System (AMIS) for inventory management.
-V. Asset Utilization and Maintenance 
-1. Asset Assignment; Action - Assets are assigned to users or departments as needed, with records updated in AMIS.
-2. Maintenance Scheduling; Action - Regular maintenance schedules are created and tracked in AMIS to ensure asset longevity and performance.
-
-## Development Workflows
-
-### Adding New Features
-1. Create feature folder: `Features/[Operation]/v1/`
-2. Implement Command → Handler → Endpoint → Validator
-3. Register endpoint in Module's `CarterModule.AddRoutes()`
-4. Add permissions to `Shared/Authorization/FshPermissions.cs`
-
-### Module Registration
-- Services: `RegisterModuleServices()` in module file
-- Endpoints: Add to `Host/Extensions.cs` RegisterModules()
-- Carter endpoints: Configure in module's Endpoints class
-
-### Database Patterns
-- Entity Framework with Repository pattern
-- Keyed services for module isolation: `[FromKeyedServices("moduleName")]`
-- Migrations in separate projects: `api/migrations/PostgreSQL|MSSQL`
-
-## Key Conventions
-
-### Authorization
-- Permission-based with `RequirePermission("Permissions.Resource.Action")`
-- Permissions defined in `FshPermissions.cs` with Basic/Admin/Root levels
-- Multi-tenant with Finbuckle.MultiTenant
-
-### API Versioning
-- Use `MapToApiVersion(new ApiVersion(1, 0))` on endpoints
-- Version sets configured in `Extensions.UseModules()`
-
-### Dependency Injection
-- Framework services in `FshInfrastructure.cs`
-- Module services in each `RegisterModuleServices()`
-- Keyed services for module boundaries
-
-### Configuration
-- Centralized package management in `Directory.Packages.props`
-- Settings in `appsettings.json` with typed options
-- Connection strings for PostgreSQL primary, MSSQL migrations
-
-## API Architecture Details
-
-### Endpoint Patterns
-- **Carter** for minimal API endpoint mapping with fluent routing
-- Endpoints return structured responses: `Results.CreatedAtRoute()`, `Results.Ok()`
-- API versioning with `MapToApiVersion(new ApiVersion(1, 0))`
-- Permission-based authorization: `RequirePermission("Permissions.Resource.Action")`
-
-### Request/Response Flow
+**Example from Todo module** (`api/modules/Todo/Features/Create/v1/`):
 ```csharp
-// Example endpoint structure
-endpoints.MapPost("/", async (CreateCommand request, ISender mediator) => {
+// Command
+public record CreateTodoCommand(string Title, string Note) : IRequest<CreateTodoResponse>;
+
+// Handler with keyed repository injection
+public sealed class CreateTodoHandler(
+    [FromKeyedServices("todo")] IRepository<TodoItem> repository)
+    : IRequestHandler<CreateTodoCommand, CreateTodoResponse>
+{
+    public async Task<CreateTodoResponse> Handle(CreateTodoCommand request, CancellationToken ct)
+    {
+        var item = TodoItem.Create(request.Title, request.Note);
+        await repository.AddAsync(item, ct);
+        await repository.SaveChangesAsync(ct);
+        return new CreateTodoResponse(item.Id);
+    }
+}
+
+// Endpoint
+endpoints.MapPost("/", async (CreateTodoCommand request, ISender mediator) => {
     var response = await mediator.Send(request);
-    return Results.CreatedAtRoute(nameof(Endpoint), new { id = response.Id }, response);
+    return Results.CreatedAtRoute(nameof(CreateTodoEndpoint), new { id = response.Id }, response);
 })
-.WithName(nameof(Endpoint))
-.RequirePermission("Permissions.Resource.Create")
+.WithName(nameof(CreateTodoEndpoint))
+.RequirePermission("Permissions.Todos.Create")
 .MapToApiVersion(new ApiVersion(1, 0));
 ```
 
-### Database Context Patterns
-- Multiple DbContexts per module with keyed services
-- Repository pattern with `IRepository<TEntity>` and `IReadRepository<TEntity>`
-- Migrations managed separately in `api/migrations/PostgreSQL|MSSQL`
+## Module Registration Pattern
 
-## Blazor Client Architecture
+Modules expose three extension methods in `[ModuleName]Module.cs`:
 
-### Project Structure
-```
-apps/blazor/
-├── client/          # Blazor WebAssembly main app
-├── infrastructure/ # API client, auth, services
-├── shared/         # Shared components and models
-└── nginx.conf      # Production deployment config
+1. **RegisterModuleServices** - DI registration with keyed repositories:
+```csharp
+builder.Services.BindDbContext<TodoDbContext>();
+builder.Services.AddKeyedScoped<IRepository<TodoItem>, TodoRepository<TodoItem>>("todo");
 ```
 
-### Key Components
-- **MudBlazor** for Material Design UI components
-- **Auto-generated API Client** via NSwag from OpenAPI spec
-- **JWT Authentication** with automatic token handling
-- **Local Storage** for user preferences and caching
+2. **Endpoints (Carter)** - Route mapping:
+```csharp
+public class Endpoints : CarterModule
+{
+    public Endpoints() : base("catalog") { }
+    public override void AddRoutes(IEndpointRouteBuilder app)
+    {
+        var group = app.MapGroup("products").WithTags("products");
+        group.MapProductCreationEndpoint();
+    }
+}
+```
 
-### API Integration
-- Generated `IApiClient` interface from API OpenAPI spec
-- Automatic JWT token injection via `JwtAuthenticationHeaderHandler`
-- Centralized HTTP client configuration in `Extensions.cs`
-- Type-safe API calls with full IntelliSense support
+3. **UseModule** - Middleware/pipeline configuration (often empty)
 
-### UI Patterns
-- **EntityTable** component for CRUD operations with pagination
-- **PageHeader** for consistent page layouts
-- **Form validation** with Blazored.FluentValidation
-- **Theme management** with dark/light mode toggle
+Wire modules in `api/server/Extensions.cs`:
+```csharp
+// RegisterModules() - call RegisterCatalogServices(), RegisterTodoServices()
+// UseModules() - configure versioning, call app.UseCatalogModule(), MapCarter()
+```
 
-### Development Workflow
-1. Update API endpoints → regenerate client via NSwag
-2. Use `EntityTable<TEntity, TId, TRequest>` for standard CRUD pages
-3. Implement page-specific logic in `.razor.cs` code-behind files
+## Database & Migrations
 
-## Integration Points
+**Critical**: Migrations live in **separate projects** (`api/migrations/PostgreSQL`, `api/migrations/MSSQL`), not in module folders.
 
-- **Carter** for minimal API endpoints
-- **MediatR** for CQRS command/query handling
-- **FluentValidation** for input validation
-- **Serilog** for structured logging
-- **Hangfire** for background jobs
-- **Entity Framework** with multi-database support
-- **Aspire** for local service orchestration
-- **NSwag** for API client code generation
-- **MudBlazor** for Blazor UI components
+From `api/server/` directory:
+```powershell
+# Add migration
+dotnet ef migrations add AddInspectionStatus --project ../migrations/PostgreSQL --context CatalogDbContext -o Catalog
 
-## Testing Strategy
-- XUnit with Moq for unit tests
-- Blazor component testing with mock dependencies
-- Test project structure matches feature organization
+# Apply
+dotnet ef database update --project ../migrations/PostgreSQL --context CatalogDbContext
+```
+
+Primary database: PostgreSQL. Connection string in `api/server/appsettings.Development.json`.
+
+## Keyed Services for Module Isolation
+
+Repositories use keyed DI to prevent cross-module contamination:
+```csharp
+// Registration
+builder.Services.AddKeyedScoped<IRepository<Product>, CatalogRepository<Product>>("catalog:products");
+
+// Injection
+public Handler([FromKeyedServices("catalog:products")] IRepository<Product> repo)
+```
+
+## Authorization & Permissions
+
+Permission-based, defined in `Shared/Authorization/FshPermissions.cs`:
+```csharp
+new("Create Products", FshActions.Create, FshResources.Products),
+```
+
+Apply to endpoints:
+```csharp
+.RequirePermission("Permissions.Products.Create")
+```
+
+Three levels: Basic (IsBasic: true), Admin (default), Root (IsRoot: true).
+
+## Business Context: Asset Procurement Workflow
+
+System tracks end-to-end asset lifecycle (see `purchaesworkflow.md`):
+
+1. **Purchase Request** → PR Approval
+2. **Procurement** → PO Creation → Goods Delivery
+3. **Receiving** → Inspection Request → QA Inspection → Acceptance
+4. **Asset Tagging** → Inventory Recording → Assignment → Maintenance
+
+Key status progressions:
+- PO: `Draft` → `Issued` → `Received` → `Closed`
+- Inspection: `Pending` → `In Progress` → `Complete`
+- Inventory: `In-Stock` → `Assigned` → `Under Maintenance`
+
+## Employee Registration Enforcement
+
+**UI-based user onboarding** links Identity users to Employee records:
+
+**Flow** (`Pages/Identity/Account/Profile.razor` & `.razor.cs`):
+1. User logs in → navigates to Profile page
+2. `LoadEmployeeProfileAsync()` checks for existing Employee record by UserId
+3. If **no Employee record found**:
+   - UI displays alert with registration prompt
+   - Shows benefits: "Create purchase requests, Receive assignments, Access features"
+   - "Register as Employee" button navigates to `/catalog/employees`
+   
+4. If **Employee record exists**:
+   - Displays read-only Employee information card
+   - Shows Name, Designation, Responsibility Code
+   - "Edit Details" button for business field updates
+   - Alert: "Basic contact information (name) is automatically synced from your login profile"
+
+**Profile Update → Auto-Sync**:
+```csharp
+// When user updates Identity profile (FirstName, LastName, PhoneNumber)
+private async Task UpdateProfileAsync()
+{
+    await PersonalClient.UpdateUserEndpointAsync(_profileModel);
+    
+    // If employee profile exists, sync basic contact info automatically
+    if (_hasEmployeeProfile && _employeeProfile != null)
+    {
+        await SyncEmployeeBasicInfoAsync();  // Copies name from Identity to Employee
+    }
+}
+```
+
+**Backend Self-Registration** (`Catalog.Application/Employees/SelfRegister/v1/`):
+```csharp
+var employee = Employee.Create(
+    request.Name,
+    request.Designation,
+    request.ResponsibilityCode,
+    currentUser.GetUserId());  // Links Employee.UserId to Identity user
+```
+
+**Optional Middleware** (`Catalog.Infrastructure/Middleware/EmployeeRegistrationMiddleware.cs`):
+- Available but currently **disabled** in `CatalogModule.UseCatalogModule()`
+- Can enforce Employee record requirement by returning 403 for unregistered users
+- Excluded paths: `/self-register`, `/tokens`, `/health`, `/identity`
+
+## Blazor Client Integration
+
+**Auto-generated API client** via NSwag:
+1. Edit API endpoints
+2. Run NSwag target: `dotnet build apps/blazor/infrastructure` (triggers NSwag via MSBuild target)
+3. Client regenerated from OpenAPI spec at `apps/blazor/infrastructure/Api/`
+
+UI uses **MudBlazor** with `MudTable` or `MudDataGrid` for data-heavy pages. JWT tokens auto-injected via `JwtAuthenticationHeaderHandler`.
 
 ## Development Commands
-- **Build**: `dotnet build AMIS.9.sln`
-- **Run API**: `dotnet run --project api/server`
-- **Run Blazor**: `dotnet run --project apps/blazor/client`
-- **Run Aspire**: `dotnet run --project aspire/Host`
-- **Migrations**: Use commands in `Migration Command.txt`
-- **Regenerate API Client**: Use NSwag target in Blazor Infrastructure project
+
+```powershell
+# Build & Run
+dotnet build AMIS.9.sln
+dotnet run --project api/server                    # API at https://localhost:7000
+dotnet run --project apps/blazor/client            # Blazor at https://localhost:7100
+dotnet run --project aspire/Host                   # Aspire dashboard
+
+# Migrations (see Migration Command.txt)
+dotnet ef migrations add <Name> --project ../migrations/PostgreSQL --startup-project . --context CatalogDbContext -o Catalog
+dotnet ef database update --project ../migrations/PostgreSQL --startup-project . --context CatalogDbContext
+
+# Tests
+dotnet test TestProject.XUnit/TestProject.XUnit.csproj
+```
+
+## Key Configuration
+
+- **Packages**: Centralized in `Directory.Packages.props` (CPM enabled)
+- **Settings**: `api/server/appsettings.Development.json` for connection strings, JWT, mail, CORS
+- **Framework Bootstrap**: `Program.cs` calls `ConfigureFshFramework()` and `UseFshFramework()` from `api/framework/Infrastructure/Extensions.cs`
+
+## Common Patterns to Follow
+
+- **Endpoints**: Return `Results.Ok()`, `Results.CreatedAtRoute()`, `Results.NotFound()`
+- **Versioning**: Always add `.MapToApiVersion(new ApiVersion(1, 0))`
+- **Validation**: Create `[Operation]Validator.cs` with FluentValidation rules
+- **Logging**: Inject `ILogger<THandler>` and log business events
+- **Domain Events**: Use `DomainEvent` base class from Framework.Core
+- **Specifications**: Use `Specification<T>` pattern from Framework.Core for complex queries
+
+## Specifications Pattern (Ardalis.Specification)
+
+Encapsulate query logic in reusable, testable spec classes:
+
+```csharp
+// Simple filter spec
+public sealed class EmployeeByUserIdSpec : Specification<Employee>
+{
+    public EmployeeByUserIdSpec(Guid userId)
+    {
+        Query.Where(e => e.UserId == userId);
+    }
+}
+
+// Complex spec with includes and filters
+public sealed class GetPurchaseItemWithAcceptancesSpec : Specification<PurchaseItem>
+{
+    public GetPurchaseItemWithAcceptancesSpec(Guid purchaseItemId)
+    {
+        Query.Where(pi => pi.Id == purchaseItemId)
+             .Include(pi => pi.AcceptanceItems)
+                .ThenInclude(ai => ai.Acceptance)
+             .Include(pi => pi.InspectionItems);
+    }
+}
+
+// Usage in handlers
+var employee = await repository.FirstOrDefaultAsync(new EmployeeByUserIdSpec(userId), ct);
+```
+
+## Domain Events
+
+Events inherit from `DomainEvent` base class and use MediatR `INotification`:
+
+```csharp
+// Define event
+public sealed record InspectionApproved : DomainEvent
+{
+    public Guid InspectionId { get; init; }
+    public Guid ApprovedBy { get; init; }
+}
+
+// Raise event (typically in aggregate methods)
+public void Approve(Guid approvedBy)
+{
+    Status = InspectionStatus.Approved;
+    RaiseDomainEvent(new InspectionApproved 
+    { 
+        InspectionId = Id, 
+        ApprovedBy = approvedBy 
+    });
+}
+
+// Handle event (separate handler class)
+public class InspectionApprovedHandler : INotificationHandler<InspectionApproved>
+{
+    public async Task Handle(InspectionApproved notification, CancellationToken ct)
+    {
+        // Side effects: create inventory transaction, send notification, etc.
+    }
+}
+```
+
+Examples in codebase: `InspectionApproved`, `InspectionRequestCreated`, `TodoItemCreated`
+

@@ -64,6 +64,9 @@ public partial class Login()
             _customValidation))
         {
             Toast.Add($"Logged in as {_tokenRequest.Email}", Severity.Info);
+            
+            // Navigate to profile page to check/setup employee registration
+            Navigation.NavigateTo("/identity/account");
         }
 
         BusySubmitting = false;

@@ -97,7 +97,10 @@
                 <MudCardHeader>
                     <CardHeaderContent>
                         <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
-                            <MudText>Employee Information</MudText>
+                            <MudStack Row="true" AlignItems="AlignItems.Center">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" />
+                                <MudText>Employee Information</MudText>
+                            </MudStack>
                             <MudButton Variant="Variant.Outlined" 
                                        Color="Color.Primary" 
                                        StartIcon="@Icons.Material.Filled.Edit" 
@@ -148,13 +151,22 @@
                             <MudListItem T="string" Icon="@Icons.Material.Filled.Inventory" Text="Receive asset assignments" />
                             <MudListItem T="string" Icon="@Icons.Material.Filled.Assessment" Text="Access full system features" />
                         </MudList>
-                        <MudButton Variant="Variant.Filled" 
-                                   Color="Color.Primary" 
-                                   StartIcon="@Icons.Material.Filled.PersonAdd"
-                                   OnClick="NavigateToEmployeeRegistration"
-                                   Class="mt-2">
-                            Register as Employee
-                        </MudButton>
+                        <MudStack Row="true" Class="mt-3">
+                            <MudButton Variant="Variant.Filled" 
+                                       Color="Color.Primary" 
+                                       StartIcon="@Icons.Material.Filled.AutoAwesome"
+                                       OnClick="ManualEmployeeRegistrationAsync"
+                                       Class="mt-2">
+                                Quick Register
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Primary" 
+                                       StartIcon="@Icons.Material.Filled.PersonAdd"
+                                       OnClick="NavigateToEmployeeRegistration"
+                                       Class="mt-2">
+                                Advanced Setup
+                            </MudButton>
+                        </MudStack>
                     </MudAlert>
                 </MudCardContent>
             </MudCard>

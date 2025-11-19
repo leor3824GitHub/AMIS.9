@@ -179,11 +179,18 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         builder.Services.AddKeyedScoped<IRepository<PurchaseRequest>, CatalogRepository<PurchaseRequest>>("catalog:purchaseRequests");
         builder.Services.AddKeyedScoped<IReadRepository<PurchaseRequest>, CatalogRepository<PurchaseRequest>>("catalog:purchaseRequests");
+        
+        // Register middleware (optional - enable if hard enforcement needed)
+        // builder.Services.AddScoped<EmployeeRegistrationMiddleware>();
+        
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)
     {
-        // Employee registration middleware removed
+        // Optional: Enable middleware for hard enforcement
+        // Uncomment to require Employee registration before API access
+        // app.UseMiddleware<EmployeeRegistrationMiddleware>();
+        
         return app;
     }
 }

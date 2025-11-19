@@ -2,6 +2,7 @@
 using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
+using AMIS.Blazor.Shared.Employees;
 using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
@@ -48,11 +49,51 @@ public partial class Profile
 
             // Load employee profile
             await LoadEmployeeProfileAsync();
+            
+            // Auto-create employee record if profile is complete but no employee exists
+            if (!_hasEmployeeProfile && IsProfileComplete())
+            {
+                await AutoCreateEmployeeRecordAsync();
+            }
         }
 
         if (_profileModel.FirstName?.Length > 0)
         {
             _firstLetterOfName = _profileModel.FirstName.ToUpperInvariant().FirstOrDefault();
+        }
+    }
+    
+    private bool IsProfileComplete()
+    {
+        return !string.IsNullOrWhiteSpace(_profileModel.FirstName) && 
+               !string.IsNullOrWhiteSpace(_profileModel.LastName);
+    }
+    
+    private async Task AutoCreateEmployeeRecordAsync()
+    {
+        try
+        {
+            var fullName = $"{_profileModel.FirstName} {_profileModel.LastName}".Trim();
+            
+            var selfRegisterCommand = new SelfRegisterEmployeeCommand
+            {
+                Name = fullName,
+                Designation = "Employee",
+                ResponsibilityCode = "GENERAL"
+            };
+
+            var result = await PersonalClient.SelfRegisterEmployeeEndpointAsync("1", selfRegisterCommand);
+            
+            if (result?.Id != Guid.Empty)
+            {
+                await LoadEmployeeProfileAsync(); // Reload to show new employee info
+                Toast.Add("Employee record created automatically!", Severity.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Auto-creation failed: {ex.Message}");
+            // Silent fail - UI will show manual registration option
         }
     }
 
@@ -98,6 +139,11 @@ public partial class Profile
             if (_hasEmployeeProfile && _employeeProfile != null)
             {
                 await SyncEmployeeBasicInfoAsync();
+            }
+            // If no employee profile and profile is now complete, auto-create employee record
+            else if (IsProfileComplete())
+            {
+                await AutoCreateEmployeeRecordAsync();
             }
 
             Toast.Add("Your Profile has been updated. Please Login again to Continue.", Severity.Success);
@@ -145,6 +191,41 @@ public partial class Profile
         if (_employeeProfile?.Id != null)
         {
             Navigation.NavigateTo($"/catalog/employees");
+        }
+    }
+
+
+
+    private async Task ManualEmployeeRegistrationAsync()
+    {
+        try
+        {
+            var fullName = $"{_profileModel.FirstName} {_profileModel.LastName}".Trim();
+            
+            if (string.IsNullOrEmpty(fullName))
+            {
+                Toast.Add("Please complete your profile name before registering as an employee.", Severity.Warning);
+                return;
+            }
+
+            var selfRegisterCommand = new SelfRegisterEmployeeCommand
+            {
+                Name = fullName,
+                Designation = "Employee",
+                ResponsibilityCode = "GENERAL"
+            };
+
+            var result = await PersonalClient.SelfRegisterEmployeeEndpointAsync("1", selfRegisterCommand);
+            
+            if (result?.Id != Guid.Empty)
+            {
+                Toast.Add("Employee registration successful!", Severity.Success);
+                await LoadEmployeeProfileAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Toast.Add($"Registration failed: {ex.Message}", Severity.Error);
         }
     }
 
