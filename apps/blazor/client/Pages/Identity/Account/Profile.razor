@@ -80,5 +80,84 @@
                 </MudCardActions>
             </MudCard>
         </EditForm>
+
+        @* Employee Profile Section *@
+        @if (_isLoadingEmployee)
+        {
+            <MudCard Outlined Class="mt-4">
+                <MudCardContent>
+                    <MudProgressLinear Color="Color.Primary" Indeterminate="true" />
+                    <MudText Typo="Typo.body2" Class="mt-2">Loading employee information...</MudText>
+                </MudCardContent>
+            </MudCard>
+        }
+        else if (_hasEmployeeProfile && _employeeProfile != null)
+        {
+            <MudCard Outlined Class="mt-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudStack Row="true" Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                            <MudText>Employee Information</MudText>
+                            <MudButton Variant="Variant.Outlined" 
+                                       Color="Color.Primary" 
+                                       StartIcon="@Icons.Material.Filled.Edit" 
+                                       Size="Size.Small"
+                                       OnClick="NavigateToEmployeeEdit">
+                                Edit Details
+                            </MudButton>
+                        </MudStack>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="12" md="12">
+                            <MudField Label="Name" Variant="Variant.Outlined" ReadOnly="true">
+                                @_employeeProfile.Name
+                            </MudField>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudField Label="Designation" Variant="Variant.Outlined" ReadOnly="true">
+                                @(_employeeProfile.Designation ?? "Not assigned")
+                            </MudField>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudField Label="Responsibility Code" Variant="Variant.Outlined" ReadOnly="true">
+                                @(_employeeProfile.ResponsibilityCode ?? "Not assigned")
+                            </MudField>
+                        </MudItem>
+                    </MudGrid>
+                    
+                    <MudAlert Severity="Severity.Info" Class="mt-3" Dense="true">
+                        Basic contact information (name) is automatically synced from your login profile above.
+                        Use the "Edit Details" button to update designation and responsibility code.
+                    </MudAlert>
+                </MudCardContent>
+            </MudCard>
+        }
+        else
+        {
+            <MudCard Outlined Class="mt-4">
+                <MudCardContent>
+                    <MudAlert Severity="Severity.Info">
+                        <MudText Typo="Typo.h6" Class="mb-2">Complete Your Employee Profile</MudText>
+                        <MudText>
+                            You haven't registered as an employee yet. Employee registration is required to:
+                        </MudText>
+                        <MudList T="string" Dense="true" Class="mt-2">
+                            <MudListItem T="string" Icon="@Icons.Material.Filled.ShoppingCart" Text="Create and track purchase requests" />
+                            <MudListItem T="string" Icon="@Icons.Material.Filled.Inventory" Text="Receive asset assignments" />
+                            <MudListItem T="string" Icon="@Icons.Material.Filled.Assessment" Text="Access full system features" />
+                        </MudList>
+                        <MudButton Variant="Variant.Filled" 
+                                   Color="Color.Primary" 
+                                   StartIcon="@Icons.Material.Filled.PersonAdd"
+                                   OnClick="NavigateToEmployeeRegistration"
+                                   Class="mt-2">
+                            Register as Employee
+                        </MudButton>
+                    </MudAlert>
+                </MudCardContent>
+            </MudCard>
+        }
     </MudItem>
 </MudGrid>

@@ -21,10 +21,13 @@ public partial class Profile
     protected IApiClient PersonalClient { get; set; } = default!;
 
     private readonly UpdateUserCommand _profileModel = new();
+    private EmployeeResponse? _employeeProfile;
 
     private string? _imageUrl;
     private string? _userId;
     private char _firstLetterOfName;
+    private bool _hasEmployeeProfile;
+    private bool _isLoadingEmployee;
 
     private FshValidation? _customValidation;
 
@@ -42,6 +45,9 @@ public partial class Profile
                 _imageUrl = user.GetImageUrl()!.ToString();
             }
             if (_userId is not null) _profileModel.Id = _userId;
+
+            // Load employee profile
+            await LoadEmployeeProfileAsync();
         }
 
         if (_profileModel.FirstName?.Length > 0)
@@ -50,13 +56,95 @@ public partial class Profile
         }
     }
 
+    private async Task LoadEmployeeProfileAsync()
+    {
+        if (string.IsNullOrEmpty(_userId))
+            return;
+
+        try
+        {
+            _isLoadingEmployee = true;
+            StateHasChanged();
+
+            var filter = new SearchEmployeesCommand
+            {
+                PageNumber = 1,
+                PageSize = 1,
+                UsrId = Guid.Parse(_userId)
+            };
+
+            var response = await PersonalClient.SearchEmployeesEndpointAsync("1", filter);
+            _employeeProfile = response?.Items?.FirstOrDefault();
+            _hasEmployeeProfile = _employeeProfile != null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to load employee profile: {ex.Message}");
+            _hasEmployeeProfile = false;
+        }
+        finally
+        {
+            _isLoadingEmployee = false;
+            StateHasChanged();
+        }
+    }
+
     private async Task UpdateProfileAsync()
     {
         if (await ApiHelper.ExecuteCallGuardedAsync(
             () => PersonalClient.UpdateUserEndpointAsync(_profileModel), Toast, _customValidation))
         {
+            // If employee profile exists, sync basic contact info
+            if (_hasEmployeeProfile && _employeeProfile != null)
+            {
+                await SyncEmployeeBasicInfoAsync();
+            }
+
             Toast.Add("Your Profile has been updated. Please Login again to Continue.", Severity.Success);
             await AuthService.ReLoginAsync(Navigation.Uri);
+        }
+    }
+
+    private async Task SyncEmployeeBasicInfoAsync()
+    {
+        if (_employeeProfile == null)
+            return;
+
+        try
+        {
+            // Sync only basic info from Identity to Employee
+            var updateEmployeeCommand = new UpdateEmployeeCommand
+            {
+                Id = _employeeProfile.Id ?? Guid.Empty,
+                Name = $"{_profileModel.FirstName} {_profileModel.LastName}",
+                // Keep business fields unchanged
+                Designation = _employeeProfile.Designation ?? string.Empty,
+                ResponsibilityCode = _employeeProfile.ResponsibilityCode ?? string.Empty,
+                UserId = _employeeProfile.UserId
+            };
+
+            await PersonalClient.UpdateEmployeeEndpointAsync(
+                "1",
+                _employeeProfile.Id ?? Guid.Empty,
+                updateEmployeeCommand);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Failed to sync employee profile: {ex.Message}");
+            // Don't fail the whole operation - Identity update succeeded
+        }
+    }
+
+    private void NavigateToEmployeeRegistration()
+    {
+        Navigation.NavigateTo("/catalog/employees");
+    }
+
+    private void NavigateToEmployeeEdit()
+    {
+        if (_employeeProfile?.Id != null)
+        {
+            Navigation.NavigateTo($"/catalog/employees");
         }
     }
 

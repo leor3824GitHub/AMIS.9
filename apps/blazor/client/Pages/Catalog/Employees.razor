@@ -9,7 +9,7 @@
     </AdvancedSearchContent>
 
     <EditFormContent>
-        @if (!Context.AddEditModal.IsCreate)
+        @if (Context.AddEditModal != null && !Context.AddEditModal.IsCreate)
         {
             <MudItem xs="12" md="6">
                 <MudTextField Value="context.Id" Underline=false ReadOnly Label="Employee Id" />

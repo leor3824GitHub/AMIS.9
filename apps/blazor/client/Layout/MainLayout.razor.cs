@@ -1,6 +1,7 @@
 ﻿using AMIS.Blazor.Infrastructure.Preferences;
 using AMIS.Blazor.Infrastructure.Api;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 
 namespace AMIS.Blazor.Client.Layout;
@@ -29,6 +30,9 @@ public partial class MainLayout
     [Inject]
     private IApiClient Api { get; set; } = default!;
 
+    [Inject]
+    private AuthenticationStateProvider AuthenticationStateProvider { get; set; } = default!;
+
     protected override async Task OnInitializedAsync()
     {
         if (await ClientPreferences.GetPreference() is ClientPreference preferences)
@@ -43,7 +47,12 @@ public partial class MainLayout
         UpdateShowDashboardFlag();
         if (_showDashboard)
         {
-            await LoadDashboardAsync();
+            // Only load dashboard if user is authenticated
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            if (authState.User.Identity?.IsAuthenticated == true)
+            {
+                await LoadDashboardAsync();
+            }
         }
     }
 

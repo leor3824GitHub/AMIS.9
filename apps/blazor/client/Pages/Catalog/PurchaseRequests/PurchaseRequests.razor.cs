@@ -92,6 +92,13 @@ public partial class PurchaseRequests
     private async Task OnCreate()
     {
         var requesterEmployeeId = await GetCurrentEmployeeIdAsync();
+        
+        if (requesterEmployeeId == Guid.Empty)
+        {
+            Snackbar?.Add("You need to complete your employee profile before creating purchase requests. Please visit your profile page.", Severity.Warning);
+            return;
+        }
+        
         var model = new CreatePurchaseRequestCommand
         {
             RequestDate = DateTime.UtcNow,
