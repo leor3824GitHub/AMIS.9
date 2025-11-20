@@ -3,6 +3,7 @@ using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Infrastructure.Persistence;
 using AMIS.WebApi.Catalog.Domain;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Canvass;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Employee;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.InspectionRequest.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.Inspection.v1;
@@ -14,6 +15,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace AMIS.WebApi.Catalog.Infrastructure;
+
 public static class CatalogModule
 {
     public class Endpoints : CarterModule
@@ -106,6 +108,7 @@ public static class CatalogModule
             inspectionGroup.MapInspectionApproveEndpoint();
             inspectionGroup.MapInspectionRejectEndpoint();
             inspectionGroup.MapInspectionCancelEndpoint();
+            inspectionGroup.MapInspectionCompleteEndpoint();
 
             var acceptanceGroup = app.MapGroup("acceptances").WithTags("acceptances");
             acceptanceGroup.MapAcceptanceCreationEndpoint();
@@ -113,6 +116,9 @@ public static class CatalogModule
             acceptanceGroup.MapGetAcceptanceEndpoint();
             acceptanceGroup.MapGetAcceptanceListEndpoint();
             acceptanceGroup.MapAcceptanceUpdateEndpoint();
+            acceptanceGroup.MapAcceptancePostEndpoint();
+            acceptanceGroup.MapAcceptanceLinkInspectionEndpoint();
+            acceptanceGroup.MapAcceptanceCancelEndpoint();
 
             acceptanceGroup.MapAcceptanceItemManagementEndpoints();
 
@@ -123,6 +129,10 @@ public static class CatalogModule
             inspectionRequestGroup.MapGetInspectionRequestEndpoint();
             inspectionRequestGroup.MapGetInspectionRequestListEndpoint();
             inspectionRequestGroup.MapInspectionRequestUpdateEndpoint();
+            inspectionRequestGroup.MapInspectionRequestAssignInspectorEndpoint();
+            inspectionRequestGroup.MapInspectionRequestMarkCompletedEndpoint();
+            inspectionRequestGroup.MapInspectionRequestMarkAcceptedEndpoint();
+            inspectionRequestGroup.MapInspectionRequestUpdateStatusEndpoint();
 
             var purchaseRequestGroup = app.MapGroup("purchaseRequests").WithTags("purchaseRequests");
             purchaseRequestGroup.MapPurchaseRequestCreationEndpoint();
@@ -133,6 +143,15 @@ public static class CatalogModule
             purchaseRequestGroup.MapPurchaseRequestRejectEndpoint();
             purchaseRequestGroup.MapPurchaseRequestCancelEndpoint();
             purchaseRequestGroup.MapPurchaseRequestItemManagementEndpoints();
+
+            var canvassGroup = app.MapGroup("canvasses").WithTags("canvasses");
+            canvassGroup.MapCanvassCreationEndpoint();
+            canvassGroup.MapGetCanvassEndpoint();
+            canvassGroup.MapSearchCanvassesEndpoint();
+            canvassGroup.MapCanvassUpdateEndpoint();
+            canvassGroup.MapCanvassDeleteEndpoint();
+            canvassGroup.MapCanvassSelectLowestEndpoint();
+            canvassGroup.MapAwardCanvassEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -179,6 +198,10 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         builder.Services.AddKeyedScoped<IRepository<PurchaseRequest>, CatalogRepository<PurchaseRequest>>("catalog:purchaseRequests");
         builder.Services.AddKeyedScoped<IReadRepository<PurchaseRequest>, CatalogRepository<PurchaseRequest>>("catalog:purchaseRequests");
+
+        builder.Services.AddKeyedScoped<IRepository<Canvass>, CatalogRepository<Canvass>>("catalog:canvasses");
+        builder.Services.AddKeyedScoped<IReadRepository<Canvass>, CatalogRepository<Canvass>>("catalog:canvasses");
+
         return builder;
     }
     public static WebApplication UseCatalogModule(this WebApplication app)

@@ -6,6 +6,6 @@ public sealed record AddPurchaseRequestItemCommand(
     Guid PurchaseRequestId,
     Guid? ProductId,
     int Qty,
-    string? Description,
-    string? Justification
+    string Unit,
+    string? Description
 ) : IRequest<Guid>; // returns new item Id

@@ -1,0 +1,35 @@
+@using AMIS.Blazor.Infrastructure.Api
+
+<MudDialog>
+    <DialogContent>
+        <MudSelect @bind-Value="_selectedStatus" Label="New Status" Variant="Variant.Outlined"
+            AnchorOrigin="Origin.BottomCenter">
+            @foreach (InspectionRequestStatus status in Enum.GetValues(typeof(InspectionRequestStatus)))
+            {
+                <MudSelectItem Value="@status" Disabled="@(status == CurrentStatus)">
+                    @status.ToString()
+                </MudSelectItem>
+            }
+        </MudSelect>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="@(_selectedStatus == CurrentStatus)">Update
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
+    [Parameter] public InspectionRequestStatus CurrentStatus { get; set; }
+
+    private InspectionRequestStatus _selectedStatus;
+
+    protected override void OnInitialized()
+    {
+        _selectedStatus = CurrentStatus;
+    }
+
+    void Cancel() => MudDialog?.Cancel();
+    void Submit() => MudDialog?.Close(DialogResult.Ok(_selectedStatus));
+}

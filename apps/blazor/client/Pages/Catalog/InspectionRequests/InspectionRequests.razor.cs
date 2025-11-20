@@ -13,6 +13,7 @@ using AMIS.Blazor.Client.Pages.Catalog.Inspections; // for InspectionDialog
 using System.Linq; // ensure LINQ
 
 namespace AMIS.Blazor.Client.Pages.Catalog.InspectionRequests;
+
 public partial class InspectionRequests
 {
     private MudDataGrid<InspectionRequestResponse> _table = default!;
@@ -50,10 +51,10 @@ public partial class InspectionRequests
         _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.InspectionRequests);
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.InspectionRequests);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.InspectionRequests);
-        
+
         await LoadPurchasesAsync();
         await LoadEmployeesAsync();
-        
+
     }
 
     private async Task LoadEmployeesAsync()
@@ -207,6 +208,78 @@ public partial class InspectionRequests
         if (!state.Canceled)
         {
             await _table.ReloadServerData();
+        }
+    }
+
+    private async Task OnMarkCompleted(InspectionRequestResponse? item)
+    {
+        if (item is null) return;
+
+        if (item.Status == InspectionRequestStatus.Completed)
+        {
+            Snackbar?.Add("Request is already completed.", Severity.Info);
+            return;
+        }
+
+        try
+        {
+            await inspectionrequestclient.MarkCompletedInspectionRequestEndpointAsync("1", item.Id!.Value);
+            Snackbar?.Add("Inspection request marked as completed.", Severity.Success);
+            await _table.ReloadServerData();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Mark completed failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnMarkAccepted(InspectionRequestResponse? item)
+    {
+        if (item is null) return;
+
+        if (item.Status == InspectionRequestStatus.Accepted)
+        {
+            Snackbar?.Add("Request is already accepted.", Severity.Info);
+            return;
+        }
+
+        try
+        {
+            await inspectionrequestclient.MarkAcceptedInspectionRequestEndpointAsync("1", item.Id!.Value);
+            Snackbar?.Add("Inspection request marked as accepted.", Severity.Success);
+            await _table.ReloadServerData();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Mark accepted failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnUpdateStatus(InspectionRequestResponse? item)
+    {
+        if (item is null) return;
+
+        // Show dialog to select new status
+        var parameters = new DialogParameters
+        {
+            { "CurrentStatus", item.Status }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<UpdateStatusDialog>("Update Status", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: InspectionRequestStatus newStatus })
+        {
+            try
+            {
+                await inspectionrequestclient.UpdateStatusInspectionRequestEndpointAsync("1", item.Id!.Value, newStatus);
+                Snackbar?.Add($"Status updated to {newStatus}.", Severity.Success);
+                await _table.ReloadServerData();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Status update failed: {ex.Message}", Severity.Error);
+            }
         }
     }
 

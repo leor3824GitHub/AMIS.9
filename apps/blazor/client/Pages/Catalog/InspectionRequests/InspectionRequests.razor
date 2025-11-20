@@ -3,58 +3,37 @@
 @using AMIS.Blazor.Infrastructure.Api
 @using MudBlazor
 
-<PageHeader Title="Inspection Requests" Header="Inspection Request Management" SubHeader="Manage and track purchase inspection requests and assignments" />
+<PageHeader Title="Inspection Requests" Header="Inspection Request Management"
+    SubHeader="Manage and track purchase inspection requests and assignments" />
 
 <MudPaper Class="pa-4">
     <MudStack Row="true" Spacing="2" Class="mb-4">
         @if (_canSearch)
         {
-            <MudTextField T="string"
-                          ValueChanged="@(s => OnSearch(s))"
-                          Placeholder="Search by purchase, status, or inspector..."
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          Variant="Variant.Outlined"
-                          Disabled="@_loading" />
+            <MudTextField T="string" ValueChanged="@(s => OnSearch(s))"
+                Placeholder="Search by purchase, status, or inspector..." Adornment="Adornment.Start"
+                AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" Disabled="@_loading" />
         }
         <MudSpacer />
-        <MudButton Variant="Variant.Outlined"
-                   Color="Color.Secondary"
-                   Disabled="@_loading"
-                   OnClick="@OnRefresh"
-                   StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="@_loading" OnClick="@OnRefresh"
+            StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
 
         @if (_canCreate)
         {
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Disabled="@_loading"
-                       OnClick="OnCreate"
-                       StartIcon="@Icons.Material.Filled.Add">New Request</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_loading" OnClick="OnCreate"
+                StartIcon="@Icons.Material.Filled.Add">New Request</MudButton>
         }
 
         @if (_canDelete)
         {
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Error"
-                       Disabled="@(_selectedItems.Count == 0)"
-                       OnClick="OnDeleteChecked"
-                       StartIcon="@Icons.Material.Filled.Delete">Delete Selected</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="@(_selectedItems.Count == 0)"
+                OnClick="OnDeleteChecked" StartIcon="@Icons.Material.Filled.Delete">Delete Selected</MudButton>
         }
     </MudStack>
 
-    <MudDataGrid ServerData="ServerReload"
-                 T="InspectionRequestResponse"
-                 MultiSelection="true"
-                 @bind-SelectedItems="_selectedItems"
-                 @bind-SelectedItem="_currentDto"
-                 Hover="true"
-                 Dense="true"
-                 Bordered="true"
-                 Striped="true"
-                 Loading="@_loading"
-                 @ref="_table"
-                 RowStyleFunc="@RowStyle">
+    <MudDataGrid ServerData="ServerReload" T="InspectionRequestResponse" MultiSelection="true"
+        @bind-SelectedItems="_selectedItems" @bind-SelectedItem="_currentDto" Hover="true" Dense="true" Bordered="true"
+        Striped="true" Loading="@_loading" @ref="_table" RowStyleFunc="@RowStyle">
 
         <Columns>
             <SelectColumn T="InspectionRequestResponse" />
@@ -106,7 +85,8 @@
                     }
                     else
                     {
-                        <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined" Icon="@Icons.Material.Filled.PersonOff">
+                        <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Outlined"
+                            Icon="@Icons.Material.Filled.PersonOff">
                             Unassigned
                         </MudChip>
                     }
@@ -114,10 +94,8 @@
             </TemplateColumn>
             <TemplateColumn Title="Status" Sortable="false">
                 <CellTemplate>
-                    <MudChip Size="Size.Small" 
-                             Color="@GetStatusColor(context.Item.Status)" 
-                             Variant="Variant.Filled"
-                             Icon="@GetStatusIcon(context.Item.Status)">
+                    <MudChip Size="Size.Small" Color="@GetStatusColor(context.Item.Status)" Variant="Variant.Filled"
+                        Icon="@GetStatusIcon(context.Item.Status)">
                         @context.Item.Status.ToString()
                     </MudChip>
                 </CellTemplate>
@@ -139,18 +117,22 @@
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true" Size="Size.Small">
                         @if (context.Item.InspectorId == null)
                         {
-                            <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)" OnClick="@(() => OnAssign(context.Item))">
+                            <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)"
+                                OnClick="@(() => OnAssign(context.Item))">
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                    <MudIcon Icon="@Icons.Material.Filled.AssignmentInd" Size="Size.Small" Color="Color.Info" />
+                                    <MudIcon Icon="@Icons.Material.Filled.AssignmentInd" Size="Size.Small"
+                                        Color="Color.Info" />
                                     <MudText>Assign Inspector</MudText>
                                 </MudStack>
                             </MudMenuItem>
                         }
                         else
                         {
-                            <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)" OnClick="@(() => ReAssign(context.Item))">
+                            <MudMenuItem Disabled="@ShouldDisableAssignActions(context.Item)"
+                                OnClick="@(() => ReAssign(context.Item))">
                                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                    <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small" Color="Color.Warning" />
+                                    <MudIcon Icon="@Icons.Material.Filled.SwapHoriz" Size="Size.Small"
+                                        Color="Color.Warning" />
                                     <MudText>Re-Assign</MudText>
                                 </MudStack>
                             </MudMenuItem>
@@ -163,10 +145,34 @@
                         </MudMenuItem>
                         <MudDivider />
                         <MudMenuItem Disabled="@ShouldDisableInspect(context.Item)"
-                                     OnClick="@(() => OnInspect(context.Item))">
+                            OnClick="@(() => OnInspect(context.Item))">
                             <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
-                                <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small" Color="Color.Success" />
+                                <MudIcon Icon="@Icons.Material.Filled.FactCheck" Size="Size.Small"
+                                    Color="Color.Success" />
                                 <MudText>Start Inspection</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudDivider />
+                        <MudMenuItem Disabled="@(context.Item.Status == InspectionRequestStatus.Completed)"
+                            OnClick="@(() => OnMarkCompleted(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small"
+                                    Color="Color.Success" />
+                                <MudText>Mark Completed</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudMenuItem Disabled="@(context.Item.Status == InspectionRequestStatus.Accepted)"
+                            OnClick="@(() => OnMarkAccepted(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.TaskAlt" Size="Size.Small"
+                                    Color="Color.Primary" />
+                                <MudText>Mark Accepted</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        <MudMenuItem OnClick="@(() => OnUpdateStatus(context.Item))">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Update" Size="Size.Small" Color="Color.Info" />
+                                <MudText>Update Status</MudText>
                             </MudStack>
                         </MudMenuItem>
                     </MudMenu>

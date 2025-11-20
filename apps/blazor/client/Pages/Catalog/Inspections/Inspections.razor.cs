@@ -214,8 +214,8 @@ public partial class Inspections
         }
 
         var model = item.Adapt<UpdateInspectionCommand>();
-    // Only InProgress inspections are editable, see CanEdit
-    await ShowEditFormDialog("Edit inspection", model, false, _inspectionrequests, isReadOnly: false);
+        // Only InProgress inspections are editable, see CanEdit
+        await ShowEditFormDialog("Edit inspection", model, false, _inspectionrequests, isReadOnly: false);
     }
 
     private async Task OnDelete(InspectionResponse item)
@@ -288,7 +288,7 @@ public partial class Inspections
             InspectionRequestId = null,
             Remarks = null
         };
-    await ShowEditFormDialog("Create new inspection", model, true, _inspectionrequests, isReadOnly: false);
+        await ShowEditFormDialog("Create new inspection", model, true, _inspectionrequests, isReadOnly: false);
     }
 
     private async Task OnApprove(InspectionResponse item)
@@ -307,6 +307,72 @@ public partial class Inspections
         }
     }
 
+    private async Task OnComplete(InspectionResponse item)
+    {
+        try
+        {
+            await inspectionclient.CompleteInspectionEndpointAsync("1", item.Id);
+            Snackbar?.Add("Inspection marked as completed.", Severity.Success);
+            await _table.ReloadServerData();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Complete failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnReject(InspectionResponse item)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Label", "Rejection Reason" },
+            { "Placeholder", "Enter reason for rejection..." }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>("Reject Inspection", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: string reason })
+        {
+            try
+            {
+                await inspectionclient.RejectInspectionEndpointAsync("1", item.Id, reason);
+                Snackbar?.Add("Inspection rejected.", Severity.Success);
+                await _table.ReloadServerData();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Reject failed: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OnCancel(InspectionResponse item)
+    {
+        var parameters = new DialogParameters
+        {
+            { "Label", "Cancellation Reason" },
+            { "Placeholder", "Enter reason for cancellation..." }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>("Cancel Inspection", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: string reason })
+        {
+            try
+            {
+                await inspectionclient.CancelInspectionEndpointAsync("1", item.Id, reason);
+                Snackbar?.Add("Inspection cancelled.", Severity.Success);
+                await _table.ReloadServerData();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Cancel failed: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
     private bool IsApproveEnabled(InspectionResponse item)
     {
         if (item == null) return false;
@@ -322,10 +388,10 @@ public partial class Inspections
         {
             // Check if inspection has items with passed items through the aggregate
             // Inspections are loaded with items in InspectionResponse, check those instead
-            var hasPassedItems = item.Items?.Any(i => 
-                i.InspectionItemStatus == InspectionItemStatus.Passed || 
+            var hasPassedItems = item.Items?.Any(i =>
+                i.InspectionItemStatus == InspectionItemStatus.Passed ||
                 i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation) == true;
-            
+
             _approveEnabledCache[item.Id] = hasPassedItems;
             return hasPassedItems;
         }

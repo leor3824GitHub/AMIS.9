@@ -10,10 +10,6 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [JsonPropertyName("remarks")]
         public string? Remarks { get; set; }
-
-        // Align with server domain property until NSwag regeneration updates generated contract
-        [JsonPropertyName("deliveryAddress")]
-        public string? DeliveryAddress { get; set; }
     }
 
     // Extends generated UpdatePurchaseCommand with client-side only properties
@@ -24,8 +20,5 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [JsonPropertyName("remarks")]
         public string? Remarks { get; set; }
-
-        [JsonPropertyName("deliveryAddress")]
-        public string? DeliveryAddress { get; set; }
     }
 }

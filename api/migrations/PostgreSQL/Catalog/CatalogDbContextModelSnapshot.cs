@@ -195,6 +195,86 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.HasAnnotation("Finbuckle:MultiTenant", true);
                 });
 
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Canvass", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsSelected")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("ItemDescription")
+                        .IsRequired()
+                        .HasMaxLength(512)
+                        .HasColumnType("character varying(512)");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("PurchaseRequestId")
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("QuotedPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(1024)
+                        .HasColumnType("character varying(1024)");
+
+                    b.Property<DateTime>("ResponseDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SupplierId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("TenantId")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PurchaseRequestId")
+                        .HasDatabaseName("IX_Canvass_PurchaseRequestId");
+
+                    b.HasIndex("SupplierId")
+                        .HasDatabaseName("IX_Canvass_SupplierId");
+
+                    b.HasIndex("PurchaseRequestId", "SupplierId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_Canvass_PurchaseRequestId_SupplierId");
+
+                    b.ToTable("Canvasses", "catalog");
+
+                    b.HasAnnotation("Finbuckle:MultiTenant", true);
+                });
+
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Category", b =>
                 {
                     b.Property<Guid>("Id")
@@ -926,6 +1006,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 
                     b.HasKey("Id");
 
+                    b.HasIndex("RequestedBy");
+
                     b.ToTable("PurchaseRequests", "catalog");
 
                     b.HasAnnotation("Finbuckle:MultiTenant", true);
@@ -953,10 +1035,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .HasMaxLength(512)
                         .HasColumnType("character varying(512)");
 
-                    b.Property<string>("Justification")
-                        .HasMaxLength(1024)
-                        .HasColumnType("character varying(1024)");
-
                     b.Property<DateTimeOffset>("LastModified")
                         .HasColumnType("timestamp with time zone");
 
@@ -976,6 +1054,11 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                         .IsRequired()
                         .HasMaxLength(64)
                         .HasColumnType("character varying(64)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.HasKey("Id");
 
@@ -1089,6 +1172,24 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Navigation("Acceptance");
 
                     b.Navigation("PurchaseItem");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Canvass", b =>
+                {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.PurchaseRequest", "PurchaseRequest")
+                        .WithMany()
+                        .HasForeignKey("PurchaseRequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Supplier", "Supplier")
+                        .WithMany()
+                        .HasForeignKey("SupplierId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("PurchaseRequest");
+
+                    b.Navigation("Supplier");
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Inspection", b =>
@@ -1234,6 +1335,17 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Navigation("Product");
 
                     b.Navigation("Purchase");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.PurchaseRequest", b =>
+                {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.Employee", "RequestedByEmployee")
+                        .WithMany()
+                        .HasForeignKey("RequestedBy")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("RequestedByEmployee");
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.PurchaseRequestItem", b =>

@@ -7,6 +7,6 @@ public sealed record UpdatePurchaseRequestItemCommand(
     Guid ItemId,
     Guid? ProductId,
     int Qty,
-    string? Description,
-    string? Justification
+    string Unit,
+    string? Description
 ) : IRequest;

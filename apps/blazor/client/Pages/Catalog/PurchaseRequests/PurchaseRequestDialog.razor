@@ -14,7 +14,8 @@
         {
             <MudStack Spacing="1">
                 <MudDatePicker @bind-Date="RequestDateValue" Label="Request Date" Dense="true" Margin="Margin.Dense" />
-                <MudTextField T="string" @bind-Value="CreateModel.Purpose" Label="Purpose" Dense="true" Margin="Margin.Dense" Required="true" />
+                <MudTextField T="string" @bind-Value="CreateModel.Purpose" Label="Purpose" Dense="true"
+                    Margin="Margin.Dense" Required="true" />
                 <PurchaseRequestItemList Items="CreateModel.Items" Products="_products" OnItemsChanged="StateHasChanged" />
             </MudStack>
         }
@@ -28,14 +29,14 @@
                     <HeaderContent>
                         <MudTh>Product</MudTh>
                         <MudTh>Qty</MudTh>
+                        <MudTh>Unit</MudTh>
                         <MudTh>Description</MudTh>
-                        <MudTh>Justification</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>@context.ProductId</MudTd>
                         <MudTd>@context.Qty</MudTd>
+                        <MudTd>@context.Unit</MudTd>
                         <MudTd>@context.Description</MudTd>
-                        <MudTd>@context.Justification</MudTd>
                     </RowTemplate>
                 </MudTable>
             </MudStack>
@@ -45,7 +46,8 @@
         <MudButton DropShadow=false StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel">Close</MudButton>
         @if (IsCreate)
         {
-            <MudButton DropShadow=false StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary" Variant="Variant.Filled" Disabled="@(!CanSave())" OnClick="Save">Create</MudButton>
+            <MudButton DropShadow=false StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary"
+                Variant="Variant.Filled" Disabled="@(!CanSave())" OnClick="Save">Create</MudButton>
         }
     </DialogActions>
 </MudDialog>
@@ -74,10 +76,10 @@
     {
         if (RequestDateValue.HasValue)
             CreateModel.RequestDate = RequestDateValue.Value;
-        return CreateModel.RequestDate != default && 
-               !string.IsNullOrWhiteSpace(CreateModel.Purpose) &&
-               CreateModel.Items != null && 
-               CreateModel.Items.Count > 0;
+        return CreateModel.RequestDate != default &&
+        !string.IsNullOrWhiteSpace(CreateModel.Purpose) &&
+        CreateModel.Items != null &&
+        CreateModel.Items.Count > 0;
     }
 
     private async Task Save()

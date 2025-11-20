@@ -8,8 +8,8 @@ public class PurchaseRequestItem : AuditableEntity
     public Guid PurchaseRequestId { get; private set; }
     public Guid? ProductId { get; private set; }
     public int Qty { get; private set; }
+    public string Unit { get; private set; } = "Piece";
     public string? Description { get; private set; }
-    public string? Justification { get; private set; }
 
     // Navigation
     public virtual PurchaseRequest PurchaseRequest { get; private set; } = default!;
@@ -17,29 +17,31 @@ public class PurchaseRequestItem : AuditableEntity
 
     private PurchaseRequestItem() { }
 
-    private PurchaseRequestItem(Guid id, Guid purchaseRequestId, Guid? productId, int qty, string? description, string? justification)
+    private PurchaseRequestItem(Guid id, Guid purchaseRequestId, Guid? productId, int qty, string unit, string? description)
     {
         if (qty <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(qty));
+        if (string.IsNullOrWhiteSpace(unit))
+            throw new ArgumentException("Unit cannot be null or empty.", nameof(unit));
 
         Id = id;
         PurchaseRequestId = purchaseRequestId;
         ProductId = productId;
         Qty = qty;
+        Unit = unit;
         Description = description;
-        Justification = justification;
 
         QueueDomainEvent(new PurchaseRequestItemCreated { PurchaseRequestItem = this });
     }
 
-    public static PurchaseRequestItem Create(Guid purchaseRequestId, Guid? productId, int qty, string? description, string? justification)
+    public static PurchaseRequestItem Create(Guid purchaseRequestId, Guid? productId, int qty, string unit, string? description)
     {
-        return new PurchaseRequestItem(Guid.NewGuid(), purchaseRequestId, productId, qty, description, justification);
+        return new PurchaseRequestItem(Guid.NewGuid(), purchaseRequestId, productId, qty, unit, description);
     }
 
-    public static PurchaseRequestItem Create(Guid itemId, Guid purchaseRequestId, Guid? productId, int qty, string? description, string? justification)
+    public static PurchaseRequestItem Create(Guid itemId, Guid purchaseRequestId, Guid? productId, int qty, string unit, string? description)
     {
-        return new PurchaseRequestItem(itemId, purchaseRequestId, productId, qty, description, justification);
+        return new PurchaseRequestItem(itemId, purchaseRequestId, productId, qty, unit, description);
     }
 
     internal void SetPurchaseRequestId(Guid purchaseRequestId)
@@ -51,10 +53,12 @@ public class PurchaseRequestItem : AuditableEntity
         PurchaseRequestId = purchaseRequestId;
     }
 
-    public PurchaseRequestItem Update(Guid? productId, int qty, string? description, string? justification)
+    public PurchaseRequestItem Update(Guid? productId, int qty, string unit, string? description)
     {
         if (qty <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(qty));
+        if (string.IsNullOrWhiteSpace(unit))
+            throw new ArgumentException("Unit cannot be null or empty.", nameof(unit));
 
         bool isUpdated = false;
 
@@ -70,17 +74,18 @@ public class PurchaseRequestItem : AuditableEntity
             isUpdated = true;
         }
 
+        if (Unit != unit)
+        {
+            Unit = unit;
+            isUpdated = true;
+        }
+
         if (Description != description)
         {
             Description = description;
             isUpdated = true;
         }
 
-        if (Justification != justification)
-        {
-            Justification = justification;
-            isUpdated = true;
-        }
 
         if (isUpdated)
         {

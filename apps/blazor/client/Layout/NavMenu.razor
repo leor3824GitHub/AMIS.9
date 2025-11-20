@@ -21,6 +21,10 @@
         {
             <MudNavLink Href="/catalog/purchaserequests" Icon="@Icons.Material.Filled.Description" Class="fsh-nav-child">Purchase Requests</MudNavLink>
         }
+        @if (_canViewCanvasses)
+        {
+            <MudNavLink Href="/catalog/canvasses" Icon="@Icons.Material.Filled.Gavel" Class="fsh-nav-child">Canvasses</MudNavLink>
+        }
         @if (_canViewInspectionRequests)
         {
             <MudNavLink Href="/catalog/inspectionrequests" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Inspection Request</MudNavLink>

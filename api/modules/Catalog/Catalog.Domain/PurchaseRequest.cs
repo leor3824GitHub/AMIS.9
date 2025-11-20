@@ -17,7 +17,7 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
     public string? ApprovalRemarks { get; private set; }
     public Guid? ApprovedBy { get; private set; }
     public DateTime? ApprovedOn { get; private set; }
-    
+
     public virtual ICollection<PurchaseRequestItem> Items { get; private set; } = [];
 
     // Computed properties - not persisted
@@ -43,12 +43,12 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
     public static PurchaseRequest Create(Guid requestedBy, string purpose, DateTime? requestDate = null)
     {
         var purchaseRequest = new PurchaseRequest(
-            Guid.NewGuid(), 
-            requestDate ?? DateTime.UtcNow, 
-            requestedBy, 
-            purpose, 
+            Guid.NewGuid(),
+            requestDate ?? DateTime.UtcNow,
+            requestedBy,
+            purpose,
             PurchaseRequestStatus.Draft);
-        
+
         return purchaseRequest;
     }
 
@@ -78,7 +78,7 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
         return this;
     }
 
-    public void AddItem(Guid? productId, int qty, string? description, string? justification)
+    public void AddItem(Guid? productId, int qty, string unit, string? description)
     {
         if (Status != PurchaseRequestStatus.Draft)
         {
@@ -90,22 +90,22 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
             throw new ArgumentException("Quantity must be greater than zero.", nameof(qty));
         }
 
-        var item = PurchaseRequestItem.Create(this.Id, productId, qty, description, justification);
+        var item = PurchaseRequestItem.Create(this.Id, productId, qty, unit, description);
         Items.Add(item);
     }
 
-    public void AddItem(Guid id, Guid? productId, int qty, string? description, string? justification)
+    public void AddItem(Guid id, Guid? productId, int qty, string unit, string? description)
     {
         if (Status != PurchaseRequestStatus.Draft)
         {
             throw new InvalidOperationException($"Cannot add items to a {Status} purchase request.");
         }
 
-        var item = PurchaseRequestItem.Create(id, this.Id, productId, qty, description, justification);
+        var item = PurchaseRequestItem.Create(id, this.Id, productId, qty, unit, description);
         Items.Add(item);
     }
 
-    public void UpdateItem(Guid itemId, Guid? productId, int qty, string? description, string? justification)
+    public void UpdateItem(Guid itemId, Guid? productId, int qty, string unit, string? description)
     {
         if (Status != PurchaseRequestStatus.Draft)
         {
@@ -118,7 +118,7 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
             throw new InvalidOperationException($"Purchase request item with ID {itemId} not found.");
         }
 
-        item.Update(productId, qty, description, justification);
+        item.Update(productId, qty, unit, description);
     }
 
     public void RemoveItem(Guid itemId)
@@ -203,7 +203,7 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
 
         Status = PurchaseRequestStatus.Cancelled;
         ApprovalRemarks = string.IsNullOrWhiteSpace(reason) ? ApprovalRemarks : $"{ApprovalRemarks}\nCancellation Reason: {reason}";
-        
+
         QueueDomainEvent(new PurchaseRequestUpdated { PurchaseRequest = this });
     }
 }

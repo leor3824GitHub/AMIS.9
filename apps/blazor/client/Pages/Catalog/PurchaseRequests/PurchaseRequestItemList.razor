@@ -4,113 +4,150 @@
 <MudPaper Class="pa-2 mb-2" Style="max-height: 50vh; overflow-y: auto;">
     <MudText Typo="Typo.subtitle1" Class="mb-1">Request Items - @(Items?.Count ?? 0)</MudText>
 
-    <MudTable T="PurchaseRequestItemDto" Items="Items" Hover Bordered Striped Dense="true">
+    <MudTable T="PurchaseRequestItemCreateDto" Items="Items" Hover Bordered Striped Dense="true">
         <HeaderContent>
-            <MudTh Style="width: 40%">Product</MudTh>
+            <MudTh Style="width: 35%">Product</MudTh>
             <MudTh Style="width: 10%">Qty</MudTh>
-            <MudTh Style="width: 25%">Description</MudTh>
-            <MudTh Style="width: 25%">Justification</MudTh>
+            <MudTh Style="width: 10%">Unit</MudTh>
+            <MudTh Style="width: 30%">Description</MudTh>
             <MudTh>Actions</MudTh>
         </HeaderContent>
         <RowTemplate Context="item">
             @if (EditingItem == item)
             {
                 <MudTd>
-                    <MudSelect T="Guid?" @bind-Value="item.ProductId" Dense Margin="Margin.Dense" Style="width: 100%;" Variant="Variant.Outlined">
+                    <MudSelect T="Guid ?" @bind-Value="item.ProductId" Dense Margin="Margin.Dense" Style="width: 100%;"
+                        Variant="Variant.Outlined">
                         @foreach (var p in Products)
                         {
-                            <MudSelectItem T="Guid?" Value="p.Id">@p.Name</MudSelectItem>
+                            <MudSelectItem T="Guid ?" Value="p.Id">@p.Name</MudSelectItem>
                         }
                     </MudSelect>
                 </MudTd>
                 <MudTd>
-                    <MudNumericField HideSpinButtons T="int" @bind-Value="item.Qty" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
+                    <MudNumericField HideSpinButtons T="int" @bind-Value="item.Qty" Dense Margin="Margin.Dense"
+                        Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    <MudTextField T="string" @bind-Value="item.Description" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
+                    <MudSelect T="string" @bind-Value="item.Unit" Dense Margin="Margin.Dense" Style="width: 100%;"
+                        Variant="Variant.Outlined">
+                        @foreach (var u in UnitOptions)
+                        {
+                            <MudSelectItem T="string" Value="u">@u</MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudTd>
                 <MudTd>
-                    <MudTextField T="string" @bind-Value="item.Justification" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
+                    <MudTextField T="string" @bind-Value="item.Description" Dense Margin="Margin.Dense"
+                        Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small" OnClick="SaveEdit" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Secondary" Size="Size.Small" OnClick="CancelEdit" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success" Size="Size.Small"
+                        OnClick="SaveEdit" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Close" Color="Color.Secondary" Size="Size.Small"
+                        OnClick="CancelEdit" />
                 </MudTd>
             }
             else
             {
                 <MudTd>@Products.FirstOrDefault(x => x.Id == item.ProductId)?.Name</MudTd>
                 <MudTd>@item.Qty</MudTd>
+                <MudTd>@item.Unit</MudTd>
                 <MudTd>@item.Description</MudTd>
-                <MudTd>@item.Justification</MudTd>
                 <MudTd>
-                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="() => EditItem(item)" />
-                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="() => RemoveItem(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small"
+                        OnClick="() => EditItem(item)" />
+                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small"
+                        OnClick="() => RemoveItem(item)" />
                 </MudTd>
             }
         </RowTemplate>
         <FooterContent>
             <MudTd>
-                <MudSelect T="Guid?" @bind-Value="NewProductId" Dense Margin="Margin.Dense" Style="width: 100%;" Placeholder="Select product" Variant="Variant.Outlined">
+                <MudSelect T="Guid ?" @bind-Value="NewProductId" Dense Margin="Margin.Dense" Style="width: 100%;"
+                    Placeholder="Select product" Variant="Variant.Outlined">
                     @foreach (var p in Products)
                     {
-                        <MudSelectItem T="Guid?" Value="p.Id">@p.Name</MudSelectItem>
+                        <MudSelectItem T="Guid ?" Value="p.Id">@p.Name</MudSelectItem>
                     }
                 </MudSelect>
             </MudTd>
             <MudTd>
-                <MudNumericField HideSpinButtons T="int" @bind-Value="NewQty" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
+                <MudNumericField HideSpinButtons T="int" @bind-Value="NewQty" Dense Margin="Margin.Dense"
+                    Variant="Variant.Outlined" />
             </MudTd>
             <MudTd>
-                <MudTextField T="string" @bind-Value="NewDescription" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
+                <MudSelect T="string" @bind-Value="NewUnit" Dense Margin="Margin.Dense" Style="width: 100%;"
+                    Placeholder="Unit" Variant="Variant.Outlined">
+                    @foreach (var u in UnitOptions)
+                    {
+                        <MudSelectItem T="string" Value="u">@u</MudSelectItem>
+                    }
+                </MudSelect>
             </MudTd>
             <MudTd>
-                <MudTextField T="string" @bind-Value="NewJustification" Dense Margin="Margin.Dense" Variant="Variant.Outlined" />
+                <MudTextField T="string" @bind-Value="NewDescription" Dense Margin="Margin.Dense"
+                    Variant="Variant.Outlined" />
             </MudTd>
             <MudTd>
-                <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" Color="Color.Primary" Size="Size.Small" OnClick="AddItem" />
+                <MudIconButton Icon="@Icons.Material.Filled.AddCircleOutline" Color="Color.Primary" Size="Size.Small"
+                    OnClick="AddItem" />
             </MudTd>
         </FooterContent>
     </MudTable>
 </MudPaper>
 
 @code {
-    [Parameter] public ICollection<PurchaseRequestItemDto> Items { get; set; } = new List<PurchaseRequestItemDto>();
+    [Parameter]
+    public ICollection<PurchaseRequestItemCreateDto> Items { get; set; } = new
+    List<PurchaseRequestItemCreateDto>();
     [Parameter] public IReadOnlyList<ProductResponse> Products { get; set; } = Array.Empty<ProductResponse>();
     [Parameter] public Action? OnItemsChanged { get; set; }
 
-    private PurchaseRequestItemDto? EditingItem { get; set; }
+    private PurchaseRequestItemCreateDto? EditingItem { get; set; }
 
     private Guid? NewProductId { get; set; }
     private int NewQty { get; set; }
+    private string? NewUnit { get; set; } = "Piece";
     private string? NewDescription { get; set; }
-    private string? NewJustification { get; set; }
-
-    private void EditItem(PurchaseRequestItemDto item) => EditingItem = item;
     
-    private void SaveEdit() 
-    { 
+
+    private readonly string[] UnitOptions = new[]
+    {
+"Piece", "Box", "Pack", "Set", "Unit",
+"Liter", "Gallon", "Milliliter",
+"Kilogram", "Gram", "Pound", "Ounce",
+"Meter", "Centimeter", "Foot", "Inch",
+"Square Meter", "Square Foot",
+"Cubic Meter", "Cubic Foot",
+"Dozen", "Gross", "Ream"
+};
+
+    private void EditItem(PurchaseRequestItemCreateDto item) => EditingItem = item;
+
+    private void SaveEdit()
+    {
         EditingItem = null;
         OnItemsChanged?.Invoke();
     }
-    
+
     private void CancelEdit() => EditingItem = null;
 
     private void AddItem()
     {
-        if (NewProductId == null || NewQty <= 0) return;
-        Items.Add(new PurchaseRequestItemDto
+        if (NewProductId == null || NewQty <= 0 || string.IsNullOrWhiteSpace(NewUnit)) return;
+        Items.Add(new PurchaseRequestItemCreateDto
         {
             ProductId = NewProductId,
             Qty = NewQty,
-            Description = NewDescription ?? string.Empty,
-            Justification = NewJustification ?? string.Empty
+            Unit = NewUnit,
+            Description = NewDescription ?? string.Empty
         });
-        NewProductId = null; NewQty = 0; NewDescription = null; NewJustification = null;
+        NewProductId = null; NewQty = 0; NewUnit = "Piece"; NewDescription = null;
         OnItemsChanged?.Invoke();
     }
 
-    private void RemoveItem(PurchaseRequestItemDto item)
+    private void RemoveItem(PurchaseRequestItemCreateDto item)
     {
         Items.Remove(item);
         OnItemsChanged?.Invoke();

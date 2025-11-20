@@ -11,8 +11,8 @@ public sealed class CreatePurchaseRequestCommandValidator : AbstractValidator<Cr
         RuleForEach(x => x.Items).ChildRules(item =>
         {
             item.RuleFor(i => i.Qty).GreaterThan(0);
+            item.RuleFor(i => i.Unit).NotEmpty().MaximumLength(50);
             item.RuleFor(i => i.Description).MaximumLength(512);
-            item.RuleFor(i => i.Justification).MaximumLength(1024);
         }).When(x => x.Items != null && x.Items.Count > 0);
     }
 }

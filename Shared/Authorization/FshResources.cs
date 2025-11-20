@@ -1,4 +1,5 @@
 ﻿namespace AMIS.Shared.Authorization;
+
 public static class FshResources
 {
     public const string Tenants = nameof(Tenants);
@@ -15,8 +16,9 @@ public static class FshResources
     public const string Suppliers = nameof(Suppliers);
     public const string Purchases = nameof(Purchases);
     public const string PurchaseItems = nameof(PurchaseItems);
-        public const string PurchaseRequests = nameof(PurchaseRequests);
-        public const string PurchaseRequestItems = nameof(PurchaseRequestItems);
+    public const string PurchaseRequests = nameof(PurchaseRequests);
+    public const string PurchaseRequestItems = nameof(PurchaseRequestItems);
+    public const string Canvasses = nameof(Canvasses);
     public const string Employees = nameof(Employees);
     public const string Issuances = nameof(Issuances);
     public const string IssuanceItems = nameof(IssuanceItems);

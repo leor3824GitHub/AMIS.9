@@ -129,7 +129,7 @@ public partial class Acceptances
             _loading = false;
         }
 
-    return new GridData<AcceptanceResponse?> { TotalItems = _totalItems, Items = _entityList };
+        return new GridData<AcceptanceResponse?> { TotalItems = _totalItems, Items = _entityList };
     }
 
     private Task OnSearch(string value)
@@ -194,7 +194,7 @@ public partial class Acceptances
             {
                 // Find matching purchase item to get product info
                 var purchaseItem = purchase?.Items?.FirstOrDefault(pi => pi.Id == item.PurchaseItemId);
-                
+
                 return new AcceptanceFormModel.AcceptanceItemInput
                 {
                     AcceptanceItemId = item.Id,
@@ -312,6 +312,84 @@ public partial class Acceptances
 
             _selectedItems.Clear();
             await _table.ReloadServerData();
+        }
+    }
+
+    private async Task OnPost(AcceptanceResponse? dto)
+    {
+        if (dto is null) return;
+
+        if (dto.IsPosted)
+        {
+            Snackbar?.Add("Acceptance is already posted.", Severity.Info);
+            return;
+        }
+
+        try
+        {
+            await ApiClient.PostAcceptanceEndpointAsync("1", dto.Id);
+            Snackbar?.Add("Acceptance posted successfully.", Severity.Success);
+            await _table.ReloadServerData();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Post failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OnLinkInspection(AcceptanceResponse? dto)
+    {
+        if (dto is null) return;
+
+        // Show dialog to select inspection
+        var parameters = new DialogParameters
+        {
+            { "PurchaseId", dto.PurchaseId }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Medium, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<SelectInspectionDialog>("Link to Inspection", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: Guid inspectionId })
+        {
+            try
+            {
+                await ApiClient.LinkAcceptanceInspectionEndpointAsync("1", dto.Id, inspectionId);
+                Snackbar?.Add("Acceptance linked to inspection.", Severity.Success);
+                await _table.ReloadServerData();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Link failed: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task OnCancelAcceptance(AcceptanceResponse? dto)
+    {
+        if (dto is null) return;
+
+        var parameters = new DialogParameters
+        {
+            { "Label", "Cancellation Reason" },
+            { "Placeholder", "Enter reason for cancellation..." }
+        };
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Small, FullWidth = true };
+        var dialog = await DialogService.ShowAsync<ReasonDialog>("Cancel Acceptance", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false, Data: string reason })
+        {
+            try
+            {
+                await ApiClient.CancelAcceptanceEndpointAsync("1", dto.Id, reason);
+                Snackbar?.Add("Acceptance cancelled.", Severity.Success);
+                await _table.ReloadServerData();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Cancel failed: {ex.Message}", Severity.Error);
+            }
         }
     }
 

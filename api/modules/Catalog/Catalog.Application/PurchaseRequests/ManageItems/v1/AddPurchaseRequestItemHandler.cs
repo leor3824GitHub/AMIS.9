@@ -18,7 +18,7 @@ public sealed class AddPurchaseRequestItemHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
         var pr = await repository.GetByIdAsync(request.PurchaseRequestId, cancellationToken) ?? throw new InvalidOperationException("PurchaseRequest not found");
-        
+
         // Authorization check: Only the requester, supply officers, or admins can edit
         var userId = currentUser.GetUserId();
         var isAdmin = currentUser.IsInRole(FshRoles.Admin);
@@ -30,7 +30,7 @@ public sealed class AddPurchaseRequestItemHandler(
         if (pr.Status != Domain.ValueObjects.PurchaseRequestStatus.Draft)
             throw new InvalidOperationException("Can only add items while in Draft status");
 
-        pr.AddItem(request.ProductId, request.Qty, request.Description, request.Justification);
+        pr.AddItem(request.ProductId, request.Qty, request.Unit, request.Description);
         await repository.UpdateAsync(pr, cancellationToken);
         var newItem = pr.Items.Last();
         logger.LogInformation("Added item {ItemId} to PurchaseRequest {PRId}", newItem.Id, pr.Id);

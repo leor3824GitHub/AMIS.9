@@ -9,6 +9,7 @@ using AMIS.Framework.Core.Identity.Tokens;
 using AMIS.Framework.Core.Identity.Tokens.Features.Generate;
 using AMIS.Framework.Core.Identity.Tokens.Features.Refresh;
 using AMIS.Framework.Core.Identity.Tokens.Models;
+using AMIS.Framework.Core.Identity.Users.Events;
 using AMIS.Framework.Infrastructure.Auth.Jwt;
 using AMIS.Framework.Infrastructure.Identity.Audit;
 using AMIS.Framework.Infrastructure.Identity.Users;
@@ -20,6 +21,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
 namespace AMIS.Framework.Infrastructure.Identity.Tokens;
+
 public sealed class TokenService : ITokenService
 {
     private readonly UserManager<FshUser> _userManager;
@@ -109,6 +111,12 @@ public sealed class TokenService : ITokenService
                 DateTime = DateTime.UtcNow,
             }
         }));
+
+        // Publish UserLoggedInEvent for cross-module communication (e.g., auto-create employee record)
+        await _publisher.Publish(new UserLoggedInEvent(
+            new Guid(user.Id),
+            user.UserName,
+            user.Email));
 
         return new TokenResponse(token, user.RefreshToken, user.RefreshTokenExpiryTime);
     }

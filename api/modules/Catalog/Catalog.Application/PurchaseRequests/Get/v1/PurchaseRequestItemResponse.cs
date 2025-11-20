@@ -6,7 +6,7 @@ public sealed record PurchaseRequestItemResponse(
     Guid? Id,
     Guid? ProductId,
     int Qty,
+    string Unit,
     string? Description,
-    string? Justification,
     ProductResponse? Product
 );

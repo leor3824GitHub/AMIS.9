@@ -1,0 +1,66 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+@inject IApiClient ApiClient
+@inject ISnackbar Snackbar
+
+<MudDialog>
+    <DialogContent>
+        @if (_loading)
+        {
+            <MudProgressLinear Indeterminate="true" />
+        }
+        else if (_inspections?.Count > 0)
+        {
+            <MudSelect @bind-Value="_selectedInspectionId" Label="Select Inspection" Variant="Variant.Outlined"
+                AnchorOrigin="Origin.BottomCenter">
+                @foreach (var inspection in _inspections)
+                {
+                    <MudSelectItem Value="@inspection.Id">
+                        @inspection.Id - @inspection.Status
+                    </MudSelectItem>
+                }
+            </MudSelect>
+        }
+        else
+        {
+            <MudText>No available inspections found for this purchase.</MudText>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" OnClick="Submit" Disabled="@(_selectedInspectionId == Guid.Empty)">Link
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
+    [Parameter] public Guid PurchaseId { get; set; }
+
+    private List<InspectionResponse>? _inspections;
+    private Guid _selectedInspectionId = Guid.Empty;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            // Load inspections for the purchase
+            var command = new SearchInspectionsCommand { PurchaseId = PurchaseId, PageSize = 100 };
+            var result = await ApiClient.SearchInspectionsEndpointAsync("1", command);
+            _inspections = result.Items?.Where(i => i.Status != InspectionStatus.Cancelled).ToList();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load inspections: {ex.Message}", Severity.Error);
+            _inspections = new List<InspectionResponse>();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    void Cancel() => MudDialog?.Cancel();
+    void Submit() => MudDialog?.Close(DialogResult.Ok(_selectedInspectionId));
+}

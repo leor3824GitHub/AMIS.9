@@ -3,49 +3,32 @@
 @using AMIS.Blazor.Infrastructure.Api
 @using MudBlazor
 
-<PageHeader Title="Purchase Requests" Header="Purchase Request Management" SubHeader="Create, submit, approve or reject purchase requests" />
+<PageHeader Title="Purchase Requests" Header="Purchase Request Management"
+    SubHeader="Create, submit, approve or reject purchase requests" />
 
 <MudPaper Class="pa-4">
     <MudStack Row="true" Spacing="2" Class="mb-4">
         @if (_canSearch)
         {
-            <MudTextField T="string"
-                          ValueChanged="@(s => OnSearch(s))"
-                          Placeholder="Search by requester, purpose, or status..."
-                          Adornment="Adornment.Start"
-                          AdornmentIcon="@Icons.Material.Filled.Search"
-                          Variant="Variant.Outlined"
-                          Disabled="@_loading" />
+            <MudTextField T="string" ValueChanged="@(s => OnSearch(s))"
+                Placeholder="Search by requester, purpose, or status..." Adornment="Adornment.Start"
+                AdornmentIcon="@Icons.Material.Filled.Search" Variant="Variant.Outlined" Disabled="@_loading" />
         }
         <MudSpacer />
-        <MudButton Variant="Variant.Outlined"
-                   Color="Color.Secondary"
-                   Disabled="@_loading"
-                   OnClick="@OnRefresh"
-                   StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="@_loading" OnClick="@OnRefresh"
+            StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
 
         @if (_canCreate)
         {
-            <MudButton Variant="Variant.Filled"
-                       Color="Color.Primary"
-                       Disabled="@_loading"
-                       OnClick="OnCreate"
-                       StartIcon="@Icons.Material.Filled.Add">New Request</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_loading" OnClick="OnCreate"
+                StartIcon="@Icons.Material.Filled.Add">New Request</MudButton>
         }
 
     </MudStack>
 
-    <MudDataGrid ServerData="ServerReload"
-                 T="PurchaseRequestResponse"
-                 MultiSelection="true"
-                 @bind-SelectedItems="_selectedItems"
-                 @bind-SelectedItem="_currentDto"
-                 Hover="true"
-                 Dense="true"
-                 Bordered="true"
-                 Striped="true"
-                 Loading="@_loading"
-                 @ref="_table">
+    <MudDataGrid ServerData="ServerReload" T="PurchaseRequestResponse" MultiSelection="true"
+        @bind-SelectedItems="_selectedItems" @bind-SelectedItem="_currentDto" Hover="true" Dense="true" Bordered="true"
+        Striped="true" Loading="@_loading" @ref="_table">
 
         <Columns>
             <SelectColumn T="PurchaseRequestResponse" />
@@ -68,7 +51,7 @@
                                 <MudText>View</MudText>
                             </MudStack>
                         </MudMenuItem>
-                        @if (context.Item.Status == 0)
+                        @if (context.Item.Status == PurchaseRequestStatus.Draft)
                         {
                             <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnSubmit(context.Item))">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
@@ -83,11 +66,12 @@
                                 </MudStack>
                             </MudMenuItem>
                         }
-                        @if (context.Item.Status == 1)
+                        @if (context.Item.Status == PurchaseRequestStatus.Submitted)
                         {
                             <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnApprove(context.Item))">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
-                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success" />
+                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small"
+                                        Color="Color.Success" />
                                     <MudText>Approve</MudText>
                                 </MudStack>
                             </MudMenuItem>

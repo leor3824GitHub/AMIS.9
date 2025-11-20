@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.PurchaseRequests;
+
 public partial class PurchaseRequests
 {
     private MudDataGrid<PurchaseRequestResponse> _table = default!;
@@ -92,12 +93,19 @@ public partial class PurchaseRequests
     private async Task OnCreate()
     {
         var requesterEmployeeId = await GetCurrentEmployeeIdAsync();
+
+        if (requesterEmployeeId == Guid.Empty)
+        {
+            Snackbar?.Add("You must be registered as an employee to create a purchase request.", Severity.Error);
+            return;
+        }
+
         var model = new CreatePurchaseRequestCommand
         {
             RequestDate = DateTime.UtcNow,
             RequestedBy = requesterEmployeeId,
             Purpose = string.Empty,
-            Items = new List<PurchaseRequestItemDto>()
+            Items = new List<PurchaseRequestItemCreateDto>()
         };
         var parameters = new DialogParameters
         {
@@ -139,11 +147,10 @@ public partial class PurchaseRequests
 
     private async Task OnView(PurchaseRequestResponse item)
     {
-        // fetch latest details
-        var dto = await Api.GetPurchaseRequestEndpointAsync("1", item.Id);
+        // Use the item response directly
         var parameters = new DialogParameters
         {
-            { nameof(PurchaseRequestDialog.ViewModel), dto },
+            { nameof(PurchaseRequestDialog.ViewModel), item },
             { nameof(PurchaseRequestDialog.IsCreate), false },
             { nameof(PurchaseRequestDialog.ReadOnly), true }
         };
@@ -156,7 +163,7 @@ public partial class PurchaseRequests
     {
         try
         {
-            await Api.SubmitPurchaseRequestEndpointAsync("1", item.Id);
+            await Api.SubmitPurchaseRequestEndpointAsync("1", item.Id!.Value);
             Snackbar?.Add("Purchase request submitted.", Severity.Success);
             await _table.ReloadServerData();
         }
@@ -169,9 +176,15 @@ public partial class PurchaseRequests
     private async Task OnApprove(PurchaseRequestResponse item)
     {
         var remarks = await PromptAsync("Approval remarks (optional):");
+        var currentUserId = GetCurrentUserId();
+        if (currentUserId == Guid.Empty)
+        {
+            Snackbar?.Add("Unable to determine current user.", Severity.Error);
+            return;
+        }
         try
         {
-            await Api.ApprovePurchaseRequestEndpointAsync("1", item.Id, new ApprovePurchaseRequestCommand { Remarks = remarks ?? string.Empty });
+            await Api.ApprovePurchaseRequestEndpointAsync("1", item.Id!.Value, currentUserId, remarks ?? string.Empty);
             Snackbar?.Add("Purchase request approved.", Severity.Success);
             await _table.ReloadServerData();
         }
@@ -185,9 +198,15 @@ public partial class PurchaseRequests
     {
         var reason = await PromptAsync("Rejection reason:");
         if (string.IsNullOrWhiteSpace(reason)) return;
+        var currentUserId = GetCurrentUserId();
+        if (currentUserId == Guid.Empty)
+        {
+            Snackbar?.Add("Unable to determine current user.", Severity.Error);
+            return;
+        }
         try
         {
-            await Api.RejectPurchaseRequestEndpointAsync("1", item.Id, new RejectPurchaseRequestCommand { Reason = reason });
+            await Api.RejectPurchaseRequestEndpointAsync("1", item.Id!.Value, currentUserId, reason);
             Snackbar?.Add("Purchase request rejected.", Severity.Success);
             await _table.ReloadServerData();
         }
@@ -201,7 +220,7 @@ public partial class PurchaseRequests
     {
         try
         {
-            await Api.CancelPurchaseRequestEndpointAsync("1", item.Id);
+            await Api.CancelPurchaseRequestEndpointAsync("1", item.Id!.Value);
             Snackbar?.Add("Purchase request canceled.", Severity.Success);
             await _table.ReloadServerData();
         }
@@ -211,13 +230,13 @@ public partial class PurchaseRequests
         }
     }
 
-    private static Color GetStatusColor(int status) => status switch
+    private static Color GetStatusColor(PurchaseRequestStatus status) => status switch
     {
-        0 => Color.Default,      // Draft
-        1 => Color.Info,         // Submitted
-        2 => Color.Success,      // Approved
-        3 => Color.Error,        // Rejected
-        4 => Color.Secondary,    // Cancelled
+        PurchaseRequestStatus.Draft => Color.Default,
+        PurchaseRequestStatus.Submitted => Color.Info,
+        PurchaseRequestStatus.Approved => Color.Success,
+        PurchaseRequestStatus.Rejected => Color.Error,
+        PurchaseRequestStatus.Cancelled => Color.Secondary,
         _ => Color.Default
     };
 
@@ -240,7 +259,7 @@ public partial class PurchaseRequests
             var idClaim = user?.Claims?.FirstOrDefault(c => c.Type == "sub" || c.Type.EndsWith("/nameidentifier", StringComparison.OrdinalIgnoreCase));
             if (idClaim != null && Guid.TryParse(idClaim.Value, out var id)) return id;
         }
-        catch 
+        catch
         {
             // ignored: unable to parse user id claim
         }

@@ -6,8 +6,8 @@ namespace AMIS.WebApi.Catalog.Application.PurchaseRequests.Create.v1;
 public sealed record PurchaseRequestItemCreateDto(
     Guid? ProductId,
     int Qty,
-    string? Description,
-    string? Justification
+    string Unit,
+    string? Description
 );
 
 public sealed record CreatePurchaseRequestCommand(

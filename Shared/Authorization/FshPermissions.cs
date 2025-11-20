@@ -100,6 +100,13 @@ public static class FshPermissions
             new("Delete PurchaseRequestItems", FshActions.Delete, FshResources.PurchaseRequestItems),
             new("Export PurchaseRequestItems", FshActions.Export, FshResources.PurchaseRequestItems),
 
+            //canvasses
+            new("View Canvasses", FshActions.View, FshResources.Canvasses, IsBasic: true),
+            new("Search Canvasses", FshActions.Search, FshResources.Canvasses, IsBasic: true),
+            new("Create Canvasses", FshActions.Create, FshResources.Canvasses),
+            new("Edit Canvasses", FshActions.Update, FshResources.Canvasses),
+            new("Delete Canvasses", FshActions.Delete, FshResources.Canvasses),
+
         //employees
         new("View Employees", FshActions.View, FshResources.Employees, IsBasic: true),
         new("Search Employees", FshActions.Search, FshResources.Employees, IsBasic: true),
@@ -139,6 +146,8 @@ public static class FshPermissions
         new("Update Inspections", FshActions.Update, FshResources.Inspections),
         new("Delete Inspections", FshActions.Delete, FshResources.Inspections),
         new("Export Inspections", FshActions.Export, FshResources.Inspections),
+        new("Complete Inspections", FshActions.Complete, FshResources.Inspections),
+        // (Approve/Reject/Cancel mapped to Accept/Cancel if needed later)
 
         //inpectionitems
         new("View InspectionItems", FshActions.View, FshResources.InspectionItems, IsBasic: true),
@@ -155,6 +164,9 @@ public static class FshPermissions
         new("Update Acceptances", FshActions.Update, FshResources.Acceptances),
         new("Delete Acceptances", FshActions.Delete, FshResources.Acceptances),
         new("Export Acceptances", FshActions.Export, FshResources.Acceptances),
+        new("Post Acceptances", FshActions.Post, FshResources.Acceptances),
+        new("Link Acceptances", FshActions.Link, FshResources.Acceptances),
+        new("Cancel Acceptances", FshActions.Cancel, FshResources.Acceptances),
 
         //acceptanceitems
         new("View AcceptanceItems", FshActions.View, FshResources.AcceptanceItems, IsBasic: true),
@@ -171,6 +183,10 @@ public static class FshPermissions
         new("Update InspectionRequests", FshActions.Update, FshResources.InspectionRequests),
         new("Delete InspectionRequests", FshActions.Delete, FshResources.InspectionRequests),
         new("Export InspectionRequests", FshActions.Export, FshResources.InspectionRequests),
+        new("Assign InspectionRequests", FshActions.Assign, FshResources.InspectionRequests),
+        new("Complete InspectionRequests", FshActions.Complete, FshResources.InspectionRequests),
+        new("Accept InspectionRequests", FshActions.Accept, FshResources.InspectionRequests),
+        new("StatusUpdate InspectionRequests", FshActions.StatusUpdate, FshResources.InspectionRequests),
 
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
