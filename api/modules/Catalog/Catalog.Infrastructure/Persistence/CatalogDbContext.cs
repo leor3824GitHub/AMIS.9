@@ -37,6 +37,19 @@ public sealed class CatalogDbContext : FshDbContext
     public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; } = null!;
     public DbSet<Canvass> Canvasses { get; set; } = null!;
 
+    // COA-Compliant Inventory Tables (Separate per Classification)
+    public DbSet<ConsumableInventory> ConsumableInventories { get; set; } = null!;
+    // Removed legacy separated tables in favor of unified PhysicalAsset
+    // public DbSet<SemiExpendableInventory> SemiExpendableInventories { get; set; } = null!;
+    // public DbSet<PropertyPlantEquipment> PropertyPlantEquipments { get; set; } = null!;
+    // public DbSet<PPEAssignmentHistory> PPEAssignmentHistories { get; set; } = null!;
+
+    // Unified Physical Asset with Dynamic Classification
+    public DbSet<PhysicalAsset> PhysicalAssets { get; set; } = null!;
+    public DbSet<AssetAssignmentHistory> AssetAssignmentHistories { get; set; } = null!;
+    public DbSet<AssetReclassificationHistory> AssetReclassificationHistories { get; set; } = null!;
+    public DbSet<AssetClassificationRule> AssetClassificationRules { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);
