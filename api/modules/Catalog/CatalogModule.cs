@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using AMIS.WebApi.Catalog.Domain.Services;
+using AMIS.WebApi.Catalog.Infrastructure.Persistence.Repositories;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints;
 
 namespace FSH.WebApi.Modules.Catalog;
 
@@ -18,6 +21,9 @@ public static class CatalogModule
             var productGroup = app.MapGroup("products").WithTags("products");
             productGroup.MapProductCreationEndpoint();
 
+            // PPE Type Mappings endpoints
+            app.MapPPETypeMappingEndpoints();
+
             var testGroup = app.MapGroup("test").WithTags("test");
             testGroup.MapGet("/test", () => "hi");
         }
@@ -28,6 +34,11 @@ public static class CatalogModule
         
         // Register audit service
         builder.Services.AddScoped<IInspectionAuditService, InspectionAuditService>();
+        
+        // Register PPE account code mapping services
+        builder.Services.AddScoped<DefaultPPEAccountCodeMapper>();
+        builder.Services.AddScoped<IPPEAccountCodeMapper, DatabasePPEAccountCodeMapper>();
+        builder.Services.AddScoped<IPPETypeAccountMappingRepository, PPETypeAccountMappingRepository>();
         
         return builder;
     }

@@ -99,5 +99,36 @@ internal sealed class CatalogDbInitializer(
         }
         await context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         logger.LogInformation("[{Tenant}] seeded employees", context.TenantInfo!.Identifier);
+
+        // Seed PPE Type Account Mappings
+        await SeedPPETypeAccountMappingsAsync(cancellationToken);
+    }
+
+    private async Task SeedPPETypeAccountMappingsAsync(CancellationToken cancellationToken)
+    {
+        if (await context.PPETypeAccountMappings.AnyAsync(cancellationToken))
+        {
+            logger.LogInformation("[{Tenant}] PPE type account mappings already seeded", context.TenantInfo!.Identifier);
+            return;
+        }
+
+        var mappings = new[]
+        {
+            PPETypeAccountMapping.Create("MACHINERY", "1-06-03-010", "Heavy machinery and industrial equipment"),
+            PPETypeAccountMapping.Create("EQUIPMENT", "1-06-03-010", "General equipment and tools"),
+            PPETypeAccountMapping.Create("TRANSPORTATION", "1-06-04-010", "Vehicles and transportation assets"),
+            PPETypeAccountMapping.Create("VEHICLE", "1-06-04-010", "Motor vehicles"),
+            PPETypeAccountMapping.Create("AUTOMOTIVE", "1-06-04-010", "Automotive equipment"),
+            PPETypeAccountMapping.Create("FURNITURE", "1-06-05-010", "Office furniture and fixtures"),
+            PPETypeAccountMapping.Create("FIXTURES", "1-06-05-010", "Office fixtures and fittings"),
+            PPETypeAccountMapping.Create("ICT", "1-06-06-010", "Information and communication technology"),
+            PPETypeAccountMapping.Create("COMPUTER", "1-06-06-010", "Computer hardware and peripherals"),
+            PPETypeAccountMapping.Create("IT", "1-06-06-010", "Information technology equipment"),
+            PPETypeAccountMapping.Create("TECHNOLOGY", "1-06-06-010", "Technology equipment")
+        };
+
+        await context.PPETypeAccountMappings.AddRangeAsync(mappings, cancellationToken);
+        await context.SaveChangesAsync(cancellationToken);
+        logger.LogInformation("[{Tenant}] seeded {Count} PPE type account mappings", context.TenantInfo!.Identifier, mappings.Length);
     }
 }

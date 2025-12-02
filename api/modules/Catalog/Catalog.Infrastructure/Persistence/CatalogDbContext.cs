@@ -49,6 +49,7 @@ public sealed class CatalogDbContext : FshDbContext
     public DbSet<AssetAssignmentHistory> AssetAssignmentHistories { get; set; } = null!;
     public DbSet<AssetReclassificationHistory> AssetReclassificationHistories { get; set; } = null!;
     public DbSet<AssetClassificationRule> AssetClassificationRules { get; set; } = null!;
+    public DbSet<PPETypeAccountMapping> PPETypeAccountMappings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

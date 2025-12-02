@@ -33,16 +33,11 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
     // Lifecycle
     public int EstimatedUsefulLife { get; private set; } // in months
-    public DateTime? DisposalDate { get; private set; }
-    public string? DisposalReason { get; private set; }
+    public DateTime? DisposalDate { get; private init; }
+    public string? DisposalReason { get; private init; }
 
     // Classification (determined at creation/update using IAssetClassificationService)
     public PropertyClassification CurrentClassification { get; private set; }
-
-    // Previous classification (for tracking reclassification history)
-    public PropertyClassification? PreviousClassification { get; private set; }
-    public DateTime? LastReclassificationDate { get; private set; }
-    public string? ReclassificationReason { get; private set; }
 
     // PPE-Specific Fields (null if Semi-Expendable)
     public string? PPEType { get; private set; } // Machinery, ICT, etc.
@@ -52,8 +47,13 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     // Dynamic RCA Account (calculated based on current classification)
     public string RCAAccountCode => GetRCAAccountCode();
 
-    // Current assignment derived from AssignmentHistory (no denormalized fields)
-    // Query: AssignmentHistory.Where(h => h.Status == "Active").OrderByDescending(h => h.AssignmentDate).FirstOrDefault()
+    // Computed properties for convenience
+    public bool IsDisposed => DisposalDate.HasValue;
+    public bool IsDepreciable => CurrentClassification == PropertyClassification.PropertyPlantEquipment;
+    public AssetAssignmentHistory? CurrentAssignment => 
+        AssignmentHistory.FirstOrDefault(h => h.Status == "Active");
+    public AssetReclassificationHistory? LastReclassification =>
+        ReclassificationHistory.OrderByDescending(h => h.EffectiveDate).FirstOrDefault();
 
     // Navigation
     public virtual Product Product { get; private set; } = default!;
@@ -114,12 +114,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         string? location = null,
         string? ppeType = null)
     {
-        if (acquisitionCost <= 0)
-            throw new ArgumentException("Acquisition cost must be greater than zero.");
-        if (quantity <= 0)
-            throw new ArgumentException("Quantity must be greater than zero.");
-        if (estimatedUsefulLife <= 0)
-            throw new ArgumentException("Estimated useful life must be greater than zero.");
+        ValidateCreate(propertyCode, description, acquisitionCost, quantity, estimatedUsefulLife, unitOfMeasure, classification, ppeType);
 
         return new PhysicalAsset(
             Guid.NewGuid(),
@@ -152,17 +147,23 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         };
     }
 
+    /// <summary>
+    /// Get PPE account code - should use IPPEAccountCodeMapper service for configurable mapping
+    /// This fallback implementation is used when service is not available
+    /// </summary>
     private string GetPPEAccountCode()
     {
+        // TODO: Inject IPPEAccountCodeMapper service via domain service pattern
+        // For now, using basic fallback logic
         if (string.IsNullOrWhiteSpace(PPEType))
             return ValueObjects.RCAAccountCode.OtherPropertyPlantAndEquipment;
 
-        return PPEType.ToLowerInvariant() switch
+        return PPEType.ToUpperInvariant() switch
         {
-            "machinery" or "equipment" => ValueObjects.RCAAccountCode.MachineryAndEquipment,
-            "transportation" or "vehicle" => ValueObjects.RCAAccountCode.TransportationEquipment,
-            "furniture" or "fixtures" => ValueObjects.RCAAccountCode.FurnitureFixturesAndBooksEquipment,
-            "ict" or "computer" => ValueObjects.RCAAccountCode.ICTEquipment,
+            "MACHINERY" or "EQUIPMENT" => ValueObjects.RCAAccountCode.MachineryAndEquipment,
+            "TRANSPORTATION" or "VEHICLE" => ValueObjects.RCAAccountCode.TransportationEquipment,
+            "FURNITURE" or "FIXTURES" => ValueObjects.RCAAccountCode.FurnitureFixturesAndBooksEquipment,
+            "ICT" or "COMPUTER" => ValueObjects.RCAAccountCode.ICTEquipment,
             _ => ValueObjects.RCAAccountCode.OtherPropertyPlantAndEquipment
         };
     }
@@ -173,6 +174,11 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     /// </summary>
     public void Reclassify(PropertyClassification newClassification, string reason, DateTime effectiveDate)
     {
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Reclassification reason is required.", nameof(reason));
+        if (IsDisposed)
+            throw new InvalidOperationException("Cannot reclassify a disposed asset.");
+
         var oldClassification = CurrentClassification;
 
         if (oldClassification == newClassification)
@@ -188,12 +194,9 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             reason,
             AcquisitionCost);
 
-        ((List<AssetReclassificationHistory>)ReclassificationHistory).Add(history);
+        ReclassificationHistory.Add(history);
 
-        PreviousClassification = oldClassification;
         CurrentClassification = newClassification;
-        LastReclassificationDate = effectiveDate;
-        ReclassificationReason = reason;
 
         // Adjust PPE-specific fields based on new classification
         if (newClassification != PropertyClassification.PropertyPlantEquipment)
@@ -223,14 +226,12 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         string documentNumber,
         int? quantityIssued = null)
     {
-        // Check for active assignment
-        var activeAssignment = ((List<AssetAssignmentHistory>)AssignmentHistory)
-            .FirstOrDefault(h => h.Status == "Active");
+        ValidateIssue(employeeId, employeeName, documentNumber);
 
-        if (activeAssignment != null)
+        if (CurrentAssignment != null)
             throw new InvalidOperationException("Asset is already assigned. Use Transfer instead.");
 
-        if (DisposalDate.HasValue)
+        if (IsDisposed)
             throw new InvalidOperationException("Cannot issue disposed asset.");
 
         var classification = CurrentClassification;
@@ -263,7 +264,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             quantityIssued ?? 1,
             classification);
 
-        ((List<AssetAssignmentHistory>)AssignmentHistory).Add(history);
+        AssignmentHistory.Add(history);
 
         QueueDomainEvent(new PhysicalAssetIssued
         {
@@ -282,10 +283,14 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     /// </summary>
     public void Return(string reason, string condition, Guid acceptedBy, int? quantityReturned = null)
     {
-        // Find active assignment
-        var currentAssignment = ((List<AssetAssignmentHistory>)AssignmentHistory)
-            .FirstOrDefault(h => h.Status == "Active");
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Return reason is required.", nameof(reason));
+        if (!IsValidCondition(condition))
+            throw new ArgumentException("Invalid condition. Must be Good, Fair, or Poor.", nameof(condition));
+        if (acceptedBy == Guid.Empty)
+            throw new ArgumentException("Accepted by is required.", nameof(acceptedBy));
 
+        var currentAssignment = CurrentAssignment;
         if (currentAssignment == null)
             throw new InvalidOperationException("Asset is not currently assigned.");
 
@@ -321,12 +326,11 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     /// </summary>
     public void RecordDepreciation(decimal amount, DateTime depreciationDate)
     {
-        if (CurrentClassification != PropertyClassification.PropertyPlantEquipment)
+        if (!IsDepreciable)
             throw new InvalidOperationException("Only PPE classification can be depreciated.");
-
         if (amount <= 0)
-            throw new ArgumentException("Depreciation amount must be greater than zero.");
-        if (DisposalDate.HasValue)
+            throw new ArgumentException("Depreciation amount must be greater than zero.", nameof(amount));
+        if (IsDisposed)
             throw new InvalidOperationException("Cannot depreciate disposed asset.");
         if (AccumulatedDepreciation + amount > AcquisitionCost)
             throw new InvalidOperationException("Accumulated depreciation cannot exceed acquisition cost.");
@@ -346,9 +350,11 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     public void UpdateCondition(string condition, string? remarks = null)
     {
         if (string.IsNullOrWhiteSpace(condition))
-            throw new ArgumentException("Condition is required.");
+            throw new ArgumentException("Condition is required.", nameof(condition));
         if (!IsValidCondition(condition))
-            throw new ArgumentException("Invalid condition. Must be Good, Fair, or Poor.");
+            throw new ArgumentException("Invalid condition. Must be Good, Fair, or Poor.", nameof(condition));
+        if (IsDisposed)
+            throw new InvalidOperationException("Cannot update condition of disposed asset.");
 
         Condition = condition;
 
@@ -365,5 +371,41 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         return condition.Equals("Good", StringComparison.OrdinalIgnoreCase) ||
                condition.Equals("Fair", StringComparison.OrdinalIgnoreCase) ||
                condition.Equals("Poor", StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static void ValidateCreate(
+        string propertyCode,
+        string description,
+        decimal acquisitionCost,
+        int quantity,
+        int estimatedUsefulLife,
+        string unitOfMeasure,
+        PropertyClassification classification,
+        string? ppeType)
+    {
+        if (string.IsNullOrWhiteSpace(propertyCode))
+            throw new ArgumentException("Property code is required.", nameof(propertyCode));
+        if (string.IsNullOrWhiteSpace(description))
+            throw new ArgumentException("Description is required.", nameof(description));
+        if (string.IsNullOrWhiteSpace(unitOfMeasure))
+            throw new ArgumentException("Unit of measure is required.", nameof(unitOfMeasure));
+        if (acquisitionCost <= 0)
+            throw new ArgumentException("Acquisition cost must be greater than zero.", nameof(acquisitionCost));
+        if (quantity <= 0)
+            throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
+        if (estimatedUsefulLife <= 0)
+            throw new ArgumentException("Estimated useful life must be greater than zero.", nameof(estimatedUsefulLife));
+        if (classification == PropertyClassification.PropertyPlantEquipment && string.IsNullOrWhiteSpace(ppeType))
+            throw new ArgumentException("PPE type is required for Property, Plant and Equipment classification.", nameof(ppeType));
+    }
+
+    private static void ValidateIssue(Guid employeeId, string employeeName, string documentNumber)
+    {
+        if (employeeId == Guid.Empty)
+            throw new ArgumentException("Employee ID is required.", nameof(employeeId));
+        if (string.IsNullOrWhiteSpace(employeeName))
+            throw new ArgumentException("Employee name is required.", nameof(employeeName));
+        if (string.IsNullOrWhiteSpace(documentNumber))
+            throw new ArgumentException("Document number is required.", nameof(documentNumber));
     }
 }

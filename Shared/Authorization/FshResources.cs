@@ -28,6 +28,7 @@ public static class FshResources
     public const string Acceptances = nameof(Acceptances);
     public const string AcceptanceItems = nameof(AcceptanceItems);
     public const string InspectionRequests = nameof(InspectionRequests);
+    public const string PPETypeMappings = nameof(PPETypeMappings);
     public const string Todos = nameof(Todos);
     public const string AuditTrails = nameof(AuditTrails);
 }

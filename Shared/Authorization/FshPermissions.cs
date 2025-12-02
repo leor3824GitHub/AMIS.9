@@ -188,6 +188,10 @@ public static class FshPermissions
         new("Accept InspectionRequests", FshActions.Accept, FshResources.InspectionRequests),
         new("StatusUpdate InspectionRequests", FshActions.StatusUpdate, FshResources.InspectionRequests),
 
+        //ppe type mappings
+        new("View PPE Type Mappings", FshActions.View, FshResources.PPETypeMappings, IsBasic: true),
+        new("Manage PPE Type Mappings", FshActions.Manage, FshResources.PPETypeMappings),
+
         //todos
         new("View Todos", FshActions.View, FshResources.Todos, IsBasic: true),
         new("Search Todos", FshActions.Search, FshResources.Todos, IsBasic: true),
