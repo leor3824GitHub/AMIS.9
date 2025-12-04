@@ -1,5 +1,4 @@
 @using AMIS.Blazor.Infrastructure.Api
-@using AMIS.Blazor.Shared.PurchaseRequests
 @using MudBlazor
 
 <MudPaper Class="pa-2 mb-2" Style="max-height: 50vh; overflow-y: auto;">
@@ -111,7 +110,7 @@
     private int NewQty { get; set; }
     private string? NewUnit { get; set; } = "Piece";
     private string? NewDescription { get; set; }
-    
+
 
     private readonly string[] UnitOptions = new[]
     {

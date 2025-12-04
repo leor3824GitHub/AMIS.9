@@ -49,7 +49,13 @@ public sealed class CatalogDbContext : FshDbContext
     public DbSet<AssetAssignmentHistory> AssetAssignmentHistories { get; set; } = null!;
     public DbSet<AssetReclassificationHistory> AssetReclassificationHistories { get; set; } = null!;
     public DbSet<AssetClassificationRule> AssetClassificationRules { get; set; } = null!;
+    public DbSet<RcaAccountCodeDefinition> RcaAccountCodes { get; set; } = null!;
     public DbSet<PPETypeAccountMapping> PPETypeAccountMappings { get; set; } = null!;
+
+    // Configuration Tables for Database-Driven Behavior
+    public DbSet<AssetConditionConfiguration> AssetConditionConfigurations { get; set; } = null!;
+    public DbSet<PPETypeDefinition> PPETypeDefinitions { get; set; } = null!;
+    public DbSet<UnitOfMeasure> UnitsOfMeasure { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

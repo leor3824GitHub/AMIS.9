@@ -6,8 +6,8 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "DOTNET_ENVIRONMENT": "Development",
-        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21192",
-        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22197"
+        "DOTNET_DASHBOARD_OTLP_ENDPOINT_URL": "https://localhost:21193",
+        "DOTNET_RESOURCE_SERVICE_ENDPOINT_URL": "https://localhost:22198"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:7200;http://localhost:5200",

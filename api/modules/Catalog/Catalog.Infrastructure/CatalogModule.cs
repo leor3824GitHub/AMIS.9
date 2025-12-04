@@ -1,14 +1,16 @@
 ﻿using Carter;
 using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Infrastructure.Persistence;
+using AMIS.WebApi.Catalog.Infrastructure.Persistence;
+using AMIS.WebApi.Catalog.Infrastructure.Persistence.Repositories;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.Services;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Canvass;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Employee;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.InspectionRequest.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.Inspection.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Middleware;
-using AMIS.WebApi.Catalog.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
@@ -201,6 +203,21 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<Canvass>, CatalogRepository<Canvass>>("catalog:canvasses");
         builder.Services.AddKeyedScoped<IReadRepository<Canvass>, CatalogRepository<Canvass>>("catalog:canvasses");
+
+        builder.Services.AddScoped<IPPETypeAccountMappingRepository, PPETypeAccountMappingRepository>();
+
+        // Register repositories for configuration entities
+        builder.Services.AddKeyedScoped<IRepository<AssetConditionConfiguration>, CatalogRepository<AssetConditionConfiguration>>("catalog:assetConditions");
+        builder.Services.AddKeyedScoped<IReadRepository<AssetConditionConfiguration>, CatalogRepository<AssetConditionConfiguration>>("catalog:assetConditions");
+
+        builder.Services.AddKeyedScoped<IRepository<PPETypeDefinition>, CatalogRepository<PPETypeDefinition>>("catalog:ppeTypes");
+        builder.Services.AddKeyedScoped<IReadRepository<PPETypeDefinition>, CatalogRepository<PPETypeDefinition>>("catalog:ppeTypes");
+
+        builder.Services.AddKeyedScoped<IRepository<UnitOfMeasure>, CatalogRepository<UnitOfMeasure>>("catalog:unitsOfMeasure");
+        builder.Services.AddKeyedScoped<IReadRepository<UnitOfMeasure>, CatalogRepository<UnitOfMeasure>>("catalog:unitsOfMeasure");
+
+        builder.Services.AddKeyedScoped<IRepository<AssetClassificationRule>, CatalogRepository<AssetClassificationRule>>("catalog:classificationRules");
+        builder.Services.AddKeyedScoped<IReadRepository<AssetClassificationRule>, CatalogRepository<AssetClassificationRule>>("catalog:classificationRules");
 
         return builder;
     }
