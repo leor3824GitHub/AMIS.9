@@ -24,7 +24,7 @@
         "-y",
         "@modelcontextprotocol/server-openapi",
         "--spec",
-        "http://localhost:PORT/swagger/v1/swagger.json",
+        "https://localhost:7000/swagger/v1/swagger.json",
         "--name",
         "AMIS WebAPI"
       ]

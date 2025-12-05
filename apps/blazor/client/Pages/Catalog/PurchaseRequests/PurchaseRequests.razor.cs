@@ -218,9 +218,13 @@ public partial class PurchaseRequests
 
     private async Task OnCancel(PurchaseRequestResponse item)
     {
+        var reason = await PromptAsync("Cancellation reason:");
         try
         {
-            await Api.CancelPurchaseRequestEndpointAsync("1", item.Id!.Value);
+            await Api.CancelPurchaseRequestEndpointAsync(
+                "1",
+                item.Id!.Value,
+                string.IsNullOrWhiteSpace(reason) ? null : reason);
             Snackbar?.Add("Purchase request canceled.", Severity.Success);
             await _table.ReloadServerData();
         }
