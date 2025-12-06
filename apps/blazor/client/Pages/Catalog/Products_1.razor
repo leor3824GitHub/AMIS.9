@@ -18,29 +18,29 @@
    </AdvancedSearchContent>
 
    <EditFormContent>
-       @if (!Context.AddEditModal.IsCreate)
+       @if (!context.IsCreate)
        {
            <MudItem xs="12" md="6">
-               <MudTextField Value="context.Id" Underline="false" ReadOnly="true" Label="Product Id" />
+               <MudTextField Value="@context.RequestModel.Id" Underline="false" ReadOnly="true" Label="Product Id" />
            </MudItem>
        }
        <MudItem xs="12" md="6">
-           <MudTextField Label="Name" For="@(() => context.Name)" @bind-Value="context.Name" />
+           <MudTextField Label="Name" For="@(() => context.RequestModel.Name)" @bind-Value="context.RequestModel.Name" />
        </MudItem>
        <MudItem xs="12" md="6">
-           <MudTextField Label="Description" For="@(() => context.Description)" @bind-Value="context.Description" />
+           <MudTextField Label="Description" For="@(() => context.RequestModel.Description)" @bind-Value="context.RequestModel.Description" />
        </MudItem>
        <MudItem xs="12" md="6">
-           <MudTextField Label="Unit" For="@(() => context.Unit)" @bind-Value="context.Unit" />
+           <MudTextField Label="Unit" For="@(() => context.RequestModel.Unit)" @bind-Value="context.RequestModel.Unit" />
        </MudItem>
        <MudItem xs="12" md="6">
-           <MudTextField Label="Sku" For="@(() => context.Sku)" @bind-Value="context.Sku" />
+           <MudTextField Label="Sku" For="@(() => context.RequestModel.Sku)" @bind-Value="context.RequestModel.Sku" />
        </MudItem>
        <MudItem xs="12" md="6">
-           <MudTextField Label="Location" For="@(() => context.Location)" @bind-Value="context.Location" />
+           <MudTextField Label="Location" For="@(() => context.RequestModel.Location)" @bind-Value="context.RequestModel.Location" />
        </MudItem>
        <MudItem xs="12" md="6">
-           <MudSelect T="Guid?" Label="Category" @bind-Value="context.CategoryId">
+           <MudSelect T="Guid?" Label="Category" @bind-Value="context.RequestModel.CategoryId">
                @foreach (var category in _categories)
                {
                    <MudSelectItem T="Guid?" Value="category.Id">@category.Name</MudSelectItem>
@@ -49,15 +49,15 @@
        </MudItem>
         <MudItem xs="12" md="12">
             <MudItem>
-                @if (!string.IsNullOrEmpty(context.ImagePath))
+                @if (!string.IsNullOrEmpty(context.RequestModel.ImagePath))
                 {
                     <MudAvatar Square="true" Style="height: auto; width: auto; max-height: 100%">
-                        <MudImage Src="@context.ImagePath.ToString()"></MudImage>
+                        <MudImage Src="@context.RequestModel.ImagePath.ToString()"></MudImage>
                     </MudAvatar>
                 }
                 else
                 {
-                    <MudAvatar Image="@(string.IsNullOrEmpty(context.ImagePath) ? string.Empty : Config[ConfigNames.ApiBaseUrl] + context.ImagePath)" Square="true" Style="height: auto; width: auto; max-height: 100%" />
+                    <MudAvatar Image="@(string.IsNullOrEmpty(context.RequestModel.ImagePath) ? string.Empty : Config[ConfigNames.ApiBaseUrl] + context.RequestModel.ImagePath)" Square="true" Style="height: auto; width: auto; max-height: 100%" />
                 }
             </MudItem>
             <MudCardActions Class="d-flex justify-center">
@@ -67,10 +67,10 @@
                                StartIcon="@Icons.Material.Filled.CloudUpload" for="fileInput">
                         Upload Profile Picture
                     </MudButton>
-                    @if (!string.IsNullOrEmpty(context.ImagePath))
+                    @if (!string.IsNullOrEmpty(context.RequestModel.ImagePath))
                     {
                         <MudButton HtmlTag="label" DropShadow="false" Variant="Variant.Filled" Color="Color.Info" Size="Size.Small" Target="_blank"
-                                   StartIcon="@Icons.Material.Filled.RemoveRedEye" Href="@context.ImagePath" Style="margin-left: 5px;">
+                                   StartIcon="@Icons.Material.Filled.RemoveRedEye" Href="@context.RequestModel.ImagePath" Style="margin-left: 5px;">
                             View
                         </MudButton>
 

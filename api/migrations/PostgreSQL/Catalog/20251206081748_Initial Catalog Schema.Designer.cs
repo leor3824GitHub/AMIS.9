@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
 {
     [DbContext(typeof(CatalogDbContext))]
-    [Migration("20251203022611_AddRcaAccountCodesTable")]
-    partial class AddRcaAccountCodesTable
+    [Migration("20251206081748_Initial Catalog Schema")]
+    partial class InitialCatalogSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -323,6 +323,154 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.HasKey("Id");
 
                     b.ToTable("AssetClassificationRules", "catalog");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.AssetConditionConfiguration", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("AllowsForUse")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("ColorCode")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("DisplayName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("RequiresDisposal")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("RequiresRepair")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("AssetConditionConfigurations", "catalog");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("41d4a251-c8f4-48a5-a4ed-f7fe33cd079f"),
+                            AllowsForUse = true,
+                            Code = "Good",
+                            ColorCode = "#28a745",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Asset is in excellent working condition",
+                            DisplayName = "Good",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            RequiresDisposal = false,
+                            RequiresRepair = false,
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("669f921b-76a4-4aed-932a-15afa3c288d2"),
+                            AllowsForUse = true,
+                            Code = "Fair",
+                            ColorCode = "#ffc107",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Asset has minor wear but still functional",
+                            DisplayName = "Fair",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            RequiresDisposal = false,
+                            RequiresRepair = false,
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("ae49e9fd-a2bd-41aa-ae86-ba964448b63e"),
+                            AllowsForUse = true,
+                            Code = "Poor",
+                            ColorCode = "#fd7e14",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Asset has significant wear, may need repair",
+                            DisplayName = "Poor",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            RequiresDisposal = false,
+                            RequiresRepair = true,
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("6fe8ff84-7667-4247-86ad-eb0db427242c"),
+                            AllowsForUse = false,
+                            Code = "Unserviceable",
+                            ColorCode = "#dc3545",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Asset is not functional, requires major repair",
+                            DisplayName = "Unserviceable",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            RequiresDisposal = false,
+                            RequiresRepair = true,
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("a568e767-7b46-41f5-a57f-261c4b2b94ae"),
+                            AllowsForUse = false,
+                            Code = "ForDisposal",
+                            ColorCode = "#6c757d",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            Description = "Asset is beyond repair and should be disposed",
+                            DisplayName = "For Disposal",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            RequiresDisposal = true,
+                            RequiresRepair = false,
+                            SortOrder = 5
+                        });
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.AssetReclassificationHistory", b =>
@@ -1132,6 +1280,184 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.HasAnnotation("Finbuckle:MultiTenant", true);
                 });
 
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.PPETypeDefinition", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("COAReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Category")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<decimal>("DefaultDepreciationRate")
+                        .HasPrecision(5, 2)
+                        .HasColumnType("numeric(5,2)");
+
+                    b.Property<int>("DefaultUsefulLifeYears")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("DepreciationAccountCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("IconName")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("RCAAccountCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("PPETypeDefinitions", "catalog");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("4dba4769-1cfe-4042-832c-c7fd5409fe76"),
+                            COAReference = "COA Circular 2022-002",
+                            Category = "Production",
+                            Code = "MACHINERY",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DefaultDepreciationRate = 10m,
+                            DefaultUsefulLifeYears = 10,
+                            DepreciationAccountCode = "10699010",
+                            Description = "Industrial machinery, tools, and equipment",
+                            IconName = "gear",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Machinery and Equipment",
+                            RCAAccountCode = "10604010",
+                            SortOrder = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("b96aa336-e2ba-471b-b452-4ea434a0ed98"),
+                            COAReference = "COA Circular 2022-002",
+                            Category = "Transportation",
+                            Code = "TRANSPORTATION",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DefaultDepreciationRate = 20m,
+                            DefaultUsefulLifeYears = 5,
+                            DepreciationAccountCode = "10699010",
+                            Description = "Vehicles, motorcycles, boats",
+                            IconName = "car",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Transportation Equipment",
+                            RCAAccountCode = "10605010",
+                            SortOrder = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("a6b2cfdb-3741-4920-8422-c9fe57ccc2be"),
+                            COAReference = "COA Circular 2022-002",
+                            Category = "Office",
+                            Code = "FURNITURE",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DefaultDepreciationRate = 10m,
+                            DefaultUsefulLifeYears = 10,
+                            DepreciationAccountCode = "10699010",
+                            Description = "Office furniture, fixtures, and reference books",
+                            IconName = "chair",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Furniture, Fixtures and Books",
+                            RCAAccountCode = "10606010",
+                            SortOrder = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("50658792-65c3-4d41-b087-a20aa06329fc"),
+                            COAReference = "COA Circular 2022-002",
+                            Category = "Technology",
+                            Code = "ICT",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DefaultDepreciationRate = 33.33m,
+                            DefaultUsefulLifeYears = 3,
+                            DepreciationAccountCode = "10699010",
+                            Description = "Computers, servers, network equipment",
+                            IconName = "desktop",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "ICT Equipment",
+                            RCAAccountCode = "10607010",
+                            SortOrder = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("2025d61f-9cb2-4a8c-93a4-d40df637d5f4"),
+                            COAReference = "COA Circular 2022-002",
+                            Category = "General",
+                            Code = "OTHER",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            DefaultDepreciationRate = 10m,
+                            DefaultUsefulLifeYears = 10,
+                            DepreciationAccountCode = "10699010",
+                            Description = "Other property, plant and equipment",
+                            IconName = "box",
+                            IsActive = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Other PPE",
+                            RCAAccountCode = "10699990",
+                            SortOrder = 5
+                        });
+                });
+
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.PhysicalAsset", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1593,141 +1919,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.HasIndex("Key")
                         .IsUnique();
 
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0001"),
-                            Key = "SuppliesAndMaterialsInventory",
-                            AccountCode = "10501000",
-                            Description = "Supplies and materials inventory",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0002"),
-                            Key = "SuppliesAndMaterialsExpense",
-                            AccountCode = "50203010",
-                            Description = "Supplies and materials expense",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0003"),
-                            Key = "SemiExpendablePropertyInventory",
-                            AccountCode = "10599020",
-                            Description = "Semi-expendable property inventory",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0004"),
-                            Key = "SemiExpendablePropertyExpense",
-                            AccountCode = "50299010",
-                            Description = "Semi-expendable property expense",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0005"),
-                            Key = "MachineryAndEquipment",
-                            AccountCode = "10604010",
-                            Description = "Machinery and equipment",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0006"),
-                            Key = "TransportationEquipment",
-                            AccountCode = "10605010",
-                            Description = "Transportation equipment",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0007"),
-                            Key = "FurnitureFixturesAndBooksEquipment",
-                            AccountCode = "10606010",
-                            Description = "Furniture, fixtures, and books equipment",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0008"),
-                            Key = "ICTEquipment",
-                            AccountCode = "10607010",
-                            Description = "ICT equipment",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0009"),
-                            Key = "OtherPropertyPlantAndEquipment",
-                            AccountCode = "10699990",
-                            Description = "Other property, plant, and equipment",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0010"),
-                            Key = "AccumulatedDepreciation",
-                            AccountCode = "10699010",
-                            Description = "Accumulated depreciation",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        },
-                        new
-                        {
-                            Id = new Guid("0a5f2beb-2d1d-4c36-9f56-11d9ad1c0011"),
-                            Key = "AccountsPayable",
-                            AccountCode = "20101010",
-                            Description = "Accounts payable",
-                            IsActive = true,
-                            Created = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            CreatedBy = Guid.Empty,
-                            LastModified = new DateTimeOffset(new DateTime(2025, 12, 3, 0, 0, 0, DateTimeKind.Utc)),
-                            LastModifiedBy = Guid.Empty
-                        }
-                    );
-
                     b.ToTable("RcaAccountCodes", "catalog");
                 });
 
@@ -1788,6 +1979,341 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.ToTable("Suppliers", "catalog");
 
                     b.HasAnnotation("Finbuckle:MultiTenant", true);
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.UnitOfMeasure", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Abbreviation")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<Guid?>("BaseUnitId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<decimal?>("ConversionFactor")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("numeric(18,6)");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsDefault")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UnitType")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BaseUnitId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("UnitsOfMeasure", "catalog");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("847cf8f5-7034-49e2-a4e1-1e7df481945d"),
+                            Abbreviation = "pc",
+                            Code = "PC",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = true,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Piece",
+                            SortOrder = 1,
+                            UnitType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("f8ae353f-d899-46fa-8dcd-b5eee344ae5c"),
+                            Abbreviation = "set",
+                            Code = "SET",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Set",
+                            SortOrder = 2,
+                            UnitType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("95f4da69-c36a-4357-af6a-5d9ae771c2b6"),
+                            Abbreviation = "unit",
+                            Code = "UNIT",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Unit",
+                            SortOrder = 3,
+                            UnitType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("8d575521-d80e-45cf-af3b-8c35d96156a8"),
+                            Abbreviation = "pair",
+                            Code = "PAIR",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Pair",
+                            SortOrder = 4,
+                            UnitType = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("af3c2bfc-4268-4fc6-a152-0ef6a819a0ca"),
+                            Abbreviation = "kg",
+                            Code = "KG",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Kilogram",
+                            SortOrder = 10,
+                            UnitType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("298e7e87-bd06-436b-a929-ca660810cdf2"),
+                            Abbreviation = "g",
+                            Code = "G",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Gram",
+                            SortOrder = 11,
+                            UnitType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("aadca10b-24d2-4b05-9fb3-f049db139c11"),
+                            Abbreviation = "MT",
+                            Code = "MT",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Metric Ton",
+                            SortOrder = 12,
+                            UnitType = 2
+                        },
+                        new
+                        {
+                            Id = new Guid("4019ba90-159e-4e7a-8c31-898fd89fb6b3"),
+                            Abbreviation = "L",
+                            Code = "L",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Liter",
+                            SortOrder = 20,
+                            UnitType = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("23a4de7b-0505-473e-bee8-f3cf31026941"),
+                            Abbreviation = "mL",
+                            Code = "ML",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Milliliter",
+                            SortOrder = 21,
+                            UnitType = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("4fb0b91c-1816-43c9-a6fc-33a934315f86"),
+                            Abbreviation = "gal",
+                            Code = "GAL",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Gallon",
+                            SortOrder = 22,
+                            UnitType = 3
+                        },
+                        new
+                        {
+                            Id = new Guid("bbc37a18-bbff-44ad-9883-154a77718365"),
+                            Abbreviation = "m",
+                            Code = "M",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Meter",
+                            SortOrder = 30,
+                            UnitType = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("9256c4da-4bed-45e8-b2f0-c11064d67a84"),
+                            Abbreviation = "cm",
+                            Code = "CM",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Centimeter",
+                            SortOrder = 31,
+                            UnitType = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("725a5187-13b2-44d4-8dcc-7e3c17be8b61"),
+                            Abbreviation = "mm",
+                            Code = "MM",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Millimeter",
+                            SortOrder = 32,
+                            UnitType = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("7fef522a-f64a-4b56-88cc-7ad1806ca845"),
+                            Abbreviation = "ft",
+                            Code = "FT",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Feet",
+                            SortOrder = 33,
+                            UnitType = 4
+                        },
+                        new
+                        {
+                            Id = new Guid("50a8abab-d0b5-4c26-946f-287c7ee1e91c"),
+                            Abbreviation = "m²",
+                            Code = "SQM",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Square Meter",
+                            SortOrder = 40,
+                            UnitType = 5
+                        },
+                        new
+                        {
+                            Id = new Guid("14682b4b-614f-475b-8e47-a5305f16a965"),
+                            Abbreviation = "box",
+                            Code = "BOX",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Box",
+                            SortOrder = 50,
+                            UnitType = 6
+                        },
+                        new
+                        {
+                            Id = new Guid("7c4d5910-da2a-44df-9d2b-d21929f198af"),
+                            Abbreviation = "pack",
+                            Code = "PACK",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Pack",
+                            SortOrder = 51,
+                            UnitType = 6
+                        },
+                        new
+                        {
+                            Id = new Guid("e105e3f4-b17d-4667-8c57-02d72f5f1367"),
+                            Abbreviation = "btl",
+                            Code = "BOTTLE",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Bottle",
+                            SortOrder = 52,
+                            UnitType = 6
+                        },
+                        new
+                        {
+                            Id = new Guid("937de7a4-1fe2-42a7-b1bd-4c19ba1d694a"),
+                            Abbreviation = "can",
+                            Code = "CAN",
+                            Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            CreatedBy = new Guid("00000000-0000-0000-0000-000000000000"),
+                            IsActive = true,
+                            IsDefault = false,
+                            LastModified = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
+                            Name = "Can",
+                            SortOrder = 53,
+                            UnitType = 6
+                        });
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Acceptance", b =>
@@ -2089,6 +2615,14 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                     b.Navigation("Product");
 
                     b.Navigation("PurchaseRequest");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.UnitOfMeasure", b =>
+                {
+                    b.HasOne("AMIS.WebApi.Catalog.Domain.UnitOfMeasure", null)
+                        .WithMany()
+                        .HasForeignKey("BaseUnitId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Catalog.Domain.Acceptance", b =>

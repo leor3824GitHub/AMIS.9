@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Tenant
 {
     [DbContext(typeof(TenantDbContext))]
-    [Migration("20241123024825_Add Tenant Schema")]
+    [Migration("20251206081807_Add Tenant Schema")]
     partial class AddTenantSchema
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Tenant
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);

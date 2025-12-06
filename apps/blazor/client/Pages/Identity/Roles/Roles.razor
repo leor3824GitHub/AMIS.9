@@ -10,17 +10,17 @@
         }
     </ExtraActions>
     <EditFormContent>
-        @if (!Context.AddEditModal.IsCreate)
+        @if (!context.IsCreate)
         {
             <MudItem xs="12" md="6">
-                <MudTextField Value="context.Id" ReadOnly Underline="false" Label="Role Id]" />
+                <MudTextField Value="@context.RequestModel.Id" ReadOnly Underline="false" Label="Role Id]" />
             </MudItem>
         }
         <MudItem xs="12" md="6">
-            <MudTextField For="@(() => context.Name)" @bind-Value="context.Name" Label="Role Name" />
+            <MudTextField For="@(() => context.RequestModel.Name)" @bind-Value="context.RequestModel.Name" Label="Role Name" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField For="@(() => context.Description)" @bind-Value="context.Description"
+            <MudTextField For="@(() => context.RequestModel.Description)" @bind-Value="context.RequestModel.Description"
                 Label="Description" />
         </MudItem>
     </EditFormContent>

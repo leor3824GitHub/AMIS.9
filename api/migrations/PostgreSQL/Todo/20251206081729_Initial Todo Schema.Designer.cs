@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Todo
 {
     [DbContext(typeof(TodoDbContext))]
-    [Migration("20241123024832_Add Todo Schema")]
-    partial class AddTodoSchema
+    [Migration("20251206081729_Initial Todo Schema")]
+    partial class InitialTodoSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -21,7 +21,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Todo
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("todo")
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -51,6 +51,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Todo
                         .HasColumnType("uuid");
 
                     b.Property<string>("Note")
+                        .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("character varying(1000)");
 
@@ -60,6 +61,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Todo
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("Title")
+                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 

@@ -36,7 +36,7 @@ public partial class EntityTable<TEntity, TId, TRequest>
     public RenderFragment<TEntity>? ChildRowContent { get; set; }
 
     [Parameter]
-    public RenderFragment<TRequest>? EditFormContent { get; set; }
+    public RenderFragment<AddEditFormContext<TRequest>>? EditFormContent { get; set; }
 
     [CascadingParameter]
     protected Task<AuthenticationState> AuthState { get; set; } = default!;

@@ -12,7 +12,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Identity
 {
     [DbContext(typeof(IdentityDbContext))]
-    [Migration("20241123024818_Add Identity Schema")]
+    [Migration("20251206081556_Add Identity Schema")]
     partial class AddIdentitySchema
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Identity
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.0")
+                .HasAnnotation("ProductVersion", "9.0.2")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);

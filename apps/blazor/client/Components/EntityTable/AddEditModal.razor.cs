@@ -7,7 +7,7 @@ public partial class AddEditModal<TRequest> : IAddEditModal<TRequest>
 {
     [Parameter]
     [EditorRequired]
-    public RenderFragment<TRequest> ChildContent { get; set; } = default!;
+    public RenderFragment<AddEditFormContext<TRequest>> ChildContent { get; set; } = default!;
     [Parameter]
     [EditorRequired]
     public TRequest RequestModel { get; set; } = default!;
