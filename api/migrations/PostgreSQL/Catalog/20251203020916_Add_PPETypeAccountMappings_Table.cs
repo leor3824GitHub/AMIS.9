@@ -11,20 +11,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
-                name: "LastReclassificationDate",
-                schema: "catalog",
-                table: "PhysicalAssets");
-
-            migrationBuilder.DropColumn(
-                name: "PreviousClassification",
-                schema: "catalog",
-                table: "PhysicalAssets");
-
-            migrationBuilder.DropColumn(
-                name: "ReclassificationReason",
-                schema: "catalog",
-                table: "PhysicalAssets");
+            migrationBuilder.Sql("ALTER TABLE catalog.\"PhysicalAssets\" DROP COLUMN IF EXISTS \"LastReclassificationDate\";");
+            migrationBuilder.Sql("ALTER TABLE catalog.\"PhysicalAssets\" DROP COLUMN IF EXISTS \"PreviousClassification\";");
+            migrationBuilder.Sql("ALTER TABLE catalog.\"PhysicalAssets\" DROP COLUMN IF EXISTS \"ReclassificationReason\";");
 
             migrationBuilder.CreateTable(
                 name: "PPETypeAccountMappings",
