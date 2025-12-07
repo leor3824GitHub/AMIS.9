@@ -22,17 +22,17 @@
                     </MudText>
                     <MudDivider />
                     <MudList T="string" Dense="true">
-                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Pending, PurchaseStatus.Submitted)">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Submitted)">
                             PO Number: <strong>@(ReferenceNumber ?? "-")</strong>
                         </MudListItem>
-                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Pending, PurchaseStatus.Submitted)">
+                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Submitted)">
                             Supplier Selected
                         </MudListItem>
                         <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Submitted)">
                             PO Submitted for Approval
                         </MudListItem>
                     </MudList>
-                    @if (Status == PurchaseStatus.Draft || Status == PurchaseStatus.Pending)
+                    @if (Status == PurchaseStatus.Draft)
                     {
                         <MudAlert Severity="Severity.Info" Dense="true">
                             Current Status: <strong>@Status</strong> - Complete PO details and submit for approval
@@ -145,7 +145,6 @@
         return Status switch
         {
             PurchaseStatus.Draft => 0,
-            PurchaseStatus.Pending => 0,
             PurchaseStatus.Submitted => 1,
             PurchaseStatus.PartiallyDelivered => 1,
             PurchaseStatus.Delivered => 2,

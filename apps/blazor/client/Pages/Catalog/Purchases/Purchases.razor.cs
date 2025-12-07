@@ -138,7 +138,7 @@ public partial class Purchases
         {
             PurchaseDate = DateTime.Today,
             SupplierId = null,
-            Status = PurchaseStatus.Pending,
+            Status = PurchaseStatus.Draft,
             Items = new List<PurchaseItemDto>()
         };
     }
@@ -149,7 +149,6 @@ public partial class Purchases
         if (copy != null)
         {
             var command = new Mapper().Map<PurchaseResponse, CreatePurchaseCommand>(copy);
-            command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
             await ShowEditFormDialog("Clone a purchase", command, true);
         }
     }
@@ -245,7 +244,6 @@ public partial class Purchases
             PurchaseStatus.Cancelled => Color.Error,
             PurchaseStatus.Closed => Color.Info,
             PurchaseStatus.Submitted => Color.Primary,
-            PurchaseStatus.Pending => Color.Secondary,
             _ => Color.Default
         };
 
@@ -253,7 +251,6 @@ public partial class Purchases
         => status switch
         {
             PurchaseStatus.Draft => Icons.Material.Filled.Edit,
-            PurchaseStatus.Pending => Icons.Material.Filled.HourglassEmpty,
             PurchaseStatus.Submitted => Icons.Material.Filled.Send,
             PurchaseStatus.PartiallyDelivered => Icons.Material.Filled.LocalShipping,
             PurchaseStatus.Delivered => Icons.Material.Filled.Inventory,

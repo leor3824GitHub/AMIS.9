@@ -90,7 +90,7 @@ public partial class PurchaseItemList
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
-            ItemStatus = Status ?? PurchaseStatus.Pending
+            ItemStatus = Status ?? PurchaseStatus.Draft
         };
         Items.Add(newItem);
 
@@ -119,11 +119,6 @@ public partial class PurchaseItemList
 
     private void RemoveItem(PurchaseItemDto item)
     {
-        if (item.Id == Guid.Empty)
-        {
-            Snackbar?.Add("Item ID is null and cannot be removed.", Severity.Error);
-            return;
-        }
         try
         {
             // TODO: Use nested endpoint DELETE /purchases/{purchaseId}/items/{itemId}

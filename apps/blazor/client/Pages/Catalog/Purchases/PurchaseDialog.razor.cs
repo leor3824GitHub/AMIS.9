@@ -42,6 +42,8 @@ public partial class PurchaseDialog
         await LoadSupplierAsync();
         await LoadProductAsync();
 
+        Model.Items ??= new List<PurchaseItemDto>();
+
         // Auto-generate PO Number for new purchases
         if (IsCreate == true && string.IsNullOrEmpty(Model.ReferenceNumber))
         {
@@ -141,9 +143,9 @@ public partial class PurchaseDialog
     // Workflow Action Methods
     private async Task SubmitPurchase()
     {
-        if (Model.Status != PurchaseStatus.Draft && Model.Status != PurchaseStatus.Pending)
+        if (Model.Status != PurchaseStatus.Draft)
         {
-            Snackbar.Add("Purchase order must be in Draft or Pending status to submit.", Severity.Warning);
+            Snackbar.Add("Purchase order must be in Draft status to submit.", Severity.Warning);
             return;
         }
 
@@ -217,7 +219,6 @@ public partial class PurchaseDialog
     private string GetWorkflowStepIcon() => Model.Status switch
     {
         PurchaseStatus.Draft => Icons.Material.Filled.Edit,
-        PurchaseStatus.Pending => Icons.Material.Filled.HourglassEmpty,
         PurchaseStatus.Submitted => Icons.Material.Filled.Send,
         PurchaseStatus.PartiallyDelivered => Icons.Material.Filled.LocalShipping,
         PurchaseStatus.Delivered => Icons.Material.Filled.Inventory,
@@ -229,7 +230,6 @@ public partial class PurchaseDialog
     private Color GetWorkflowStepColor() => Model.Status switch
     {
         PurchaseStatus.Draft => Color.Default,
-        PurchaseStatus.Pending => Color.Warning,
         PurchaseStatus.Submitted => Color.Primary,
         PurchaseStatus.PartiallyDelivered => Color.Info,
         PurchaseStatus.Delivered => Color.Success,
@@ -241,7 +241,6 @@ public partial class PurchaseDialog
     private string GetWorkflowStepText() => Model.Status switch
     {
         PurchaseStatus.Draft => "Step 1: Draft",
-        PurchaseStatus.Pending => "Step 1: Pending",
         PurchaseStatus.Submitted => "Step 1: Ready to Issue",
         PurchaseStatus.PartiallyDelivered => "Step 2: Partially Delivered",
         PurchaseStatus.Delivered => "Step 3: Ready for Inspection",

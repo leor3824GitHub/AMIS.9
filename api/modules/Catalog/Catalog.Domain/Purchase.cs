@@ -171,7 +171,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
     public void Submit()
     {
-        if (Status != PurchaseStatus.Draft && Status != PurchaseStatus.Pending)
+        if (Status != PurchaseStatus.Draft)
         {
             throw new InvalidOperationException($"Cannot submit a purchase with status {Status}.");
         }
@@ -272,7 +272,6 @@ public class Purchase : AuditableEntity, IAggregateRoot
             { PurchaseStatus.Submitted, new[] { PurchaseStatus.PartiallyDelivered, PurchaseStatus.Delivered, PurchaseStatus.Cancelled } },
             { PurchaseStatus.PartiallyDelivered, new[] { PurchaseStatus.Delivered, PurchaseStatus.Cancelled } },
             { PurchaseStatus.Delivered, new[] { PurchaseStatus.Closed } },
-            { PurchaseStatus.Pending, new[] { PurchaseStatus.Submitted, PurchaseStatus.Cancelled } },
             { PurchaseStatus.Closed, Array.Empty<PurchaseStatus>() },
             { PurchaseStatus.Cancelled, Array.Empty<PurchaseStatus>() }
         };

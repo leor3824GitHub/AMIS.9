@@ -85,7 +85,7 @@ public partial class InspectionItemList
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
-            ItemStatus = Status ?? PurchaseStatus.Pending
+            ItemStatus = Status ?? PurchaseStatus.Draft
         };
         Items.Add(newItem);
 

@@ -57,7 +57,7 @@ public sealed class UpdatePurchaseHandler(
                         updatedPurchase.Cancel();
                     }
                     break;
-                // Note: Cannot change to Pending or Draft once progressed
+                // Note: Draft is the only pre-submission state; Pending is deprecated
             }
         }
 
