@@ -4,6 +4,7 @@ using AMIS.Framework.Infrastructure.Persistence;
 using AMIS.WebApi.Catalog.Infrastructure.Persistence;
 using AMIS.WebApi.Catalog.Infrastructure.Persistence.Repositories;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Application.Acceptances.Services;
 using AMIS.WebApi.Catalog.Domain.Services;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Canvass;
@@ -196,6 +197,9 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
         builder.Services.AddKeyedScoped<IReadRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
 
+        builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, CatalogRepository<PhysicalAsset>>("catalog:physical-assets");
+        builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, CatalogRepository<PhysicalAsset>>("catalog:physical-assets");
+
         builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         builder.Services.AddKeyedScoped<IRepository<PurchaseRequest>, CatalogRepository<PurchaseRequest>>("catalog:purchaseRequests");
@@ -218,6 +222,10 @@ public static class CatalogModule
 
         builder.Services.AddKeyedScoped<IRepository<AssetClassificationRule>, CatalogRepository<AssetClassificationRule>>("catalog:classificationRules");
         builder.Services.AddKeyedScoped<IReadRepository<AssetClassificationRule>, CatalogRepository<AssetClassificationRule>>("catalog:classificationRules");
+
+        // Asset creation strategies (override in composition root if needed)
+        builder.Services.AddScoped<IAssetPropertyCodeGenerator, DefaultAssetPropertyCodeGenerator>();
+        builder.Services.AddScoped<IAssetClassificationResolver, DefaultAssetClassificationResolver>();
 
         return builder;
     }

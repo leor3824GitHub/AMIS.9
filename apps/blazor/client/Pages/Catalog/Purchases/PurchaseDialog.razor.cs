@@ -77,55 +77,63 @@ public partial class PurchaseDialog
     }
     private async Task OnValidSubmit()
     {
+        if (IsCreate is not true && IsCreate is not false) return;
+
+        if (Model.SupplierId is null)
         {
-            if (IsCreate is not true && IsCreate is not false) return;
+            Snackbar.Add("Select a supplier before saving.", Severity.Warning);
+            return;
+        }
 
-            Snackbar.Add(IsCreate.Value ? "Creating purchase order..." : "Updating purchase order...", Severity.Info);
+        if (Model.Items is null || Model.Items.Count == 0)
+        {
+            Snackbar.Add("Add at least one item before saving.", Severity.Warning);
+            return;
+        }
 
-            try
+        Model.TotalAmount = Model.Items.Sum(i => i.Qty * i.UnitPrice);
+
+        Snackbar.Add(IsCreate.Value ? "Creating purchase order..." : "Updating purchase order...", Severity.Info);
+
+        var saved = false;
+
+        try
+        {
+            if (IsCreate.Value) // Create Purchase Order
             {
-                if (IsCreate.Value) // Create Purchase Order
+                var model = Model.Adapt<CreatePurchaseCommand>();
+
+                var response = await PurchaseClient.CreatePurchaseEndpointAsync("1", model);
+
+                if (response.Id.HasValue)
                 {
-                    var model = Model.Adapt<CreatePurchaseCommand>();
-
-                    var response = await PurchaseClient.CreatePurchaseEndpointAsync("1", model);
-
-                    if (response.Id.HasValue)
-                    {
-                        Model.Id = (Guid)response.Id;
-                        StateHasChanged();
-                        Snackbar.Add("Purchase order created successfully!", Severity.Success);
-                        await Refresh.InvokeAsync();
-
-                    }
-                }
-                else // Update Purchase Order
-                {
-                    var model = Model.Adapt<UpdatePurchaseCommand>();
-
-                    var response = await PurchaseClient.UpdatePurchaseEndpointAsync("1", model.Id, model);
-
-                    if (response != null)
-                    {
-                        StateHasChanged();
-                        Snackbar.Add("Purchase order updated successfully!", Severity.Success);
-                        await Refresh.InvokeAsync();
-
-                    }
+                    Model.Id = (Guid)response.Id;
+                    saved = true;
+                    Snackbar.Add("Purchase order created successfully!", Severity.Success);
                 }
             }
-            catch (ApiException ex)
+            else // Update Purchase Order
             {
-                //if (ex.StatusCode == 400)
-                //{
-                //    var errors = await ex.GetValidationErrorsAsync();
-                //    Validation?.DisplayErrors(errors);
-                //}
-                //else
-                //{
-                    Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-                //}
+                var model = Model.Adapt<UpdatePurchaseCommand>();
+
+                var response = await PurchaseClient.UpdatePurchaseEndpointAsync("1", model.Id, model);
+
+                if (response != null)
+                {
+                    saved = true;
+                    Snackbar.Add("Purchase order updated successfully!", Severity.Success);
+                }
             }
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+
+        if (saved)
+        {
+            await Refresh.InvokeAsync();
+            MudDialog.Close(DialogResult.Ok(true));
         }
     }    
     private void UpdateTotalAmount(double value)

@@ -50,10 +50,47 @@ namespace AMIS.Blazor.Client.Pages.Catalog.Purchases
 
         private async Task Submit()
         {
-            // Endpoint not yet implemented server-side; placeholder success.
-            Snackbar.Add("Goods receipt captured (placeholder).", Severity.Success);
-            MudDialog.Close(DialogResult.Ok(true));
-            await Task.CompletedTask;
+            if (_command.Items.Count == 0)
+            {
+                Snackbar.Add("No receipt lines to submit.", Severity.Warning);
+                return;
+            }
+
+            var invalidQty = _command.Items.Any(i => i.QtyReceived < 0 || i.QtyReceived > (i.QtyOrdered - i.QtyPreviouslyReceived));
+            if (invalidQty)
+            {
+                Snackbar.Add("Received quantity must be between 0 and the remaining ordered quantity.", Severity.Warning);
+                return;
+            }
+
+            if (_command.Items.All(i => i.QtyReceived == 0))
+            {
+                Snackbar.Add("Enter at least one received quantity.", Severity.Warning);
+                return;
+            }
+
+            var fullyReceived = _command.Items.All(i => (i.QtyPreviouslyReceived + i.QtyReceived) >= i.QtyOrdered);
+            var newStatus = fullyReceived ? PurchaseStatus.Delivered : PurchaseStatus.PartiallyDelivered;
+
+            var update = new UpdatePurchaseCommand
+            {
+                Id = Purchase.Id ?? Guid.Empty,
+                SupplierId = Purchase.SupplierId,
+                PurchaseDate = Purchase.PurchaseDate,
+                Status = newStatus,
+                DeliveryAddress = Purchase.DeliveryAddress ?? string.Empty
+            };
+
+            try
+            {
+                await ApiClient.UpdatePurchaseEndpointAsync("1", update.Id, update);
+                Snackbar.Add("Goods receipt recorded. Purchase status updated.", Severity.Success);
+                MudDialog.Close(DialogResult.Ok(true));
+            }
+            catch (ApiException ex)
+            {
+                Snackbar.Add($"Error recording goods receipt: {ex.Message}", Severity.Error);
+            }
         }
 
         private void Cancel() => MudDialog.Cancel();

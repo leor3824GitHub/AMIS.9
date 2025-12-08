@@ -81,18 +81,37 @@ public partial class PurchaseItemList
 
     private void AddNewItem()
     {
-        if (Productid == null || Qty <= 0 || Unitprice <= 0)
-            return;
-
-        var newItem = new PurchaseItemDto
+        if (Productid == null)
         {
-            Id = Guid.NewGuid(),
-            ProductId = Productid.Value,
-            Qty = Qty,
-            UnitPrice = Unitprice,
-            ItemStatus = Status ?? PurchaseStatus.Draft
-        };
-        Items.Add(newItem);
+            Snackbar?.Add("Select a product before adding.", Severity.Warning);
+            return;
+        }
+
+        if (Qty <= 0 || Unitprice <= 0)
+        {
+            Snackbar?.Add("Quantity and unit price must be greater than zero.", Severity.Warning);
+            return;
+        }
+
+        var existing = Items.FirstOrDefault(i => i.ProductId == Productid.Value);
+        if (existing is not null)
+        {
+            existing.Qty += Qty;
+            existing.UnitPrice = Unitprice;
+            Snackbar?.Add("Updated existing line item.", Severity.Info);
+        }
+        else
+        {
+            var newItem = new PurchaseItemDto
+            {
+                Id = Guid.NewGuid(),
+                ProductId = Productid.Value,
+                Qty = Qty,
+                UnitPrice = Unitprice,
+                ItemStatus = Status ?? PurchaseStatus.Draft
+            };
+            Items.Add(newItem);
+        }
 
         if (IsCreate == false)
         {
