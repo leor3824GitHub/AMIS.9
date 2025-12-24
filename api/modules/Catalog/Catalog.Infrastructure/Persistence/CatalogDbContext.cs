@@ -39,10 +39,11 @@ public sealed class CatalogDbContext : FshDbContext
 
     // COA-Compliant Inventory Tables (Separate per Classification)
     public DbSet<ConsumableInventory> ConsumableInventories { get; set; } = null!;
-    // Removed legacy separated tables in favor of unified PhysicalAsset
-    // public DbSet<SemiExpendableInventory> SemiExpendableInventories { get; set; } = null!;
-    // public DbSet<PropertyPlantEquipment> PropertyPlantEquipments { get; set; } = null!;
-    // public DbSet<PPEAssignmentHistory> PPEAssignmentHistories { get; set; } = null!;
+    public DbSet<SemiExpendableInventory> SemiExpendableInventories { get; set; } = null!;
+    
+    // Journal Entry Vouchers for COA Circular 2022-002 Compliance
+    public DbSet<JournalEntryVoucher> JournalEntryVouchers { get; set; } = null!;
+    public DbSet<JournalEntryLine> JournalEntryLines { get; set; } = null!;
 
     // Unified Physical Asset with Dynamic Classification
     public DbSet<PhysicalAsset> PhysicalAssets { get; set; } = null!;
