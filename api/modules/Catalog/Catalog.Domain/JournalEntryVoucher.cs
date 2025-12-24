@@ -18,7 +18,7 @@ public class JournalEntryVoucher : AuditableEntity, IAggregateRoot
     public string? SourceDocumentType { get; private set; } // RSMI, ICS, PAR, PO, etc.
     public string? SourceDocumentNumber { get; private set; }
     public decimal TotalDebit { get; private set; }
-    public decimal TotalCredit { get; private; }
+    public decimal TotalCredit { get; private set; }
     public bool IsPosted { get; private set; }
     public DateTime? PostedDate { get; private set; }
     public Guid? PostedBy { get; private set; }
@@ -92,16 +92,13 @@ public class JournalEntryVoucher : AuditableEntity, IAggregateRoot
         if (debitAmount == 0 && creditAmount == 0)
             throw new ArgumentException("Either debit or credit amount must be greater than zero.");
 
-        var line = new JournalEntryLine
-        {
-            Id = Guid.NewGuid(),
-            JournalEntryVoucherId = this.Id,
-            AccountCode = accountCode,
-            AccountTitle = accountTitle,
-            DebitAmount = debitAmount,
-            CreditAmount = creditAmount,
-            Particulars = particulars
-        };
+        var line = JournalEntryLine.Create(
+            this.Id,
+            accountCode,
+            accountTitle,
+            debitAmount,
+            creditAmount,
+            particulars);
 
         Lines.Add(line);
         RecalculateTotals();
@@ -141,12 +138,33 @@ public class JournalEntryVoucher : AuditableEntity, IAggregateRoot
 /// </summary>
 public class JournalEntryLine : BaseEntity
 {
-    public Guid JournalEntryVoucherId { get; set; }
-    public string AccountCode { get; set; } = default!; // RCA 2019 account code
-    public string AccountTitle { get; set; } = default!;
-    public decimal DebitAmount { get; set; }
-    public decimal CreditAmount { get; set; }
-    public string? Particulars { get; set; }
+    public Guid JournalEntryVoucherId { get; private set; }
+    public string AccountCode { get; private set; } = default!; // RCA 2019 account code
+    public string AccountTitle { get; private set; } = default!;
+    public decimal DebitAmount { get; private set; }
+    public decimal CreditAmount { get; private set; }
+    public string? Particulars { get; private set; }
 
-    public virtual JournalEntryVoucher JournalEntryVoucher { get; set; } = default!;
+    public virtual JournalEntryVoucher JournalEntryVoucher { get; private set; } = default!;
+
+    private JournalEntryLine() { }
+
+    public static JournalEntryLine Create(
+        Guid journalEntryVoucherId,
+        string accountCode,
+        string accountTitle,
+        decimal debitAmount,
+        decimal creditAmount,
+        string? particulars = null)
+    {
+        return new JournalEntryLine
+        {
+            JournalEntryVoucherId = journalEntryVoucherId,
+            AccountCode = accountCode,
+            AccountTitle = accountTitle,
+            DebitAmount = debitAmount,
+            CreditAmount = creditAmount,
+            Particulars = particulars
+        };
+    }
 }
