@@ -3,6 +3,8 @@ using Asp.Versioning.Conventions;
 using FluentValidation;
 using AMIS.Framework.Core;
 using AMIS.Framework.Core.Origin;
+using AMIS.Framework.Core.Jobs;
+using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Infrastructure.Auth;
 using AMIS.Framework.Infrastructure.Auth.Jwt;
 using AMIS.Framework.Infrastructure.Behaviours;
@@ -25,6 +27,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 
 namespace AMIS.Framework.Infrastructure;
@@ -34,6 +37,9 @@ public static class Extensions
     public static WebApplicationBuilder ConfigureFshFramework(this WebApplicationBuilder builder)
     {
         ArgumentNullException.ThrowIfNull(builder);
+
+        var dbOptions = builder.Configuration.GetSection(nameof(DatabaseOptions)).Get<DatabaseOptions>() ?? new DatabaseOptions();
+
         builder.AddServiceDefaults();
         builder.ConfigureSerilog();
         builder.ConfigureDatabase();
@@ -43,7 +49,14 @@ public static class Extensions
         builder.Services.ConfigureFileStorage();
         builder.Services.ConfigureJwtAuth();
         builder.Services.ConfigureOpenApi();
-        builder.Services.ConfigureJobs(builder.Configuration);
+        if (!dbOptions.SkipInitialization)
+        {
+            builder.Services.ConfigureJobs(builder.Configuration);
+        }
+        else
+        {
+            builder.Services.AddTransient<IJobService, NoopJobService>();
+        }
         builder.Services.ConfigureMailing();
         builder.Services.ConfigureCaching(builder.Configuration);
         builder.Services.AddExceptionHandler<CustomExceptionHandler>();
@@ -76,6 +89,8 @@ public static class Extensions
 
     public static WebApplication UseFshFramework(this WebApplication app)
     {
+        var dbOptions = app.Configuration.GetSection(nameof(DatabaseOptions)).Get<DatabaseOptions>() ?? new DatabaseOptions();
+
         app.MapDefaultEndpoints();
         app.UseCorsPolicy(); // CORS must be early in pipeline, before routing
         app.UseRateLimit();
@@ -83,7 +98,10 @@ public static class Extensions
         app.UseMultitenancy();
         app.UseExceptionHandler();
         app.UseOpenApi();
-        app.UseJobDashboard(app.Configuration);
+        if (!dbOptions.SkipInitialization)
+        {
+            app.UseJobDashboard(app.Configuration);
+        }
         app.UseRouting();
         app.UseStaticFiles();
         app.UseStaticFiles(new StaticFileOptions()

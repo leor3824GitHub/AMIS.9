@@ -33,7 +33,7 @@
                         <MudTh>Description</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd>@context.ProductId</MudTd>
+                        <MudTd>@GetProductLabel(context.Product, context.ManualProductName)</MudTd>
                         <MudTd>@context.Qty</MudTd>
                         <MudTd>@context.Unit</MudTd>
                         <MudTd>@context.Description</MudTd>
@@ -99,4 +99,15 @@
     private void Cancel() => MudDialog.Cancel();
 
     private DateTime? RequestDateValue { get; set; }
+
+    private static string GetProductLabel(ProductResponse product, string manualProductName)
+    {
+        if (product is not null && !string.IsNullOrWhiteSpace(product.Name))
+        {
+            return product.Name;
+        }
+
+        if (string.IsNullOrWhiteSpace(manualProductName)) return string.Empty;
+        return $"{manualProductName} (Manual)";
+    }
 }

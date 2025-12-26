@@ -1,0 +1,169 @@
+openapi: 3.0.3
+info:
+  title: AMIS Catalog API (Excerpt)
+  version: v1
+  description: |
+    Contract excerpt for feature 001-pr-item-product-input.
+    This document is not a full API definition; it highlights the PR item payload changes.
+
+paths:
+  /api/v1/catalog/purchaseRequests:
+    post:
+      summary: Create purchase request (with optional items)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePurchaseRequestCommand'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreatePurchaseRequestResponse'
+
+  /api/v1/catalog/purchaseRequests/{id}/items:
+    post:
+      summary: Add purchase request item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddPurchaseRequestItemCommand'
+      responses:
+        '200':
+          description: OK
+
+  /api/v1/catalog/purchaseRequests/{id}/items/{itemId}:
+    put:
+      summary: Update purchase request item
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: itemId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePurchaseRequestItemCommand'
+      responses:
+        '204':
+          description: No Content
+
+components:
+  schemas:
+    CreatePurchaseRequestCommand:
+      type: object
+      required: [requestDate, requestedBy, purpose]
+      properties:
+        requestDate:
+          type: string
+          format: date-time
+        requestedBy:
+          type: string
+          format: uuid
+        purpose:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PurchaseRequestItemCreateDto'
+
+    CreatePurchaseRequestResponse:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+          format: uuid
+
+    PurchaseRequestItemCreateDto:
+      type: object
+      required: [qty, unit]
+      description: |
+        Exactly one of productId or manualProductName must be provided.
+      properties:
+        productId:
+          type: string
+          format: uuid
+          nullable: true
+        manualProductName:
+          type: string
+          nullable: true
+        qty:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+    AddPurchaseRequestItemCommand:
+      type: object
+      required: [purchaseRequestId, qty, unit]
+      properties:
+        purchaseRequestId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+          nullable: true
+        manualProductName:
+          type: string
+          nullable: true
+        qty:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+        description:
+          type: string
+          nullable: true
+
+    UpdatePurchaseRequestItemCommand:
+      type: object
+      required: [purchaseRequestId, itemId, qty, unit]
+      properties:
+        purchaseRequestId:
+          type: string
+          format: uuid
+        itemId:
+          type: string
+          format: uuid
+        productId:
+          type: string
+          format: uuid
+          nullable: true
+        manualProductName:
+          type: string
+          nullable: true
+        qty:
+          type: integer
+          minimum: 1
+        unit:
+          type: string
+        description:
+          type: string
+          nullable: true

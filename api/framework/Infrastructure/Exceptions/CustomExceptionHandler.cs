@@ -15,6 +15,8 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         var problemDetails = new ProblemDetails();
         problemDetails.Instance = httpContext.Request.Path;
 
+        httpContext.Request.Headers.TryGetValue("tenant", out var tenant);
+
         if (exception is FluentValidation.ValidationException fluentException)
         {
             problemDetails.Detail = "one or more validation errors occurred";
@@ -44,7 +46,15 @@ public class CustomExceptionHandler(ILogger<CustomExceptionHandler> logger) : IE
         }
 
         LogContext.PushProperty("StackTrace", exception.StackTrace);
-        logger.LogError("{ProblemDetail}", problemDetails.Detail);
+        logger.LogError(
+            exception,
+            "{Method} {Path} failed ({StatusCode}) | TraceId={TraceId} Tenant={Tenant} | {ProblemDetail}",
+            httpContext.Request.Method,
+            httpContext.Request.Path.Value,
+            httpContext.Response.StatusCode,
+            httpContext.TraceIdentifier,
+            tenant.ToString(),
+            problemDetails.Detail);
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken).ConfigureAwait(false);
         return true;
     }

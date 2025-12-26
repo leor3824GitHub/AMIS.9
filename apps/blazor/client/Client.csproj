@@ -14,6 +14,7 @@
 	<!-- Explicitly exclude appsettings.json from compression processing -->
 	<ItemGroup>
 		<Content Update="wwwroot/appsettings.json" ExcludeFromCompression="true" />
+		<StaticWebAssetExcludeFromCompression Include="wwwroot/appsettings.json" />
 	</ItemGroup>
 
 

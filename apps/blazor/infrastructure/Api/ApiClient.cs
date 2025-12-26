@@ -14163,6 +14163,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
         public System.Guid? ProductId { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("manualProductName")]
+        public string ManualProductName { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("qty")]
         public int Qty { get; set; }
 
@@ -15738,6 +15741,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
         public System.Guid? ProductId { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("manualProductName")]
+        public string ManualProductName { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("qty")]
         public int Qty { get; set; }
 
@@ -15758,6 +15764,9 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
         public System.Guid? ProductId { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("manualProductName")]
+        public string ManualProductName { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("qty")]
         public int Qty { get; set; }
@@ -17227,6 +17236,9 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("productId")]
         public System.Guid? ProductId { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("manualProductName")]
+        public string ManualProductName { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("qty")]
         public int Qty { get; set; }

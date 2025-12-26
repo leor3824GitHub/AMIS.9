@@ -5,6 +5,7 @@ namespace AMIS.WebApi.Catalog.Application.PurchaseRequests.Get.v1;
 public sealed record PurchaseRequestItemResponse(
     Guid? Id,
     Guid? ProductId,
+    string? ManualProductName,
     int Qty,
     string Unit,
     string? Description,

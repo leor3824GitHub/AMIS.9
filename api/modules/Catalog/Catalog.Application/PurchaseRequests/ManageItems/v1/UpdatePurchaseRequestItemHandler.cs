@@ -30,7 +30,7 @@ public sealed class UpdatePurchaseRequestItemHandler(
         if (pr.Status != Domain.ValueObjects.PurchaseRequestStatus.Draft)
             throw new InvalidOperationException("Can only update items while in Draft status");
 
-        pr.UpdateItem(request.ItemId, request.ProductId, request.Qty, request.Unit, request.Description);
+        pr.UpdateItem(request.ItemId, request.ProductId, request.ManualProductName, request.Qty, request.Unit, request.Description);
         await repository.UpdateAsync(pr, cancellationToken);
         logger.LogInformation("Updated item {ItemId} in PurchaseRequest {PRId}", request.ItemId, pr.Id);
     }
