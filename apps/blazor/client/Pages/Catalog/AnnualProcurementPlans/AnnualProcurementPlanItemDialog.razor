@@ -1,0 +1,92 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.ListAlt" Class="mr-3 mb-n1" />
+            @(IsCreate ? "Add Line Item" : "Edit Line Item")
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudGrid>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string" @bind-Value="_departmentName" Label="Department"
+                        Required="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string" @bind-Value="_papCode" Label="PAP Code"
+                        Margin="Margin.Dense" HelperText="Optional" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string" @bind-Value="_description" Label="Description"
+                        Required="true" Margin="Margin.Dense" Lines="3" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="ProjectType" @bind-Value="_projectType" Label="Project Type"
+                        Required="true" Margin="Margin.Dense">
+                        <MudSelectItem Value="ProjectType._0">Goods</MudSelectItem>
+                        <MudSelectItem Value="ProjectType._1">Services</MudSelectItem>
+                        <MudSelectItem Value="ProjectType._2">Infrastructure</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="int" @bind-Value="_quantity" Label="Quantity"
+                        Required="true" Margin="Margin.Dense" Min="1" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string" @bind-Value="_unitOfMeasure" Label="Unit of Measure"
+                        Required="true" Margin="Margin.Dense" Placeholder="e.g., piece, unit, lot" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudNumericField T="double" @bind-Value="_unitCost" Label="Unit Cost"
+                        Required="true" Margin="Margin.Dense" Min="0" Format="N2" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string" @bind-Value="_mode" Label="Mode of Procurement"
+                        Required="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudCheckBox T="bool" @bind-Checked="_isEarlyProcurement" Label="Early Procurement Activity" />
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudSelect T="string" @bind-Value="_scheduleMonth" Label="Schedule (Month)"
+                        Required="true" Margin="Margin.Dense">
+                        <MudSelectItem Value="@(\"January\")">January</MudSelectItem>
+                        <MudSelectItem Value="@(\"February\")">February</MudSelectItem>
+                        <MudSelectItem Value="@(\"March\")">March</MudSelectItem>
+                        <MudSelectItem Value="@(\"April\")">April</MudSelectItem>
+                        <MudSelectItem Value="@(\"May\")">May</MudSelectItem>
+                        <MudSelectItem Value="@(\"June\")">June</MudSelectItem>
+                        <MudSelectItem Value="@(\"July\")">July</MudSelectItem>
+                        <MudSelectItem Value="@(\"August\")">August</MudSelectItem>
+                        <MudSelectItem Value="@(\"September\")">September</MudSelectItem>
+                        <MudSelectItem Value="@(\"October\")">October</MudSelectItem>
+                        <MudSelectItem Value="@(\"November\")">November</MudSelectItem>
+                        <MudSelectItem Value="@(\"December\")">December</MudSelectItem>
+                    </MudSelect>
+                </MudItem>
+                <MudItem xs="12" sm="6">
+                    <MudTextField T="string" @bind-Value="_fundingSource" Label="Funding Source"
+                        Required="true" Margin="Margin.Dense" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField T="string" @bind-Value="_remarks" Label="Remarks"
+                        Margin="Margin.Dense" Lines="2" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        Estimated Budget: <strong>@CalculateEstimatedBudget().ToString("N2")</strong>
+                    </MudAlert>
+                </MudItem>
+            </MudGrid>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Save" Disabled="@(!CanSave())">
+            @(IsCreate ? "Add" : "Update")
+        </MudButton>
+    </DialogActions>
+</MudDialog>

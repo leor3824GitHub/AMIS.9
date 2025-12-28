@@ -1,10 +1,10 @@
-@page "/catalog/annualprocurementplans"
+@page "/catalog/procurementplans"
 @using AMIS.Blazor.Client.Components
 @using AMIS.Blazor.Infrastructure.Api
 @using MudBlazor
 
-<PageHeader Title="Annual Procurement Plans (APP)" Header="APP Management"
-    SubHeader="Consolidated annual procurement plans from approved PPMPs" />
+<PageHeader Title="Procurement Plans (PPMP)" Header="PPMP Management"
+    SubHeader="Project Procurement Management Plans for each fiscal year" />
 
 <MudPaper Class="pa-4">
     <MudStack Row="true" Spacing="2" Class="mb-4">
@@ -22,15 +22,16 @@
         @if (_canCreate)
         {
             <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_loading"
-                OnClick="OnCreate" StartIcon="@Icons.Material.Filled.Add">New APP</MudButton>
+                OnClick="OnCreate" StartIcon="@Icons.Material.Filled.Add">New PPMP</MudButton>
         }
     </MudStack>
 
-    <MudDataGrid ServerData="ServerReload" T="AnnualProcurementPlanListItemResponse" Hover="true" Dense="true"
+    <MudDataGrid ServerData="ServerReload" T="ProcurementPlanListItemResponse" Hover="true" Dense="true"
         Bordered="true" Striped="true" Loading="@_loading" @ref="_table">
         <Columns>
             <PropertyColumn Property="x => x.ControlNumber" Title="Control No." />
             <PropertyColumn Property="x => x.FiscalYear" Title="Fiscal Year" />
+            <PropertyColumn Property="x => x.DepartmentName" Title="Department" />
             <TemplateColumn Title="Budget Type">
                 <CellTemplate>
                     <MudChip T="string" Size="Size.Small" Color="@GetBudgetTypeColor(context.Item.BudgetType)" Variant="Variant.Text">

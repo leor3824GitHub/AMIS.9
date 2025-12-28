@@ -159,6 +159,36 @@ public partial class AnnualProcurementPlans
         }
     }
 
+    private async Task OnQuickAddItem(AnnualProcurementPlanListItemResponse item)
+    {
+        if (!_canUpdate) return;
+
+        try
+        {
+            var detail = await Api.GetAnnualProcurementPlanEndpointAsync("1", item.Id);
+            var parameters = new DialogParameters
+            {
+                { nameof(AnnualProcurementPlanDialog.ViewModel), detail },
+                { nameof(AnnualProcurementPlanDialog.IsCreate), false },
+                { nameof(AnnualProcurementPlanDialog.ReadOnly), false },
+                { nameof(AnnualProcurementPlanDialog.OpenAddItemOnLoad), true }
+            };
+
+            var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.ExtraLarge, FullWidth = true };
+            var dialog = await Dialog.ShowAsync<AnnualProcurementPlanDialog>($"Add Item: {item.ControlNumber}", parameters, options);
+            var result = await dialog.Result;
+
+            if (result is { Canceled: false })
+            {
+                await _table.ReloadServerData();
+            }
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add($"Error opening APP: {ex.Message}", Severity.Error);
+        }
+    }
+
     private async Task OnSubmit(AnnualProcurementPlanListItemResponse item)
     {
         var confirm = await ConfirmAsync("Submit APP", "Are you sure you want to submit this APP for approval?");

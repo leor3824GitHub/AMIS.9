@@ -13,6 +13,7 @@ public partial class AnnualProcurementPlanDialog
     [Parameter] public bool ReadOnly { get; set; }
     [Parameter] public Guid PreparedByUserId { get; set; }
     [Parameter] public GetAnnualProcurementPlanResponse? ViewModel { get; set; }
+    [Parameter] public bool OpenAddItemOnLoad { get; set; }
 
     [Inject] protected IApiClient Api { get; set; } = default!;
     [Inject] protected ISnackbar Snackbar { get; set; } = default!;
@@ -27,6 +28,9 @@ public partial class AnnualProcurementPlanDialog
     private int _editFiscalYear;
     private BudgetType _editBudgetType;
 
+    private List<AnnualProcurementPlanItemResponse>? _editItems;
+    private bool _openedAddItem;
+
     protected override void OnInitialized()
     {
         // Initialize edit fields if editing
@@ -34,6 +38,104 @@ public partial class AnnualProcurementPlanDialog
         {
             _editFiscalYear = ViewModel.FiscalYear;
             _editBudgetType = ViewModel.BudgetType;
+            _editItems = ViewModel.Items?.ToList() ?? new List<AnnualProcurementPlanItemResponse>();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender) return;
+        if (_openedAddItem) return;
+        if (IsCreate) return;
+        if (ReadOnly) return;
+        if (!OpenAddItemOnLoad) return;
+        if (ViewModel == null) return;
+
+        _openedAddItem = true;
+        await OnAddItem();
+    }
+
+    private async Task OnAddItem()
+    {
+        if (ViewModel == null) return;
+
+        var parameters = new DialogParameters
+        {
+            { nameof(AnnualProcurementPlanItemDialog.PlanHeaderId), ViewModel.Id },
+            { nameof(AnnualProcurementPlanItemDialog.IsCreate), true }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true };
+        var dialog = await Dialog.ShowAsync<AnnualProcurementPlanItemDialog>("Add Line Item", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add("Item added successfully.", Severity.Success);
+            await RefreshPlan();
+        }
+    }
+
+    private async Task OnEditItem(AnnualProcurementPlanItemResponse item)
+    {
+        if (ViewModel == null) return;
+
+        var parameters = new DialogParameters
+        {
+            { nameof(AnnualProcurementPlanItemDialog.PlanHeaderId), ViewModel.Id },
+            { nameof(AnnualProcurementPlanItemDialog.IsCreate), false },
+            { nameof(AnnualProcurementPlanItemDialog.Item), item }
+        };
+
+        var options = new DialogOptions { CloseButton = true, MaxWidth = MaxWidth.Large, FullWidth = true };
+        var dialog = await Dialog.ShowAsync<AnnualProcurementPlanItemDialog>("Edit Line Item", parameters, options);
+        var result = await dialog.Result;
+
+        if (result is { Canceled: false })
+        {
+            Snackbar.Add("Item updated successfully.", Severity.Success);
+            await RefreshPlan();
+        }
+    }
+
+    private async Task OnDeleteItem(AnnualProcurementPlanItemResponse item)
+    {
+        if (ViewModel == null) return;
+
+        var confirm = await Dialog.ShowMessageBox(
+            "Confirm Delete",
+            $"Are you sure you want to delete this item: '{item.Description}'?",
+            yesText: "Delete", cancelText: "Cancel");
+
+        if (confirm == true)
+        {
+            try
+            {
+                await Api.DeleteAnnualProcurementPlanItemAsync("1", ViewModel.Id, item.Id);
+                Snackbar.Add("Item deleted successfully.", Severity.Success);
+                await RefreshPlan();
+            }
+            catch (ApiException ex)
+            {
+                Snackbar.Add($"Failed to delete item: {ex.Message}", Severity.Error);
+            }
+        }
+    }
+
+    private async Task RefreshPlan()
+    {
+        if (ViewModel == null) return;
+
+        try
+        {
+            var updated = await Api.GetAnnualProcurementPlanEndpointAsync("1", ViewModel.Id);
+            ViewModel = updated;
+            _editItems = updated.Items?.ToList() ?? new List<AnnualProcurementPlanItemResponse>();
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to refresh plan: {ex.Message}", Severity.Error);
         }
     }
 

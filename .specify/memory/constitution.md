@@ -1,14 +1,14 @@
 <!--
 SYNC IMPACT REPORT
 
-- Version change: 1.2.0 -> 1.2.1
-- Modified principles: Added "Procurement Planning Compliance (RA 12009)" principle
+- Version change: 1.2.1 -> 1.2.2
+- Modified principles: N/A
 - Added sections: N/A
-- Expanded sections: Domain Entities: Procurement Plan (PPMP) (clarified ProcurementPlan aggregate; added ProcurementProject aggregate)
+- Expanded sections: Development Workflow & Quality Gates (added EF migration steps)
 - Removed sections: N/A
 - Templates requiring updates:
-	- .specify/templates/plan-template.md (updated)
-	- .specify/templates/spec-template.md (updated)
+	- .specify/templates/plan-template.md (no change)
+	- .specify/templates/spec-template.md (no change)
 	- .specify/templates/tasks-template.md (no change)
 	- .specify/templates/commands/*.md: N/A (folder not present)
 - Deferred items: None
@@ -213,6 +213,11 @@ single aggregate. `ProcurementProject` is the aggregate root; `ProcurementSchedu
 - **Feature work** MUST follow vertical slices (Command → Handler → Validator → Endpoint → Response)
 	inside the relevant module.
 - **API changes** that affect the Blazor client MUST include a regeneration step for the NSwag client.
+- **EF Core migrations** MUST be created using the standard workflow:
+	1. Change directory to `./api/server`:
+		- `cd ./api/server`
+	2. Create the migration (replace the quoted migration name every time):
+		- `dotnet ef migrations add "Add Catalog Schema" --project .././migrations/postgresql/ --context CatalogDbContext -o Catalog`
 - **Compliance-sensitive changes** (forms, RCA mapping, thresholds, valuation policy) MUST include:
 	(1) a short impact note, (2) test updates, and (3) review by a domain/compliance-aware reviewer.
 - **Release readiness** requires: build green, tests green (as applicable), migrations reviewed, and
@@ -233,4 +238,4 @@ Amendment rules:
 - When constitution changes, dependent templates under `.specify/templates/` MUST be reviewed and
 	updated to match.
 
-**Version**: 1.2.1 | **Ratified**: 2025-12-24 | **Last Amended**: 2025-12-27
+**Version**: 1.2.2 | **Ratified**: 2025-12-24 | **Last Amended**: 2025-12-28
