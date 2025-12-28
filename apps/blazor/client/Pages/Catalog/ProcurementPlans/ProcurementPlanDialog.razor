@@ -4,7 +4,7 @@
 <MudDialog>
     <TitleContent>
         <MudText Typo="Typo.h6">
-            <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Class="mr-3 mb-n1" />
+            <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-3 mb-n1" />
             @GetDialogTitle()
         </MudText>
     </TitleContent>
@@ -22,6 +22,10 @@
                             Required="true" Margin="Margin.Dense" Min="2020" Max="2100" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
+                        <MudTextField T="string" @bind-Value="_departmentName" Label="Department"
+                            Required="true" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
                         <MudSelect T="BudgetType" @bind-Value="_budgetType" Label="Budget Type"
                             Required="true" Margin="Margin.Dense">
                             <MudSelectItem Value="BudgetType._0">MOOE</MudSelectItem>
@@ -29,10 +33,13 @@
                             <MudSelectItem Value="BudgetType._2">Mixed</MudSelectItem>
                         </MudSelect>
                     </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudCheckBox T="bool" @bind-Checked="_isSupplemental" Label="Is Supplemental PPMP" />
+                    </MudItem>
                 </MudGrid>
 
                 <MudAlert Severity="Severity.Info" Dense="true">
-                    After creating the APP, you can add line items by editing the plan.
+                    After creating the PPMP, you can add line items by editing the plan.
                 </MudAlert>
             </MudStack>
         }
@@ -47,6 +54,9 @@
                         <MudText><strong>Fiscal Year:</strong> @ViewModel.FiscalYear</MudText>
                     </MudItem>
                     <MudItem xs="12" sm="6">
+                        <MudText><strong>Department:</strong> @ViewModel.DepartmentName</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
                         <MudText>
                             <strong>Status:</strong>
                             <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(ViewModel.Status)" Variant="Variant.Filled">
@@ -56,6 +66,9 @@
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudText><strong>Budget Type:</strong> @GetBudgetTypeLabel(ViewModel.BudgetType)</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText><strong>Supplemental:</strong> @(ViewModel.IsSupplemental ? "Yes" : "No")</MudText>
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudText><strong>Total Budget:</strong> @ViewModel.TotalBudget.ToString("N2")</MudText>
@@ -84,28 +97,29 @@
 
                 <MudDivider Class="my-2" />
 
-                <MudText Typo="Typo.subtitle1">
-                    <MudIcon Icon="@Icons.Material.Filled.List" Size="Size.Small" Class="mr-1" />
-                    Line Items (@(ViewModel.Items?.Count ?? 0))
-                </MudText>
+                <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudText Typo="Typo.subtitle1">
+                        <MudIcon Icon="@Icons.Material.Filled.List" Size="Size.Small" Class="mr-1" />
+                        Line Items (@(ViewModel.Items?.Count ?? 0))
+                    </MudText>
+                </MudStack>
 
                 @if (ViewModel.Items?.Count > 0)
                 {
-                    <MudTable T="AnnualProcurementPlanItemResponse" Items="ViewModel.Items" Dense="true" Hover="true" Bordered="true" Striped="true">
+                    <MudTable T="ProcurementPlanItemResponse" Items="ViewModel.Items" Dense="true" Hover="true" Bordered="true" Striped="true">
                         <HeaderContent>
-                            <MudTh>Department</MudTh>
                             <MudTh>PAP Code</MudTh>
                             <MudTh>Description</MudTh>
-                            <MudTh>Project Type</MudTh>
+                            <MudTh>Type</MudTh>
                             <MudTh>Qty</MudTh>
                             <MudTh>Unit</MudTh>
                             <MudTh>Unit Cost</MudTh>
                             <MudTh>Est. Budget</MudTh>
                             <MudTh>Mode</MudTh>
                             <MudTh>Schedule</MudTh>
+                            <MudTh>Source</MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd>@context.DepartmentName</MudTd>
                             <MudTd>@context.PapCode</MudTd>
                             <MudTd>@context.Description</MudTd>
                             <MudTd>@GetProjectTypeLabel(context.ProjectType)</MudTd>
@@ -115,6 +129,7 @@
                             <MudTd>@context.EstimatedBudget.ToString("N2")</MudTd>
                             <MudTd>@context.Mode</MudTd>
                             <MudTd>@context.ScheduleMonth</MudTd>
+                            <MudTd>@context.FundingSource</MudTd>
                         </RowTemplate>
                     </MudTable>
                 }
@@ -133,7 +148,10 @@
                         <MudTextField T="string" Value="@ViewModel.ControlNumber" Label="Control Number" ReadOnly="true" Margin="Margin.Dense" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudNumericField T="int" @bind-Value="_editFiscalYear" Label="Fiscal Year" Required="true" Margin="Margin.Dense" Min="2020" Max="2100" />
+                        <MudNumericField T="int" Value="@ViewModel.FiscalYear" Label="Fiscal Year" ReadOnly="true" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" @bind-Value="_editDepartmentName" Label="Department" Required="true" Margin="Margin.Dense" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
                         <MudSelect T="BudgetType" @bind-Value="_editBudgetType" Label="Budget Type" Required="true" Margin="Margin.Dense">
@@ -141,6 +159,9 @@
                             <MudSelectItem Value="BudgetType._1">CO</MudSelectItem>
                             <MudSelectItem Value="BudgetType._2">Mixed</MudSelectItem>
                         </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudCheckBox T="bool" @bind-Checked="_editIsSupplemental" Label="Is Supplemental PPMP" />
                     </MudItem>
                 </MudGrid>
 
@@ -163,9 +184,8 @@
 
                 @if (_editItems?.Count > 0)
                 {
-                    <MudTable T="AnnualProcurementPlanItemResponse" Items="_editItems" Dense="true" Hover="true" Bordered="true" Striped="true">
+                    <MudTable T="ProcurementPlanItemResponse" Items="_editItems" Dense="true" Hover="true" Bordered="true" Striped="true">
                         <HeaderContent>
-                            <MudTh>Department</MudTh>
                             <MudTh>Description</MudTh>
                             <MudTh>Type</MudTh>
                             <MudTh>Qty</MudTh>
@@ -174,7 +194,6 @@
                             <MudTh>Actions</MudTh>
                         </HeaderContent>
                         <RowTemplate>
-                            <MudTd>@context.DepartmentName</MudTd>
                             <MudTd>@context.Description</MudTd>
                             <MudTd>@GetProjectTypeLabel(context.ProjectType)</MudTd>
                             <MudTd>@context.Quantity</MudTd>
@@ -192,29 +211,26 @@
                 else
                 {
                     <MudAlert Severity="Severity.Info" Dense="true">
-                        No items yet. Click "Add Item" to add line items to this APP.
+                        No items yet. Click "Add Item" to add line items to this PPMP.
                     </MudAlert>
                 }
             </MudStack>
         }
     </DialogContent>
     <DialogActions>
-        <MudButton DropShadow="false" StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel">
-            @(ReadOnly ? "Close" : "Cancel")
-        </MudButton>
         @if (IsCreate)
         {
-            <MudButton DropShadow="false" StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary"
-                Variant="Variant.Filled" Disabled="@(!CanCreate())" OnClick="Create">
-                Create
-            </MudButton>
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Create" Disabled="@(!CanCreate())">Create</MudButton>
         }
-        else if (!ReadOnly)
+        else if (ReadOnly)
         {
-            <MudButton DropShadow="false" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary"
-                Variant="Variant.Filled" OnClick="Update">
-                Save Changes
-            </MudButton>
+            <MudButton OnClick="Cancel">Close</MudButton>
+        }
+        else
+        {
+            <MudButton OnClick="Cancel">Cancel</MudButton>
+            <MudButton Color="Color.Primary" Variant="Variant.Filled" OnClick="Update">Save Changes</MudButton>
         }
     </DialogActions>
 </MudDialog>
