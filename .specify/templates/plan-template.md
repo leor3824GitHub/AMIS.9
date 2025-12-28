@@ -32,6 +32,7 @@
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - [ ] Compliance impact assessed (COA/DBM/PPSAS/RCA, prescribed forms)
+- [ ] Procurement planning impact assessed when applicable (RA 12009, PPMP alignment, PR must map to PPMP item)
 - [ ] Clean Architecture boundaries respected (Domain/Application/Infrastructure)
 - [ ] Multi-tenant isolation preserved (tenant context + permission checks)
 - [ ] Cloud readiness considered (config, logging; no secrets)

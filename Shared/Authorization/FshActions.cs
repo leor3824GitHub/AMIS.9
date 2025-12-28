@@ -20,4 +20,8 @@ public static class FshActions
     public const string Assign = nameof(Assign);
     public const string Accept = nameof(Accept);
     public const string StatusUpdate = nameof(StatusUpdate);
+
+    // Procurement / PPMP workflow actions
+    public const string Submit = nameof(Submit);
+    public const string Approve = nameof(Approve);
 }

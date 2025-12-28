@@ -40,9 +40,6 @@ public sealed class CatalogDbContext : FshDbContext
     // COA-Compliant Inventory Tables (Separate per Classification)
     public DbSet<ConsumableInventory> ConsumableInventories { get; set; } = null!;
     // Removed legacy separated tables in favor of unified PhysicalAsset
-    // public DbSet<SemiExpendableInventory> SemiExpendableInventories { get; set; } = null!;
-    // public DbSet<PropertyPlantEquipment> PropertyPlantEquipments { get; set; } = null!;
-    // public DbSet<PPEAssignmentHistory> PPEAssignmentHistories { get; set; } = null!;
 
     // Unified Physical Asset with Dynamic Classification
     public DbSet<PhysicalAsset> PhysicalAssets { get; set; } = null!;
@@ -56,6 +53,15 @@ public sealed class CatalogDbContext : FshDbContext
     public DbSet<AssetConditionConfiguration> AssetConditionConfigurations { get; set; } = null!;
     public DbSet<PPETypeDefinition> PPETypeDefinitions { get; set; } = null!;
     public DbSet<UnitOfMeasure> UnitsOfMeasure { get; set; } = null!;
+
+    // Procurement Planning (PPMP)
+    public DbSet<ProcurementPlanHeader> ProcurementPlans { get; set; } = null!;
+
+    // Annual Procurement Planning (APP)
+    public DbSet<AnnualProcurementPlanHeader> AnnualProcurementPlans { get; set; } = null!;
+
+    // Procurement Projects
+    public DbSet<ProcurementProject> ProcurementProjects { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

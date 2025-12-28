@@ -2,6 +2,8 @@
 
 Auto-generated from all feature plans. Last updated: [DATE]
 
+**Governance reminder**: Follow the AMIS constitution (auditability, COA/DBM/PPSAS/RCA requirements; and for procurement-related features, RA 12009 + PPMP alignment rules).
+
 ## Active Technologies
 
 [EXTRACTED FROM ALL PLAN.MD FILES]

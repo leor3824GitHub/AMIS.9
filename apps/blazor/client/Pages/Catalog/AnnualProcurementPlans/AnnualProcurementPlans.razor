@@ -1,0 +1,115 @@
+@page "/catalog/annualprocurementplans"
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<PageHeader Title="Annual Procurement Plans (APP)" Header="APP Management"
+    SubHeader="Consolidated annual procurement plans from approved PPMPs" />
+
+<MudPaper Class="pa-4">
+    <MudStack Row="true" Spacing="2" Class="mb-4">
+        @if (_canSearch)
+        {
+            <MudTextField T="string" ValueChanged="@(s => OnSearch(s))"
+                Placeholder="Search by control number or fiscal year..."
+                Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search"
+                Variant="Variant.Outlined" Disabled="@_loading" Style="min-width: 300px;" />
+        }
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Disabled="@_loading"
+            OnClick="@OnRefresh" StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+
+        @if (_canCreate)
+        {
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="@_loading"
+                OnClick="OnCreate" StartIcon="@Icons.Material.Filled.Add">New APP</MudButton>
+        }
+    </MudStack>
+
+    <MudDataGrid ServerData="ServerReload" T="AnnualProcurementPlanListItem" Hover="true" Dense="true"
+        Bordered="true" Striped="true" Loading="@_loading" @ref="_table">
+        <Columns>
+            <PropertyColumn Property="x => x.ControlNumber" Title="Control No." />
+            <PropertyColumn Property="x => x.FiscalYear" Title="Fiscal Year" />
+            <TemplateColumn Title="Budget Type">
+                <CellTemplate>
+                    <MudChip T="string" Size="Size.Small" Color="@GetBudgetTypeColor(context.Item.BudgetType)" Variant="Variant.Text">
+                        @GetBudgetTypeLabel(context.Item.BudgetType)
+                    </MudChip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Total Budget">
+                <CellTemplate>
+                    @context.Item.TotalBudget.ToString("N2")
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Status">
+                <CellTemplate>
+                    <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(context.Item.Status)" Variant="Variant.Filled">
+                        @GetStatusLabel(context.Item.Status)
+                    </MudChip>
+                </CellTemplate>
+            </TemplateColumn>
+            <TemplateColumn Title="Actions" Sortable="false">
+                <CellTemplate>
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense Size="Size.Small">
+                        <MudMenuItem OnClick="@(() => OnView(context.Item))">
+                            <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                <MudIcon Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" />
+                                <MudText>View Details</MudText>
+                            </MudStack>
+                        </MudMenuItem>
+                        @if (IsDraft(context.Item.Status))
+                        {
+                            <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnEdit(context.Item))">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Warning" />
+                                    <MudText>Edit</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                            <MudMenuItem Disabled="@(!_canSubmit)" OnClick="@(() => OnSubmit(context.Item))">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Send" Size="Size.Small" Color="Color.Info" />
+                                    <MudText>Submit</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                            <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnCancel(context.Item))">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Cancel" Size="Size.Small" />
+                                    <MudText>Cancel</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        @if (IsSubmitted(context.Item.Status))
+                        {
+                            <MudMenuItem Disabled="@(!_canApprove)" OnClick="@(() => OnApprove(context.Item))">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Size="Size.Small" Color="Color.Success" />
+                                    <MudText>Approve</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                            <MudMenuItem Disabled="@(!_canApprove)" OnClick="@(() => OnReject(context.Item))">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Block" Size="Size.Small" Color="Color.Error" />
+                                    <MudText>Reject</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                        @if (IsRejected(context.Item.Status))
+                        {
+                            <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnRevertToDraft(context.Item))">
+                                <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
+                                    <MudIcon Icon="@Icons.Material.Filled.Undo" Size="Size.Small" Color="Color.Warning" />
+                                    <MudText>Revert to Draft</MudText>
+                                </MudStack>
+                            </MudMenuItem>
+                        }
+                    </MudMenu>
+                </CellTemplate>
+            </TemplateColumn>
+        </Columns>
+        <PagerContent>
+            <MudDataGridPager />
+        </PagerContent>
+    </MudDataGrid>
+</MudPaper>

@@ -1,0 +1,431 @@
+openapi: 3.0.3
+info:
+  title: AMIS Procurement (PPMP) API
+  version: 1.0.0
+  description: |
+    Contracts for the Procurement Plan (PPMP) module. These endpoints are intended to be exposed under
+    the host's versioned route group (e.g., /api/v1/...).
+servers:
+  - url: /api/v1
+tags:
+  - name: procurement-plans
+  - name: procurement-projects
+paths:
+  /procurement/plans/search:
+    post:
+      tags: [procurement-plans]
+      summary: Search procurement plans (paged)
+      operationId: ProcurementPlans_Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationFilter'
+      responses:
+        '200':
+          description: Paged list of plans
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedProcurementPlanHeader'
+  /procurement/plans:
+    post:
+      tags: [procurement-plans]
+      summary: Create a procurement plan header
+      operationId: ProcurementPlans_Create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProcurementPlanHeader'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcurementPlanHeader'
+  /procurement/plans/{id}:
+    get:
+      tags: [procurement-plans]
+      summary: Get procurement plan header by id
+      operationId: ProcurementPlans_Get
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcurementPlanHeader'
+    put:
+      tags: [procurement-plans]
+      summary: Update procurement plan header metadata
+      operationId: ProcurementPlans_Update
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProcurementPlanHeader'
+      responses:
+        '204': { description: No Content }
+  /procurement/plans/{id}/items:
+    post:
+      tags: [procurement-plans]
+      summary: Add an item to a procurement plan
+      operationId: ProcurementPlans_AddItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProcurementPlanItem'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcurementPlanItem'
+  /procurement/plans/{id}/items/{itemId}:
+    put:
+      tags: [procurement-plans]
+      summary: Update a procurement plan item
+      operationId: ProcurementPlans_UpdateItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: itemId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProcurementPlanItem'
+      responses:
+        '204': { description: No Content }
+    delete:
+      tags: [procurement-plans]
+      summary: Delete a procurement plan item
+      operationId: ProcurementPlans_DeleteItem
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+        - name: itemId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: No Content }
+  /procurement/plans/{id}/submit:
+    post:
+      tags: [procurement-plans]
+      summary: Submit a draft plan for approval
+      operationId: ProcurementPlans_Submit
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: No Content }
+  /procurement/plans/{id}/approve:
+    post:
+      tags: [procurement-plans]
+      summary: Approve a submitted plan
+      operationId: ProcurementPlans_Approve
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: No Content }
+
+  /procurement/projects/search:
+    post:
+      tags: [procurement-projects]
+      summary: Search procurement projects (paged)
+      operationId: ProcurementProjects_Search
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaginationFilter'
+      responses:
+        '200':
+          description: Paged list of projects
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedProcurementProject'
+  /procurement/projects:
+    post:
+      tags: [procurement-projects]
+      summary: Create a procurement project
+      operationId: ProcurementProjects_Create
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProcurementProject'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcurementProject'
+  /procurement/projects/{projectId}:
+    get:
+      tags: [procurement-projects]
+      summary: Get procurement project by id
+      operationId: ProcurementProjects_Get
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProcurementProject'
+    put:
+      tags: [procurement-projects]
+      summary: Update procurement project
+      operationId: ProcurementProjects_Update
+      parameters:
+        - name: projectId
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProcurementProject'
+      responses:
+        '204': { description: No Content }
+
+components:
+  schemas:
+    PaginationFilter:
+      type: object
+      properties:
+        pageNumber: { type: integer, format: int32, minimum: 1 }
+        pageSize: { type: integer, format: int32, minimum: 1, maximum: 100 }
+        orderBy: { type: string, nullable: true }
+        advancedSearch: { type: string, nullable: true }
+        keyword: { type: string, nullable: true }
+      required: [pageNumber, pageSize]
+
+    ProcurementPlanStatus:
+      type: string
+      enum: [DRAFT, PENDING_APPROVAL, APPROVED]
+
+    BudgetType:
+      type: string
+      enum: [INDICATIVE, FINAL]
+
+    ProjectType:
+      type: string
+      enum: [GOODS, INFRASTRUCTURE, CONSULTING_SERVICES]
+
+    ProcurementPlanHeader:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        controlNumber: { type: string }
+        fiscalYear: { type: integer, format: int32 }
+        departmentId: { type: string, format: uuid }
+        departmentName: { type: string }
+        status: { $ref: '#/components/schemas/ProcurementPlanStatus' }
+        isSupplemental: { type: boolean }
+        budgetType: { $ref: '#/components/schemas/BudgetType' }
+        totalBudget: { type: number, format: decimal }
+        preparedByUserId: { type: string, format: uuid }
+        submissionDate: { type: string, format: date-time, nullable: true }
+        approvedByUserId: { type: string, format: uuid, nullable: true }
+        approvalDate: { type: string, format: date-time, nullable: true }
+      required: [id, controlNumber, fiscalYear, departmentId, status, isSupplemental, budgetType, totalBudget, preparedByUserId]
+
+    ProcurementPlanItem:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        planHeaderId: { type: string, format: uuid }
+        papCode: { type: string, nullable: true }
+        description: { type: string }
+        projectType: { $ref: '#/components/schemas/ProjectType' }
+        quantity: { type: integer, format: int32 }
+        unitOfMeasure: { type: string }
+        unitCost: { type: number, format: decimal }
+        estimatedBudget: { type: number, format: decimal }
+        mode: { type: string }
+        isEarlyProcurement: { type: boolean }
+        scheduleMonth: { type: string }
+        fundingSource: { type: string }
+        remarks: { type: string, nullable: true }
+      required: [id, planHeaderId, description, projectType, quantity, unitOfMeasure, unitCost, estimatedBudget, mode, isEarlyProcurement, scheduleMonth, fundingSource]
+
+    CreateProcurementPlanHeader:
+      type: object
+      properties:
+        controlNumber: { type: string }
+        fiscalYear: { type: integer, format: int32 }
+        departmentId: { type: string, format: uuid }
+        isSupplemental: { type: boolean, default: false }
+        budgetType: { $ref: '#/components/schemas/BudgetType' }
+      required: [controlNumber, fiscalYear, departmentId]
+
+    UpdateProcurementPlanHeader:
+      type: object
+      properties:
+        departmentId: { type: string, format: uuid }
+        isSupplemental: { type: boolean }
+        budgetType: { $ref: '#/components/schemas/BudgetType' }
+      required: [departmentId, isSupplemental, budgetType]
+
+    CreateProcurementPlanItem:
+      type: object
+      properties:
+        papCode: { type: string, nullable: true }
+        description: { type: string }
+        projectType: { $ref: '#/components/schemas/ProjectType' }
+        quantity: { type: integer, format: int32 }
+        unitOfMeasure: { type: string }
+        unitCost: { type: number, format: decimal }
+        mode: { type: string }
+        isEarlyProcurement: { type: boolean, default: false }
+        scheduleMonth: { type: string }
+        fundingSource: { type: string }
+        remarks: { type: string, nullable: true }
+      required: [description, projectType, quantity, unitOfMeasure, unitCost, mode, scheduleMonth, fundingSource]
+
+    UpdateProcurementPlanItem:
+      type: object
+      properties:
+        papCode: { type: string, nullable: true }
+        description: { type: string }
+        projectType: { $ref: '#/components/schemas/ProjectType' }
+        quantity: { type: integer, format: int32 }
+        unitOfMeasure: { type: string }
+        unitCost: { type: number, format: decimal }
+        mode: { type: string }
+        isEarlyProcurement: { type: boolean }
+        scheduleMonth: { type: string }
+        fundingSource: { type: string }
+        remarks: { type: string, nullable: true }
+      required: [description, projectType, quantity, unitOfMeasure, unitCost, mode, isEarlyProcurement, scheduleMonth, fundingSource]
+
+    ProcurementSchedule:
+      type: object
+      properties:
+        scheduleId: { type: string, format: uuid }
+        adsPosting: { type: string, format: date, nullable: true }
+        bidOpening: { type: string, format: date, nullable: true }
+        noticeOfAward: { type: string, format: date, nullable: true }
+        contractSigning: { type: string, format: date, nullable: true }
+
+    ProjectBudget:
+      type: object
+      properties:
+        budgetId: { type: string, format: uuid }
+        totalAmount: { type: number, format: decimal }
+        mooeAmount: { type: number, format: decimal }
+        coAmount: { type: number, format: decimal }
+
+    ProcurementProject:
+      type: object
+      properties:
+        projectId: { type: string, format: uuid }
+        papCode: { type: string, nullable: true }
+        projectTitle: { type: string }
+        pmoEndUser: { type: string }
+        isEPA: { type: boolean }
+        modeId: { type: integer, format: int32 }
+        fundSource: { type: string }
+        remarks: { type: string, nullable: true }
+        schedule: { $ref: '#/components/schemas/ProcurementSchedule' }
+        budget: { $ref: '#/components/schemas/ProjectBudget' }
+      required: [projectId, projectTitle, pmoEndUser, isEPA, modeId, fundSource]
+
+    CreateProcurementProject:
+      type: object
+      properties:
+        papCode: { type: string, nullable: true }
+        projectTitle: { type: string }
+        pmoEndUser: { type: string }
+        isEPA: { type: boolean, default: false }
+        modeId: { type: integer, format: int32 }
+        fundSource: { type: string }
+        remarks: { type: string, nullable: true }
+        schedule:
+          $ref: '#/components/schemas/ProcurementSchedule'
+        budget:
+          $ref: '#/components/schemas/ProjectBudget'
+      required: [projectTitle, pmoEndUser, modeId, fundSource]
+
+    UpdateProcurementProject:
+      type: object
+      properties:
+        papCode: { type: string, nullable: true }
+        projectTitle: { type: string }
+        pmoEndUser: { type: string }
+        isEPA: { type: boolean }
+        modeId: { type: integer, format: int32 }
+        fundSource: { type: string }
+        remarks: { type: string, nullable: true }
+        schedule:
+          $ref: '#/components/schemas/ProcurementSchedule'
+        budget:
+          $ref: '#/components/schemas/ProjectBudget'
+      required: [projectTitle, pmoEndUser, isEPA, modeId, fundSource]
+
+    PagedProcurementPlanHeader:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ProcurementPlanHeader' }
+        totalCount: { type: integer, format: int64 }
+      required: [items, totalCount]
+
+    PagedProcurementProject:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ProcurementProject' }
+        totalCount: { type: integer, format: int64 }
+      required: [items, totalCount]

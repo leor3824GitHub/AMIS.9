@@ -92,6 +92,7 @@
 
 **AMIS constraints to apply when writing FRs**:
 - Compliance-sensitive workflows MUST include audit trail and documentary outputs where applicable.
+- Procurement-related workflows MUST consider RA 12009 compliance and PPMP source-of-truth rules when applicable.
 - Multi-tenant data MUST be isolated by tenant context.
 - Clean Architecture boundaries MUST be respected (no UI/persistence leakage into Domain).
 

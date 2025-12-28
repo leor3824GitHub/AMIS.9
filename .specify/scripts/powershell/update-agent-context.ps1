@@ -273,6 +273,14 @@ function Update-ExistingAgentFile {
     )
     if (-not (Test-Path $TargetFile)) { return (New-AgentFile -TargetFile $TargetFile -ProjectName (Split-Path $REPO_ROOT -Leaf) -Date $Date) }
 
+    $governanceReminderLine = '**Governance reminder**: Follow the AMIS constitution (auditability, COA/DBM/PPSAS/RCA requirements; and for procurement-related features, RA 12009 + PPMP alignment rules).'
+    $hasGovernanceReminder = $false
+    try {
+        $hasGovernanceReminder = Select-String -LiteralPath $TargetFile -Pattern '**Governance reminder**' -SimpleMatch -Quiet
+    } catch {
+        $hasGovernanceReminder = $false
+    }
+
     $techStack = Format-TechnologyStack -Lang $NEW_LANG -Framework $NEW_FRAMEWORK
     $newTechEntries = @()
     if ($techStack) {
@@ -297,6 +305,17 @@ function Update-ExistingAgentFile {
 
     for ($i=0; $i -lt $lines.Count; $i++) {
         $line = $lines[$i]
+
+        # Keep the template's timestamp current (agent-file-template.md uses this exact line)
+        if ($line -match '^Auto-generated from all feature plans\. Last updated:\s*\d{4}-\d{2}-\d{2}\s*$') {
+            $output.Add(($line -replace '\d{4}-\d{2}-\d{2}',$Date.ToString('yyyy-MM-dd')))
+            if (-not $hasGovernanceReminder) {
+                $output.Add($governanceReminderLine)
+                $output.Add('')
+                $hasGovernanceReminder = $true
+            }
+            continue
+        }
         if ($line -eq '## Active Technologies') {
             $output.Add($line)
             $inTech = $true

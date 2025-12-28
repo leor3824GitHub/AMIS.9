@@ -9,6 +9,7 @@ using AMIS.WebApi.Catalog.Domain.Services;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Canvass;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Employee;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.ProcurementProjects;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.InspectionRequest.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.Inspection.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Middleware;
@@ -155,6 +156,36 @@ public static class CatalogModule
             canvassGroup.MapCanvassDeleteEndpoint();
             canvassGroup.MapCanvassSelectLowestEndpoint();
             canvassGroup.MapAwardCanvassEndpoint();
+
+            var procurementPlanGroup = app.MapGroup("procurementPlans").WithTags("procurementPlans");
+            procurementPlanGroup.MapProcurementPlanCreationEndpoint();
+            procurementPlanGroup.MapGetProcurementPlanEndpoint();
+            procurementPlanGroup.MapSearchProcurementPlansEndpoint();
+            procurementPlanGroup.MapUpdateProcurementPlanEndpoint();
+            procurementPlanGroup.MapSubmitProcurementPlanEndpoint();
+            procurementPlanGroup.MapApproveProcurementPlanEndpoint();
+            procurementPlanGroup.MapRejectProcurementPlanEndpoint();
+            procurementPlanGroup.MapCancelProcurementPlanEndpoint();
+            procurementPlanGroup.MapRevertProcurementPlanToDraftEndpoint();
+            procurementPlanGroup.MapProcurementPlanItemsEndpoints();
+
+            var annualProcurementPlanGroup = app.MapGroup("annualProcurementPlans").WithTags("annualProcurementPlans");
+            annualProcurementPlanGroup.MapAnnualProcurementPlanCreationEndpoint();
+            annualProcurementPlanGroup.MapGetAnnualProcurementPlanEndpoint();
+            annualProcurementPlanGroup.MapSearchAnnualProcurementPlansEndpoint();
+            annualProcurementPlanGroup.MapUpdateAnnualProcurementPlanEndpoint();
+            annualProcurementPlanGroup.MapSubmitAnnualProcurementPlanEndpoint();
+            annualProcurementPlanGroup.MapApproveAnnualProcurementPlanEndpoint();
+            annualProcurementPlanGroup.MapRejectAnnualProcurementPlanEndpoint();
+            annualProcurementPlanGroup.MapCancelAnnualProcurementPlanEndpoint();
+            annualProcurementPlanGroup.MapRevertAnnualProcurementPlanToDraftEndpoint();
+            annualProcurementPlanGroup.MapAnnualProcurementPlanItemsEndpoints();
+
+            var procurementProjectGroup = app.MapGroup("procurementProjects").WithTags("procurementProjects");
+            procurementProjectGroup.MapProcurementProjectCreationEndpoint();
+            procurementProjectGroup.MapGetProcurementProjectEndpoint();
+            procurementProjectGroup.MapSearchProcurementProjectsEndpoint();
+            procurementProjectGroup.MapUpdateProcurementProjectEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -226,6 +257,18 @@ public static class CatalogModule
         // Asset creation strategies (override in composition root if needed)
         builder.Services.AddScoped<IAssetPropertyCodeGenerator, DefaultAssetPropertyCodeGenerator>();
         builder.Services.AddScoped<IAssetClassificationResolver, DefaultAssetClassificationResolver>();
+
+        // Procurement Planning (PPMP)
+        builder.Services.AddKeyedScoped<IRepository<ProcurementPlanHeader>, CatalogRepository<ProcurementPlanHeader>>("catalog:procurementPlans");
+        builder.Services.AddKeyedScoped<IReadRepository<ProcurementPlanHeader>, CatalogRepository<ProcurementPlanHeader>>("catalog:procurementPlans");
+
+        // Annual Procurement Planning (APP)
+        builder.Services.AddKeyedScoped<IRepository<AnnualProcurementPlanHeader>, CatalogRepository<AnnualProcurementPlanHeader>>("catalog:annualProcurementPlans");
+        builder.Services.AddKeyedScoped<IReadRepository<AnnualProcurementPlanHeader>, CatalogRepository<AnnualProcurementPlanHeader>>("catalog:annualProcurementPlans");
+
+        // Procurement Projects
+        builder.Services.AddKeyedScoped<IRepository<ProcurementProject>, CatalogRepository<ProcurementProject>>("catalog:procurementProjects");
+        builder.Services.AddKeyedScoped<IReadRepository<ProcurementProject>, CatalogRepository<ProcurementProject>>("catalog:procurementProjects");
 
         return builder;
     }

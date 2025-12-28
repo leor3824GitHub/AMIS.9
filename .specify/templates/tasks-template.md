@@ -10,6 +10,8 @@ description: "Task list template for feature implementation"
 
 **Tests**: Include test tasks for behavioral changes (business rules, workflows, state transitions). Omit tests only if the spec explicitly says so and the omission is justified.
 
+**Procurement planning (if applicable)**: For procurement/PPMP-related features, include tasks that validate RA 12009 compliance expectations and PPMP alignment (e.g., PR items map to approved PPMP items; approval status/edit rules are enforced).
+
 **Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
 
 ## Format: `[ID] [P?] [Story] Description`

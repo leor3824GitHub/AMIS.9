@@ -1,87 +1,90 @@
-# Implementation Plan: Purchase Request Item Product Input
+# Implementation Plan: [FEATURE]
 
-**Branch**: `001-pr-item-product-input` | **Date**: 2025-12-24 | **Spec**: `specs/001-pr-item-product-input/spec.md`
-**Input**: Feature specification for supporting PR item product input via either Product library selection or manual entry.
+**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
+**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+
+**Note**: This template is filled in by the `/speckit.plan` command.
 
 ## Summary
 
-Enable purchase request items to be encoded using either:
-
-1) a linked product (`ProductId`) from the product library, or
-2) a manually entered product name (`ManualProductName`) when the library does not yet contain the needed item.
-
-Approach:
-- Add `ManualProductName` as an additive, nullable field.
-- Enforce `ProductId XOR ManualProductName` (exactly one) at validation and domain invariant levels.
-- Update Blazor UI to let users switch between “Select from product list” and “Manual entry”.
-- Regenerate NSwag client after API contract changes.
-
-Design artifacts:
-- `research.md` (decisions)
-- `data-model.md` (entity/DTO updates)
-- `contracts/openapi.yaml` (contract excerpt)
-- `quickstart.md` (verification)
+[Extract from feature spec: primary requirement + technical approach from research]
 
 ## Technical Context
 
-**Language/Version**: .NET 9 / C#  
-**Primary Dependencies**: Carter (Minimal APIs), MediatR (CQRS), FluentValidation, EF Core, Finbuckle.MultiTenant  
-**Storage**: PostgreSQL primary (EF Core); MSSQL migrations/testing scenarios exist  
-**Testing**: xUnit (TestProject.XUnit)  
-**Target Platform**: Server (ASP.NET Core) + Blazor WebAssembly client  
-**Project Type**: Modular Clean Architecture (framework + modules)  
-**Performance Goals**: N/A (bounded CRUD change)  
-**Constraints**: Multi-tenant isolation; permission-based authorization; backward compatible API changes; auditability  
-**Scale/Scope**: Localized change to Purchase Request items pipeline + UI component
+<!--
+  ACTION REQUIRED: Replace the content in this section with the technical details
+  for the project. The structure here is presented in advisory capacity to guide
+  the iteration process.
+-->
+
+**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
+**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
+**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
+**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
+**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
+**Project Type**: [single/web/mobile - determines source structure]  
+**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
+**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
+**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- [x] Compliance impact assessed (no prescribed form changes; auditability preserved)
-- [x] Clean Architecture boundaries respected (Domain/Application/Infrastructure; UI remains client-only)
-- [x] Multi-tenant isolation preserved (no cross-tenant reads/writes introduced)
-- [x] Cloud readiness considered (additive API contract; no secrets; stable DTO evolution)
-- [x] Test plan included for behavioral changes (XOR validation + mode switching)
+- [ ] Compliance impact assessed (COA/DBM/PPSAS/RCA, prescribed forms)
+- [ ] Procurement planning impact assessed when applicable (RA 12009, PPMP alignment, PR must map to PPMP item)
+- [ ] Clean Architecture boundaries respected (Domain/Application/Infrastructure)
+- [ ] Multi-tenant isolation preserved (tenant context + permission checks)
+- [ ] Cloud readiness considered (config, logging; no secrets)
+- [ ] Test plan included for behavioral changes (or justification documented)
 
 ## Project Structure
 
 ### Documentation (this feature)
 
 ```text
-specs/001-pr-item-product-input/
-├── plan.md
-├── research.md
-├── data-model.md
-├── quickstart.md
-├── contracts/
-│   └── openapi.yaml
-└── checklists/
-    └── requirements.md
+specs/[###-feature]/
+├── plan.md              # This file (/speckit.plan command output)
+├── research.md          # Phase 0 output (/speckit.plan command)
+├── data-model.md        # Phase 1 output (/speckit.plan command)
+├── quickstart.md        # Phase 1 output (/speckit.plan command)
+├── contracts/           # Phase 1 output (/speckit.plan command)
+└── tasks.md             # Phase 2 output (/speckit.tasks command - NOT created by /speckit.plan)
 ```
 
 ### Source Code (repository root)
-
 ```text
 AMIS.9.sln
 api/
   framework/
+    Core/
+    Infrastructure/
   modules/
-    Catalog/
-      Catalog.Domain/
-      Catalog.Application/
-      Catalog.Infrastructure/
+    [Module]/
+      Domain/
+      Application/
+      Infrastructure/
+      Features/
   server/
 apps/
   blazor/
     client/
     infrastructure/
+    shared/
+aspire/
+  Host/
 Shared/
 TestProject.XUnit/
 ```
 
-**Structure Decision**: Implement changes inside the Catalog module (Domain + Application + Infrastructure) and update the Blazor client component that edits PR items. Avoid introducing new modules or cross-module dependencies.
+**Structure Decision**: [Document the selected structure and reference the real
+directories captured above]
 
 ## Complexity Tracking
 
-No constitution violations introduced.
+> **Fill ONLY if Constitution Check has violations that must be justified**
+
+| Violation | Why Needed | Simpler Alternative Rejected Because |
+|-----------|------------|-------------------------------------|
+| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
+| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |

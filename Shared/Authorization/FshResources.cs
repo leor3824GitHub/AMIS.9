@@ -31,4 +31,11 @@ public static class FshResources
     public const string PPETypeMappings = nameof(PPETypeMappings);
     public const string Todos = nameof(Todos);
     public const string AuditTrails = nameof(AuditTrails);
+
+    // Procurement / PPMP
+    public const string ProcurementPlans = nameof(ProcurementPlans);
+    public const string ProcurementPlanItems = nameof(ProcurementPlanItems);
+    public const string AnnualProcurementPlans = nameof(AnnualProcurementPlans);
+    public const string AnnualProcurementPlanItems = nameof(AnnualProcurementPlanItems);
+    public const string ProcurementProjects = nameof(ProcurementProjects);
 }
