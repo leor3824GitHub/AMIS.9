@@ -13,8 +13,8 @@
                         @GetWorkflowStepText()
                     </MudChip>
                     <MudSpacer />
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">PO Reference</MudText>
-                    <MudText Typo="Typo.body2" Style="font-family: monospace;">@Model.ReferenceNumber</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">PO ID</MudText>
+                    <MudText Typo="Typo.body2" Style="font-family: monospace;">@(PurchaseId?.ToString() ?? "-")</MudText>
                 </MudStack>
             </MudPaper>
 
@@ -22,17 +22,12 @@
             <MudPaper Class="pa-4 mt-3" Elevation="2" Square="true">
                 <MudText Typo="Typo.subtitle1" Class="mb-3">Purchase Order Details</MudText>
                 <MudGrid>
-                    <!-- Header Row: PO Number, Date, Status, Total -->
-                    <MudItem xs="12" sm="6" md="3">
-                        <MudTextField @bind-Value="Model.ReferenceNumber" Variant="Variant.Outlined" Label="PO Number"
-                            ReadOnly="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Receipt"
-                            HelperText="Auto-generated" />
-                    </MudItem>
-                    <MudItem xs="12" sm="6" md="3">
+                    <!-- Header Row: Date, Status, Total -->
+                    <MudItem xs="12" sm="6" md="4">
                         <MudDatePicker @bind-Date="Model.PurchaseDate" Variant="Variant.Outlined" Label="Date"
                             For="@(() => Model.PurchaseDate)" />
                     </MudItem>
-                    <MudItem xs="12" sm="6" md="3">
+                    <MudItem xs="12" sm="6" md="4">
                         <MudSelect T="PurchaseStatus" Variant="Variant.Outlined" Label="Status"
                             @bind-Value="Model.Status" ReadOnly="true">
                             @foreach (var status in PurchaseStatusList)
@@ -41,13 +36,13 @@
                             }
                         </MudSelect>
                     </MudItem>
-                    <MudItem xs="12" sm="6" md="3">
-                        <MudTextField @bind-Value="Model.TotalAmount" Variant="Variant.Outlined" Label="Total Amount"
-                            For="@(() => Model.TotalAmount)" Format="N2" ReadOnly="true" />
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudTextField Value="@_totalAmount" Variant="Variant.Outlined" Label="Total Amount"
+                            Format="N2" ReadOnly="true" />
                     </MudItem>
 
-                    <!-- Supplier, Delivery Address, and Remarks -->
-                    <MudItem xs="12" sm="6" md="4">
+                    <!-- Supplier, Delivery Address -->
+                    <MudItem xs="12" sm="6" md="6">
                         <MudSelect T="Guid ?" Variant="Variant.Outlined" Label="Supplier" @bind-Value="Model.SupplierId"
                             Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Business" Required="true"
                             HelperText="Select the vendor for this PO">
@@ -58,16 +53,11 @@
                         </MudSelect>
                     </MudItem>
 
-                    <MudItem xs="12" sm="6" md="4">
+                    <MudItem xs="12" sm="6" md="6">
                         <MudTextField @bind-Value="Model.DeliveryAddress" Variant="Variant.Outlined"
                             Label="Delivery Address" Adornment="Adornment.Start"
                             AdornmentIcon="@Icons.Material.Filled.LocationOn" Placeholder="Enter delivery location"
                             Lines="1" HelperText="Ship-to location" />
-                    </MudItem>
-
-                    <MudItem xs="12" sm="12" md="4">
-                        <MudTextField @bind-Value="Model.Remarks" Variant="Variant.Outlined" Label="Remarks"
-                            Placeholder="Add any notes or comments..." Lines="1" />
                     </MudItem>
 
                     <!-- Supplier Info Block - Compact Layout -->
@@ -162,7 +152,7 @@
 
             <!-- Items -->
             <PurchaseItemList Items="@Model.Items" Products="_products" Suppliers="_suppliers" Status="@Model.Status"
-                PurchaseId="@Model.Id" OnTotalAmountChanged="UpdateTotalAmount" IsCreate="@IsCreate" />
+                PurchaseId="@PurchaseId" OnTotalAmountChanged="UpdateTotalAmount" IsCreate="@IsCreate" />
 
         </DialogContent>
 

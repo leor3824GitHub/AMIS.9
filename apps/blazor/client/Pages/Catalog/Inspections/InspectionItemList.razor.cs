@@ -81,7 +81,6 @@ public partial class InspectionItemList
 
         var newItem = new PurchaseItemDto
         {
-            Id = Guid.NewGuid(),
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
@@ -106,11 +105,6 @@ public partial class InspectionItemList
 
     private void RemoveItem(PurchaseItemDto item)
     {
-        if (item.Id == Guid.Empty)
-        {
-            Snackbar?.Add("Item ID is null and cannot be removed.", Severity.Error);
-            return;
-        }
         try
         {
             // TODO: Use nested endpoint DELETE /purchases/{purchaseId}/items/{itemId}

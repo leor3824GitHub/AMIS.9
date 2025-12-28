@@ -1,7 +1,7 @@
 using AMIS.Framework.Core.Exceptions;
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Application.ProcurementProjects.Get.v1;
-using AMIS.WebApi.Catalog.Domain.ProcurementProjects;
+using AMIS.WebApi.Catalog.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

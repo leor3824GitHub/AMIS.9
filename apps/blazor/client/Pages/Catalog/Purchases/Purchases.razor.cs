@@ -99,12 +99,13 @@ public partial class Purchases
         return new GridData<PurchaseResponse> { TotalItems = _totalItems, Items = _entityList ?? Enumerable.Empty<PurchaseResponse>() };
     }
 
-    private async Task ShowEditFormDialog(string title, CreatePurchaseCommand command, bool IsCreate)
+    private async Task ShowEditFormDialog(string title, CreatePurchaseCommand command, bool IsCreate, Guid? purchaseId = null)
     {
         var parameters = new DialogParameters
         {
             { nameof(PurchaseDialog.Model), command },
             { nameof(PurchaseDialog.IsCreate), IsCreate },
+            { nameof(PurchaseDialog.PurchaseId), purchaseId },
             { nameof(PurchaseDialog.Refresh), EventCallback.Factory.Create(this, OnRefresh) }
 
         };
@@ -129,7 +130,7 @@ public partial class Purchases
     {
         var model = CreateDefaultPurchaseCommand();
 
-        await ShowEditFormDialog("Create new purchase", model, true);
+        await ShowEditFormDialog("Create new purchase", model, true, null);
     }
 
     private static CreatePurchaseCommand CreateDefaultPurchaseCommand()
@@ -149,13 +150,13 @@ public partial class Purchases
         if (copy != null)
         {
             var command = new Mapper().Map<PurchaseResponse, CreatePurchaseCommand>(copy);
-            await ShowEditFormDialog("Clone a purchase", command, true);
+            await ShowEditFormDialog("Clone a purchase", command, true, null);
         }
     }
     private async Task OnEdit(PurchaseResponse dto)
     {        
         var command = dto.Adapt<CreatePurchaseCommand>();
-        await ShowEditFormDialog("Edit the purchase", command, false);
+        await ShowEditFormDialog("Edit the purchase", command, false, dto.Id);
     }
 
     private async Task OnDelete(PurchaseResponse dto)

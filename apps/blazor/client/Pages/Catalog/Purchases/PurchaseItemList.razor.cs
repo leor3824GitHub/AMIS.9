@@ -123,7 +123,6 @@ public partial class PurchaseItemList
         {
             var newItem = new PurchaseItemDto
             {
-                Id = Guid.NewGuid(),
                 ProductId = Productid.Value,
                 Qty = Qty,
                 UnitPrice = Unitprice,

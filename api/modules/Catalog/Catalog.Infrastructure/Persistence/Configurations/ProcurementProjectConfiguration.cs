@@ -1,5 +1,5 @@
 using Finbuckle.MultiTenant;
-using AMIS.WebApi.Catalog.Domain.ProcurementProjects;
+using AMIS.WebApi.Catalog.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Constants;

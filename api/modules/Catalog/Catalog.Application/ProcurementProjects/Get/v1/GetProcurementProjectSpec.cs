@@ -1,5 +1,5 @@
 using Ardalis.Specification;
-using AMIS.WebApi.Catalog.Domain.ProcurementProjects;
+using AMIS.WebApi.Catalog.Domain;
 
 namespace AMIS.WebApi.Catalog.Application.ProcurementProjects.Get.v1;
 

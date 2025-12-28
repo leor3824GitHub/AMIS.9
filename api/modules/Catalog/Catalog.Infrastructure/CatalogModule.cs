@@ -15,7 +15,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using AMIS.WebApi.Catalog.Domain.ProcurementProjects;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Inventory;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Purchase;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.ProcurementPlans;

@@ -1,7 +1,8 @@
 using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
-namespace AMIS.WebApi.Catalog.Domain.ProcurementProjects;
+namespace AMIS.WebApi.Catalog.Domain;
 
 /// <summary>
 /// Represents a Procurement Project aggregate root.

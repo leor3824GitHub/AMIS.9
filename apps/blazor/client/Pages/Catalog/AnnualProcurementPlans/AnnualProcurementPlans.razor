@@ -26,7 +26,7 @@
         }
     </MudStack>
 
-    <MudDataGrid ServerData="ServerReload" T="AnnualProcurementPlanListItem" Hover="true" Dense="true"
+    <MudDataGrid ServerData="ServerReload" T="AnnualProcurementPlanListItemResponse" Hover="true" Dense="true"
         Bordered="true" Striped="true" Loading="@_loading" @ref="_table">
         <Columns>
             <PropertyColumn Property="x => x.ControlNumber" Title="Control No." />

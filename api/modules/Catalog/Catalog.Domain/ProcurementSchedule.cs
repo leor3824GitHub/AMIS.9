@@ -1,6 +1,6 @@
 using AMIS.Framework.Core.Domain;
 
-namespace AMIS.WebApi.Catalog.Domain.ProcurementProjects;
+namespace AMIS.WebApi.Catalog.Domain;
 
 /// <summary>
 /// Represents the procurement schedule milestones for a project.

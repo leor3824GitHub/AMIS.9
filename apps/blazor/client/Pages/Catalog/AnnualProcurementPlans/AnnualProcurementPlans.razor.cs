@@ -11,7 +11,7 @@ namespace AMIS.Blazor.Client.Pages.Catalog.AnnualProcurementPlans;
 
 public partial class AnnualProcurementPlans
 {
-    private MudDataGrid<AnnualProcurementPlanListItem> _table = default!;
+    private MudDataGrid<AnnualProcurementPlanListItemResponse> _table = default!;
 
     [CascadingParameter]
     protected Task<AuthenticationState> AuthState { get; set; } = default!;
@@ -19,8 +19,6 @@ public partial class AnnualProcurementPlans
     protected IAuthorizationService AuthService { get; set; } = default!;
     [Inject]
     protected IApiClient Api { get; set; } = default!;
-    [Inject]
-    protected HttpClient HttpClient { get; set; } = default!;
     [Inject]
     private ISnackbar Snackbar { get; set; } = default!;
     [Inject]
@@ -46,7 +44,7 @@ public partial class AnnualProcurementPlans
         _canApprove = await AuthService.HasPermissionAsync(user, FshActions.Approve, FshResources.AnnualProcurementPlans);
     }
 
-    private async Task<GridData<AnnualProcurementPlanListItem>> ServerReload(GridState<AnnualProcurementPlanListItem> state)
+    private async Task<GridData<AnnualProcurementPlanListItemResponse>> ServerReload(GridState<AnnualProcurementPlanListItemResponse> state)
     {
         _loading = true;
         try
@@ -58,13 +56,12 @@ public partial class AnnualProcurementPlans
                 Keyword = _searchString
             };
 
-            // Use extension method to call search with proper response type
-            var result = await HttpClient.SearchAnnualProcurementPlansAsync("1", filter);
+            var result = await Api.SearchAnnualProcurementPlansEndpointAsync("1", filter);
             _totalItems = result.TotalCount;
-            return new GridData<AnnualProcurementPlanListItem>
+            return new GridData<AnnualProcurementPlanListItemResponse>
             {
                 TotalItems = result.TotalCount,
-                Items = result.Items ?? Enumerable.Empty<AnnualProcurementPlanListItem>()
+                Items = result.Items ?? Enumerable.Empty<AnnualProcurementPlanListItemResponse>()
             };
         }
         catch (Exception ex)
@@ -76,7 +73,7 @@ public partial class AnnualProcurementPlans
             _loading = false;
         }
 
-        return new GridData<AnnualProcurementPlanListItem> { TotalItems = 0, Items = Enumerable.Empty<AnnualProcurementPlanListItem>() };
+        return new GridData<AnnualProcurementPlanListItemResponse> { TotalItems = 0, Items = Enumerable.Empty<AnnualProcurementPlanListItemResponse>() };
     }
 
     private async Task OnSearch(string value)
@@ -115,7 +112,7 @@ public partial class AnnualProcurementPlans
         }
     }
 
-    private async Task OnView(AnnualProcurementPlanListItem item)
+    private async Task OnView(AnnualProcurementPlanListItemResponse item)
     {
         try
         {
@@ -135,7 +132,7 @@ public partial class AnnualProcurementPlans
         }
     }
 
-    private async Task OnEdit(AnnualProcurementPlanListItem item)
+    private async Task OnEdit(AnnualProcurementPlanListItemResponse item)
     {
         try
         {
@@ -162,7 +159,7 @@ public partial class AnnualProcurementPlans
         }
     }
 
-    private async Task OnSubmit(AnnualProcurementPlanListItem item)
+    private async Task OnSubmit(AnnualProcurementPlanListItemResponse item)
     {
         var confirm = await ConfirmAsync("Submit APP", "Are you sure you want to submit this APP for approval?");
         if (!confirm) return;
@@ -179,7 +176,7 @@ public partial class AnnualProcurementPlans
         }
     }
 
-    private async Task OnApprove(AnnualProcurementPlanListItem item)
+    private async Task OnApprove(AnnualProcurementPlanListItemResponse item)
     {
         var userId = GetCurrentUserId();
         if (userId == Guid.Empty)
@@ -193,9 +190,8 @@ public partial class AnnualProcurementPlans
 
         try
         {
-            await Api.ApproveAnnualProcurementPlanEndpointAsync("1", item.Id, new ApproveAnnualProcurementPlanCommand
+            await Api.ApproveAnnualProcurementPlanEndpointAsync("1", item.Id, new ApproveAnnualProcurementPlanBody
             {
-                Id = item.Id,
                 ApprovedByUserId = userId
             });
             Snackbar.Add("APP approved successfully.", Severity.Success);
@@ -207,7 +203,7 @@ public partial class AnnualProcurementPlans
         }
     }
 
-    private async Task OnReject(AnnualProcurementPlanListItem item)
+    private async Task OnReject(AnnualProcurementPlanListItemResponse item)
     {
         var userId = GetCurrentUserId();
         if (userId == Guid.Empty)
@@ -225,7 +221,7 @@ public partial class AnnualProcurementPlans
 
         try
         {
-            await Api.RejectAnnualProcurementPlanEndpointAsync("1", item.Id, new RejectAnnualProcurementPlanRequest
+            await Api.RejectAnnualProcurementPlanEndpointAsync("1", item.Id, new RejectAnnualProcurementPlanBody
             {
                 RejectedByUserId = userId,
                 Reason = reason
@@ -239,7 +235,7 @@ public partial class AnnualProcurementPlans
         }
     }
 
-    private async Task OnCancel(AnnualProcurementPlanListItem item)
+    private async Task OnCancel(AnnualProcurementPlanListItemResponse item)
     {
         var confirm = await ConfirmAsync("Cancel APP", "Are you sure you want to cancel this APP?");
         if (!confirm) return;
@@ -256,7 +252,7 @@ public partial class AnnualProcurementPlans
         }
     }
 
-    private async Task OnRevertToDraft(AnnualProcurementPlanListItem item)
+    private async Task OnRevertToDraft(AnnualProcurementPlanListItemResponse item)
     {
         var confirm = await ConfirmAsync("Revert to Draft", "Are you sure you want to revert this rejected APP to draft?");
         if (!confirm) return;

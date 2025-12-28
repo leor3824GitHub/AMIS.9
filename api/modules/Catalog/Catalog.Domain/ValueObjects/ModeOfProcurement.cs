@@ -1,4 +1,4 @@
-namespace AMIS.WebApi.Catalog.Domain.ProcurementProjects;
+namespace AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 /// <summary>
 /// Mode of Procurement as per RA 9184 and related rules
