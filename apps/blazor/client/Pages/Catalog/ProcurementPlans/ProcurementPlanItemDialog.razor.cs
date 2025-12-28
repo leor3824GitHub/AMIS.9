@@ -1,6 +1,10 @@
 using AMIS.Blazor.Infrastructure.Api;
+using AMIS.Blazor.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.ProcurementPlans;
 
@@ -9,12 +13,17 @@ public partial class ProcurementPlanItemDialog
     [CascadingParameter]
     IMudDialogInstance MudDialog { get; set; } = default!;
 
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; } = default!;
+
     [Parameter] public Guid PlanHeaderId { get; set; }
     [Parameter] public bool IsCreate { get; set; }
     [Parameter] public ProcurementPlanItemResponse? Item { get; set; }
 
     [Inject] protected IApiClient Api { get; set; } = default!;
     [Inject] protected ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject] protected IAuthorizationService AuthService { get; set; } = default!;
 
     private string _papCode = string.Empty;
     private string _description = string.Empty;
@@ -27,6 +36,8 @@ public partial class ProcurementPlanItemDialog
     private string _scheduleMonth = "January";
     private string _fundingSource = string.Empty;
     private string _remarks = string.Empty;
+
+    private bool _hasSavePermission;
 
     protected override void OnInitialized()
     {
@@ -46,6 +57,14 @@ public partial class ProcurementPlanItemDialog
         }
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        _hasSavePermission = IsCreate
+            ? await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.ProcurementPlanItems)
+            : await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.ProcurementPlanItems);
+    }
+
     private double CalculateEstimatedBudget()
     {
         return _quantity * _unitCost;
@@ -53,7 +72,8 @@ public partial class ProcurementPlanItemDialog
 
     private bool CanSave()
     {
-        return !string.IsNullOrWhiteSpace(_description) &&
+         return _hasSavePermission &&
+             !string.IsNullOrWhiteSpace(_description) &&
                _quantity > 0 &&
                !string.IsNullOrWhiteSpace(_unitOfMeasure) &&
                _unitCost >= 0 &&
@@ -64,6 +84,8 @@ public partial class ProcurementPlanItemDialog
 
     private async Task Save()
     {
+        if (!_hasSavePermission) return;
+
         try
         {
             if (IsCreate)

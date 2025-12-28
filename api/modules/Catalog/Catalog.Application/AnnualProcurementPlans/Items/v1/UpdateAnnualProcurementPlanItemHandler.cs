@@ -1,4 +1,5 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Application.AnnualProcurementPlans.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,7 @@ public sealed class UpdateAnnualProcurementPlanItemHandler(
 {
     public async Task Handle(UpdateAnnualProcurementPlanItemCommand request, CancellationToken cancellationToken)
     {
-        var plan = await repository.GetByIdAsync(request.PlanId, cancellationToken).ConfigureAwait(false);
+        var plan = await repository.FirstOrDefaultAsync(new GetAnnualProcurementPlanSpec(request.PlanId), cancellationToken).ConfigureAwait(false);
         if (plan is null) throw new InvalidOperationException("Annual procurement plan not found.");
 
         plan.UpdateItem(
@@ -32,7 +33,7 @@ public sealed class UpdateAnnualProcurementPlanItemHandler(
             request.FundingSource,
             request.Remarks);
 
-        await repository.UpdateAsync(plan, cancellationToken).ConfigureAwait(false);
+        await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         logger.LogInformation("Updated annual procurement plan item {ItemId} on plan {PlanId}", request.ItemId, request.PlanId);
     }
 }

@@ -133,10 +133,10 @@
                         <MudTextField T="string" Value="@ViewModel.ControlNumber" Label="Control Number" ReadOnly="true" Margin="Margin.Dense" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudNumericField T="int" @bind-Value="_editFiscalYear" Label="Fiscal Year" Required="true" Margin="Margin.Dense" Min="2020" Max="2100" />
+                        <MudNumericField T="int" @bind-Value="_editFiscalYear" Label="Fiscal Year" Required="true" Margin="Margin.Dense" Min="2020" Max="2100" Disabled="@(!_canUpdatePlan)" />
                     </MudItem>
                     <MudItem xs="12" sm="6">
-                        <MudSelect T="BudgetType" @bind-Value="_editBudgetType" Label="Budget Type" Required="true" Margin="Margin.Dense">
+                        <MudSelect T="BudgetType" @bind-Value="_editBudgetType" Label="Budget Type" Required="true" Margin="Margin.Dense" Disabled="@(!_canUpdatePlan)">
                             <MudSelectItem Value="BudgetType._0">MOOE</MudSelectItem>
                             <MudSelectItem Value="BudgetType._1">CO</MudSelectItem>
                             <MudSelectItem Value="BudgetType._2">Mixed</MudSelectItem>
@@ -156,7 +156,7 @@
                         Line Items (@(_editItems?.Count ?? 0))
                     </MudText>
                     <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary"
-                        StartIcon="@Icons.Material.Filled.Add" OnClick="OnAddItem">
+                        StartIcon="@Icons.Material.Filled.Add" OnClick="OnAddItem" Disabled="@(!_canCreateItems)">
                         Add Item
                     </MudButton>
                 </MudStack>
@@ -182,9 +182,9 @@
                             <MudTd>@context.EstimatedBudget.ToString("N2")</MudTd>
                             <MudTd>
                                 <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning"
-                                    OnClick="@(() => OnEditItem(context))" />
+                                    Disabled="@(!_canUpdateItems)" OnClick="@(() => OnEditItem(context))" />
                                 <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                                    OnClick="@(() => OnDeleteItem(context))" />
+                                    Disabled="@(!_canDeleteItems)" OnClick="@(() => OnDeleteItem(context))" />
                             </MudTd>
                         </RowTemplate>
                     </MudTable>
@@ -212,7 +212,7 @@
         else if (!ReadOnly)
         {
             <MudButton DropShadow="false" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary"
-                Variant="Variant.Filled" OnClick="Update">
+                Variant="Variant.Filled" OnClick="Update" Disabled="@(!_canUpdatePlan)">
                 Save Changes
             </MudButton>
         }

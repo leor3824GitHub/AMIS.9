@@ -34,6 +34,8 @@ public partial class AnnualProcurementPlans
     private bool _canSubmit;
     private bool _canApprove;
 
+    private bool _canCreateItems;
+
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthState).User;
@@ -42,6 +44,8 @@ public partial class AnnualProcurementPlans
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.AnnualProcurementPlans);
         _canSubmit = await AuthService.HasPermissionAsync(user, FshActions.Submit, FshResources.AnnualProcurementPlans);
         _canApprove = await AuthService.HasPermissionAsync(user, FshActions.Approve, FshResources.AnnualProcurementPlans);
+
+        _canCreateItems = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.AnnualProcurementPlanItems);
     }
 
     private async Task<GridData<AnnualProcurementPlanListItemResponse>> ServerReload(GridState<AnnualProcurementPlanListItemResponse> state)
@@ -161,7 +165,7 @@ public partial class AnnualProcurementPlans
 
     private async Task OnQuickAddItem(AnnualProcurementPlanListItemResponse item)
     {
-        if (!_canUpdate) return;
+        if (!_canCreateItems) return;
 
         try
         {
@@ -300,18 +304,18 @@ public partial class AnnualProcurementPlans
     }
 
     // Status helpers
-    private static bool IsDraft(AnnualProcurementPlanStatus status) => status == AnnualProcurementPlanStatus._0;
-    private static bool IsSubmitted(AnnualProcurementPlanStatus status) => status == AnnualProcurementPlanStatus._1;
-    private static bool IsApproved(AnnualProcurementPlanStatus status) => status == AnnualProcurementPlanStatus._2;
+    private static bool IsDraft(AnnualProcurementPlanStatus status) => status == AnnualProcurementPlanStatus._1;
+    private static bool IsSubmitted(AnnualProcurementPlanStatus status) => status == AnnualProcurementPlanStatus._2;
+    private static bool IsApproved(AnnualProcurementPlanStatus status) => status == AnnualProcurementPlanStatus._3;
     private static bool IsRejected(AnnualProcurementPlanStatus status) => status == AnnualProcurementPlanStatus._4;
     private static bool IsCancelled(AnnualProcurementPlanStatus status) => status == AnnualProcurementPlanStatus._5;
 
     private static string GetStatusLabel(AnnualProcurementPlanStatus status) => status switch
     {
-        AnnualProcurementPlanStatus._0 => "Draft",
-        AnnualProcurementPlanStatus._1 => "Submitted",
-        AnnualProcurementPlanStatus._2 => "Approved",
-        AnnualProcurementPlanStatus._3 => "Published",
+        AnnualProcurementPlanStatus._0 => "None",
+        AnnualProcurementPlanStatus._1 => "Draft",
+        AnnualProcurementPlanStatus._2 => "Submitted",
+        AnnualProcurementPlanStatus._3 => "Approved",
         AnnualProcurementPlanStatus._4 => "Rejected",
         AnnualProcurementPlanStatus._5 => "Cancelled",
         _ => "Unknown"
@@ -320,9 +324,9 @@ public partial class AnnualProcurementPlans
     private static Color GetStatusColor(AnnualProcurementPlanStatus status) => status switch
     {
         AnnualProcurementPlanStatus._0 => Color.Default,
-        AnnualProcurementPlanStatus._1 => Color.Info,
-        AnnualProcurementPlanStatus._2 => Color.Success,
-        AnnualProcurementPlanStatus._3 => Color.Primary,
+        AnnualProcurementPlanStatus._1 => Color.Default,
+        AnnualProcurementPlanStatus._2 => Color.Info,
+        AnnualProcurementPlanStatus._3 => Color.Success,
         AnnualProcurementPlanStatus._4 => Color.Error,
         AnnualProcurementPlanStatus._5 => Color.Secondary,
         _ => Color.Default

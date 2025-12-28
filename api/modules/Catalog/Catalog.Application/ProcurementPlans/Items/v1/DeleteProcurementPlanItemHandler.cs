@@ -1,4 +1,5 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Application.ProcurementPlans.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,11 +14,12 @@ public sealed class DeleteProcurementPlanItemHandler(
 {
     public async Task Handle(DeleteProcurementPlanItemCommand request, CancellationToken cancellationToken)
     {
-        var plan = await repository.GetByIdAsync(request.PlanId, cancellationToken).ConfigureAwait(false);
+        var plan = await repository.FirstOrDefaultAsync(new GetProcurementPlanSpec(request.PlanId), cancellationToken).ConfigureAwait(false);
         if (plan is null) throw new InvalidOperationException("Procurement plan not found.");
 
         plan.DeleteItem(request.ItemId);
-        await repository.UpdateAsync(plan, cancellationToken).ConfigureAwait(false);
+
+        await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         logger.LogInformation("Deleted procurement plan item {ItemId} from plan {PlanId}", request.ItemId, request.PlanId);
     }
 }

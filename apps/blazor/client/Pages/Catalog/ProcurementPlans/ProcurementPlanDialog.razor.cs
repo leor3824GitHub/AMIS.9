@@ -1,6 +1,10 @@
 using AMIS.Blazor.Infrastructure.Api;
+using AMIS.Blazor.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.ProcurementPlans;
 
@@ -8,6 +12,9 @@ public partial class ProcurementPlanDialog
 {
     [CascadingParameter]
     IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; } = default!;
 
     [Parameter] public bool IsCreate { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
@@ -18,6 +25,8 @@ public partial class ProcurementPlanDialog
     [Inject] protected IApiClient Api { get; set; } = default!;
     [Inject] protected ISnackbar Snackbar { get; set; } = default!;
     [Inject] protected IDialogService Dialog { get; set; } = default!;
+
+    [Inject] protected IAuthorizationService AuthService { get; set; } = default!;
 
     // Create form fields
     private string _controlNumber = string.Empty;
@@ -34,6 +43,11 @@ public partial class ProcurementPlanDialog
 
     private bool _openedAddItem;
 
+    private bool _canUpdatePlan;
+    private bool _canCreateItems;
+    private bool _canUpdateItems;
+    private bool _canDeleteItems;
+
     protected override void OnInitialized()
     {
         // Initialize edit fields if editing
@@ -46,6 +60,15 @@ public partial class ProcurementPlanDialog
         }
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        _canUpdatePlan = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.ProcurementPlans);
+        _canCreateItems = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.ProcurementPlanItems);
+        _canUpdateItems = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.ProcurementPlanItems);
+        _canDeleteItems = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.ProcurementPlanItems);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -54,6 +77,7 @@ public partial class ProcurementPlanDialog
         if (ReadOnly) return;
         if (!OpenAddItemOnLoad) return;
         if (ViewModel == null) return;
+        if (!_canCreateItems) return;
 
         _openedAddItem = true;
         await OnAddItem();
@@ -98,6 +122,7 @@ public partial class ProcurementPlanDialog
     private async Task Update()
     {
         if (ViewModel == null) return;
+        if (!_canUpdatePlan) return;
 
         try
         {
@@ -122,6 +147,7 @@ public partial class ProcurementPlanDialog
     private async Task OnAddItem()
     {
         if (ViewModel == null) return;
+        if (!_canCreateItems) return;
 
         var parameters = new DialogParameters
         {
@@ -145,6 +171,7 @@ public partial class ProcurementPlanDialog
     private async Task OnEditItem(ProcurementPlanItemResponse item)
     {
         if (ViewModel == null) return;
+        if (!_canUpdateItems) return;
 
         var parameters = new DialogParameters
         {
@@ -167,6 +194,7 @@ public partial class ProcurementPlanDialog
     private async Task OnDeleteItem(ProcurementPlanItemResponse item)
     {
         if (ViewModel == null) return;
+        if (!_canDeleteItems) return;
 
         var confirm = await Dialog.ShowMessageBox(
             "Confirm Delete",
@@ -210,10 +238,10 @@ public partial class ProcurementPlanDialog
     // Status helpers
     private static string GetStatusLabel(ProcurementPlanStatus status) => status switch
     {
-        ProcurementPlanStatus._0 => "Draft",
-        ProcurementPlanStatus._1 => "Submitted",
-        ProcurementPlanStatus._2 => "Approved",
-        ProcurementPlanStatus._3 => "Published",
+        ProcurementPlanStatus._0 => "None",
+        ProcurementPlanStatus._1 => "Draft",
+        ProcurementPlanStatus._2 => "Submitted",
+        ProcurementPlanStatus._3 => "Approved",
         ProcurementPlanStatus._4 => "Rejected",
         ProcurementPlanStatus._5 => "Cancelled",
         _ => "Unknown"
@@ -222,9 +250,9 @@ public partial class ProcurementPlanDialog
     private static Color GetStatusColor(ProcurementPlanStatus status) => status switch
     {
         ProcurementPlanStatus._0 => Color.Default,
-        ProcurementPlanStatus._1 => Color.Info,
-        ProcurementPlanStatus._2 => Color.Success,
-        ProcurementPlanStatus._3 => Color.Primary,
+        ProcurementPlanStatus._1 => Color.Default,
+        ProcurementPlanStatus._2 => Color.Info,
+        ProcurementPlanStatus._3 => Color.Success,
         ProcurementPlanStatus._4 => Color.Error,
         ProcurementPlanStatus._5 => Color.Secondary,
         _ => Color.Default

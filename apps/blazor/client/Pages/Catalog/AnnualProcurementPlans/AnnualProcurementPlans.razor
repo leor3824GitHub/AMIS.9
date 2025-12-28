@@ -67,7 +67,7 @@
                                     <MudText>Edit</MudText>
                                 </MudStack>
                             </MudMenuItem>
-                            <MudMenuItem Disabled="@(!_canUpdate)" OnClick="@(() => OnQuickAddItem(context.Item))">
+                            <MudMenuItem Disabled="@(!_canCreateItems)" OnClick="@(() => OnQuickAddItem(context.Item))">
                                 <MudStack Row AlignItems="AlignItems.Center" Spacing="1">
                                     <MudIcon Icon="@Icons.Material.Filled.Add" Size="Size.Small" Color="Color.Primary" />
                                     <MudText>Add Item</MudText>

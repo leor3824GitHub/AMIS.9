@@ -1,4 +1,5 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Catalog.Application.ProcurementPlans.Get.v1;
 using AMIS.WebApi.Catalog.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,7 @@ public sealed class AddProcurementPlanItemHandler(
 {
     public async Task<AddProcurementPlanItemResponse> Handle(AddProcurementPlanItemCommand request, CancellationToken cancellationToken)
     {
-        var plan = await repository.GetByIdAsync(request.PlanId, cancellationToken).ConfigureAwait(false);
+        var plan = await repository.FirstOrDefaultAsync(new GetProcurementPlanSpec(request.PlanId), cancellationToken).ConfigureAwait(false);
         if (plan is null) throw new InvalidOperationException("Procurement plan not found.");
 
         var item = plan.AddItem(
@@ -29,7 +30,7 @@ public sealed class AddProcurementPlanItemHandler(
             request.FundingSource,
             request.Remarks);
 
-        await repository.UpdateAsync(plan, cancellationToken).ConfigureAwait(false);
+        await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
         logger.LogInformation("Added procurement plan item {ItemId} to plan {PlanId}", item.Id, plan.Id);
         return new AddProcurementPlanItemResponse(item.Id);
     }

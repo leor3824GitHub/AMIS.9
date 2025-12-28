@@ -1,6 +1,10 @@
 using AMIS.Blazor.Infrastructure.Api;
+using AMIS.Blazor.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.AnnualProcurementPlans;
 
@@ -8,6 +12,9 @@ public partial class AnnualProcurementPlanDialog
 {
     [CascadingParameter]
     IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; } = default!;
 
     [Parameter] public bool IsCreate { get; set; }
     [Parameter] public bool ReadOnly { get; set; }
@@ -18,6 +25,8 @@ public partial class AnnualProcurementPlanDialog
     [Inject] protected IApiClient Api { get; set; } = default!;
     [Inject] protected ISnackbar Snackbar { get; set; } = default!;
     [Inject] protected IDialogService Dialog { get; set; } = default!;
+
+    [Inject] protected IAuthorizationService AuthService { get; set; } = default!;
 
     // Create form fields
     private string _controlNumber = string.Empty;
@@ -31,6 +40,11 @@ public partial class AnnualProcurementPlanDialog
     private List<AnnualProcurementPlanItemResponse>? _editItems;
     private bool _openedAddItem;
 
+    private bool _canUpdatePlan;
+    private bool _canCreateItems;
+    private bool _canUpdateItems;
+    private bool _canDeleteItems;
+
     protected override void OnInitialized()
     {
         // Initialize edit fields if editing
@@ -42,6 +56,15 @@ public partial class AnnualProcurementPlanDialog
         }
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        _canUpdatePlan = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.AnnualProcurementPlans);
+        _canCreateItems = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.AnnualProcurementPlanItems);
+        _canUpdateItems = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.AnnualProcurementPlanItems);
+        _canDeleteItems = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.AnnualProcurementPlanItems);
+    }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender) return;
@@ -50,6 +73,7 @@ public partial class AnnualProcurementPlanDialog
         if (ReadOnly) return;
         if (!OpenAddItemOnLoad) return;
         if (ViewModel == null) return;
+        if (!_canCreateItems) return;
 
         _openedAddItem = true;
         await OnAddItem();
@@ -58,6 +82,7 @@ public partial class AnnualProcurementPlanDialog
     private async Task OnAddItem()
     {
         if (ViewModel == null) return;
+        if (!_canCreateItems) return;
 
         var parameters = new DialogParameters
         {
@@ -79,6 +104,7 @@ public partial class AnnualProcurementPlanDialog
     private async Task OnEditItem(AnnualProcurementPlanItemResponse item)
     {
         if (ViewModel == null) return;
+        if (!_canUpdateItems) return;
 
         var parameters = new DialogParameters
         {
@@ -101,6 +127,7 @@ public partial class AnnualProcurementPlanDialog
     private async Task OnDeleteItem(AnnualProcurementPlanItemResponse item)
     {
         if (ViewModel == null) return;
+        if (!_canDeleteItems) return;
 
         var confirm = await Dialog.ShowMessageBox(
             "Confirm Delete",
@@ -175,6 +202,7 @@ public partial class AnnualProcurementPlanDialog
     private async Task Update()
     {
         if (ViewModel == null) return;
+        if (!_canUpdatePlan) return;
 
         try
         {
@@ -199,10 +227,10 @@ public partial class AnnualProcurementPlanDialog
     // Status helpers
     private static string GetStatusLabel(AnnualProcurementPlanStatus status) => status switch
     {
-        AnnualProcurementPlanStatus._0 => "Draft",
-        AnnualProcurementPlanStatus._1 => "Submitted",
-        AnnualProcurementPlanStatus._2 => "Approved",
-        AnnualProcurementPlanStatus._3 => "Published",
+        AnnualProcurementPlanStatus._0 => "None",
+        AnnualProcurementPlanStatus._1 => "Draft",
+        AnnualProcurementPlanStatus._2 => "Submitted",
+        AnnualProcurementPlanStatus._3 => "Approved",
         AnnualProcurementPlanStatus._4 => "Rejected",
         AnnualProcurementPlanStatus._5 => "Cancelled",
         _ => "Unknown"
@@ -211,9 +239,9 @@ public partial class AnnualProcurementPlanDialog
     private static Color GetStatusColor(AnnualProcurementPlanStatus status) => status switch
     {
         AnnualProcurementPlanStatus._0 => Color.Default,
-        AnnualProcurementPlanStatus._1 => Color.Info,
-        AnnualProcurementPlanStatus._2 => Color.Success,
-        AnnualProcurementPlanStatus._3 => Color.Primary,
+        AnnualProcurementPlanStatus._1 => Color.Default,
+        AnnualProcurementPlanStatus._2 => Color.Info,
+        AnnualProcurementPlanStatus._3 => Color.Success,
         AnnualProcurementPlanStatus._4 => Color.Error,
         AnnualProcurementPlanStatus._5 => Color.Secondary,
         _ => Color.Default

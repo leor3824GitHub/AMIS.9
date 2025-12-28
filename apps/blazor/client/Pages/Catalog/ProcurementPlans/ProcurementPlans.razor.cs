@@ -35,6 +35,8 @@ public partial class ProcurementPlans
     private bool _canSubmit;
     private bool _canApprove;
 
+    private bool _canCreateItems;
+
     protected override async Task OnInitializedAsync()
     {
         var user = (await AuthState).User;
@@ -43,6 +45,8 @@ public partial class ProcurementPlans
         _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.ProcurementPlans);
         _canSubmit = await AuthService.HasPermissionAsync(user, FshActions.Submit, FshResources.ProcurementPlans);
         _canApprove = await AuthService.HasPermissionAsync(user, FshActions.Approve, FshResources.ProcurementPlans);
+
+        _canCreateItems = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.ProcurementPlanItems);
     }
 
     private async Task<GridData<ProcurementPlanListItemResponse>> ServerReload(GridState<ProcurementPlanListItemResponse> state)
@@ -162,7 +166,7 @@ public partial class ProcurementPlans
 
     private async Task OnQuickAddItem(ProcurementPlanListItemResponse item)
     {
-        if (!_canUpdate) return;
+        if (!_canCreateItems) return;
 
         try
         {
@@ -331,16 +335,16 @@ public partial class ProcurementPlans
     }
 
     // Status helpers
-    private static bool IsDraft(ProcurementPlanStatus status) => status == ProcurementPlanStatus._0;
-    private static bool IsSubmitted(ProcurementPlanStatus status) => status == ProcurementPlanStatus._1;
+    private static bool IsDraft(ProcurementPlanStatus status) => status == ProcurementPlanStatus._1;
+    private static bool IsSubmitted(ProcurementPlanStatus status) => status == ProcurementPlanStatus._2;
     private static bool IsRejected(ProcurementPlanStatus status) => status == ProcurementPlanStatus._4;
 
     private static string GetStatusLabel(ProcurementPlanStatus status) => status switch
     {
-        ProcurementPlanStatus._0 => "Draft",
-        ProcurementPlanStatus._1 => "Submitted",
-        ProcurementPlanStatus._2 => "Approved",
-        ProcurementPlanStatus._3 => "Published",
+        ProcurementPlanStatus._0 => "None",
+        ProcurementPlanStatus._1 => "Draft",
+        ProcurementPlanStatus._2 => "Submitted",
+        ProcurementPlanStatus._3 => "Approved",
         ProcurementPlanStatus._4 => "Rejected",
         ProcurementPlanStatus._5 => "Cancelled",
         _ => "Unknown"
@@ -349,9 +353,9 @@ public partial class ProcurementPlans
     private static Color GetStatusColor(ProcurementPlanStatus status) => status switch
     {
         ProcurementPlanStatus._0 => Color.Default,
-        ProcurementPlanStatus._1 => Color.Info,
-        ProcurementPlanStatus._2 => Color.Success,
-        ProcurementPlanStatus._3 => Color.Primary,
+        ProcurementPlanStatus._1 => Color.Default,
+        ProcurementPlanStatus._2 => Color.Info,
+        ProcurementPlanStatus._3 => Color.Success,
         ProcurementPlanStatus._4 => Color.Error,
         ProcurementPlanStatus._5 => Color.Secondary,
         _ => Color.Default

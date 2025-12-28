@@ -1,6 +1,10 @@
 using AMIS.Blazor.Infrastructure.Api;
+using AMIS.Blazor.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.AnnualProcurementPlans;
 
@@ -9,12 +13,17 @@ public partial class AnnualProcurementPlanItemDialog
     [CascadingParameter]
     IMudDialogInstance MudDialog { get; set; } = default!;
 
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; } = default!;
+
     [Parameter] public Guid PlanHeaderId { get; set; }
     [Parameter] public bool IsCreate { get; set; }
     [Parameter] public AnnualProcurementPlanItemResponse? Item { get; set; }
 
     [Inject] protected IApiClient Api { get; set; } = default!;
     [Inject] protected ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject] protected IAuthorizationService AuthService { get; set; } = default!;
 
     private Guid _departmentId = Guid.Empty;
     private string _departmentName = string.Empty;
@@ -29,6 +38,8 @@ public partial class AnnualProcurementPlanItemDialog
     private string _scheduleMonth = "January";
     private string _fundingSource = string.Empty;
     private string _remarks = string.Empty;
+
+    private bool _hasSavePermission;
 
     protected override void OnInitialized()
     {
@@ -54,11 +65,20 @@ public partial class AnnualProcurementPlanItemDialog
         }
     }
 
+    protected override async Task OnInitializedAsync()
+    {
+        var user = (await AuthState).User;
+        _hasSavePermission = IsCreate
+            ? await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.AnnualProcurementPlanItems)
+            : await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.AnnualProcurementPlanItems);
+    }
+
     private double CalculateEstimatedBudget() => _quantity * _unitCost;
 
     private bool CanSave()
     {
-        return !string.IsNullOrWhiteSpace(_departmentName) &&
+         return _hasSavePermission &&
+             !string.IsNullOrWhiteSpace(_departmentName) &&
                !string.IsNullOrWhiteSpace(_description) &&
                _quantity > 0 &&
                !string.IsNullOrWhiteSpace(_unitOfMeasure) &&
@@ -70,6 +90,8 @@ public partial class AnnualProcurementPlanItemDialog
 
     private async Task Save()
     {
+        if (!_hasSavePermission) return;
+
         try
         {
             if (IsCreate)
