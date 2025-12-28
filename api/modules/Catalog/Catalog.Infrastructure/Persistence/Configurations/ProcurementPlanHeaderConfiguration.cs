@@ -13,7 +13,7 @@ internal sealed class ProcurementPlanHeaderConfiguration : IEntityTypeConfigurat
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
 
-        builder.ToTable("ProcurementPlans", SchemaNames.Procurement);
+        builder.ToTable("ProcurementPlans", SchemaNames.Catalog);
 
         builder.Property(x => x.ControlNumber).HasMaxLength(50).IsRequired();
         builder.Property(x => x.DepartmentName).HasMaxLength(200);

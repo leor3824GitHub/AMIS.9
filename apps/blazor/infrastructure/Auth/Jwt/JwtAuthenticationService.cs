@@ -3,10 +3,10 @@ using System.Text.Json;
 using Blazored.LocalStorage;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Storage;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Infrastructure.Auth.Jwt;
 

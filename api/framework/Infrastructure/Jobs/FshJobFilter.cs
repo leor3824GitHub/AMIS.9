@@ -1,10 +1,10 @@
 ﻿using Finbuckle.MultiTenant.Abstractions;
 using AMIS.Framework.Infrastructure.Constants;
-using AMIS.Shared.Authorization;
 using Hangfire.Client;
 using Hangfire.Logging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Jobs;
 

@@ -1,10 +1,10 @@
 using AMIS.Framework.Core.Identity.Users.Abstractions;
 using AMIS.Framework.Core.Persistence;
-using AMIS.Shared.Authorization;
 using AMIS.WebApi.Catalog.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shared.Authorization;
 
 namespace AMIS.WebApi.Catalog.Application.PurchaseRequests.ManageItems.v1;
 

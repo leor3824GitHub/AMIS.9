@@ -3,6 +3,7 @@ using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Infrastructure.Persistence;
 using AMIS.Framework.Infrastructure.Tenant;
 using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ProcurementProjects;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;

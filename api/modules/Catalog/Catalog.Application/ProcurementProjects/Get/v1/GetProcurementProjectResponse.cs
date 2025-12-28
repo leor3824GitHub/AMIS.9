@@ -1,4 +1,4 @@
-using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ProcurementProjects;
 
 namespace AMIS.WebApi.Catalog.Application.ProcurementProjects.Get.v1;
 

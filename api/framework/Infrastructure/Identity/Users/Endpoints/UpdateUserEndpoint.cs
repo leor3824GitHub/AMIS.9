@@ -3,11 +3,11 @@ using AMIS.Framework.Core.Exceptions;
 using AMIS.Framework.Core.Identity.Users.Abstractions;
 using AMIS.Framework.Core.Identity.Users.Features.UpdateUser;
 using AMIS.Framework.Infrastructure.Auth.Policy;
-using AMIS.Shared.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Users.Endpoints;
 public static class UpdateUserEndpoint

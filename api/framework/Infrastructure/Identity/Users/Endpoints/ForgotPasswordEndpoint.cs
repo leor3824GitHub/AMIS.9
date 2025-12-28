@@ -3,12 +3,12 @@ using FluentValidation.Results;
 using AMIS.Framework.Core.Identity.Users.Abstractions;
 using AMIS.Framework.Core.Identity.Users.Features.ForgotPassword;
 using AMIS.Framework.Core.Origin;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Users.Endpoints;
 

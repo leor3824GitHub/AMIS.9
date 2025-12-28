@@ -7,13 +7,13 @@ using AMIS.Framework.Infrastructure.Persistence;
 using AMIS.Framework.Infrastructure.Persistence.Services;
 using AMIS.Framework.Infrastructure.Tenant.Persistence;
 using AMIS.Framework.Infrastructure.Tenant.Services;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Serilog;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Tenant;
 internal static class Extensions

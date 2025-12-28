@@ -18,11 +18,11 @@ using AMIS.Framework.Infrastructure.Constants;
 using AMIS.Framework.Infrastructure.Identity.Persistence;
 using AMIS.Framework.Infrastructure.Identity.Roles;
 using AMIS.Framework.Infrastructure.Tenant;
-using AMIS.Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Users.Services;
 

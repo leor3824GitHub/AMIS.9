@@ -1,7 +1,7 @@
 using AMIS.Framework.Core.Identity.Users.Abstractions;
 using Microsoft.Extensions.Logging;
 
-namespace Catalog.Application.Services.v1;
+namespace AMIS.WebApi.Catalog.Application.Services.v1;
 
 public interface IInspectionAuditService
 {

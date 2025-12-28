@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.PurchaseRequest;
 public static class CreatePurchaseRequestEndpoint
 {
     internal static RouteHandlerBuilder MapPurchaseRequestCreationEndpoint(this IEndpointRouteBuilder endpoints)

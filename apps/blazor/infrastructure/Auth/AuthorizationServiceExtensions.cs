@@ -1,5 +1,5 @@
-﻿using AMIS.Shared.Authorization;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
+using Shared.Authorization;
 using System.Security.Claims;
 
 namespace AMIS.Blazor.Infrastructure.Auth;

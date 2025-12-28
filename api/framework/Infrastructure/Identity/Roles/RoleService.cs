@@ -7,9 +7,9 @@ using AMIS.Framework.Core.Identity.Users.Abstractions;
 using AMIS.Framework.Infrastructure.Identity.Persistence;
 using AMIS.Framework.Infrastructure.Identity.RoleClaims;
 using AMIS.Framework.Infrastructure.Tenant;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Roles;
 

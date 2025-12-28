@@ -4,7 +4,7 @@ using AMIS.Framework.Core.Identity.Users.Abstractions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
-using AMIS.Shared.Authorization;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Users.Endpoints;
 public static class GetUserProfileEndpoint

@@ -1,5 +1,5 @@
 using Finbuckle.MultiTenant;
-using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ProcurementProjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Shared.Constants;
@@ -13,7 +13,7 @@ internal sealed class ProcurementProjectConfiguration : IEntityTypeConfiguration
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
 
-        builder.ToTable("ProcurementProjects", SchemaNames.Procurement);
+        builder.ToTable("ProcurementProjects", SchemaNames.Catalog);
 
         builder.Property(x => x.PapCode).HasMaxLength(50);
         builder.Property(x => x.ProjectTitle).HasMaxLength(500).IsRequired();
@@ -24,7 +24,7 @@ internal sealed class ProcurementProjectConfiguration : IEntityTypeConfiguration
         // Owned entity: Schedule
         builder.OwnsOne(x => x.Schedule, schedule =>
         {
-            schedule.ToTable("ProcurementSchedules", SchemaNames.Procurement);
+            schedule.ToTable("ProcurementSchedules", SchemaNames.Catalog);
             schedule.WithOwner().HasForeignKey(s => s.ProjectId);
             schedule.HasKey(s => s.Id);
         });
@@ -32,7 +32,7 @@ internal sealed class ProcurementProjectConfiguration : IEntityTypeConfiguration
         // Owned entity: Budget
         builder.OwnsOne(x => x.Budget, budget =>
         {
-            budget.ToTable("ProjectBudgets", SchemaNames.Procurement);
+            budget.ToTable("ProjectBudgets", SchemaNames.Catalog);
             budget.WithOwner().HasForeignKey(b => b.ProjectId);
             budget.HasKey(b => b.Id);
             budget.Property(b => b.TotalAmount).HasPrecision(18, 2);

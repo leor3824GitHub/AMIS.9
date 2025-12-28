@@ -3,10 +3,10 @@ using Finbuckle.MultiTenant.Abstractions;
 using AMIS.Framework.Core.Identity.Users.Abstractions;
 using AMIS.Framework.Infrastructure.Constants;
 using AMIS.Framework.Infrastructure.Tenant;
-using AMIS.Shared.Authorization;
 using Hangfire;
 using Hangfire.Server;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Jobs;
 

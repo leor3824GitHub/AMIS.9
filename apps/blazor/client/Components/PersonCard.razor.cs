@@ -1,6 +1,6 @@
-﻿using AMIS.Shared.Authorization;
-using Microsoft.AspNetCore.Components;
+﻿using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using Shared.Authorization;
 namespace AMIS.Blazor.Client.Components;
 
 public partial class PersonCard

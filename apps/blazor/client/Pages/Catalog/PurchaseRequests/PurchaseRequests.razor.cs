@@ -2,12 +2,12 @@ using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
-using AMIS.Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.PurchaseRequests;
 

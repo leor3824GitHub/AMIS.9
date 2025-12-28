@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 using FluentValidation;
-using AMIS.Shared.Authorization;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Core.Identity.Tokens.Features.Generate;
 public record TokenGenerationCommand(

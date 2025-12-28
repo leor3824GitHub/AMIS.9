@@ -1,4 +1,4 @@
-namespace AMIS.WebApi.Catalog.Domain;
+namespace AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 public enum ProjectType
 {

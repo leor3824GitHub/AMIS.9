@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace AMIS.Shared.Authorization;
+namespace Shared.Authorization;
 public static class AppConstants
 {
     public static readonly Collection<string> SupportedImageFormats =

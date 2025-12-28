@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using AMIS.Framework.Core.Exceptions;
 using AMIS.Framework.Core.Identity.Users.Abstractions;
-using AMIS.Shared.Authorization;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Users.Services;
 public class CurrentUser : ICurrentUser, ICurrentUserInitializer

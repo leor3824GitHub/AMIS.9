@@ -1,8 +1,8 @@
 ﻿using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Auth;
 

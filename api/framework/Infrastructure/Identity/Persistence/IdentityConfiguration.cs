@@ -6,7 +6,7 @@ using AMIS.Framework.Infrastructure.Identity.Users;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using IdentityConstants = AMIS.Shared.Authorization.IdentityConstants;
+using IdentityConstants = Shared.Authorization.IdentityConstants;
 
 namespace AMIS.Framework.Infrastructure.Identity.Persistence;
 

@@ -1,5 +1,5 @@
 using AMIS.Framework.Core.Persistence;
-using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ProcurementProjects;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;

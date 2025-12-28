@@ -1,4 +1,5 @@
 using AMIS.Framework.Core.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
 

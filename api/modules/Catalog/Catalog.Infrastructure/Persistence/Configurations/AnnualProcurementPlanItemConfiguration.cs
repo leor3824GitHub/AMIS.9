@@ -11,7 +11,7 @@ internal sealed class AnnualProcurementPlanItemConfiguration : IEntityTypeConfig
     {
         builder.HasKey(x => x.Id);
 
-        builder.ToTable("AnnualProcurementPlanItems", SchemaNames.Procurement);
+        builder.ToTable("AnnualProcurementPlanItems", SchemaNames.Catalog);
 
         builder.Property(x => x.PlanHeaderId).IsRequired();
 

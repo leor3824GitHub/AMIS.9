@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace AMIS.Shared.Authorization;
+namespace Shared.Authorization;
 public static class ClaimsPrincipalExtensions
 {
     public static string? GetEmail(this ClaimsPrincipal principal)

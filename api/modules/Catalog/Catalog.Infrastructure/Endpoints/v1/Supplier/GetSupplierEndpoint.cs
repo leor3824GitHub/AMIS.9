@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Supplier;
 public static class GetSupplierEndpoint
 {
     internal static RouteHandlerBuilder MapGetSupplierEndpoint(this IEndpointRouteBuilder endpoints)

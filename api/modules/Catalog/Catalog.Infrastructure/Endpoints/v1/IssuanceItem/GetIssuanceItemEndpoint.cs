@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.IssuanceItem;
 public static class GetIssuanceItemEndpoint
 {
     internal static RouteHandlerBuilder MapGetIssuanceItemEndpoint(this IEndpointRouteBuilder endpoints)

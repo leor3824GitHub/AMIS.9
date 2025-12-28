@@ -1,4 +1,4 @@
-using AMIS.WebApi.Catalog.Domain;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Application.ProcurementPlans.Search.v1;
 
