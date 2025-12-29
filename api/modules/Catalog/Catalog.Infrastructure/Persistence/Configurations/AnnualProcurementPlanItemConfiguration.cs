@@ -1,3 +1,4 @@
+using Finbuckle.MultiTenant;
 using AMIS.WebApi.Catalog.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -9,6 +10,7 @@ internal sealed class AnnualProcurementPlanItemConfiguration : IEntityTypeConfig
 {
     public void Configure(EntityTypeBuilder<AnnualProcurementPlanItem> builder)
     {
+        builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
 
         builder.ToTable("AnnualProcurementPlanItems", SchemaNames.Catalog);
