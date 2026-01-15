@@ -292,4 +292,83 @@ public class Acceptance : AuditableEntity, IAggregateRoot
             }
         }
     }
+
+    /// <summary>
+    /// Marks acceptance as inspected after inspection is completed.
+    /// </summary>
+    public void MarkAsInspected()
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot modify a posted acceptance.");
+
+        if (Status == AcceptanceStatus.Cancelled)
+            throw new InvalidOperationException("Cannot modify a cancelled acceptance.");
+
+        if (!HasItems)
+            throw new InvalidOperationException("Cannot mark as inspected without any items.");
+
+        Status = AcceptanceStatus.Inspected;
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
+    }
+
+    /// <summary>
+    /// Marks acceptance as fully accepted.
+    /// </summary>
+    public void MarkAsAccepted()
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot modify a posted acceptance.");
+
+        if (Status == AcceptanceStatus.Cancelled)
+            throw new InvalidOperationException("Cannot modify a cancelled acceptance.");
+
+        if (!HasItems)
+            throw new InvalidOperationException("Cannot accept without any items.");
+
+        if (!IsFullAcceptance)
+            throw new InvalidOperationException("Not all items have been accepted. Use MarkAsPartiallyAccepted instead.");
+
+        Status = AcceptanceStatus.Accepted;
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
+    }
+
+    /// <summary>
+    /// Marks acceptance as partially accepted.
+    /// </summary>
+    public void MarkAsPartiallyAccepted()
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot modify a posted acceptance.");
+
+        if (Status == AcceptanceStatus.Cancelled)
+            throw new InvalidOperationException("Cannot modify a cancelled acceptance.");
+
+        if (!HasItems)
+            throw new InvalidOperationException("Cannot accept without any items.");
+
+        if (IsFullAcceptance)
+            throw new InvalidOperationException("All items accepted. Use MarkAsAccepted instead.");
+
+        if (!IsPartialAcceptance)
+            throw new InvalidOperationException("Items are not partially accepted.");
+
+        Status = AcceptanceStatus.PartiallyAccepted;
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
+    }
+
+    /// <summary>
+    /// Marks acceptance as rejected.
+    /// </summary>
+    public void MarkAsRejected(string reason = "Items rejected")
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot modify a posted acceptance.");
+
+        if (Status == AcceptanceStatus.Cancelled)
+            throw new InvalidOperationException("Cannot modify a cancelled acceptance.");
+
+        Status = AcceptanceStatus.Rejected;
+        Remarks = string.IsNullOrWhiteSpace(Remarks) ? reason : $"{Remarks}\nRejection: {reason}";
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
+    }
 }

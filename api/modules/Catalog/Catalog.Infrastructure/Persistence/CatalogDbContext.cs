@@ -63,6 +63,14 @@ public sealed class CatalogDbContext : FshDbContext
     // Procurement Projects
     public DbSet<ProcurementProject> ProcurementProjects { get; set; } = null!;
 
+    // UI Workflow - Asset Requisition & Acceptance
+    public DbSet<AssetRequisition> AssetRequisitions { get; set; } = null!;
+
+    // UI Workflow - Depreciation & Accounting
+    public DbSet<DepreciationSchedule> DepreciationSchedules { get; set; } = null!;
+    public DbSet<JournalEntryVoucher> JournalEntryVouchers { get; set; } = null!;
+    public DbSet<JournalEntry> JournalEntries { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

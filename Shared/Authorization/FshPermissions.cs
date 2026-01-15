@@ -188,6 +188,21 @@ public static class FshPermissions
         new("Accept InspectionRequests", FshActions.Accept, FshResources.InspectionRequests),
         new("StatusUpdate InspectionRequests", FshActions.StatusUpdate, FshResources.InspectionRequests),
 
+        //asset requisitions
+        new("View AssetRequisitions", FshActions.View, FshResources.AssetRequisitions, IsBasic: true),
+        new("Create AssetRequisitions", FshActions.Create, FshResources.AssetRequisitions),
+        new("Accept AssetRequisitions", FshActions.Accept, FshResources.AssetRequisitions),
+
+        //depreciation schedules
+        new("View DepreciationSchedules", FshActions.View, FshResources.DepreciationSchedules, IsBasic: true),
+        new("Create DepreciationSchedules", FshActions.Create, FshResources.DepreciationSchedules),
+        new("Post DepreciationSchedules", FshActions.Post, FshResources.DepreciationSchedules),
+
+        //journal entry vouchers
+        new("View JournalEntryVouchers", FshActions.View, FshResources.JournalEntryVouchers, IsBasic: true),
+        new("Create JournalEntryVouchers", FshActions.Create, FshResources.JournalEntryVouchers),
+        new("Post JournalEntryVouchers", FshActions.Post, FshResources.JournalEntryVouchers),
+
         //ppe type mappings
         new("View PPE Type Mappings", FshActions.View, FshResources.PPETypeMappings, IsBasic: true),
         new("Manage PPE Type Mappings", FshActions.Manage, FshResources.PPETypeMappings),

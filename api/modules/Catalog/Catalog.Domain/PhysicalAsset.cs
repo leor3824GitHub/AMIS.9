@@ -49,6 +49,12 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     // Dynamic RCA Account (calculated based on current classification)
     public string RCAAccountCode => GetRCAAccountCode();
 
+    // QR Code & Identification Support
+    public string? QRCodeData { get; private set; } // Base64 encoded QR code image or raw QR data
+    public string? PropertyNumber { get; private set; } // Auto-generated property identification number
+    public DateTime? QRGeneratedDate { get; private set; } // When QR was generated
+    public Guid? CurrentCustodianId { get; private set; } // Currently assigned custodian
+
     // Computed properties for convenience
     public bool IsDisposed => DisposalDate.HasValue;
     public bool IsDepreciable => CurrentClassification == PropertyClassification.PropertyPlantEquipment;
@@ -56,6 +62,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         AssignmentHistory.FirstOrDefault(h => h.Status == "Active");
     public AssetReclassificationHistory? LastReclassification =>
         ReclassificationHistory.OrderByDescending(h => h.EffectiveDate).FirstOrDefault();
+    public bool HasQRCode => !string.IsNullOrEmpty(QRCodeData);
 
     // Navigation
     public virtual Product Product { get; private set; } = default!;
@@ -367,6 +374,63 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             Condition = Condition,
             Remarks = remarks
         });
+    }
+
+    /// <summary>
+    /// Generates and stores a QR code for the asset.
+    /// QR code data should contain property code and asset identification.
+    /// </summary>
+    public void GenerateQRCode(string qrCodeData, string? propertyNumber = null)
+    {
+        if (string.IsNullOrWhiteSpace(qrCodeData))
+            throw new ArgumentException("QR code data cannot be empty.", nameof(qrCodeData));
+
+        if (IsDisposed)
+            throw new InvalidOperationException("Cannot generate QR code for disposed asset.");
+
+        QRCodeData = qrCodeData;
+        PropertyNumber = propertyNumber ?? GeneratePropertyNumber();
+        QRGeneratedDate = DateTime.UtcNow;
+
+        QueueDomainEvent(new PhysicalAssetQRCodeGenerated
+        {
+            PhysicalAsset = this,
+            PropertyNumber = PropertyNumber,
+            GeneratedDate = QRGeneratedDate.Value
+        });
+    }
+
+    /// <summary>
+    /// Assigns the asset to a custodian/employee.
+    /// </summary>
+    public void AssignToCustodian(Guid employeeId)
+    {
+        if (employeeId == Guid.Empty)
+            throw new ArgumentException("Employee ID must be provided.", nameof(employeeId));
+
+        if (IsDisposed)
+            throw new InvalidOperationException("Cannot assign disposed asset.");
+
+        CurrentCustodianId = employeeId;
+
+        QueueDomainEvent(new PhysicalAssetAssignedToCustodian
+        {
+            PhysicalAsset = this,
+            CustodianId = employeeId,
+            AssignmentDate = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
+    /// Generates a property number if not already set.
+    /// Format: PPE-{Year}{Month}-{SequenceNumber} or SEMI-{Year}{Month}-{SequenceNumber}
+    /// </summary>
+    private string GeneratePropertyNumber()
+    {
+        var prefix = CurrentClassification == PropertyClassification.PropertyPlantEquipment ? "PPE" : "SEMI";
+        var now = DateTime.UtcNow;
+        var timestamp = now.Ticks % 10000;
+        return $"{prefix}-{now:yyyyMM}-{timestamp:D5}";
     }
 
     private static void ValidateCreate(

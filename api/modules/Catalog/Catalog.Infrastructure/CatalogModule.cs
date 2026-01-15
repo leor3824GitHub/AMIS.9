@@ -28,8 +28,16 @@ using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.PurchaseRequest;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Product;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Brand;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Category;
+using AMIS.Catalog.Infrastructure.Issuances.Features.Accept.v1;
+using AMIS.Catalog.Infrastructure.Issuances.Features.Reject.v1;
+using AMIS.Catalog.Infrastructure.Issuances.Features.Cancel.v1;
+using AMIS.Catalog.Infrastructure.Issuances.Features.Return.v1;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Issuance;
 using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Supplier;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.AssetRequisition;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.DepreciationSchedule;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.JournalEntryVoucher;
+using AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.PhysicalAsset;
 
 namespace AMIS.WebApi.Catalog.Infrastructure;
 
@@ -101,6 +109,10 @@ public static class CatalogModule
             issuanceGroup.MapGetIssuanceListEndpoint();
             issuanceGroup.MapIssuanceUpdateEndpoint();
             issuanceGroup.MapIssuanceDeleteEndpoint();
+            issuanceGroup.MapAcceptIssuanceEndpoint();
+            issuanceGroup.MapRejectIssuanceEndpoint();
+            issuanceGroup.MapCancelIssuanceEndpoint();
+            issuanceGroup.MapReturnIssuanceEndpoint();
 
             var issuanceItemGroup = app.MapGroup("issuanceItems").WithTags("issuanceItems");
             issuanceItemGroup.MapIssuanceItemCreationEndpoint();
@@ -199,6 +211,46 @@ public static class CatalogModule
             procurementProjectGroup.MapGetProcurementProjectEndpoint();
             procurementProjectGroup.MapSearchProcurementProjectsEndpoint();
             procurementProjectGroup.MapUpdateProcurementProjectEndpoint();
+
+            var assetRequisitionGroup = app.MapGroup("assetRequisitions").WithTags("assetRequisitions");
+            assetRequisitionGroup.MapAssetRequisitionCreationEndpoint();
+            assetRequisitionGroup.MapAssetRequisitionAcceptanceEndpoint();
+            assetRequisitionGroup.MapRejectAssetRequisitionEndpoint();
+            assetRequisitionGroup.MapCancelAssetRequisitionEndpoint();
+            assetRequisitionGroup.MapSearchAssetRequisitionsEndpoint();
+            assetRequisitionGroup.MapGetAssetRequisitionEndpoint();
+            assetRequisitionGroup.MapUpdateAssetRequisitionEndpoint();
+            assetRequisitionGroup.MapDeleteAssetRequisitionEndpoint();
+
+            var depreciationScheduleGroup = app.MapGroup("depreciationSchedules").WithTags("depreciationSchedules");
+            depreciationScheduleGroup.MapDepreciationScheduleCreationEndpoint();
+            depreciationScheduleGroup.MapDepreciationSchedulePostingEndpoint();
+            depreciationScheduleGroup.MapSearchDepreciationSchedulesEndpoint();
+            depreciationScheduleGroup.MapGetDepreciationScheduleEndpoint();
+            depreciationScheduleGroup.MapUpdateDepreciationScheduleEndpoint();
+            depreciationScheduleGroup.MapDeleteDepreciationScheduleEndpoint();
+
+            var journalEntryVoucherGroup = app.MapGroup("journalEntryVouchers").WithTags("journalEntryVouchers");
+            journalEntryVoucherGroup.MapJournalEntryVoucherCreationEndpoint();
+            journalEntryVoucherGroup.MapJournalEntryVoucherPostingEndpoint();
+            journalEntryVoucherGroup.MapExportJournalEntryVoucherEndpoint();
+            journalEntryVoucherGroup.MapSearchJournalEntryVouchersEndpoint();
+            journalEntryVoucherGroup.MapGetJournalEntryVoucherEndpoint();
+            journalEntryVoucherGroup.MapUpdateJournalEntryVoucherEndpoint();
+            journalEntryVoucherGroup.MapDeleteJournalEntryVoucherEndpoint();
+
+            var physicalAssetGroup = app.MapGroup("physicalAssets").WithTags("physicalAssets");
+            physicalAssetGroup.MapCreatePhysicalAssetEndpoint();
+            physicalAssetGroup.MapSearchPhysicalAssetsEndpoint();
+            physicalAssetGroup.MapGetPhysicalAssetEndpoint();
+            physicalAssetGroup.MapUpdatePhysicalAssetEndpoint();
+            physicalAssetGroup.MapDeletePhysicalAssetEndpoint();
+            physicalAssetGroup.MapGenerateQRCodeEndpoint();
+            physicalAssetGroup.MapAssignCustodianEndpoint();
+            physicalAssetGroup.MapUpdateConditionEndpoint();
+            physicalAssetGroup.MapRecordDepreciationEndpoint();
+            physicalAssetGroup.MapExportPhysicalAssetsEndpoint();
+            physicalAssetGroup.MapGetStockLevelsEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterCatalogServices(this WebApplicationBuilder builder)
@@ -241,8 +293,8 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
         builder.Services.AddKeyedScoped<IReadRepository<Acceptance>, CatalogRepository<Acceptance>>("catalog:acceptances");
 
-        builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, CatalogRepository<PhysicalAsset>>("catalog:physical-assets");
-        builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, CatalogRepository<PhysicalAsset>>("catalog:physical-assets");
+        builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, CatalogRepository<PhysicalAsset>>("catalog:physicalassets");
+        builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, CatalogRepository<PhysicalAsset>>("catalog:physicalassets");
 
         builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
         builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, CatalogRepository<InspectionRequest>>("catalog:inspectionRequests");
@@ -282,6 +334,18 @@ public static class CatalogModule
         // Procurement Projects
         builder.Services.AddKeyedScoped<IRepository<ProcurementProject>, CatalogRepository<ProcurementProject>>("catalog:procurementProjects");
         builder.Services.AddKeyedScoped<IReadRepository<ProcurementProject>, CatalogRepository<ProcurementProject>>("catalog:procurementProjects");
+
+        // Asset Requisitions
+        builder.Services.AddKeyedScoped<IRepository<AssetRequisition>, CatalogRepository<AssetRequisition>>("catalog:assetrequisitions");
+        builder.Services.AddKeyedScoped<IReadRepository<AssetRequisition>, CatalogRepository<AssetRequisition>>("catalog:assetrequisitions");
+
+        // Depreciation Schedules
+        builder.Services.AddKeyedScoped<IRepository<DepreciationSchedule>, CatalogRepository<DepreciationSchedule>>("catalog:depreciationschedules");
+        builder.Services.AddKeyedScoped<IReadRepository<DepreciationSchedule>, CatalogRepository<DepreciationSchedule>>("catalog:depreciationschedules");
+
+        // Journal Entry Vouchers
+        builder.Services.AddKeyedScoped<IRepository<JournalEntryVoucher>, CatalogRepository<JournalEntryVoucher>>("catalog:journalentryv ouchers");
+        builder.Services.AddKeyedScoped<IReadRepository<JournalEntryVoucher>, CatalogRepository<JournalEntryVoucher>>("catalog:journalentryv ouchers");
 
         return builder;
     }

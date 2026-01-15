@@ -3,34 +3,61 @@ using System.Linq;
 using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
+
+public enum IssuanceType
+{
+    PAR = 0,   // Property Acknowledgment Receipt (for PPE)
+    ICS = 1    // Internal Control Slip (for Semi-Expendable)
+}
+
+public enum IssuanceStatus
+{
+    Pending = 0,     // Created, waiting for custodian acceptance
+    Accepted = 1,    // Custodian accepted the asset
+    Rejected = 2,    // Custodian rejected the issuance
+    Returned = 3,    // Asset returned by custodian
+    Cancelled = 4    // Issuance cancelled
+}
+
 public class Issuance : AuditableEntity, IAggregateRoot
 {
     public Guid EmployeeId { get; private set; }
     public DateTime IssuanceDate { get; private set; }
     public decimal TotalAmount { get; private set; }
     public bool IsClosed { get; private set; }
+    
+    // New acceptance workflow properties
+    public IssuanceType Type { get; private set; } = IssuanceType.PAR;
+    public Guid? CustodianId { get; private set; }
+    public IssuanceStatus Status { get; private set; } = IssuanceStatus.Pending;
+    public DateTime? AcceptedOn { get; private set; }
+    public string? RejectionReason { get; private set; }
+    public DigitalSignature? AcceptanceSignature { get; private set; }
+
     public virtual Employee Employee { get; private set; } = default!;
     public virtual ICollection<IssuanceItem> Items { get; private set; } = [];
 
     private Issuance() { }
 
-    private Issuance(Guid id, Guid employeeId, DateTime issuanceDate, decimal totalAmount)
+    private Issuance(Guid id, Guid employeeId, DateTime issuanceDate, decimal totalAmount, IssuanceType type = IssuanceType.PAR)
     {
         Id = id;
         EmployeeId = employeeId;
         IssuanceDate = issuanceDate;
         TotalAmount = totalAmount;
+        Type = type;
         IsClosed = false;
 
         QueueDomainEvent(new IssuanceCreated { Issuance = this });
     }
 
-    public static Issuance Create(Guid employeeId, DateTime issuanceDate, decimal totalAmount)
+    public static Issuance Create(Guid employeeId, DateTime issuanceDate, decimal totalAmount, IssuanceType type = IssuanceType.PAR)
     {
         EnsureNonNegative(totalAmount);
-        return new Issuance(Guid.NewGuid(), employeeId, issuanceDate, totalAmount);
+        return new Issuance(Guid.NewGuid(), employeeId, issuanceDate, totalAmount, type);
     }
 
     public Issuance Update(Guid employeeId, DateTime issuanceDate, decimal totalAmount, bool isClosed)
@@ -188,6 +215,79 @@ public class Issuance : AuditableEntity, IAggregateRoot
 
         IsClosed = false;
         QueueDomainEvent(new IssuanceUpdated { Issuance = this });
+    }
+
+    /// <summary>
+    /// Marks the issuance as accepted by the custodian with digital signature.
+    /// </summary>
+    public void Accept(DigitalSignature signature)
+    {
+        if (Status != IssuanceStatus.Pending)
+            throw new InvalidOperationException($"Cannot accept an issuance with status {Status}.");
+
+        if (signature == null)
+            throw new ArgumentNullException(nameof(signature));
+
+        Status = IssuanceStatus.Accepted;
+        AcceptedOn = DateTime.UtcNow;
+        AcceptanceSignature = signature;
+        CustodianId = signature.SignedByEmployeeId;
+
+        QueueDomainEvent(new IssuanceAccepted { Issuance = this });
+    }
+
+    /// <summary>
+    /// Marks the issuance as rejected by the custodian with a reason.
+    /// </summary>
+    public void Reject(string reason)
+    {
+        if (Status != IssuanceStatus.Pending)
+            throw new InvalidOperationException($"Cannot reject an issuance with status {Status}.");
+
+        if (string.IsNullOrWhiteSpace(reason))
+            throw new ArgumentException("Rejection reason must be provided.", nameof(reason));
+
+        Status = IssuanceStatus.Rejected;
+        RejectionReason = reason;
+
+        QueueDomainEvent(new IssuanceRejected { Issuance = this });
+    }
+
+    /// <summary>
+    /// Marks the issuance as cancelled.
+    /// </summary>
+    public void Cancel()
+    {
+        if (Status == IssuanceStatus.Returned || Status == IssuanceStatus.Cancelled)
+            throw new InvalidOperationException($"Cannot cancel an issuance with status {Status}.");
+
+        Status = IssuanceStatus.Cancelled;
+
+        QueueDomainEvent(new IssuanceCancelled { Issuance = this });
+    }
+
+    /// <summary>
+    /// Marks the asset as returned.
+    /// </summary>
+    public void MarkAsReturned()
+    {
+        if (Status != IssuanceStatus.Accepted)
+            throw new InvalidOperationException("Only accepted issuances can be marked as returned.");
+
+        Status = IssuanceStatus.Returned;
+
+        QueueDomainEvent(new IssuanceReturned { Issuance = this });
+    }
+
+    /// <summary>
+    /// Sets the issuance type (PAR or ICS).
+    /// </summary>
+    public void SetType(IssuanceType type)
+    {
+        if (IsClosed)
+            throw new InvalidOperationException("Cannot modify a closed issuance.");
+
+        Type = type;
     }
 
     private void EnsureMutable()
