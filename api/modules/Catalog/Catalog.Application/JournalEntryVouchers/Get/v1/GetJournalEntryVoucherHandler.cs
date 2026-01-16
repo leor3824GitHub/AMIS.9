@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Catalog.Application.JournalEntryVouchers.Get.v1;
 
 public sealed class GetJournalEntryVoucherHandler(
     ILogger<GetJournalEntryVoucherHandler> logger,
-    [FromKeyedServices("catalog:journalentryv ouchers")] IReadRepository<JournalEntryVoucher> repository)
+    [FromKeyedServices("catalog:journalentryvouchers")] IReadRepository<JournalEntryVoucher> repository)
     : IRequestHandler<GetJournalEntryVoucherCommand, GetJournalEntryVoucherResponse>
 {
     public async Task<GetJournalEntryVoucherResponse> Handle(GetJournalEntryVoucherCommand request, CancellationToken cancellationToken)

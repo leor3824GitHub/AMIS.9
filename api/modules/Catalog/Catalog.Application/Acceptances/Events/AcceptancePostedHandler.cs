@@ -24,7 +24,7 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
 
     public AcceptancePostedHandler(
         [FromKeyedServices("catalog:acceptances")] IRepository<Acceptance> acceptanceRepo,
-        [FromKeyedServices("catalog:physical-assets")] IRepository<PhysicalAsset> assetRepo,
+        [FromKeyedServices("catalog:physicalassets")] IRepository<PhysicalAsset> assetRepo,
         [FromKeyedServices("catalog:employees")] IReadRepository<Employee> employeeRepo,
         IAssetPropertyCodeGenerator codeGenerator,
         IAssetClassificationResolver classificationResolver,

@@ -193,14 +193,25 @@ public static class FshPermissions
         new("Create AssetRequisitions", FshActions.Create, FshResources.AssetRequisitions),
         new("Accept AssetRequisitions", FshActions.Accept, FshResources.AssetRequisitions),
 
+        //physical assets
+        new("View PhysicalAssets", FshActions.View, FshResources.PhysicalAssets, IsBasic: true),
+        new("Create PhysicalAssets", FshActions.Create, FshResources.PhysicalAssets),
+        new("Update PhysicalAssets", FshActions.Update, FshResources.PhysicalAssets),
+        new("Delete PhysicalAssets", FshActions.Delete, FshResources.PhysicalAssets),
+        new("Issue PhysicalAssets", FshActions.Issue, FshResources.PhysicalAssets),
+        new("Return PhysicalAssets", FshActions.Return, FshResources.PhysicalAssets),
+
         //depreciation schedules
         new("View DepreciationSchedules", FshActions.View, FshResources.DepreciationSchedules, IsBasic: true),
         new("Create DepreciationSchedules", FshActions.Create, FshResources.DepreciationSchedules),
         new("Post DepreciationSchedules", FshActions.Post, FshResources.DepreciationSchedules),
+        new("Reverse DepreciationSchedules", FshActions.Reverse, FshResources.DepreciationSchedules),
 
         //journal entry vouchers
         new("View JournalEntryVouchers", FshActions.View, FshResources.JournalEntryVouchers, IsBasic: true),
         new("Create JournalEntryVouchers", FshActions.Create, FshResources.JournalEntryVouchers),
+        new("Submit JournalEntryVouchers", FshActions.Submit, FshResources.JournalEntryVouchers),
+        new("Approve JournalEntryVouchers", FshActions.Approve, FshResources.JournalEntryVouchers),
         new("Post JournalEntryVouchers", FshActions.Post, FshResources.JournalEntryVouchers),
 
         //ppe type mappings

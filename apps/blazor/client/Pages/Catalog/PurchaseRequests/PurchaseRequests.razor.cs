@@ -2,18 +2,14 @@ using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
-<<<<<<< HEAD
 using PurchaseRequestStatus = AMIS.Blazor.Infrastructure.Api.PurchaseRequestStatus;
 using PurchaseRequestItemCreateDto = AMIS.Blazor.Infrastructure.Api.PurchaseRequestItemCreateDto;
-using AMIS.Shared.Authorization;
-=======
->>>>>>> origin/jan1626
+using Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
-using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.PurchaseRequests;
 

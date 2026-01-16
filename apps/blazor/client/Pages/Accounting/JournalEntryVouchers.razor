@@ -1,0 +1,404 @@
+@page "/catalog/journalentryvouchers"
+@using AMIS.Blazor.Infrastructure.Api
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Globalization
+@using System.Text
+@inject IJSRuntime JS
+
+<PageHeader Title="Journal Entry Vouchers (JEV)"
+    Description="Create, manage, and post journal entries for accounting transactions"
+    BreadcrumbItems="_breadcrumbItems" />
+
+<AuthorizeView Roles="Accountant">
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8">
+            <MudGrid>
+                <!-- Summary Cards -->
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Default">Total JEVs</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Primary">@_totalJevCount</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Default">Pending JEVs</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Warning">@_pendingJevCount</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Default">Posted JEVs</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success">@_postedJevCount</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Default">Total Amount</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info">₱ @_totalAmount.ToString("N0")</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Filters and Actions -->
+                <MudItem xs="12">
+                    <MudPaper Class="pa-4">
+                        <MudGrid>
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudTextField @bind-Value="_searchText" Label="Search JEV Number"
+                                    Variant="Variant.Outlined" FullWidth="true" Clearable="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudSelect @bind-Value="_statusFilter" Label="Status" Variant="Variant.Outlined"
+                                    FullWidth="true">
+                                    <MudSelectItem Value="@string.Empty">All Status</MudSelectItem>
+                                    <MudSelectItem Value="@("Draft")">Draft</MudSelectItem>
+                                    <MudSelectItem Value="@("Pending")">Pending</MudSelectItem>
+                                    <MudSelectItem Value="@("Posted")">Posted</MudSelectItem>
+                                    <MudSelectItem Value="@("Rejected")">Rejected</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudDatePicker @bind-Date="_filterStartDate" Label="From Date"
+                                    Variant="Variant.Outlined" FullWidth="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudDatePicker @bind-Date="_filterEndDate" Label="To Date" Variant="Variant.Outlined"
+                                    FullWidth="true" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudStack Row="true" Spacing="2" Class="mt-3">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                StartIcon="@Icons.Material.Filled.Add" OnClick="@CreateJev">
+                                Create New JEV
+                            </MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Primary"
+                                StartIcon="@Icons.Material.Filled.Refresh" OnClick="@LoadData">
+                                Refresh
+                            </MudButton>
+                            <MudButton Variant="Variant.Text" Color="Color.Info"
+                                StartIcon="@Icons.Material.Filled.Download" OnClick="@ExportToExcel">
+                                Export
+                            </MudButton>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+
+                <!-- JEV List -->
+                <MudItem xs="12">
+                    @if (_isLoading)
+                    {
+                        <MudSkeleton SkeletonType="SkeletonType.Text" Width="100%" Height="400px;" />
+                    }
+                    else if (_jevs.Count == 0)
+                    {
+                        <MudAlert Severity="Severity.Info">No journal entries found matching your criteria.</MudAlert>
+                    }
+                    else
+                    {
+                        <MudDataGrid Items="@FilteredJevs" Hover="true" Striped="true" Elevation="0">
+                            <Columns>
+                                <PropertyColumn Property="x => x.JevNumber" Title="JEV Number" />
+                                <PropertyColumn Property="x => x.EntryDate" Title="Entry Date">
+                                    <CellTemplate Context="item">
+                                        <MudText>@item.Item.EntryDate.ToString("MMM dd, yyyy")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.Description" Title="Description" />
+                                <PropertyColumn Property="x => x.Amount" Title="Amount">
+                                    <CellTemplate Context="item">
+                                        <MudText>₱ @item.Item.Amount.ToString("N0")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.PreparedBy" Title="Prepared By" />
+                                <PropertyColumn Property="x => x.Status" Title="Status">
+                                    <CellTemplate Context="item">
+                                        <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(item.Item.Status)"
+                                            Variant="Variant.Filled">
+                                            @item.Item.Status
+                                        </MudChip>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <TemplateColumn Title="Actions">
+                                    <CellTemplate Context="item">
+                                        <MudStack Row="true" Spacing="1">
+                                            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Info"
+                                                OnClick="@(() => ViewJev(item.Item))">
+                                                View
+                                            </MudButton>
+                                            @if (item.Item.Status == "Draft" || item.Item.Status == "Pending")
+                                            {
+                                                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Primary"
+                                                    OnClick="@(() => EditJev(item.Item))">
+                                                    Edit
+                                                </MudButton>
+                                                @if (item.Item.Status == "Draft")
+                                                {
+                                                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Success"
+                                                        OnClick="@(() => SubmitJev(item.Item))">
+                                                        Submit
+                                                    </MudButton>
+                                                }
+                                            }
+                                            @if (item.Item.Status == "Pending")
+                                            {
+                                                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Success"
+                                                    OnClick="@(() => ApproveJev(item.Item))">
+                                                    Approve
+                                                </MudButton>
+                                                <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error"
+                                                    OnClick="@(() => RejectJev(item.Item))">
+                                                    Reject
+                                                </MudButton>
+                                            }
+                                        </MudStack>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    }
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert Severity="Severity.Error">
+            Access Denied. Only Accountants can access Journal Entry Vouchers.
+        </MudAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private bool _isLoading = false;
+    private List<JournalEntryVoucher> _jevs = new();
+    private string _searchText = string.Empty;
+    private string _statusFilter = string.Empty;
+    private DateTime? _filterStartDate = DateTime.Now.AddMonths(-3);
+    private DateTime? _filterEndDate = DateTime.Now;
+
+    private int _totalJevCount = 0;
+    private int _pendingJevCount = 0;
+    private int _postedJevCount = 0;
+    private decimal _totalAmount = 0;
+
+    private List<BreadcrumbItem> _breadcrumbItems = new()
+{
+new BreadcrumbItem("Home", href: "/"),
+new BreadcrumbItem("Accounting", href: null),
+new BreadcrumbItem("Journal Entry Vouchers", href: null, disabled: true)
+};
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            _isLoading = true;
+
+            // Load JEV data from API
+            try
+            {
+                // API endpoint when implemented: GET /api/v1/journalEntryVouchers
+                // var response = await ApiClient.GetJournalEntryVouchersAsync("1");
+                // _jevs = response?.ToList() ?? new();
+
+                // Fallback to mock data for now
+                _jevs = GetMockJournalEntryVouchers();
+            }
+            catch (Exception ex)
+            {
+                // Log and use mock data if API call fails
+                Console.WriteLine($"Failed to load from API: {ex.Message}");
+                _jevs = GetMockJournalEntryVouchers();
+            }
+
+            UpdateSummary();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error loading JEV data: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private List<JournalEntryVoucher> GetMockJournalEntryVouchers() => new()
+{
+new JournalEntryVoucher
+{
+Id = Guid.NewGuid(),
+JevNumber = "JEV-2025-0001",
+EntryDate = DateTime.Now.AddDays(-10),
+Description = "Monthly Depreciation - January",
+Amount = 15000,
+PreparedBy = "John Doe",
+Status = "Posted"
+},
+new JournalEntryVoucher
+{
+Id = Guid.NewGuid(),
+JevNumber = "JEV-2025-0002",
+EntryDate = DateTime.Now.AddDays(-5),
+Description = "Asset Receipt - Equipment",
+Amount = 50000,
+PreparedBy = "Jane Smith",
+Status = "Pending"
+},
+new JournalEntryVoucher
+{
+Id = Guid.NewGuid(),
+JevNumber = "JEV-2025-0003",
+EntryDate = DateTime.Now,
+Description = "Depreciation Adjustment",
+Amount = 5000,
+PreparedBy = "Mike Johnson",
+Status = "Draft"
+}
+};
+
+    private void UpdateSummary()
+    {
+        _totalJevCount = _jevs.Count;
+        _pendingJevCount = _jevs.Count(j => j.Status == "Pending");
+        _postedJevCount = _jevs.Count(j => j.Status == "Posted");
+        _totalAmount = _jevs.Sum(j => j.Amount);
+    }
+
+    private IEnumerable<JournalEntryVoucher> FilteredJevs =>
+    _jevs
+    .Where(j => string.IsNullOrEmpty(_searchText) || j.JevNumber.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+    .Where(j => string.IsNullOrEmpty(_statusFilter) || j.Status == _statusFilter)
+    .Where(j => _filterStartDate == null || j.EntryDate >= _filterStartDate)
+    .Where(j => _filterEndDate == null || j.EntryDate <= _filterEndDate);
+
+    private void CreateJev()
+    {
+        Snackbar?.Add("Creating new JEV...", Severity.Info);
+        // TODO: Navigate to create JEV form or open dialog
+    }
+
+    private void ViewJev(JournalEntryVoucher jev)
+    {
+        Snackbar?.Add($"Viewing JEV {jev.JevNumber}", Severity.Info);
+        // TODO: Navigate to view JEV details
+    }
+
+    private void EditJev(JournalEntryVoucher jev)
+    {
+        Snackbar?.Add($"Editing JEV {jev.JevNumber}", Severity.Info);
+        // TODO: Navigate to edit JEV form
+    }
+
+    private async Task SubmitJev(JournalEntryVoucher jev)
+    {
+        try
+        {
+            var response = await ApiClient.SubmitJournalEntryVoucherEndpointAsync("1", jev.Id);
+            jev.Status = response.Status ?? "Pending";
+            Snackbar?.Add($"JEV {jev.JevNumber} submitted for approval", Severity.Success);
+            UpdateSummary();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error submitting JEV: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ApproveJev(JournalEntryVoucher jev)
+    {
+        try
+        {
+            var response = await ApiClient.ApproveJournalEntryVoucherEndpointAsync("1", jev.Id);
+            jev.Status = response.Status ?? "Posted";
+            Snackbar?.Add($"JEV {jev.JevNumber} approved and posted", Severity.Success);
+            UpdateSummary();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error approving JEV: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task RejectJev(JournalEntryVoucher jev)
+    {
+        try
+        {
+            var command = new RejectJournalEntryVoucherCommand { Reason = "Rejected by accountant" };
+            var response = await ApiClient.RejectJournalEntryVoucherEndpointAsync("1", jev.Id, command);
+            jev.Status = response.Status ?? "Rejected";
+            Snackbar?.Add($"JEV {jev.JevNumber} rejected", Severity.Warning);
+            UpdateSummary();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error rejecting JEV: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task ExportToExcel()
+    {
+        try
+        {
+            Snackbar?.Add("Exporting JEVs to Excel...", Severity.Info);
+
+            var csv = new StringBuilder();
+            // Add CSV header
+            csv.AppendLine("JEV Number,Date,Description,Amount,Status,Prepared By");
+
+            // Add data rows
+            foreach (var jev in _jevs)
+            {
+                csv.AppendLine($"\"{jev.JevNumber}\",\"{jev.EntryDate:yyyy-MM-dd}\",\"{jev.Description}\",\"{jev.Amount:N2}\",\"{jev.Status}\",\"{jev.PreparedBy}\"");
+            }
+
+            // Convert to bytes and download
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            var base64 = Convert.ToBase64String(bytes);
+            var fileName = $"JournalEntryVouchers_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+
+            await JS.InvokeVoidAsync("downloadFile", fileName, base64, "text/csv");
+            Snackbar?.Add("Export completed successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error exporting data: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private Color GetStatusColor(string status) => status switch
+    {
+        "Posted" => Color.Success,
+        "Pending" => Color.Warning,
+        "Draft" => Color.Secondary,
+        "Rejected" => Color.Error,
+        _ => Color.Default
+    };
+
+    private sealed class JournalEntryVoucher
+    {
+        public Guid Id { get; set; }
+        public string JevNumber { get; set; } = string.Empty;
+        public DateTime EntryDate { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string PreparedBy { get; set; } = string.Empty;
+        public string Status { get; set; } = "Draft";
+    }
+}

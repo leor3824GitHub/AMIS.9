@@ -118,20 +118,6 @@ public partial class PurchaseDialog
             }
             else // Update Purchase Order
             {
-<<<<<<< HEAD
-                //if (ex.StatusCode == 400)
-                //{
-                //    var errors = await ex.GetValidationErrorsAsync();
-                //    Validation?.DisplayErrors(errors);
-                //}
-                //else
-                //{
-                Snackbar.Add($"Error: {ex.Message}", Severity.Error);
-                //}
-            }
-        }
-    }
-=======
                 var update = new UpdatePurchaseCommand
                 {
                     Id = PurchaseId!.Value,
@@ -160,8 +146,7 @@ public partial class PurchaseDialog
             await Refresh.InvokeAsync();
             MudDialog.Close(DialogResult.Ok(true));
         }
-    }    
->>>>>>> origin/jan1626
+    }
     private void UpdateTotalAmount(double value)
     {
         _totalAmount = value;
@@ -177,11 +162,7 @@ public partial class PurchaseDialog
     // Workflow Action Methods
     private async Task SubmitPurchase()
     {
-<<<<<<< HEAD
         if (Model.Status != PurchaseStatus.Draft && Model.Status != PurchaseStatus.Submitted)
-=======
-        if (Model.Status != PurchaseStatus.Draft)
->>>>>>> origin/jan1626
         {
             Snackbar.Add("Purchase order must be in Draft status to submit.", Severity.Warning);
             return;
@@ -293,11 +274,7 @@ public partial class PurchaseDialog
     private string GetWorkflowStepText() => Model.Status switch
     {
         PurchaseStatus.Draft => "Step 1: Draft",
-<<<<<<< HEAD
         PurchaseStatus.Submitted => "Step 1: Submitted",
-=======
-        PurchaseStatus.Submitted => "Step 1: Ready to Issue",
->>>>>>> origin/jan1626
         PurchaseStatus.PartiallyDelivered => "Step 2: Partially Delivered",
         PurchaseStatus.Delivered => "Step 3: Ready for Inspection",
         PurchaseStatus.Closed => "Complete",

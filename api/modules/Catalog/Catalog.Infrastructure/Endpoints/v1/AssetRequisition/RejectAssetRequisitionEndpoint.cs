@@ -22,7 +22,7 @@ public static class RejectAssetRequisitionEndpoint
 
     private static async Task<IResult> RejectHandler(
         Guid id,
-        [FromBody] RejectRequest request,
+        [FromBody] RejectAssetRequisitionRequest request,
         ISender mediator,
         CancellationToken cancellationToken = default)
     {
@@ -32,4 +32,4 @@ public static class RejectAssetRequisitionEndpoint
     }
 }
 
-public sealed record RejectRequest(string Reason);
+public sealed record RejectAssetRequisitionRequest(string Reason);

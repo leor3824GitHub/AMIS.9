@@ -1,4 +1,4 @@
-ï»¿@page "/catalog/inspections"
+@page "/catalog/inspections"
 <PageHeader Title="Inspection Management" Header="Inspection Management"
     SubHeader="Track and manage quality inspections for purchased goods" />
 
@@ -83,7 +83,7 @@
                 <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="1">
                     <MudIcon Icon="@Icons.Material.Filled.Business" Size="Size.Small" Color="Color.Info" />
                     <MudText Typo="Typo.body2">
-                        @(context.Item?.Purchase?.Supplier?.Name ?? "â€”")
+                        @(context.Item?.Purchase?.Supplier?.Name ?? "—")
                     </MudText>
                 </MudStack>
             </CellTemplate>
@@ -99,7 +99,7 @@
                 }
                 else
                 {
-                    <MudText Typo="Typo.body2" Color="Color.Secondary">â€”</MudText>
+                    <MudText Typo="Typo.body2" Color="Color.Secondary">—</MudText>
                 }
             </CellTemplate>
         </TemplateColumn>

@@ -97,15 +97,6 @@ public partial class PurchaseItemList
     {
         if (Productid == null)
         {
-<<<<<<< HEAD
-            Id = Guid.NewGuid(),
-            ProductId = Productid.Value,
-            Qty = Qty,
-            UnitPrice = Unitprice,
-            ItemStatus = Status ?? PurchaseStatus.Submitted
-        };
-        Items.Add(newItem);
-=======
             Snackbar?.Add("Select a product before adding.", Severity.Warning);
             return;
         }
@@ -136,11 +127,10 @@ public partial class PurchaseItemList
                 ProductId = Productid.Value,
                 Qty = Qty,
                 UnitPrice = Unitprice,
-                ItemStatus = Status ?? PurchaseStatus.Draft
+                ItemStatus = Status ?? PurchaseStatus.Submitted
             };
             Items.Add(newItem);
         }
->>>>>>> origin/jan1626
 
         if (IsCreate == false)
         {

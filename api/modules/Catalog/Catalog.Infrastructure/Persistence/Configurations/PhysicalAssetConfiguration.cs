@@ -69,15 +69,8 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(x => x.AssignmentHistory)
-            .WithOne(x => x.PhysicalAsset)
-            .HasForeignKey(x => x.PhysicalAssetId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        builder.HasMany(x => x.ReclassificationHistory)
-            .WithOne(x => x.PhysicalAsset)
-            .HasForeignKey(x => x.PhysicalAssetId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // AssignmentHistory and ReclassificationHistory relationships are handled by their
+        // PhysicalAssetId foreign keys and will be auto-discovered by EF Core
 
         // Indexes
         builder.HasIndex(x => x.PropertyCode).IsUnique();

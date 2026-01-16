@@ -1,0 +1,277 @@
+@page "/user/pending"
+@using AMIS.Blazor.Infrastructure.Api
+@using Mapster
+@using Microsoft.AspNetCore.Components.Authorization
+
+<PageHeader Title="Pending Actions" Description="Review and respond to asset issuances"
+    BreadcrumbItems="_breadcrumbItems" />
+
+<AuthorizeView>
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.ExtraLarge" Class="pt-8">
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudPaper Elevation="2" Class="pa-6">
+                        <MudText Typo="Typo.h6" GutterBottom="true">Your Pending Issuances</MudText>
+
+                        @if (_issuances == null)
+                        {
+                            <MudProgressLinear Indeterminate="true" />
+                        }
+                        else if (_issuances.Count == 0)
+                        {
+                            <MudAlert Severity="Severity.Info">No pending issuances. All assets have been processed.
+                            </MudAlert>
+                        }
+                        else
+                        {
+                            <MudDataGrid Items="@_issuances" Hover="true" Striped="true" Elevation="0" Class="mt-4">
+                                <Columns>
+                                    <PropertyColumn Property="x => x.IssuanceId" Title="ID" CellStyle="width:150px;">
+                                        <CellTemplate Context="issuanceItem">
+                                            <MudText Typo="Typo.body2">@issuanceItem.Item.IssuanceId.ToString().Substring(0,
+                                                                                            8)...</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.AssetName" Title="Asset" CellStyle="width:200px;">
+                                    <CellTemplate Context="issuanceItem">
+                                        <MudText Typo="Typo.body2">@issuanceItem.Item.AssetName</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.IssuedDate" Title="Date Issued"
+                                    CellStyle="width:150px;">
+                                    <CellTemplate Context="issuanceItem">
+                                        <MudText Typo="Typo.body2">@issuanceItem.Item.IssuedDate.ToString("MMM dd,                                            yyyy")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.Status" Title="Status" CellStyle="width:150px;">
+                                    <CellTemplate Context="issuanceItem">
+                                        <MudChip T="string" Color="@GetStatusColor(issuanceItem.Item.Status)"
+                                            Size="Size.Small" Variant="Variant.Text">
+                                            @issuanceItem.Item.Status
+                                        </MudChip>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <TemplateColumn Title="Actions" CellStyle="width:200px;">
+                                    <CellTemplate Context="issuanceItem">
+                                        <MudStack Row="true" Spacing="1">
+                                            <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Success"
+                                                OnClick="@(() => OpenAcceptDialog(issuanceItem.Item))">
+                                                Accept
+                                            </MudButton>
+                                            <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Error"
+                                                OnClick="@(() => OpenRejectDialog(issuanceItem.Item))">
+                                                Reject
+                                            </MudButton>
+                                        </MudStack>
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+                                                }
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8">
+            <MudAlert Severity="Severity.Warning">Please log in to view pending actions.</MudAlert>
+        </MudContainer>
+    </NotAuthorized>
+</AuthorizeView>
+
+<!-- Accept Dialog -->
+<MudDialog @bind-IsOpen="@_showAcceptDialog">
+    <DialogContent>
+        <MudText Typo="Typo.h6" GutterBottom="true">Accept Asset</MudText>
+        <MudAlert Severity="Severity.Info" Class="mb-4">
+            By accepting, you acknowledge custody of this asset and agree to maintain it in good condition.
+        </MudAlert>
+        <MudText>Asset ID: <strong>@_selectedIssuance?.IssuanceId.ToString().Substring(0, 8)</strong></MudText>
+
+        <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Digital Signature</MudText>
+        <MudTextField @bind-Value="@_employeeSignature" Label="Employee Name" Variant="Variant.Outlined"
+            FullWidth="true" />
+
+        <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Remarks (Optional)</MudText>
+        <MudTextField @bind-Value="@_remarks" Label="Additional remarks" Variant="Variant.Outlined" FullWidth="true"
+            Lines="3" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _showAcceptDialog = false)">Cancel</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@AcceptAsset">Accept Asset</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- Reject Dialog -->
+<MudDialog @bind-IsOpen="@_showRejectDialog">
+    <DialogContent>
+        <MudText Typo="Typo.h6" GutterBottom="true">Reject Asset</MudText>
+        <MudAlert Severity="Severity.Warning" Class="mb-4">
+            Please provide a reason for rejecting this asset.
+        </MudAlert>
+        <MudText>Asset ID: <strong>@_selectedIssuance?.IssuanceId.ToString().Substring(0, 8)</strong></MudText>
+
+        <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Rejection Reason</MudText>
+        <MudSelect @bind-Value="@_rejectionReason" Label="Select reason" Variant="Variant.Outlined" FullWidth="true">
+            <MudSelectItem Value="@("Damaged")">Damaged</MudSelectItem>
+            <MudSelectItem Value="@("Not as specified")">Not as specified</MudSelectItem>
+            <MudSelectItem Value="@("Defective")">Defective</MudSelectItem>
+            <MudSelectItem Value="@("Other")">Other</MudSelectItem>
+        </MudSelect>
+
+        <MudTextField @bind-Value="@_rejectionDetails" Label="Additional details" Variant="Variant.Outlined"
+            FullWidth="true" Lines="3" Class="mt-3" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="@(() => _showRejectDialog = false)">Cancel</MudButton>
+        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="@RejectAsset">Reject Asset</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [Inject]
+    protected IApiClient _client { get; set; } = default!;
+
+    private List<IssuanceDto> _issuances = new();
+    private IssuanceDto? _selectedIssuance;
+    private bool _showAcceptDialog = false;
+    private bool _showRejectDialog = false;
+    private string _employeeSignature = string.Empty;
+    private string _remarks = string.Empty;
+    private string _rejectionReason = string.Empty;
+    private string _rejectionDetails = string.Empty;
+
+    private List<BreadcrumbItem> _breadcrumbItems = new()
+{
+new BreadcrumbItem("Home", href: "/"),
+new BreadcrumbItem("Dashboard", href: "/dashboard"),
+new BreadcrumbItem("Pending Actions", href: null, disabled: true)
+};
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadPendingIssuances();
+    }
+
+    private async Task LoadPendingIssuances()
+    {
+        try
+        {
+            // TODO: Integrate with actual API when available
+            // Expected API endpoint: GET /api/v1/issuances?status=Pending
+            // _issuances = await ApiClient.GetPendingIssuancesAsync("1");
+
+            // Fallback to mock data
+            _issuances = GetMockPendingIssuances();
+            Snackbar?.Add("Loaded pending issuances", Severity.Info);
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error loading issuances: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private List<IssuanceDto> GetMockPendingIssuances() => new()
+{
+new IssuanceDto { IssuanceId = Guid.NewGuid(), AssetName = "Dell Laptop", IssuedDate = DateTime.Now.AddDays(-5), Status
+= "Pending" },
+new IssuanceDto { IssuanceId = Guid.NewGuid(), AssetName = "Office Chair", IssuedDate = DateTime.Now.AddDays(-3), Status
+= "Pending" },
+new IssuanceDto { IssuanceId = Guid.NewGuid(), AssetName = "Monitor", IssuedDate = DateTime.Now.AddDays(-1), Status =
+"Pending" }
+};
+
+    private void OpenAcceptDialog(IssuanceDto issuance)
+    {
+        _selectedIssuance = issuance;
+        _employeeSignature = string.Empty;
+        _remarks = string.Empty;
+        _showAcceptDialog = true;
+    }
+
+    private void OpenRejectDialog(IssuanceDto issuance)
+    {
+        _selectedIssuance = issuance;
+        _rejectionReason = string.Empty;
+        _rejectionDetails = string.Empty;
+        _showRejectDialog = true;
+    }
+
+    private async Task AcceptAsset()
+    {
+        if (_selectedIssuance == null) return;
+
+        try
+        {
+            // Accept issuance via API (when endpoint is available)
+            // For now: Local state update with mock implementation
+            // Expected API endpoint: PUT /api/v1/issuances/{id}/accept
+            // var command = new AcceptIssuanceCommand { EmployeeName = _employeeSignature, Remarks = _remarks };
+            // await ApiClient.AcceptIssuanceEndpointAsync("1", _selectedIssuance.IssuanceId, command);
+
+            // Mock update
+            var issuance = _issuances.FirstOrDefault(i => i.IssuanceId == _selectedIssuance.IssuanceId);
+            if (issuance != null)
+            {
+                issuance.Status = "Accepted";
+                issuance.AcceptedDate = DateTime.Now;
+            }
+
+            Snackbar?.Add("Asset accepted successfully", Severity.Success);
+            _showAcceptDialog = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error accepting asset: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task RejectAsset()
+    {
+        if (_selectedIssuance == null) return;
+
+        try
+        {
+            // Reject issuance via API (when endpoint is available)
+            // For now: Local state update with mock implementation
+            // Expected API endpoint: PUT /api/v1/issuances/{id}/reject
+            // var command = new RejectIssuanceCommand { Reason = _rejectionReason, Details = _rejectionDetails };
+            // await ApiClient.RejectIssuanceEndpointAsync("1", _selectedIssuance.IssuanceId, command);
+
+            // Mock update
+            var issuance = _issuances.FirstOrDefault(i => i.IssuanceId == _selectedIssuance.IssuanceId);
+            if (issuance != null)
+            {
+                issuance.Status = "Rejected";
+                issuance.RejectionReason = _rejectionReason;
+            }
+
+            Snackbar?.Add("Asset rejected successfully", Severity.Success);
+            _showRejectDialog = false;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error rejecting asset: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private Color GetStatusColor(string? status) => status?.ToLower() switch
+    {
+        "pending" => Color.Warning,
+        "accepted" => Color.Success,
+        "rejected" => Color.Error,
+        _ => Color.Default
+    };
+
+    private sealed class IssuanceDto
+    {
+        public Guid IssuanceId { get; set; }
+        public string AssetName { get; set; } = string.Empty;
+        public DateTime IssuedDate { get; set; }
+        public string Status { get; set; } = "Pending";
+    }
+}

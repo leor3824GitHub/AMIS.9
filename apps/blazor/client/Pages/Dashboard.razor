@@ -1,0 +1,279 @@
+@page "/dashboard"
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
+
+<PageHeader Title="Dashboard" Description="Welcome to the Asset Management Information System (AMIS)"
+    BreadcrumbItems="_breadcrumbItems" />
+
+<AuthorizeView>
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8">
+            <MudGrid>
+                @if (_role == "Supply Officer")
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.h5" GutterBottom="true">Supply Officer Dashboard</MudText>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.ShoppingCart" Size="Size.Large"
+                                    Color="Color.Primary" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Purchase Orders</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">@_purchaseCount</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/catalog/purchases">View
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Size="Size.Large"
+                                    Color="Color.Success" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Issuances</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">@_issuanceCount</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Success" Href="/catalog/issuances">Manage
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.AssignmentTurnedIn" Size="Size.Large"
+                                    Color="Color.Warning" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Pending Acceptance</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">@_pendingAcceptance</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Warning" Href="/catalog/acceptances">Review
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Inventory2" Size="Size.Large" Color="Color.Info" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Inventory</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">@_inventoryCount</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Info" Href="/catalog/inventories">Check
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" Class="mt-4">
+                        <MudPaper Elevation="0" Class="pa-6 mud-theme-tertiary">
+                            <MudText Typo="Typo.h6" GutterBottom="true">Quick Actions</MudText>
+                            <MudStack Row="true" Spacing="2">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/catalog/purchases"
+                                    StartIcon="@Icons.Material.Filled.Add">Create Purchase Order</MudButton>
+                                <MudButton Variant="Variant.Filled" Color="Color.Success" Href="/catalog/issuances"
+                                    StartIcon="@Icons.Material.Filled.LocalShipping">Issue Asset</MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Warning" Href="/catalog/acceptances"
+                                    StartIcon="@Icons.Material.Filled.AssignmentTurnedIn">Review Acceptances</MudButton>
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                }
+                else if (_role == "Accountant")
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.h5" GutterBottom="true">Accounting Dashboard</MudText>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Receipt" Size="Size.Large" Color="Color.Primary" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Journal Entry Vouchers</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">@_jevCount</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Primary"
+                                    Href="/catalog/journalentryvouchers">View</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.TrendingDown" Size="Size.Large"
+                                    Color="Color.Warning" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Depreciation Schedule</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">Monthly</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Warning" Href="/accounting/depreciation">
+                                    Calculate</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Assessment" Size="Size.Large" Color="Color.Success" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Assets Report</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">@_assetCount</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Success">Export</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" Class="mt-4">
+                        <MudPaper Elevation="0" Class="pa-6 mud-theme-tertiary">
+                            <MudText Typo="Typo.h6" GutterBottom="true">Month-End Tasks</MudText>
+                            <MudStack Row="true" Spacing="2">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                    StartIcon="@Icons.Material.Filled.Calculate">Calculate Depreciation</MudButton>
+                                <MudButton Variant="Variant.Filled" Color="Color.Success"
+                                    StartIcon="@Icons.Material.Filled.GetApp">Generate JEV Report</MudButton>
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                }
+                else if (_role == "End User" || _role == "Employee")
+                {
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.h5" GutterBottom="true">My Accountability Dashboard</MudText>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Large" Color="Color.Warning" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Pending Actions</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">@_pendingActions</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Warning" Href="/user/pending">Review
+                                </MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" sm="6" md="3">
+                        <MudCard Class="mud-action-card">
+                            <MudCardHeader Class="pb-2">
+                                <MudIcon Icon="@Icons.Material.Filled.Check" Size="Size.Large" Color="Color.Success" />
+                            </MudCardHeader>
+                            <MudCardContent Class="pt-2">
+                                <MudText Typo="Typo.subtitle2">Assets in Custody</MudText>
+                                <MudText Typo="Typo.body2" Color="Color.Tertiary">@_assetsInCustody</MudText>
+                            </MudCardContent>
+                            <MudCardActions>
+                                <MudButton Variant="Variant.Text" Color="Color.Success" Href="/user/assets">View</MudButton>
+                            </MudCardActions>
+                        </MudCard>
+                    </MudItem>
+
+                    <MudItem xs="12" Class="mt-4">
+                        <MudPaper Elevation="0" Class="pa-6 mud-theme-tertiary">
+                            <MudText Typo="Typo.h6" GutterBottom="true">My Actions</MudText>
+                            <MudStack Row="true" Spacing="2">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                    StartIcon="@Icons.Material.Filled.CheckCircle">Accept Asset</MudButton>
+                                <MudButton Variant="Variant.Filled" Color="Color.Error"
+                                    StartIcon="@Icons.Material.Filled.HighlightOff">Reject Asset</MudButton>
+                            </MudStack>
+                        </MudPaper>
+                    </MudItem>
+                }
+                else
+                {
+                    <MudItem xs="12">
+                        <MudAlert Severity="Severity.Info">Welcome to AMIS! Your dashboard will display here once your role
+                            is configured.</MudAlert>
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8">
+            <MudAlert Severity="Severity.Warning">Please log in to view the dashboard.</MudAlert>
+        </MudContainer>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private string _role = string.Empty;
+    private int _purchaseCount = 0;
+    private int _issuanceCount = 0;
+    private int _pendingAcceptance = 0;
+    private int _inventoryCount = 0;
+    private int _jevCount = 0;
+    private int _assetCount = 0;
+    private int _pendingActions = 0;
+    private int _assetsInCustody = 0;
+
+    private List<BreadcrumbItem> _breadcrumbItems = new()
+{
+new BreadcrumbItem("Home", href: "/"),
+new BreadcrumbItem("Dashboard", href: null, disabled: true)
+};
+
+    [CascadingParameter]
+    protected Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthState;
+        if (authState?.User?.Identity?.IsAuthenticated == true)
+        {
+            // Get user role from claims
+            var roleClaim = authState.User.FindFirst(ClaimTypes.Role);
+            _role = roleClaim?.Value ?? "User";
+
+            // Load dashboard data (this would typically come from API calls)
+            await LoadDashboardData();
+        }
+    }
+
+    private async Task LoadDashboardData()
+    {
+        // Placeholder for actual API calls
+        _purchaseCount = 12;
+        _issuanceCount = 8;
+        _pendingAcceptance = 3;
+        _inventoryCount = 145;
+        _jevCount = 24;
+        _assetCount = 342;
+        _pendingActions = 2;
+        _assetsInCustody = 15;
+
+        await Task.CompletedTask;
+    }
+}

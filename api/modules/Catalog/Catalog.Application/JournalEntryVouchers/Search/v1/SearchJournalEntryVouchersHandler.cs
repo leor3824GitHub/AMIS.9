@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 namespace AMIS.WebApi.Catalog.Application.JournalEntryVouchers.Search.v1;
 
 public sealed class SearchJournalEntryVouchersHandler(
-    [FromKeyedServices("catalog:journalentryv ouchers")] IReadRepository<JournalEntryVoucher> repository)
+    [FromKeyedServices("catalog:journalentryvouchers")] IReadRepository<JournalEntryVoucher> repository)
     : IRequestHandler<SearchJournalEntryVouchersCommand, PagedList<JournalEntryVoucherDto>>
 {
     public async Task<PagedList<JournalEntryVoucherDto>> Handle(SearchJournalEntryVouchersCommand request, CancellationToken cancellationToken)

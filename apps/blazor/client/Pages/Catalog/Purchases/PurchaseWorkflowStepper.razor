@@ -17,19 +17,14 @@
                     </MudText>
                     <MudDivider />
                     <MudList T="string" Dense="true">
-<<<<<<< HEAD
+
                         <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle"
                             IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Submitted, PurchaseStatus.Submitted)">
                             PO Number: <strong>@(ReferenceNumber ?? "-")</strong>
                         </MudListItem>
                         <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle"
                             IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Submitted, PurchaseStatus.Submitted)">
-=======
-                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Submitted)">
-                            PO Number: <strong>@(ReferenceNumber ?? "-")</strong>
-                        </MudListItem>
-                        <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle" IconColor="@GetCheckColor(Status, PurchaseStatus.Draft, PurchaseStatus.Submitted)">
->>>>>>> origin/jan1626
+
                             Supplier Selected
                         </MudListItem>
                         <MudListItem T="string" Icon="@Icons.Material.Filled.CheckCircle"
@@ -154,11 +149,9 @@
         return Status switch
         {
             PurchaseStatus.Draft => 0,
-<<<<<<< HEAD
+
             PurchaseStatus.Submitted => 0,
-=======
-            PurchaseStatus.Submitted => 1,
->>>>>>> origin/jan1626
+
             PurchaseStatus.PartiallyDelivered => 1,
             PurchaseStatus.Delivered => 2,
             PurchaseStatus.Closed => 2,

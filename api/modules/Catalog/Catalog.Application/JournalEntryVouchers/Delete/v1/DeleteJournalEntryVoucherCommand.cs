@@ -12,7 +12,7 @@ public sealed record DeleteJournalEntryVoucherResponse(Guid Id);
 
 public sealed class DeleteJournalEntryVoucherHandler(
     ILogger<DeleteJournalEntryVoucherHandler> logger,
-    [FromKeyedServices("catalog:journalentryv ouchers")] IRepository<JournalEntryVoucher> repository)
+    [FromKeyedServices("catalog:journalentryvouchers")] IRepository<JournalEntryVoucher> repository)
     : IRequestHandler<DeleteJournalEntryVoucherCommand, DeleteJournalEntryVoucherResponse>
 {
     public async Task<DeleteJournalEntryVoucherResponse> Handle(DeleteJournalEntryVoucherCommand request, CancellationToken cancellationToken)

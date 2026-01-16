@@ -4,19 +4,20 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AMIS.WebApi.Catalog.Infrastructure.Persistence.Configurations;
+
 internal sealed class IssuanceConfiguration : IEntityTypeConfiguration<Issuance>
 {
     public void Configure(EntityTypeBuilder<Issuance> builder)
     {
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
-        
+
         // Existing properties
         builder.Property(x => x.EmployeeId).IsRequired();
         builder.Property(x => x.IssuanceDate).IsRequired();
         builder.Property(x => x.TotalAmount).HasPrecision(18, 2);
         builder.Property(x => x.IsClosed).IsRequired();
-        
+
         // New properties for acceptance workflow
         builder.Property(x => x.Type)
             .IsRequired()
@@ -45,10 +46,8 @@ internal sealed class IssuanceConfiguration : IEntityTypeConfiguration<Issuance>
             .HasForeignKey(x => x.EmployeeId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        builder.HasMany(x => x.Items)
-            .WithOne(x => x.Issuance)
-            .HasForeignKey(x => x.IssuanceId)
-            .OnDelete(DeleteBehavior.Cascade);
+        // Items relationship is handled by IssuanceItem's IssuanceId foreign key
+        // No explicit configuration needed as EF will auto-discover the relationship
 
         // Indexes
         builder.HasIndex(x => x.Status);

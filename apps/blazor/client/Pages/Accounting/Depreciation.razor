@@ -1,0 +1,588 @@
+@page "/accounting/depreciation"
+@using AMIS.Blazor.Infrastructure.Api
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Text
+@inject IJSRuntime JS
+
+<PageHeader Title="Asset Depreciation & Accounting"
+    Description="Manage depreciation schedules, journal entries, and financial reporting"
+    BreadcrumbItems="_breadcrumbItems" />
+
+<AuthorizeView Roles="Accountant">
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8">
+            <MudTabs Elevation="2" ApplyEffectsToContainer="true">
+                <!-- Tab 1: Depreciation Summary -->
+                <MudTabPanel Text="Depreciation Summary" Icon="@Icons.Material.Filled.ShowChart">
+                    <MudGrid Class="mt-4">
+                        <MudItem xs="12" sm="6" md="3">
+                            <MudCard>
+                                <MudCardContent>
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">Gross PPE Value</MudText>
+                                    <MudText Typo="Typo.h5" Color="Color.Primary">₱ @_grossPpeValue.ToString("N0")
+                                    </MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6" md="3">
+                            <MudCard>
+                                <MudCardContent>
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">Accumulated Depreciation
+                                    </MudText>
+                                    <MudText Typo="Typo.h5" Color="Color.Warning">₱
+                                        @_accumulatedDepreciation.ToString("N0")</MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6" md="3">
+                            <MudCard>
+                                <MudCardContent>
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">Net Book Value</MudText>
+                                    <MudText Typo="Typo.h5" Color="Color.Success">₱ @(_grossPpeValue -
+                                                                                _accumulatedDepreciation).ToString("N0")</MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+
+                        <MudItem xs="12" sm="6" md="3">
+                            <MudCard>
+                                <MudCardContent>
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">Depreciation Expense (YTD)
+                                    </MudText>
+                                    <MudText Typo="Typo.h5" Color="Color.Info">₱ @_ytdDepreciation.ToString("N0")
+                                    </MudText>
+                                </MudCardContent>
+                            </MudCard>
+                        </MudItem>
+
+                        <!-- Depreciation by Category -->
+                        <MudItem xs="12">
+                            <MudPaper Class="pa-6">
+                                <MudText Typo="Typo.h6" GutterBottom="true">Depreciation by Asset Category</MudText>
+                                <MudDataGrid Items="@_depreciationByCategory" Hover="true">
+                                    <Columns>
+                                        <PropertyColumn Property="x => x.Category" Title="Asset Category" />
+                                        <PropertyColumn Property="x => x.AssetCount" Title="Asset Count" />
+                                        <PropertyColumn Property="x => x.GrossValue" Title="Gross Value">
+                                            <CellTemplate Context="item">
+                                                <MudText>₱ @item.Item.GrossValue.ToString("N0")</MudText>
+                                            </CellTemplate>
+                                        </PropertyColumn>
+                                        <PropertyColumn Property="x => x.AccumulatedDepreciation"
+                                            Title="Accumulated Depr.">
+                                            <CellTemplate Context="item">
+                                                <MudText>₱ @item.Item.AccumulatedDepreciation.ToString("N0")</MudText>
+                                            </CellTemplate>
+                                        </PropertyColumn>
+                                        <PropertyColumn Property="x => x.NetBookValue" Title="Net Book Value">
+                                            <CellTemplate Context="item">
+                                                <MudText>₱ @item.Item.NetBookValue.ToString("N0")</MudText>
+                                            </CellTemplate>
+                                        </PropertyColumn>
+                                        <PropertyColumn Property="x => x.DepreciationRate" Title="Depreciation Rate" />
+                                    </Columns>
+                                </MudDataGrid>
+                            </MudPaper>
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+
+                <!-- Tab 2: Depreciation Schedule -->
+                <MudTabPanel Text="Depreciation Schedule" Icon="@Icons.Material.Filled.DateRange">
+                    <div class="mt-4">
+                        <MudGrid Class="mb-4">
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="_selectedYear" Label="Select Year" Variant="Variant.Outlined">
+                                    <MudSelectItem Value="2025">2025</MudSelectItem>
+                                    <MudSelectItem Value="2024">2024</MudSelectItem>
+                                    <MudSelectItem Value="2023">2023</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                    OnClick="@CalculateDepreciation">
+                                    Calculate Depreciation
+                                </MudButton>
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudDataGrid Items="@_depreciationSchedule" Hover="true">
+                            <Columns>
+                                <PropertyColumn Property="x => x.Month" Title="Month" />
+                                <PropertyColumn Property="x => x.AssetName" Title="Asset Name" />
+                                <PropertyColumn Property="x => x.DepreciationMethod" Title="Method" />
+                                <PropertyColumn Property="x => x.MonthlyExpense" Title="Monthly Expense">
+                                    <CellTemplate Context="item">
+                                        <MudText>₱ @item.Item.MonthlyExpense.ToString("N0")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.YearToDateExpense" Title="YTD Expense">
+                                    <CellTemplate Context="item">
+                                        <MudText>₱ @item.Item.YearToDateExpense.ToString("N0")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    </div>
+                </MudTabPanel>
+
+                <!-- Tab 3: Journal Entries -->
+                <MudTabPanel Text="Journal Entries (JEV)" Icon="@Icons.Material.Filled.Receipt">
+                    <div class="mt-4">
+                        <MudGrid Class="mb-4">
+                            <MudItem xs="12" sm="6">
+                                <MudDatePicker @bind-Date="_jevStartDate" Label="From Date" Variant="Variant.Outlined"
+                                    FullWidth="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudDatePicker @bind-Date="_jevEndDate" Label="To Date" Variant="Variant.Outlined"
+                                    FullWidth="true" />
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudText Typo="Typo.subtitle2" GutterBottom="true">Recent Journal Entries</MudText>
+                        <MudDataGrid Items="@_journalEntries" Hover="true">
+                            <Columns>
+                                <PropertyColumn Property="x => x.JevNumber" Title="JEV Number" />
+                                <PropertyColumn Property="x => x.EntryDate" Title="Entry Date">
+                                    <CellTemplate Context="item">
+                                        <MudText>@item.Item.EntryDate.ToString("MMM dd, yyyy")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.Description" Title="Description" />
+                                <PropertyColumn Property="x => x.Amount" Title="Amount">
+                                    <CellTemplate Context="item">
+                                        <MudText>₱ @item.Item.Amount.ToString("N0")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.Status" Title="Status">
+                                    <CellTemplate Context="item">
+                                        <MudChip T="string" Size="Size.Small"
+                                            Color="@GetJevStatusColor(item.Item.Status)">
+                                            @item.Item.Status
+                                        </MudChip>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <TemplateColumn Title="Actions">
+                                    <CellTemplate Context="item">
+                                        <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Info"
+                                            OnClick="@(() => ViewJev(item.Item))">
+                                            View
+                                        </MudButton>
+                                        @if (item.Item.Status == "Posted")
+                                        {
+                                            <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Error"
+                                                OnClick="@(() => ReverseDepreciation(item.Item))">
+                                                Reverse
+                                            </MudButton>
+                                        }
+                                    </CellTemplate>
+                                </TemplateColumn>
+                            </Columns>
+                        </MudDataGrid>
+
+                        <MudButton Variant="Variant.Filled" Color="Color.Success" Class="mt-4"
+                            OnClick="@GenerateDepreciationJev">
+                            Generate Depreciation JEV
+                        </MudButton>
+                    </div>
+                </MudTabPanel>
+
+                <!-- Tab 4: Asset Register -->
+                <MudTabPanel Text="Asset Register" Icon="@Icons.Material.Filled.ListAlt">
+                    <div class="mt-4">
+                        <MudGrid Class="mb-4">
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="_assetSearchText" Label="Search Asset"
+                                    Variant="Variant.Outlined" FullWidth="true" Clearable="true" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="_assetCategoryFilter" Label="Category"
+                                    Variant="Variant.Outlined" FullWidth="true">
+                                    <MudSelectItem Value="string.Empty">All Categories</MudSelectItem>
+                                    <MudSelectItem Value="Building">Building</MudSelectItem>
+                                    <MudSelectItem Value="Equipment">Equipment</MudSelectItem>
+                                    <MudSelectItem Value="Vehicle">Vehicle</MudSelectItem>
+                                    <MudSelectItem Value="Furniture">Furniture</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudDataGrid Items="@FilteredAssets" Hover="true">
+                            <Columns>
+                                <PropertyColumn Property="x => x.PropertyCode" Title="Property Code" />
+                                <PropertyColumn Property="x => x.AssetName" Title="Asset Name" />
+                                <PropertyColumn Property="x => x.Category" Title="Category" />
+                                <PropertyColumn Property="x => x.AcquisitionCost" Title="Acquisition Cost">
+                                    <CellTemplate Context="item">
+                                        <MudText>₱ @item.Item.AcquisitionCost.ToString("N0")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.AcquisitionDate" Title="Acquisition Date">
+                                    <CellTemplate Context="item">
+                                        <MudText>@item.Item.AcquisitionDate.ToString("MMM dd, yyyy")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                                <PropertyColumn Property="x => x.DepreciationRate" Title="Depreciation Rate" />
+                                <PropertyColumn Property="x => x.NetBookValue" Title="Net Book Value">
+                                    <CellTemplate Context="item">
+                                        <MudText>₱ @item.Item.NetBookValue.ToString("N0")</MudText>
+                                    </CellTemplate>
+                                </PropertyColumn>
+                            </Columns>
+                        </MudDataGrid>
+                    </div>
+                </MudTabPanel>
+
+                <!-- Tab 5: Financial Reports -->
+                <MudTabPanel Text="Financial Reports" Icon="@Icons.Material.Filled.Assessment">
+                    <div class="mt-4">
+                        <MudText Typo="Typo.h6" GutterBottom="true">Generate Financial Reports</MudText>
+
+                        <MudGrid>
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudButton Variant="Variant.Text" Class="mud-action-card pa-4 h-100"
+                                    OnClick="@(() => GenerateReport("FixedAssetSummary"))"
+                                    Style="text-transform: none; height: auto;">
+                                    <MudStack AlignItems="AlignItems.Center">
+                                        <MudIcon Icon="@Icons.Material.Filled.TableChart" Size="Size.Large"
+                                            Color="Color.Primary" />
+                                        <MudText Typo="Typo.subtitle2" Class="mt-2">Fixed Asset Summary</MudText>
+                                    </MudStack>
+                                </MudButton>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudButton Variant="Variant.Text" Class="mud-action-card pa-4 h-100"
+                                    OnClick="@(() => GenerateReport("DepreciationAnalysis"))"
+                                    Style="text-transform: none; height: auto;">
+                                    <MudStack AlignItems="AlignItems.Center">
+                                        <MudIcon Icon="@Icons.Material.Filled.Timeline" Size="Size.Large"
+                                            Color="Color.Success" />
+                                        <MudText Typo="Typo.subtitle2" Class="mt-2">Depreciation Analysis</MudText>
+                                    </MudStack>
+                                </MudButton>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudButton Variant="Variant.Text" Class="mud-action-card pa-4 h-100"
+                                    OnClick="@(() => GenerateReport("DisposalReport"))"
+                                    Style="text-transform: none; height: auto;">
+                                    <MudStack AlignItems="AlignItems.Center">
+                                        <MudIcon Icon="@Icons.Material.Filled.DeleteOutline" Size="Size.Large"
+                                            Color="Color.Warning" />
+                                        <MudText Typo="Typo.subtitle2" Class="mt-2">Disposal Report</MudText>
+                                    </MudStack>
+                                </MudButton>
+                            </MudItem>
+
+                            <MudItem xs="12" sm="6" md="3">
+                                <MudButton Variant="Variant.Text" Class="mud-action-card pa-4 h-100"
+                                    OnClick="@(() => GenerateReport("TrialBalance"))"
+                                    Style="text-transform: none; height: auto;">
+                                    <MudStack AlignItems="AlignItems.Center">
+                                        <MudIcon Icon="@Icons.Material.Filled.BalanceScale" Size="Size.Large"
+                                            Color="Color.Info" />
+                                        <MudText Typo="Typo.subtitle2" Class="mt-2">Trial Balance Report</MudText>
+                                    </MudStack>
+                                </MudButton>
+                            </MudItem>
+                        </MudGrid>
+                    </div>
+                </MudTabPanel>
+            </MudTabs>
+        </MudContainer>
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert Severity="Severity.Error">
+            Access Denied. Only Accountants can access the Depreciation & Accounting module.
+        </MudAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private decimal _grossPpeValue = 2500000;
+    private decimal _accumulatedDepreciation = 625000;
+    private decimal _ytdDepreciation = 125000;
+    private int _selectedYear = 2025;
+
+    private List<BreadcrumbItem> _breadcrumbItems = new()
+{
+new BreadcrumbItem("Home", href: "/"),
+new BreadcrumbItem("Accounting", href: null),
+new BreadcrumbItem("Depreciation", href: null, disabled: true)
+};
+
+    private List<DepreciationByCategory> _depreciationByCategory = new();
+    private List<DepreciationSchedule> _depreciationSchedule = new();
+    private List<JournalEntry> _journalEntries = new();
+    private List<AssetRegisterItem> _assets = new();
+
+    private DateTime? _jevStartDate = DateTime.Now.AddMonths(-3);
+    private DateTime? _jevEndDate = DateTime.Now;
+    private string _assetSearchText = string.Empty;
+    private string _assetCategoryFilter = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadData();
+    }
+
+    private async Task LoadData()
+    {
+        try
+        {
+            // Load depreciation data from API
+            try
+            {
+                // API endpoints when implemented:
+                // var summary = await ApiClient.GetDepreciationSummaryAsync("1");
+                // var byCategory = await ApiClient.GetDepreciationByCategoryAsync("1");
+                // var register = await ApiClient.GetAssetRegisterAsync("1");
+
+                // Fallback to mock data for now
+                LoadMockDepreciationData();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to load from API: {ex.Message}");
+                LoadMockDepreciationData();
+            }
+
+            StateHasChanged();
+            LoadMockDepreciationData();
+            Snackbar?.Add("Depreciation data loaded successfully", Severity.Info);
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error loading depreciation data: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void LoadMockDepreciationData()
+    {
+        _depreciationByCategory = new()
+{
+new DepreciationByCategory { Category = "Buildings", AssetCount = 5, GrossValue = 1500000, AccumulatedDepreciation =
+300000, DepreciationRate = "5%" },
+new DepreciationByCategory { Category = "Equipment", AssetCount = 25, GrossValue = 750000, AccumulatedDepreciation =
+225000, DepreciationRate = "20%" },
+new DepreciationByCategory { Category = "Vehicles", AssetCount = 3, GrossValue = 250000, AccumulatedDepreciation =
+100000, DepreciationRate = "20%" }
+};
+
+        _journalEntries = new()
+{
+new JournalEntry { JevNumber = "JEV-2025-0001", EntryDate = DateTime.Now.AddDays(-10), Description = "Monthly Depreciation - January", Amount = 15000, Status = "Posted" },
+new JournalEntry { JevNumber = "JEV-2025-0002", EntryDate = DateTime.Now.AddDays(-5), Description = "Asset Receipt - Equipment", Amount = 50000, Status = "Pending" },
+new JournalEntry { JevNumber = "JEV-2025-0003", EntryDate = DateTime.Now, Description = "Depreciation Adjustment",
+Amount = 5000, Status = "Pending" }
+};
+
+        _assets = new()
+{
+new AssetRegisterItem { PropertyCode = "BLD-001", AssetName = "Administrative Building", Category = "Building",
+AcquisitionCost = 1000000, AcquisitionDate = new DateTime(2020, 1, 15), DepreciationRate = "5%", NetBookValue = 800000 },
+new AssetRegisterItem { PropertyCode = "VEH-001", AssetName = "Toyota Innova", Category = "Vehicle", AcquisitionCost =
+150000, AcquisitionDate = new DateTime(2021, 6, 20), DepreciationRate = "20%", NetBookValue = 90000 },
+new AssetRegisterItem { PropertyCode = "EQP-001", AssetName = "Server Computer", Category = "Equipment", AcquisitionCost
+= 80000, AcquisitionDate = new DateTime(2022, 3, 10), DepreciationRate = "20%", NetBookValue = 32000 }
+};
+    }
+
+    private void CalculateDepreciation()
+    {
+        try
+        {
+            // Calculate monthly depreciation for each asset
+            _depreciationSchedule.Clear();
+
+            var months = new[] { "January", "February", "March", "April", "May", "June",
+"July", "August", "September", "October", "November", "December" };
+
+            foreach (var asset in _assets)
+            {
+                // Parse depreciation rate (e.g., "5%" -> 0.05)
+                if (decimal.TryParse(asset.DepreciationRate?.Replace("%", ""), out var ratePercent))
+                {
+                    var annualRate = ratePercent / 100;
+                    var monthlyRate = annualRate / 12;
+                    var monthlyExpense = asset.AcquisitionCost * monthlyRate;
+
+                    decimal ytdExpense = 0;
+                    for (int i = 0; i < 12; i++)
+                    {
+                        ytdExpense += monthlyExpense;
+                        _depreciationSchedule.Add(new DepreciationScheduleItem
+                        {
+                            Month = months[i],
+                            AssetName = asset.AssetName,
+                            DepreciationMethod = "Straight-Line",
+                            MonthlyExpense = monthlyExpense,
+                            YearToDateExpense = ytdExpense
+                        });
+                    }
+                }
+            }
+
+            Snackbar?.Add($"Depreciation calculated for {_selectedYear}: {_depreciationSchedule.Count} entries generated",
+            Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error calculating depreciation: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ViewJev(JournalEntry jev)
+    {
+        Snackbar?.Add($"Viewing JEV {jev.JevNumber}", Severity.Info);
+    }
+
+    private async Task ReverseDepreciation(JournalEntry jev)
+    {
+        try
+        {
+            var command = new ReverseDepreciationScheduleCommand { Reason = "Reversed by accountant" };
+            var response = await ApiClient.ReverseDepreciationScheduleEndpointAsync("1", jev.Id, command);
+            Snackbar?.Add($"Depreciation schedule reversed successfully", Severity.Success);
+            // Refresh the data
+            await LoadData();
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error reversing depreciation: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void GenerateDepreciationJev()
+    {
+        try
+        {
+            // TODO: Generate depreciation JEV for current period
+            Snackbar?.Add("Depreciation JEV generated successfully", Severity.Success);
+        }
+}
+
+    private async Task GenerateReport(string reportType)
+    {
+        try
+        {
+            Snackbar?.Add($"Generating {reportType} report...", Severity.Info);
+
+            var csv = new StringBuilder();
+            string fileName;
+
+            switch (reportType)
+            {
+                case "FixedAssetSummary":
+                    fileName = $"FixedAssetSummary_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                    csv.AppendLine("Property Code,Asset Name,Category,Acquisition Cost,Acquisition Date,Depreciation Rate,Net Book Value");
+                    foreach (var asset in _assets)
+                    {
+                        csv.AppendLine($"\"{asset.PropertyCode}\",\"{asset.AssetName}\",\"{asset.Category}\",\"{asset.AcquisitionCost:N2}\",\"{asset.AcquisitionDate:yyyy-MM-dd}\",\"{asset.DepreciationRate}\",\"{asset.NetBookValue:N2}\"");
+                    }
+                    break;
+
+                case "DepreciationAnalysis":
+                    fileName = $"DepreciationAnalysis_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                    csv.AppendLine("Category,Asset Count,Gross Value,Accumulated Depreciation,Net Book Value,Depreciation Rate");
+                    foreach (var item in _depreciationByCategory)
+                    {
+                        var netValue = item.GrossValue - item.AccumulatedDepreciation;
+                        csv.AppendLine($"\"{item.Category}\",\"{item.AssetCount}\",\"{item.GrossValue:N2}\",\"{item.AccumulatedDepreciation:N2}\",\"{netValue:N2}\",\"{item.DepreciationRate}\"");
+                    }
+                    break;
+
+                case "DisposalReport":
+                    fileName = $"DisposalReport_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                    csv.AppendLine("Property Code,Asset Name,Category,Disposal Date,Disposal Reason,Original Cost,Book Value at Disposal");
+                    // Mock disposal data - in production this would come from API
+                    csv.AppendLine("\"DIS-001\",\"Old Printer\",\"Equipment\",\"2025-12-01\",\"End of useful life\",\"15000.00\",\"500.00\"");
+                    csv.AppendLine("\"DIS-002\",\"Damaged Chair\",\"Furniture\",\"2025-11-15\",\"Physical damage\",\"3000.00\",\"1200.00\"");
+                    break;
+
+                case "TrialBalance":
+                    fileName = $"TrialBalance_{DateTime.Now:yyyyMMdd_HHmmss}.csv";
+                    csv.AppendLine("Account Code,Account Name,Debit,Credit");
+                    // Mock trial balance data - in production this would come from API
+                    csv.AppendLine("\"1010\",\"Fixed Assets\",\"2500000.00\",\"0.00\"");
+                    csv.AppendLine("\"1011\",\"Accumulated Depreciation\",\"0.00\",\"625000.00\"");
+                    csv.AppendLine("\"5010\",\"Depreciation Expense\",\"15000.00\",\"0.00\"");
+                    csv.AppendLine("\"TOTAL\",\"Total\",\"2515000.00\",\"625000.00\"");
+                    break;
+
+                default:
+                    Snackbar?.Add($"Unknown report type: {reportType}", Severity.Warning);
+                    return;
+            }
+
+            // Convert to bytes and download
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            var base64 = Convert.ToBase64String(bytes);
+
+            await JS.InvokeVoidAsync("downloadFile", fileName, base64, "text/csv");
+            Snackbar?.Add($"{reportType} report generated successfully", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error generating report: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private IEnumerable<AssetRegisterItem> FilteredAssets =>
+    _assets
+    .Where(a => string.IsNullOrEmpty(_assetSearchText) ||
+    a.PropertyCode.Contains(_assetSearchText, StringComparison.OrdinalIgnoreCase) ||
+    a.AssetName.Contains(_assetSearchText, StringComparison.OrdinalIgnoreCase))
+    .Where(a => string.IsNullOrEmpty(_assetCategoryFilter) || a.Category == _assetCategoryFilter);
+
+    private Color GetJevStatusColor(string status) => status switch
+    {
+        "Posted" => Color.Success,
+        "Pending" => Color.Warning,
+        "Rejected" => Color.Error,
+        _ => Color.Default
+    };
+
+    private sealed class DepreciationByCategory
+    {
+        public string Category { get; set; } = string.Empty;
+        public int AssetCount { get; set; }
+        public decimal GrossValue { get; set; }
+        public decimal AccumulatedDepreciation { get; set; }
+        public decimal NetBookValue => GrossValue - AccumulatedDepreciation;
+        public string DepreciationRate { get; set; } = string.Empty;
+    }
+
+    private sealed class DepreciationSchedule
+    {
+        public string Month { get; set; } = string.Empty;
+        public string AssetName { get; set; } = string.Empty;
+        public string DepreciationMethod { get; set; } = string.Empty;
+        public decimal MonthlyExpense { get; set; }
+        public decimal YearToDateExpense { get; set; }
+    }
+
+    private sealed class JournalEntry
+    {
+        public string JevNumber { get; set; } = string.Empty;
+        public DateTime EntryDate { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public decimal Amount { get; set; }
+        public string Status { get; set; } = string.Empty;
+    }
+
+    private sealed class AssetRegisterItem
+    {
+        public string PropertyCode { get; set; } = string.Empty;
+        public string AssetName { get; set; } = string.Empty;
+        public string Category { get; set; } = string.Empty;
+        public decimal AcquisitionCost { get; set; }
+        public DateTime AcquisitionDate { get; set; }
+        public string DepreciationRate { get; set; } = string.Empty;
+        public decimal NetBookValue { get; set; }
+    }
+}

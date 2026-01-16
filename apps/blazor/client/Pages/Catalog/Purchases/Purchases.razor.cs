@@ -141,11 +141,7 @@ public partial class Purchases
         {
             PurchaseDate = DateTime.Today,
             SupplierId = null,
-<<<<<<< HEAD
             Status = PurchaseStatus.Submitted,
-=======
-            Status = PurchaseStatus.Draft,
->>>>>>> origin/jan1626
             Items = new List<PurchaseItemDto>()
         };
     }
@@ -259,11 +255,7 @@ public partial class Purchases
         => status switch
         {
             PurchaseStatus.Draft => Icons.Material.Filled.Edit,
-<<<<<<< HEAD
             PurchaseStatus.Submitted => Icons.Material.Filled.HourglassEmpty,
-=======
-            PurchaseStatus.Submitted => Icons.Material.Filled.Send,
->>>>>>> origin/jan1626
             PurchaseStatus.PartiallyDelivered => Icons.Material.Filled.LocalShipping,
             PurchaseStatus.Delivered => Icons.Material.Filled.Inventory,
             PurchaseStatus.Closed => Icons.Material.Filled.CheckCircle,

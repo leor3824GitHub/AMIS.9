@@ -225,6 +225,7 @@ public static class CatalogModule
             var depreciationScheduleGroup = app.MapGroup("depreciationSchedules").WithTags("depreciationSchedules");
             depreciationScheduleGroup.MapDepreciationScheduleCreationEndpoint();
             depreciationScheduleGroup.MapDepreciationSchedulePostingEndpoint();
+            depreciationScheduleGroup.MapDepreciationScheduleReverseEndpoint();
             depreciationScheduleGroup.MapSearchDepreciationSchedulesEndpoint();
             depreciationScheduleGroup.MapGetDepreciationScheduleEndpoint();
             depreciationScheduleGroup.MapUpdateDepreciationScheduleEndpoint();
@@ -233,6 +234,9 @@ public static class CatalogModule
             var journalEntryVoucherGroup = app.MapGroup("journalEntryVouchers").WithTags("journalEntryVouchers");
             journalEntryVoucherGroup.MapJournalEntryVoucherCreationEndpoint();
             journalEntryVoucherGroup.MapJournalEntryVoucherPostingEndpoint();
+            journalEntryVoucherGroup.MapJournalEntryVoucherSubmitEndpoint();
+            journalEntryVoucherGroup.MapJournalEntryVoucherApproveEndpoint();
+            journalEntryVoucherGroup.MapJournalEntryVoucherRejectEndpoint();
             journalEntryVoucherGroup.MapExportJournalEntryVoucherEndpoint();
             journalEntryVoucherGroup.MapSearchJournalEntryVouchersEndpoint();
             journalEntryVoucherGroup.MapGetJournalEntryVoucherEndpoint();
@@ -249,6 +253,8 @@ public static class CatalogModule
             physicalAssetGroup.MapAssignCustodianEndpoint();
             physicalAssetGroup.MapUpdateConditionEndpoint();
             physicalAssetGroup.MapRecordDepreciationEndpoint();
+            physicalAssetGroup.MapPhysicalAssetIssueEndpoint();
+            physicalAssetGroup.MapPhysicalAssetReturnEndpoint();
             physicalAssetGroup.MapExportPhysicalAssetsEndpoint();
             physicalAssetGroup.MapGetStockLevelsEndpoint();
         }
@@ -344,8 +350,8 @@ public static class CatalogModule
         builder.Services.AddKeyedScoped<IReadRepository<DepreciationSchedule>, CatalogRepository<DepreciationSchedule>>("catalog:depreciationschedules");
 
         // Journal Entry Vouchers
-        builder.Services.AddKeyedScoped<IRepository<JournalEntryVoucher>, CatalogRepository<JournalEntryVoucher>>("catalog:journalentryv ouchers");
-        builder.Services.AddKeyedScoped<IReadRepository<JournalEntryVoucher>, CatalogRepository<JournalEntryVoucher>>("catalog:journalentryv ouchers");
+        builder.Services.AddKeyedScoped<IRepository<JournalEntryVoucher>, CatalogRepository<JournalEntryVoucher>>("catalog:journalentryvouchers");
+        builder.Services.AddKeyedScoped<IReadRepository<JournalEntryVoucher>, CatalogRepository<JournalEntryVoucher>>("catalog:journalentryvouchers");
 
         return builder;
     }

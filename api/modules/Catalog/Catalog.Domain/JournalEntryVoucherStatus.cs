@@ -6,7 +6,9 @@ namespace AMIS.WebApi.Catalog.Domain;
 public enum JournalEntryVoucherStatus
 {
     Draft = 0,          // Being prepared
-    Posted = 1,         // Posted to general ledger
-    Exported = 2,       // Exported to Excel/PDF
-    Reversed = 3        // JEV reversed
+    Pending = 1,        // Submitted for approval
+    Posted = 2,         // Posted to general ledger
+    Exported = 3,       // Exported to Excel/PDF
+    Reversed = 4,       // JEV reversed
+    Rejected = 5        // Approval rejected
 }

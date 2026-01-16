@@ -128,14 +128,18 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 nullable: true);
 
             // Update Acceptance Status column to support new enum values
-            migrationBuilder.AlterColumn<int>(
-                name: "Status",
-                schema: "catalog",
-                table: "Acceptances",
-                type: "integer",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "text");
+            migrationBuilder.Sql(@"
+                ALTER TABLE catalog.""Acceptances"" 
+                ALTER COLUMN ""Status"" TYPE integer 
+                USING (
+                    CASE 
+                        WHEN ""Status""::text = 'Pending' THEN 0
+                        WHEN ""Status""::text = 'Accepted' THEN 1
+                        WHEN ""Status""::text = 'Rejected' THEN 2
+                        ELSE 0
+                    END
+                );
+            ");
 
             // Create AssetRequisitions table
             migrationBuilder.CreateTable(
@@ -508,14 +512,18 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Catalog
                 table: "Issuances");
 
             // Revert Acceptance Status column
-            migrationBuilder.AlterColumn<string>(
-                name: "Status",
-                schema: "catalog",
-                table: "Acceptances",
-                type: "text",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "integer");
+            migrationBuilder.Sql(@"
+                ALTER TABLE catalog.""Acceptances"" 
+                ALTER COLUMN ""Status"" TYPE text 
+                USING (
+                    CASE 
+                        WHEN ""Status""::integer = 0 THEN 'Pending'
+                        WHEN ""Status""::integer = 1 THEN 'Accepted'
+                        WHEN ""Status""::integer = 2 THEN 'Rejected'
+                        ELSE 'Pending'
+                    END
+                );
+            ");
         }
     }
 }

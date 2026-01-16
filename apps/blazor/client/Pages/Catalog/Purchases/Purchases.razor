@@ -1,4 +1,4 @@
-﻿@page "/catalog/purchases"
+@page "/catalog/purchases"
 
 @* <style>
     .mud-table-container {
@@ -22,7 +22,7 @@
         <ToolBarContent>
             <div class="d-flex align-center justify-between w-100 gap-2 flex-wrap">
 
-                <!-- 📦 Left: Buttons -->
+                <!-- ?? Left: Buttons -->
                 <div class="d-flex align-center flex-nowrap gap-1">
                     <MudHidden Breakpoint="Breakpoint.SmAndDown">
                         <MudButton Variant="Variant.Filled"
@@ -70,7 +70,7 @@
                         }
                     </MudHidden>
 
-                    <!-- ☰ Actions for Small Screens -->
+                    <!-- ? Actions for Small Screens -->
                     <MudHidden Breakpoint="Breakpoint.MdAndUp">
                         <MudMenu Icon="@Icons.Material.Filled.MoreVert" Dense="true">
                             <MudMenuItem OnClick="@(() => OnRefresh())" Disabled="@_loading">Refresh</MudMenuItem>
@@ -160,11 +160,9 @@
                              Class="text-uppercase">
                         @context.Item.Status
                     </MudChip>
-<<<<<<< HEAD
+
                     @if (context.Item.Status == PurchaseStatus.Draft || context.Item.Status == PurchaseStatus.Submitted)
-=======
-                    @if (context.Item.Status == PurchaseStatus.Draft)
->>>>>>> origin/jan1626
+
                     {
                         <MudText Typo="Typo.caption" Color="Color.Secondary">Step 1: PO Creation</MudText>
                     }
@@ -221,4 +219,5 @@
         <MudDataGridPager />
     </PagerContent>
 </MudDataGrid>
+
 

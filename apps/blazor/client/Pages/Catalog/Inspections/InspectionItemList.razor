@@ -1,4 +1,4 @@
-﻿<!-- Item List Section -->
+<!-- Item List Section -->
 <MudPaper Class="pa-4 mb-4" Style="max-height: 80vh; overflow-y: auto;">
     <MudText Typo="Typo.h6">Purchase Items - @(Items?.Count ?? 0)</MudText>
 
@@ -74,7 +74,7 @@
                         var product = Products?.FirstOrDefault(p => p.Id == item.ProductId);
                     }
                     <span style="display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                        @(product is not null ? product.Name : "—")
+                        @(product is not null ? product.Name : "�")
                     </span>
                 </MudTd>
                 <MudTd Style="width: 80px;">@item.Qty.ToString("N0")</MudTd>
@@ -132,11 +132,9 @@
                     <MudTextField T="string" Value="@newAmount.ToString("N2")" ReadOnly Label="Auto Compute" Variant="Variant.Outlined" />
                 </MudTd>
                 <MudTd>
-<<<<<<< HEAD
+
                     <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Submitted)" ReadOnly Variant="Variant.Outlined" />
-=======
-                    <MudTextField T="string" Value="@GetDisplayName(Status ?? PurchaseStatus.Draft)" ReadOnly Variant="Variant.Outlined" />
->>>>>>> origin/jan1626
+
                 </MudTd>
 
                 <MudTd class="text-center">
@@ -156,3 +154,4 @@
 
     </MudTable>
 </MudPaper>
+

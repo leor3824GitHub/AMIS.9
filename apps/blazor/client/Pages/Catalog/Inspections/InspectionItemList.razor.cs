@@ -85,11 +85,7 @@ public partial class InspectionItemList
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
-<<<<<<< HEAD
             ItemStatus = Status ?? PurchaseStatus.Submitted
-=======
-            ItemStatus = Status ?? PurchaseStatus.Draft
->>>>>>> origin/jan1626
         };
         Items.Add(newItem);
 

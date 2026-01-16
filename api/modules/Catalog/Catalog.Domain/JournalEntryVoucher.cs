@@ -104,6 +104,47 @@ public class JournalEntryVoucher : AuditableEntity, IAggregateRoot
     }
 
     /// <summary>
+    /// Submits the JEV for approval (Draft → Pending).
+    /// </summary>
+    public void Submit()
+    {
+        if (Status != JournalEntryVoucherStatus.Draft)
+            throw new InvalidOperationException($"Cannot submit a JEV with status {Status}. Only Draft JEVs can be submitted.");
+
+        if (!HasEntries)
+            throw new InvalidOperationException("Cannot submit a JEV with no entries.");
+
+        if (!IsBalanced)
+            throw new InvalidOperationException("Journal entry is not balanced. Debit and credit amounts must be equal.");
+
+        Status = JournalEntryVoucherStatus.Pending;
+    }
+
+    /// <summary>
+    /// Approves the JEV (Pending → Posted).
+    /// </summary>
+    public void Approve()
+    {
+        if (Status != JournalEntryVoucherStatus.Pending)
+            throw new InvalidOperationException($"Cannot approve a JEV with status {Status}. Only Pending JEVs can be approved.");
+
+        Status = JournalEntryVoucherStatus.Posted;
+        PostedDate = DateTime.UtcNow;
+    }
+
+    /// <summary>
+    /// Rejects the JEV (Pending → Rejected).
+    /// </summary>
+    public void Reject(string reason = "")
+    {
+        if (Status != JournalEntryVoucherStatus.Pending)
+            throw new InvalidOperationException($"Cannot reject a JEV with status {Status}. Only Pending JEVs can be rejected.");
+
+        Status = JournalEntryVoucherStatus.Rejected;
+        Remarks = reason;
+    }
+
+    /// <summary>
     /// Posts the JEV to the general ledger.
     /// </summary>
     public void Post()
