@@ -14,11 +14,11 @@ using AMIS.Framework.Infrastructure.Auth.Jwt;
 using AMIS.Framework.Infrastructure.Identity.Audit;
 using AMIS.Framework.Infrastructure.Identity.Users;
 using AMIS.Framework.Infrastructure.Tenant;
-using AMIS.Shared.Authorization;
 using MediatR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Tokens;
 

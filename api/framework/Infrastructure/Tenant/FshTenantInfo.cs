@@ -1,7 +1,7 @@
 ﻿using Finbuckle.MultiTenant.Abstractions;
 using AMIS.Framework.Core.Exceptions;
 using AMIS.Framework.Infrastructure.Tenant.Abstractions;
-using AMIS.Shared.Authorization;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Tenant;
 public sealed class FshTenantInfo : IFshTenantInfo

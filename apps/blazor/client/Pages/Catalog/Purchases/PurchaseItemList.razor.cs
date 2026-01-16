@@ -29,6 +29,7 @@ public partial class PurchaseItemList
     private int Qty { get; set; }
     private double Unitprice { get; set; }
     private PurchaseItemDto? EditingItem { get; set; }
+    private bool ItemsLocked => Status is PurchaseStatus.Closed or PurchaseStatus.Cancelled;
 
     protected override async Task OnInitializedAsync()
     {
@@ -45,11 +46,23 @@ public partial class PurchaseItemList
 
     private void EditItem(PurchaseItemDto item)
     {
+        if (ItemsLocked)
+        {
+            Snackbar?.Add("Items cannot be edited when the PO is locked.", Severity.Info);
+            return;
+        }
+
         EditingItem = item;
     }
 
     private void SaveEdit()
     {
+        if (ItemsLocked)
+        {
+            Snackbar?.Add("Items cannot be edited when the PO is locked.", Severity.Info);
+            return;
+        }
+
         if (EditingItem == null || EditingItem.Qty <= 0 || EditingItem.UnitPrice <= 0)
             return;
         try
@@ -82,11 +95,9 @@ public partial class PurchaseItemList
 
     private void AddNewItem()
     {
-        if (Productid == null || Qty <= 0 || Unitprice <= 0)
-            return;
-
-        var newItem = new PurchaseItemDto
+        if (Productid == null)
         {
+<<<<<<< HEAD
             Id = Guid.NewGuid(),
             ProductId = Productid.Value,
             Qty = Qty,
@@ -94,6 +105,42 @@ public partial class PurchaseItemList
             ItemStatus = Status ?? PurchaseStatus.Submitted
         };
         Items.Add(newItem);
+=======
+            Snackbar?.Add("Select a product before adding.", Severity.Warning);
+            return;
+        }
+
+        if (ItemsLocked)
+        {
+            Snackbar?.Add("This purchase order is locked. Add items via workflow actions.", Severity.Info);
+            return;
+        }
+
+        if (Qty <= 0 || Unitprice <= 0)
+        {
+            Snackbar?.Add("Quantity and unit price must be greater than zero.", Severity.Warning);
+            return;
+        }
+
+        var existing = Items.FirstOrDefault(i => i.ProductId == Productid.Value);
+        if (existing is not null)
+        {
+            existing.Qty += Qty;
+            existing.UnitPrice = Unitprice;
+            Snackbar?.Add("Updated existing line item.", Severity.Info);
+        }
+        else
+        {
+            var newItem = new PurchaseItemDto
+            {
+                ProductId = Productid.Value,
+                Qty = Qty,
+                UnitPrice = Unitprice,
+                ItemStatus = Status ?? PurchaseStatus.Draft
+            };
+            Items.Add(newItem);
+        }
+>>>>>>> origin/jan1626
 
         if (IsCreate == false)
         {
@@ -120,11 +167,12 @@ public partial class PurchaseItemList
 
     private void RemoveItem(PurchaseItemDto item)
     {
-        if (item.Id == Guid.Empty)
+        if (ItemsLocked)
         {
-            Snackbar?.Add("Item ID is null and cannot be removed.", Severity.Error);
+            Snackbar?.Add("This purchase order is locked. Item removal is disabled.", Severity.Info);
             return;
         }
+
         try
         {
             // TODO: Use nested endpoint DELETE /purchases/{purchaseId}/items/{itemId}

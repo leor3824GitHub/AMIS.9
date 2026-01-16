@@ -22,7 +22,7 @@
             <FshValidation @ref="_customValidation" />
             <MudGrid>
 
-                @ChildContent(RequestModel)
+                            @ChildContent(new AddEditFormContext<TRequest>(RequestModel, IsCreate))
 
             </MudGrid>
         </DialogContent>

@@ -1,11 +1,11 @@
 ﻿using AMIS.Blazor.Infrastructure.Auth.Jwt;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication.Internal;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Infrastructure.Auth;
 public static class Extensions

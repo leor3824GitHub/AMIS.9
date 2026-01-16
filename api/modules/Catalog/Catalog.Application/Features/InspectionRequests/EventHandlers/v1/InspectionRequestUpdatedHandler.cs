@@ -2,7 +2,7 @@ using AMIS.WebApi.Catalog.Domain.Events;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace AMIS.WebApi.Catalog.Application.InspectionRequests.Events;
+namespace AMIS.WebApi.Catalog.Application.Features.InspectionRequests.EventHandlers.v1;
 
 public class InspectionRequestUpdatedHandler : INotificationHandler<InspectionRequestUpdated>
 {

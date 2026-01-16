@@ -3,11 +3,11 @@ using FluentValidation.Results;
 using AMIS.Framework.Core.Identity.Users.Abstractions;
 using AMIS.Framework.Core.Identity.Users.Features.ChangePassword;
 using AMIS.Framework.Core.Origin;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Options;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Users.Endpoints;
 public static class ChangePasswordEndpoint

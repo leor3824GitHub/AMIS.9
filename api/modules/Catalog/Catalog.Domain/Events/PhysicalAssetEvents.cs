@@ -49,3 +49,17 @@ public record PhysicalAssetConditionUpdated : DomainEvent
     public string Condition { get; init; } = default!;
     public string? Remarks { get; init; }
 }
+
+public record PhysicalAssetQRCodeGenerated : DomainEvent
+{
+    public PhysicalAsset PhysicalAsset { get; init; } = default!;
+    public string PropertyNumber { get; init; } = default!;
+    public DateTime GeneratedDate { get; init; }
+}
+
+public record PhysicalAssetAssignedToCustodian : DomainEvent
+{
+    public PhysicalAsset PhysicalAsset { get; init; } = default!;
+    public Guid CustodianId { get; init; }
+    public DateTime AssignmentDate { get; init; }
+}

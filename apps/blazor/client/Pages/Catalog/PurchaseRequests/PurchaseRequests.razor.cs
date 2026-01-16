@@ -2,14 +2,18 @@ using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
+<<<<<<< HEAD
 using PurchaseRequestStatus = AMIS.Blazor.Infrastructure.Api.PurchaseRequestStatus;
 using PurchaseRequestItemCreateDto = AMIS.Blazor.Infrastructure.Api.PurchaseRequestItemCreateDto;
 using AMIS.Shared.Authorization;
+=======
+>>>>>>> origin/jan1626
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.PurchaseRequests;
 
@@ -220,9 +224,13 @@ public partial class PurchaseRequests
 
     private async Task OnCancel(PurchaseRequestResponse item)
     {
+        var reason = await PromptAsync("Cancellation reason:");
         try
         {
-            await Api.CancelPurchaseRequestEndpointAsync("1", item.Id!.Value);
+            await Api.CancelPurchaseRequestEndpointAsync(
+                "1",
+                item.Id!.Value,
+                string.IsNullOrWhiteSpace(reason) ? null : reason);
             Snackbar?.Add("Purchase request canceled.", Severity.Success);
             await _table.ReloadServerData();
         }

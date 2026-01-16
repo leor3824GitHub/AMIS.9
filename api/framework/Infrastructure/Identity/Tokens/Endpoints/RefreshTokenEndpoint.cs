@@ -1,10 +1,10 @@
 ﻿using AMIS.Framework.Core.Identity.Tokens;
 using AMIS.Framework.Core.Identity.Tokens.Features.Refresh;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Tokens.Endpoints;
 public static class RefreshTokenEndpoint

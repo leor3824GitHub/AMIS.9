@@ -1,5 +1,5 @@
-﻿using AMIS.Shared.Authorization;
-using MudBlazor;
+﻿using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Components.EntityTable;
 

@@ -3,14 +3,14 @@ using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Client.Pages.Catalog.Products;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
-using AMIS.Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using AMIS.Blazor.Client.Pages.Catalog.Inspections; // for InspectionDialog
-using System.Linq; // ensure LINQ
+using System.Linq;
+using Shared.Authorization; // ensure LINQ
 
 namespace AMIS.Blazor.Client.Pages.Catalog.InspectionRequests;
 

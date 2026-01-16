@@ -19,7 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using IdentityConstants = AMIS.Shared.Authorization.IdentityConstants;
+using IdentityConstants = Shared.Authorization.IdentityConstants;
 
 namespace AMIS.Framework.Infrastructure.Identity;
 internal static class Extensions

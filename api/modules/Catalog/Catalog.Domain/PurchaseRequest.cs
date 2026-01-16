@@ -78,7 +78,7 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
         return this;
     }
 
-    public void AddItem(Guid? productId, int qty, string unit, string? description)
+    public void AddItem(Guid? productId, string? manualProductName, int qty, string unit, string? description)
     {
         if (Status != PurchaseRequestStatus.Draft)
         {
@@ -90,22 +90,22 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
             throw new ArgumentException("Quantity must be greater than zero.", nameof(qty));
         }
 
-        var item = PurchaseRequestItem.Create(this.Id, productId, qty, unit, description);
+        var item = PurchaseRequestItem.Create(this.Id, productId, manualProductName, qty, unit, description);
         Items.Add(item);
     }
 
-    public void AddItem(Guid id, Guid? productId, int qty, string unit, string? description)
+    public void AddItem(Guid id, Guid? productId, string? manualProductName, int qty, string unit, string? description)
     {
         if (Status != PurchaseRequestStatus.Draft)
         {
             throw new InvalidOperationException($"Cannot add items to a {Status} purchase request.");
         }
 
-        var item = PurchaseRequestItem.Create(id, this.Id, productId, qty, unit, description);
+        var item = PurchaseRequestItem.Create(id, this.Id, productId, manualProductName, qty, unit, description);
         Items.Add(item);
     }
 
-    public void UpdateItem(Guid itemId, Guid? productId, int qty, string unit, string? description)
+    public void UpdateItem(Guid itemId, Guid? productId, string? manualProductName, int qty, string unit, string? description)
     {
         if (Status != PurchaseRequestStatus.Draft)
         {
@@ -118,7 +118,7 @@ public class PurchaseRequest : AuditableEntity, IAggregateRoot
             throw new InvalidOperationException($"Purchase request item with ID {itemId} not found.");
         }
 
-        item.Update(productId, qty, unit, description);
+        item.Update(productId, manualProductName, qty, unit, description);
     }
 
     public void RemoveItem(Guid itemId)

@@ -1,10 +1,10 @@
 using AMIS.Framework.Core.Identity.Users.Abstractions;
 using AMIS.Framework.Core.Persistence;
-using AMIS.Shared.Authorization;
 using AMIS.WebApi.Catalog.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shared.Authorization;
 
 namespace AMIS.WebApi.Catalog.Application.PurchaseRequests.ManageItems.v1;
 
@@ -30,7 +30,7 @@ public sealed class AddPurchaseRequestItemHandler(
         if (pr.Status != Domain.ValueObjects.PurchaseRequestStatus.Draft)
             throw new InvalidOperationException("Can only add items while in Draft status");
 
-        pr.AddItem(request.ProductId, request.Qty, request.Unit, request.Description);
+        pr.AddItem(request.ProductId, request.ManualProductName, request.Qty, request.Unit, request.Description);
         await repository.UpdateAsync(pr, cancellationToken);
         var newItem = pr.Items.Last();
         logger.LogInformation("Added item {ItemId} to PurchaseRequest {PRId}", newItem.Id, pr.Id);

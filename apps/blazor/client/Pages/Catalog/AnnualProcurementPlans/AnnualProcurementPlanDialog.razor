@@ -1,0 +1,220 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.CalendarMonth" Class="mr-3 mb-n1" />
+            @GetDialogTitle()
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (IsCreate)
+        {
+            <MudStack Spacing="3">
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" @bind-Value="_controlNumber" Label="Control Number"
+                            Margin="Margin.Dense" HelperText="Optional, will be auto-generated if empty" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField T="int" @bind-Value="_fiscalYear" Label="Fiscal Year"
+                            Required="true" Margin="Margin.Dense" Min="2020" Max="2100" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="BudgetType" @bind-Value="_budgetType" Label="Budget Type"
+                            Required="true" Margin="Margin.Dense">
+                            <MudSelectItem Value="BudgetType._0">MOOE</MudSelectItem>
+                            <MudSelectItem Value="BudgetType._1">CO</MudSelectItem>
+                            <MudSelectItem Value="BudgetType._2">Mixed</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+
+                <MudAlert Severity="Severity.Info" Dense="true">
+                    After creating the APP, you can add line items by editing the plan.
+                </MudAlert>
+            </MudStack>
+        }
+        else if (ReadOnly && ViewModel != null)
+        {
+            <MudStack Spacing="3">
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudText><strong>Control Number:</strong> @ViewModel.ControlNumber</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText><strong>Fiscal Year:</strong> @ViewModel.FiscalYear</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText>
+                            <strong>Status:</strong>
+                            <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(ViewModel.Status)" Variant="Variant.Filled">
+                                @GetStatusLabel(ViewModel.Status)
+                            </MudChip>
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText><strong>Budget Type:</strong> @GetBudgetTypeLabel(ViewModel.BudgetType)</MudText>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudText><strong>Total Budget:</strong> @ViewModel.TotalBudget.ToString("N2")</MudText>
+                    </MudItem>
+                    @if (ViewModel.SubmissionDate.HasValue)
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudText><strong>Submitted:</strong> @ViewModel.SubmissionDate.Value.ToString("yyyy-MM-dd")</MudText>
+                        </MudItem>
+                    }
+                    @if (ViewModel.ApprovalDate.HasValue)
+                    {
+                        <MudItem xs="12" sm="6">
+                            <MudText><strong>Approved:</strong> @ViewModel.ApprovalDate.Value.ToString("yyyy-MM-dd")</MudText>
+                        </MudItem>
+                    }
+                    @if (!string.IsNullOrEmpty(ViewModel.RejectionReason))
+                    {
+                        <MudItem xs="12">
+                            <MudAlert Severity="Severity.Error" Dense="true">
+                                <strong>Rejection Reason:</strong> @ViewModel.RejectionReason
+                            </MudAlert>
+                        </MudItem>
+                    }
+                </MudGrid>
+
+                <MudDivider Class="my-2" />
+
+                <MudText Typo="Typo.subtitle1">
+                    <MudIcon Icon="@Icons.Material.Filled.List" Size="Size.Small" Class="mr-1" />
+                    Line Items (@(ViewModel.Items?.Count ?? 0))
+                </MudText>
+
+                @if (ViewModel.Items?.Count > 0)
+                {
+                    <MudTable T="AnnualProcurementPlanItemResponse" Items="ViewModel.Items" Dense="true" Hover="true" Bordered="true" Striped="true">
+                        <HeaderContent>
+                            <MudTh>Department</MudTh>
+                            <MudTh>PAP Code</MudTh>
+                            <MudTh>Description</MudTh>
+                            <MudTh>Project Type</MudTh>
+                            <MudTh>Qty</MudTh>
+                            <MudTh>Unit</MudTh>
+                            <MudTh>Unit Cost</MudTh>
+                            <MudTh>Est. Budget</MudTh>
+                            <MudTh>Mode</MudTh>
+                            <MudTh>Schedule</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.DepartmentName</MudTd>
+                            <MudTd>@context.PapCode</MudTd>
+                            <MudTd>@context.Description</MudTd>
+                            <MudTd>@GetProjectTypeLabel(context.ProjectType)</MudTd>
+                            <MudTd>@context.Quantity</MudTd>
+                            <MudTd>@context.UnitOfMeasure</MudTd>
+                            <MudTd>@context.UnitCost.ToString("N2")</MudTd>
+                            <MudTd>@context.EstimatedBudget.ToString("N2")</MudTd>
+                            <MudTd>@context.Mode</MudTd>
+                            <MudTd>@context.ScheduleMonth</MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">No items in this plan.</MudAlert>
+                }
+            </MudStack>
+        }
+        else if (!ReadOnly && ViewModel != null)
+        {
+            <!-- Edit Mode -->
+            <MudStack Spacing="3">
+                <MudGrid>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField T="string" Value="@ViewModel.ControlNumber" Label="Control Number" ReadOnly="true" Margin="Margin.Dense" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField T="int" @bind-Value="_editFiscalYear" Label="Fiscal Year" Required="true" Margin="Margin.Dense" Min="2020" Max="2100" Disabled="@(!_canUpdatePlan)" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="BudgetType" @bind-Value="_editBudgetType" Label="Budget Type" Required="true" Margin="Margin.Dense" Disabled="@(!_canUpdatePlan)">
+                            <MudSelectItem Value="BudgetType._0">MOOE</MudSelectItem>
+                            <MudSelectItem Value="BudgetType._1">CO</MudSelectItem>
+                            <MudSelectItem Value="BudgetType._2">Mixed</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+
+                <MudText Typo="Typo.subtitle2" Class="mt-2">
+                    <strong>Total Budget: </strong> @ViewModel.TotalBudget.ToString("N2")
+                </MudText>
+
+                <MudDivider Class="my-2" />
+
+                <MudStack Row Justify="Justify.SpaceBetween" AlignItems="AlignItems.Center">
+                    <MudText Typo="Typo.subtitle1">
+                        <MudIcon Icon="@Icons.Material.Filled.List" Size="Size.Small" Class="mr-1" />
+                        Line Items (@(_editItems?.Count ?? 0))
+                    </MudText>
+                    <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary"
+                        StartIcon="@Icons.Material.Filled.Add" OnClick="OnAddItem" Disabled="@(!_canCreateItems)">
+                        Add Item
+                    </MudButton>
+                </MudStack>
+
+                @if (_editItems?.Count > 0)
+                {
+                    <MudTable T="AnnualProcurementPlanItemResponse" Items="_editItems" Dense="true" Hover="true" Bordered="true" Striped="true">
+                        <HeaderContent>
+                            <MudTh>Department</MudTh>
+                            <MudTh>Description</MudTh>
+                            <MudTh>Type</MudTh>
+                            <MudTh>Qty</MudTh>
+                            <MudTh>Unit Cost</MudTh>
+                            <MudTh>Est. Budget</MudTh>
+                            <MudTh>Actions</MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>@context.DepartmentName</MudTd>
+                            <MudTd>@context.Description</MudTd>
+                            <MudTd>@GetProjectTypeLabel(context.ProjectType)</MudTd>
+                            <MudTd>@context.Quantity</MudTd>
+                            <MudTd>@context.UnitCost.ToString("N2")</MudTd>
+                            <MudTd>@context.EstimatedBudget.ToString("N2")</MudTd>
+                            <MudTd>
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Edit" Color="Color.Warning"
+                                    Disabled="@(!_canUpdateItems)" OnClick="@(() => OnEditItem(context))" />
+                                <MudIconButton Size="Size.Small" Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                    Disabled="@(!_canDeleteItems)" OnClick="@(() => OnDeleteItem(context))" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                }
+                else
+                {
+                    <MudAlert Severity="Severity.Info" Dense="true">
+                        No items yet. Click "Add Item" to add line items to this APP.
+                    </MudAlert>
+                }
+            </MudStack>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton DropShadow="false" StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel">
+            @(ReadOnly ? "Close" : "Cancel")
+        </MudButton>
+        @if (IsCreate)
+        {
+            <MudButton DropShadow="false" StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary"
+                Variant="Variant.Filled" Disabled="@(!CanCreate())" OnClick="Create">
+                Create
+            </MudButton>
+        }
+        else if (!ReadOnly)
+        {
+            <MudButton DropShadow="false" StartIcon="@Icons.Material.Filled.Save" Color="Color.Primary"
+                Variant="Variant.Filled" OnClick="Update" Disabled="@(!_canUpdatePlan)">
+                Save Changes
+            </MudButton>
+        }
+    </DialogActions>
+</MudDialog>

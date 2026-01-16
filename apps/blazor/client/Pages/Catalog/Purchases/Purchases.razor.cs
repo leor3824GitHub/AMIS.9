@@ -1,7 +1,6 @@
 using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -10,6 +9,7 @@ using AMIS.Blazor.Infrastructure.Auth;
 using MapsterMapper;
 using Mapster;
 using System.Linq;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
 
@@ -100,12 +100,13 @@ public partial class Purchases
         return new GridData<PurchaseResponse> { TotalItems = _totalItems, Items = _entityList ?? Enumerable.Empty<PurchaseResponse>() };
     }
 
-    private async Task ShowEditFormDialog(string title, CreatePurchaseCommand command, bool IsCreate)
+    private async Task ShowEditFormDialog(string title, CreatePurchaseCommand command, bool IsCreate, Guid? purchaseId = null)
     {
         var parameters = new DialogParameters
         {
             { nameof(PurchaseDialog.Model), command },
             { nameof(PurchaseDialog.IsCreate), IsCreate },
+            { nameof(PurchaseDialog.PurchaseId), purchaseId },
             { nameof(PurchaseDialog.Refresh), EventCallback.Factory.Create(this, OnRefresh) }
 
         };
@@ -131,7 +132,7 @@ public partial class Purchases
     {
         var model = CreateDefaultPurchaseCommand();
 
-        await ShowEditFormDialog("Create new purchase", model, true);
+        await ShowEditFormDialog("Create new purchase", model, true, null);
     }
 
     private static CreatePurchaseCommand CreateDefaultPurchaseCommand()
@@ -140,7 +141,11 @@ public partial class Purchases
         {
             PurchaseDate = DateTime.Today,
             SupplierId = null,
+<<<<<<< HEAD
             Status = PurchaseStatus.Submitted,
+=======
+            Status = PurchaseStatus.Draft,
+>>>>>>> origin/jan1626
             Items = new List<PurchaseItemDto>()
         };
     }
@@ -151,14 +156,13 @@ public partial class Purchases
         if (copy != null)
         {
             var command = new Mapper().Map<PurchaseResponse, CreatePurchaseCommand>(copy);
-            command.Id = Guid.NewGuid(); // Assign a new Id for the cloned item
-            await ShowEditFormDialog("Clone a purchase", command, true);
+            await ShowEditFormDialog("Clone a purchase", command, true, null);
         }
     }
     private async Task OnEdit(PurchaseResponse dto)
     {
         var command = dto.Adapt<CreatePurchaseCommand>();
-        await ShowEditFormDialog("Edit the purchase", command, false);
+        await ShowEditFormDialog("Edit the purchase", command, false, dto.Id);
     }
 
     private async Task OnDelete(PurchaseResponse dto)
@@ -255,7 +259,11 @@ public partial class Purchases
         => status switch
         {
             PurchaseStatus.Draft => Icons.Material.Filled.Edit,
+<<<<<<< HEAD
             PurchaseStatus.Submitted => Icons.Material.Filled.HourglassEmpty,
+=======
+            PurchaseStatus.Submitted => Icons.Material.Filled.Send,
+>>>>>>> origin/jan1626
             PurchaseStatus.PartiallyDelivered => Icons.Material.Filled.LocalShipping,
             PurchaseStatus.Delivered => Icons.Material.Filled.Inventory,
             PurchaseStatus.Closed => Icons.Material.Filled.CheckCircle,

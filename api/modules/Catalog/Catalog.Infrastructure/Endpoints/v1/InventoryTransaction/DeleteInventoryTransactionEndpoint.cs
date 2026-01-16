@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
 
-namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1;
+namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.InventoryTransaction;
 public static class DeleteInventoryTransactionEndpoint
 {
     internal static RouteHandlerBuilder MapInventoryTransactionDeleteEndpoint(this IEndpointRouteBuilder endpoints)

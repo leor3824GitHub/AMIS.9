@@ -9,7 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1
+namespace AMIS.WebApi.Catalog.Infrastructure.Endpoints.v1.Product
 {
     public static class DeleteProductsEndpoint
     {

@@ -7,6 +7,7 @@ public class PurchaseRequestItem : AuditableEntity
 {
     public Guid PurchaseRequestId { get; private set; }
     public Guid? ProductId { get; private set; }
+    public string? ManualProductName { get; private set; }
     public int Qty { get; private set; }
     public string Unit { get; private set; } = "Piece";
     public string? Description { get; private set; }
@@ -17,16 +18,22 @@ public class PurchaseRequestItem : AuditableEntity
 
     private PurchaseRequestItem() { }
 
-    private PurchaseRequestItem(Guid id, Guid purchaseRequestId, Guid? productId, int qty, string unit, string? description)
+    private PurchaseRequestItem(Guid id, Guid purchaseRequestId, Guid? productId, string? manualProductName, int qty, string unit, string? description)
     {
         if (qty <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(qty));
         if (string.IsNullOrWhiteSpace(unit))
             throw new ArgumentException("Unit cannot be null or empty.", nameof(unit));
 
+        var hasProductId = productId is not null;
+        var hasManualName = !string.IsNullOrWhiteSpace(manualProductName);
+        if (hasProductId == hasManualName)
+            throw new ArgumentException("Exactly one of ProductId or ManualProductName must be provided.");
+
         Id = id;
         PurchaseRequestId = purchaseRequestId;
         ProductId = productId;
+        ManualProductName = string.IsNullOrWhiteSpace(manualProductName) ? null : manualProductName.Trim();
         Qty = qty;
         Unit = unit;
         Description = description;
@@ -34,14 +41,14 @@ public class PurchaseRequestItem : AuditableEntity
         QueueDomainEvent(new PurchaseRequestItemCreated { PurchaseRequestItem = this });
     }
 
-    public static PurchaseRequestItem Create(Guid purchaseRequestId, Guid? productId, int qty, string unit, string? description)
+    public static PurchaseRequestItem Create(Guid purchaseRequestId, Guid? productId, string? manualProductName, int qty, string unit, string? description)
     {
-        return new PurchaseRequestItem(Guid.NewGuid(), purchaseRequestId, productId, qty, unit, description);
+        return new PurchaseRequestItem(Guid.NewGuid(), purchaseRequestId, productId, manualProductName, qty, unit, description);
     }
 
-    public static PurchaseRequestItem Create(Guid itemId, Guid purchaseRequestId, Guid? productId, int qty, string unit, string? description)
+    public static PurchaseRequestItem Create(Guid itemId, Guid purchaseRequestId, Guid? productId, string? manualProductName, int qty, string unit, string? description)
     {
-        return new PurchaseRequestItem(itemId, purchaseRequestId, productId, qty, unit, description);
+        return new PurchaseRequestItem(itemId, purchaseRequestId, productId, manualProductName, qty, unit, description);
     }
 
     internal void SetPurchaseRequestId(Guid purchaseRequestId)
@@ -53,18 +60,31 @@ public class PurchaseRequestItem : AuditableEntity
         PurchaseRequestId = purchaseRequestId;
     }
 
-    public PurchaseRequestItem Update(Guid? productId, int qty, string unit, string? description)
+    public PurchaseRequestItem Update(Guid? productId, string? manualProductName, int qty, string unit, string? description)
     {
         if (qty <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(qty));
         if (string.IsNullOrWhiteSpace(unit))
             throw new ArgumentException("Unit cannot be null or empty.", nameof(unit));
 
+        var hasProductId = productId is not null;
+        var hasManualName = !string.IsNullOrWhiteSpace(manualProductName);
+        if (hasProductId == hasManualName)
+            throw new ArgumentException("Exactly one of ProductId or ManualProductName must be provided.");
+
         bool isUpdated = false;
+
+        var normalizedManualName = string.IsNullOrWhiteSpace(manualProductName) ? null : manualProductName.Trim();
 
         if (ProductId != productId)
         {
             ProductId = productId;
+            isUpdated = true;
+        }
+
+        if (ManualProductName != normalizedManualName)
+        {
+            ManualProductName = normalizedManualName;
             isUpdated = true;
         }
 

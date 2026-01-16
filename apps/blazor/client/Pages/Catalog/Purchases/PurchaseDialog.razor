@@ -5,27 +5,29 @@
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <!-- Workflow Progress Indicator -->
-            @if (!IsCreate.GetValueOrDefault())
-            {
-                <PurchaseWorkflowStepper Status="@Model.Status" ReferenceNumber="@Model.ReferenceNumber" />
-            }
+            <!-- Header: reference, status chip, contextual text -->
+            <MudPaper Class="pa-3" Elevation="1" Square="true">
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Wrap="Wrap.Wrap">
+                    <MudText Typo="Typo.h6">@(IsCreate.GetValueOrDefault() ? "Create Purchase Order" : "Edit Purchase Order")</MudText>
+                    <MudChip T="string" Icon="@GetWorkflowStepIcon()" Color="@GetWorkflowStepColor()" Variant="Variant.Filled" Size="Size.Small">
+                        @GetWorkflowStepText()
+                    </MudChip>
+                    <MudSpacer />
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">PO ID</MudText>
+                    <MudText Typo="Typo.body2" Style="font-family: monospace;">@(PurchaseId?.ToString() ?? "-")</MudText>
+                </MudStack>
+            </MudPaper>
 
             <!-- Purchase Information Section -->
             <MudPaper Class="pa-4 mt-3" Elevation="2" Square="true">
-                <MudText Typo="Typo.h6" Class="mb-3">Purchase Order Details</MudText>
+                <MudText Typo="Typo.subtitle1" Class="mb-3">Purchase Order Details</MudText>
                 <MudGrid>
-                    <!-- Header Row: PO Number, Date, Status -->
-                    <MudItem xs="12" sm="4" md="3">
-                        <MudTextField @bind-Value="Model.ReferenceNumber" Variant="Variant.Outlined" Label="PO Number"
-                            ReadOnly="true" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Receipt"
-                            HelperText="Auto-generated" />
-                    </MudItem>
-                    <MudItem xs="12" sm="4" md="3">
+                    <!-- Header Row: Date, Status, Total -->
+                    <MudItem xs="12" sm="6" md="4">
                         <MudDatePicker @bind-Date="Model.PurchaseDate" Variant="Variant.Outlined" Label="Date"
                             For="@(() => Model.PurchaseDate)" />
                     </MudItem>
-                    <MudItem xs="12" sm="4" md="3">
+                    <MudItem xs="12" sm="6" md="4">
                         <MudSelect T="PurchaseStatus" Variant="Variant.Outlined" Label="Status"
                             @bind-Value="Model.Status" ReadOnly="true">
                             @foreach (var status in PurchaseStatusList)
@@ -34,15 +36,16 @@
                             }
                         </MudSelect>
                     </MudItem>
-                    <MudItem xs="12" sm="12" md="3">
-                        <MudTextField @bind-Value="Model.TotalAmount" Variant="Variant.Outlined" Label="Total Amount"
-                            For="@(() => Model.TotalAmount)" Format="N2" ReadOnly="true" />
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudTextField Value="@_totalAmount" Variant="Variant.Outlined" Label="Total Amount"
+                            Format="N2" ReadOnly="true" />
                     </MudItem>
 
-                    <!-- Supplier, Delivery Address, and Remarks in horizontal layout -->
-                    <MudItem xs="12" sm="4" md="4">
+                    <!-- Supplier, Delivery Address -->
+                    <MudItem xs="12" sm="6" md="6">
                         <MudSelect T="Guid ?" Variant="Variant.Outlined" Label="Supplier" @bind-Value="Model.SupplierId"
-                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Business">
+                            Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Business" Required="true"
+                            HelperText="Select the vendor for this PO">
                             @foreach (var suppliers in _suppliers)
                             {
                                 <MudSelectItem T="Guid ?" Value="suppliers.Id">@suppliers.Name</MudSelectItem>
@@ -50,16 +53,11 @@
                         </MudSelect>
                     </MudItem>
 
-                    <MudItem xs="12" sm="4" md="4">
+                    <MudItem xs="12" sm="6" md="6">
                         <MudTextField @bind-Value="Model.DeliveryAddress" Variant="Variant.Outlined"
                             Label="Delivery Address" Adornment="Adornment.Start"
                             AdornmentIcon="@Icons.Material.Filled.LocationOn" Placeholder="Enter delivery location"
-                            Lines="1" />
-                    </MudItem>
-
-                    <MudItem xs="12" sm="4" md="4">
-                        <MudTextField @bind-Value="Model.Remarks" Variant="Variant.Outlined" Label="Remarks"
-                            Placeholder="Add any notes or comments..." Lines="1" />
+                            Lines="1" HelperText="Ship-to location" />
                     </MudItem>
 
                     <!-- Supplier Info Block - Compact Layout -->
@@ -70,28 +68,28 @@
                         @if (selectedSupplier != null)
                         {
                             <MudPaper Class="pa-2" Elevation="0" Square="true">
-                                <MudStack Row="true" Spacing="3" AlignItems="AlignItems.Start">
-                                    <MudStack Spacing="0" Style="min-width: 120px;">
+                                <MudStack Row="true" Spacing="3" AlignItems="AlignItems.Start" Wrap="Wrap.Wrap">
+                                    <MudStack Spacing="0" Style="min-width: 140px;">
                                         <MudText Typo="Typo.caption" Color="Color.Secondary">Address</MudText>
                                         <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier.Address) ?
                                                                                     selectedSupplier.Address : "-")</MudText>
                                     </MudStack>
-                                    <MudStack Spacing="0" Style="min-width: 100px;">
+                                    <MudStack Spacing="0" Style="min-width: 120px;">
                                         <MudText Typo="Typo.caption" Color="Color.Secondary">Contact</MudText>
                                         <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier.ContactNo)
                                                                                     ? selectedSupplier.ContactNo : "-")</MudText>
                                     </MudStack>
-                                    <MudStack Spacing="0" Style="min-width: 120px;">
+                                    <MudStack Spacing="0" Style="min-width: 140px;">
                                         <MudText Typo="Typo.caption" Color="Color.Secondary">Email</MudText>
                                         <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier.Emailadd) ?
                                                                                     selectedSupplier.Emailadd : "-")</MudText>
                                     </MudStack>
-                                    <MudStack Spacing="0" Style="min-width: 80px;">
+                                    <MudStack Spacing="0" Style="min-width: 100px;">
                                         <MudText Typo="Typo.caption" Color="Color.Secondary">TIN</MudText>
                                         <MudText Typo="Typo.body2">@(!string.IsNullOrWhiteSpace(selectedSupplier.Tin) ?
                                                                                     selectedSupplier.Tin : "-")</MudText>
                                     </MudStack>
-                                    <MudStack Spacing="0" Style="min-width: 100px;">
+                                    <MudStack Spacing="0" Style="min-width: 120px;">
                                         <MudText Typo="Typo.caption" Color="Color.Secondary">Tax Class</MudText>
                                         <MudText Typo="Typo.body2">
                                             @(!string.IsNullOrWhiteSpace(selectedSupplier.TaxClassification) ?
@@ -105,14 +103,18 @@
             </MudPaper>
             <br />
 
-            <!-- Workflow Action Buttons -->
+            <!-- Workflow Action Buttons for saved POs -->
             @if (!IsCreate.GetValueOrDefault())
             {
                 <MudPaper Class="pa-3 mb-3" Elevation="1" Square="true">
                     <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center" Wrap="Wrap.Wrap">
-                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Workflow Actions:</MudText>
+                        <MudText Typo="Typo.subtitle2" Color="Color.Secondary">Workflow</MudText>
 
+<<<<<<< HEAD
                         @if (Model.Status == PurchaseStatus.Draft || Model.Status == PurchaseStatus.Submitted)
+=======
+                        @if (Model.Status == PurchaseStatus.Draft)
+>>>>>>> origin/jan1626
                         {
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Send"
                                 OnClick="SubmitPurchase">
@@ -152,9 +154,9 @@
                 </MudPaper>
             }
 
-            <!-- ✅ Include PurchaseItemList inside the same DialogContent -->
+            <!-- Items -->
             <PurchaseItemList Items="@Model.Items" Products="_products" Suppliers="_suppliers" Status="@Model.Status"
-                PurchaseId="@Model.Id" OnTotalAmountChanged="UpdateTotalAmount" IsCreate="@IsCreate" />
+                PurchaseId="@PurchaseId" OnTotalAmountChanged="UpdateTotalAmount" IsCreate="@IsCreate" />
 
         </DialogContent>
 

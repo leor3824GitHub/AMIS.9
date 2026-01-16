@@ -11,6 +11,7 @@ public class Acceptance : AuditableEntity, IAggregateRoot
     public Guid PurchaseId { get; private set; }
     public Guid SupplyOfficerId { get; private set; } // Accountable Employee ID
     public Guid? InspectionId { get; private set; }
+    public Guid? GoodsReceiptId { get; private set; }
     public DateTime AcceptanceDate { get; private set; }
     public string? Remarks { get; private set; }
     public bool IsPosted { get; private set; }
@@ -20,6 +21,7 @@ public class Acceptance : AuditableEntity, IAggregateRoot
     public virtual Purchase Purchase { get; private set; } = default!;
     public virtual Employee SupplyOfficer { get; private set; } = default!;
     public virtual Inspection? Inspection { get; private set; }
+    public virtual GoodsReceipt? GoodsReceipt { get; private set; }
     public virtual ICollection<AcceptanceItem> Items { get; private set; } = [];
 
     // Computed properties
@@ -30,12 +32,13 @@ public class Acceptance : AuditableEntity, IAggregateRoot
 
     private Acceptance() { }
 
-    private Acceptance(Guid id, Guid purchaseId, Guid supplyOfficerId, Guid? inspectionId, DateTime acceptanceDate, string? remarks)
+    private Acceptance(Guid id, Guid purchaseId, Guid supplyOfficerId, Guid? inspectionId, Guid? goodsReceiptId, DateTime acceptanceDate, string? remarks)
     {
         Id = id;
         PurchaseId = purchaseId;
         SupplyOfficerId = supplyOfficerId;
         InspectionId = inspectionId;
+        GoodsReceiptId = goodsReceiptId;
         AcceptanceDate = acceptanceDate;
         Remarks = remarks;
         Status = AcceptanceStatus.Pending;
@@ -44,7 +47,7 @@ public class Acceptance : AuditableEntity, IAggregateRoot
         QueueDomainEvent(new AcceptanceCreated { Acceptance = this });
     }
 
-    public static Acceptance Create(Guid purchaseId, Guid supplyOfficerId, DateTime acceptanceDate, string? remarks, Guid? inspectionId = null)
+    public static Acceptance Create(Guid purchaseId, Guid supplyOfficerId, DateTime acceptanceDate, string? remarks, Guid? inspectionId = null, Guid? goodsReceiptId = null)
     {
         if (purchaseId == Guid.Empty)
             throw new ArgumentException("PurchaseId must be provided.", nameof(purchaseId));
@@ -58,7 +61,7 @@ public class Acceptance : AuditableEntity, IAggregateRoot
         if (acceptanceDate > DateTime.UtcNow)
             throw new ArgumentException("AcceptanceDate cannot be in the future.", nameof(acceptanceDate));
 
-        return new Acceptance(Guid.NewGuid(), purchaseId, supplyOfficerId, inspectionId, acceptanceDate, remarks);
+        return new Acceptance(Guid.NewGuid(), purchaseId, supplyOfficerId, inspectionId, goodsReceiptId, acceptanceDate, remarks);
     }
 
     public Acceptance Update(Guid supplyOfficerId, DateTime acceptanceDate, string? remarks)
@@ -108,6 +111,36 @@ public class Acceptance : AuditableEntity, IAggregateRoot
         }
 
         return this;
+    }
+
+    public void LinkInspection(Guid inspectionId)
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot link inspection to a posted acceptance.");
+
+        if (inspectionId == Guid.Empty)
+            throw new ArgumentException("InspectionId must be provided.", nameof(inspectionId));
+
+        if (InspectionId.HasValue && InspectionId != inspectionId)
+            throw new InvalidOperationException("Acceptance is already linked to a different inspection.");
+
+        InspectionId = inspectionId;
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
+    }
+
+    public void LinkGoodsReceipt(Guid goodsReceiptId)
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot link goods receipt to a posted acceptance.");
+
+        if (goodsReceiptId == Guid.Empty)
+            throw new ArgumentException("GoodsReceiptId must be provided.", nameof(goodsReceiptId));
+
+        if (GoodsReceiptId.HasValue && GoodsReceiptId != goodsReceiptId)
+            throw new InvalidOperationException("Acceptance is already linked to a different goods receipt.");
+
+        GoodsReceiptId = goodsReceiptId;
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
     }
 
     public void AddItem(Guid purchaseItemId, int qtyAccepted, string? remarks)
@@ -181,25 +214,6 @@ public class Acceptance : AuditableEntity, IAggregateRoot
         }
     }
 
-    public void LinkInspection(Guid inspectionId)
-    {
-        if (inspectionId == Guid.Empty)
-        {
-            throw new ArgumentException("InspectionId must be provided.", nameof(inspectionId));
-        }
-
-        if (InspectionId.HasValue && InspectionId.Value != inspectionId)
-        {
-            throw new InvalidOperationException("Acceptance is already linked to a different inspection.");
-        }
-
-        if (IsPosted)
-        {
-            throw new InvalidOperationException("Cannot link inspection to a posted acceptance.");
-        }
-
-        InspectionId = inspectionId;
-    }
 
     public void PostAcceptance(DateTime? postedOnUtc = null)
     {
@@ -211,6 +225,11 @@ public class Acceptance : AuditableEntity, IAggregateRoot
         if (!HasItems)
         {
             throw new InvalidOperationException("Cannot post an acceptance without any items.");
+        }
+
+        if (Inspection is not null)
+        {
+            ValidateAgainstInspection(Inspection);
         }
 
         if (Status == AcceptanceStatus.Cancelled)
@@ -272,5 +291,84 @@ public class Acceptance : AuditableEntity, IAggregateRoot
                 throw new InvalidOperationException($"Cannot accept more quantity ({acceptanceItem.QtyAccepted}) than passed inspection ({inspectionItem.QtyPassed}) for purchase item {acceptanceItem.PurchaseItemId}.");
             }
         }
+    }
+
+    /// <summary>
+    /// Marks acceptance as inspected after inspection is completed.
+    /// </summary>
+    public void MarkAsInspected()
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot modify a posted acceptance.");
+
+        if (Status == AcceptanceStatus.Cancelled)
+            throw new InvalidOperationException("Cannot modify a cancelled acceptance.");
+
+        if (!HasItems)
+            throw new InvalidOperationException("Cannot mark as inspected without any items.");
+
+        Status = AcceptanceStatus.Inspected;
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
+    }
+
+    /// <summary>
+    /// Marks acceptance as fully accepted.
+    /// </summary>
+    public void MarkAsAccepted()
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot modify a posted acceptance.");
+
+        if (Status == AcceptanceStatus.Cancelled)
+            throw new InvalidOperationException("Cannot modify a cancelled acceptance.");
+
+        if (!HasItems)
+            throw new InvalidOperationException("Cannot accept without any items.");
+
+        if (!IsFullAcceptance)
+            throw new InvalidOperationException("Not all items have been accepted. Use MarkAsPartiallyAccepted instead.");
+
+        Status = AcceptanceStatus.Accepted;
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
+    }
+
+    /// <summary>
+    /// Marks acceptance as partially accepted.
+    /// </summary>
+    public void MarkAsPartiallyAccepted()
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot modify a posted acceptance.");
+
+        if (Status == AcceptanceStatus.Cancelled)
+            throw new InvalidOperationException("Cannot modify a cancelled acceptance.");
+
+        if (!HasItems)
+            throw new InvalidOperationException("Cannot accept without any items.");
+
+        if (IsFullAcceptance)
+            throw new InvalidOperationException("All items accepted. Use MarkAsAccepted instead.");
+
+        if (!IsPartialAcceptance)
+            throw new InvalidOperationException("Items are not partially accepted.");
+
+        Status = AcceptanceStatus.PartiallyAccepted;
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
+    }
+
+    /// <summary>
+    /// Marks acceptance as rejected.
+    /// </summary>
+    public void MarkAsRejected(string reason = "Items rejected")
+    {
+        if (IsPosted)
+            throw new InvalidOperationException("Cannot modify a posted acceptance.");
+
+        if (Status == AcceptanceStatus.Cancelled)
+            throw new InvalidOperationException("Cannot modify a cancelled acceptance.");
+
+        Status = AcceptanceStatus.Rejected;
+        Remarks = string.IsNullOrWhiteSpace(Remarks) ? reason : $"{Remarks}\nRejection: {reason}";
+        QueueDomainEvent(new AcceptanceUpdated { Acceptance = this });
     }
 }

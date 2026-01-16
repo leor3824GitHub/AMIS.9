@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
 
 namespace AMIS.WebApi.Catalog.Domain.ValueObjects;
 
@@ -15,6 +16,5 @@ public enum PurchaseStatus
     Delivered,      //All items in the purchase order have been successfully delivered.
     Closed,         //The purchase order is fully completed, and the transaction is finished. This status usually follows delivery and invoicing.
     Cancelled,      //The purchase order has been voided before completion. This could happen due to changes in needs or issues with the supplier.
-    Pending         //The purchase order is waiting for further action, such as approval or payment.
 }
 

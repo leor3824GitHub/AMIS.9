@@ -1,6 +1,7 @@
 using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
 using AMIS.WebApi.Catalog.Domain.Events;
+using AMIS.WebApi.Catalog.Domain.Services;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Catalog.Domain;
@@ -9,6 +10,7 @@ namespace AMIS.WebApi.Catalog.Domain;
 /// Unified Physical Asset entity that handles both Semi-Expendable and PPE
 /// Classification is dynamic based on configurable thresholds from AssetClassificationRule
 /// Supports automatic reclassification when COA/DBM changes thresholds
+/// Refactored to use domain services for validation and database-driven configuration
 /// </summary>
 public class PhysicalAsset : AuditableEntity, IAggregateRoot
 {
@@ -25,11 +27,11 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     public string? SerialNumber { get; private set; }
     public string? ModelNumber { get; private set; }
     public string? Location { get; private set; }
-    public string Condition { get; private set; } = "Good";
+    public string Condition { get; private set; } = AssetCondition.Good.Value;
 
     // Quantity (for Semi-Expendable batch tracking)
     public int Quantity { get; private set; } = 1;
-    public string UnitOfMeasure { get; private set; } = "piece";
+    public string UnitOfMeasure { get; private set; } = default!; // Set from UnitOfMeasure configuration
 
     // Lifecycle
     public int EstimatedUsefulLife { get; private set; } // in months
@@ -47,13 +49,20 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     // Dynamic RCA Account (calculated based on current classification)
     public string RCAAccountCode => GetRCAAccountCode();
 
+    // QR Code & Identification Support
+    public string? QRCodeData { get; private set; } // Base64 encoded QR code image or raw QR data
+    public string? PropertyNumber { get; private set; } // Auto-generated property identification number
+    public DateTime? QRGeneratedDate { get; private set; } // When QR was generated
+    public Guid? CurrentCustodianId { get; private set; } // Currently assigned custodian
+
     // Computed properties for convenience
     public bool IsDisposed => DisposalDate.HasValue;
     public bool IsDepreciable => CurrentClassification == PropertyClassification.PropertyPlantEquipment;
-    public AssetAssignmentHistory? CurrentAssignment => 
+    public AssetAssignmentHistory? CurrentAssignment =>
         AssignmentHistory.FirstOrDefault(h => h.Status == "Active");
     public AssetReclassificationHistory? LastReclassification =>
         ReclassificationHistory.OrderByDescending(h => h.EffectiveDate).FirstOrDefault();
+    public bool HasQRCode => !string.IsNullOrEmpty(QRCodeData);
 
     // Navigation
     public virtual Product Product { get; private set; } = default!;
@@ -135,6 +144,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
     /// <summary>
     /// Get RCA account code based on current classification
+    /// Note: For PPE, the account code should be retrieved from PPETypeDefinition using IPPETypeService
+    /// This method provides a basic fallback when service is not available
     /// </summary>
     private string GetRCAAccountCode()
     {
@@ -142,22 +153,21 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         {
             PropertyClassification.Consumable => ValueObjects.RCAAccountCode.SuppliesAndMaterialsInventory,
             PropertyClassification.SemiExpendable => ValueObjects.RCAAccountCode.SemiExpendablePropertyInventory,
-            PropertyClassification.PropertyPlantEquipment => GetPPEAccountCode(),
+            PropertyClassification.PropertyPlantEquipment => GetPPEAccountCodeFallback(),
             _ => throw new InvalidOperationException("Unknown classification")
         };
     }
 
     /// <summary>
-    /// Get PPE account code - should use IPPEAccountCodeMapper service for configurable mapping
-    /// This fallback implementation is used when service is not available
+    /// Fallback PPE account code logic when domain service is not available
+    /// In production, use IPPETypeService.GetRCAAccountCodeAsync() for database-driven mapping
     /// </summary>
-    private string GetPPEAccountCode()
+    private string GetPPEAccountCodeFallback()
     {
-        // TODO: Inject IPPEAccountCodeMapper service via domain service pattern
-        // For now, using basic fallback logic
         if (string.IsNullOrWhiteSpace(PPEType))
             return ValueObjects.RCAAccountCode.OtherPropertyPlantAndEquipment;
 
+        // Basic fallback - in practice, query PPETypeDefinition table
         return PPEType.ToUpperInvariant() switch
         {
             "MACHINERY" or "EQUIPMENT" => ValueObjects.RCAAccountCode.MachineryAndEquipment,
@@ -285,8 +295,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     {
         if (string.IsNullOrWhiteSpace(reason))
             throw new ArgumentException("Return reason is required.", nameof(reason));
-        if (!IsValidCondition(condition))
-            throw new ArgumentException("Invalid condition. Must be Good, Fair, or Poor.", nameof(condition));
+        if (!AssetCondition.TryParse(condition, out var validCondition))
+            throw new ArgumentException($"Invalid condition '{condition}'. Valid values are: {string.Join(", ", AssetCondition.GetAllValues())}", nameof(condition));
         if (acceptedBy == Guid.Empty)
             throw new ArgumentException("Accepted by is required.", nameof(acceptedBy));
 
@@ -309,8 +319,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         // Mark assignment as returned
         currentAssignment.MarkAsReturned(returnDate, reason, condition, acceptedBy);
 
-        // Update condition
-        Condition = condition;
+        // Update condition using validated value
+        Condition = validCondition!.Value;
 
         QueueDomainEvent(new PhysicalAssetReturned
         {
@@ -351,26 +361,76 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     {
         if (string.IsNullOrWhiteSpace(condition))
             throw new ArgumentException("Condition is required.", nameof(condition));
-        if (!IsValidCondition(condition))
-            throw new ArgumentException("Invalid condition. Must be Good, Fair, or Poor.", nameof(condition));
+        if (!AssetCondition.TryParse(condition, out var validCondition))
+            throw new ArgumentException($"Invalid condition '{condition}'. Valid values are: {string.Join(", ", AssetCondition.GetAllValues())}", nameof(condition));
         if (IsDisposed)
             throw new InvalidOperationException("Cannot update condition of disposed asset.");
 
-        Condition = condition;
+        Condition = validCondition!.Value;
 
         QueueDomainEvent(new PhysicalAssetConditionUpdated
         {
             PhysicalAsset = this,
-            Condition = condition,
+            Condition = Condition,
             Remarks = remarks
         });
     }
 
-    private static bool IsValidCondition(string condition)
+    /// <summary>
+    /// Generates and stores a QR code for the asset.
+    /// QR code data should contain property code and asset identification.
+    /// </summary>
+    public void GenerateQRCode(string qrCodeData, string? propertyNumber = null)
     {
-        return condition.Equals("Good", StringComparison.OrdinalIgnoreCase) ||
-               condition.Equals("Fair", StringComparison.OrdinalIgnoreCase) ||
-               condition.Equals("Poor", StringComparison.OrdinalIgnoreCase);
+        if (string.IsNullOrWhiteSpace(qrCodeData))
+            throw new ArgumentException("QR code data cannot be empty.", nameof(qrCodeData));
+
+        if (IsDisposed)
+            throw new InvalidOperationException("Cannot generate QR code for disposed asset.");
+
+        QRCodeData = qrCodeData;
+        PropertyNumber = propertyNumber ?? GeneratePropertyNumber();
+        QRGeneratedDate = DateTime.UtcNow;
+
+        QueueDomainEvent(new PhysicalAssetQRCodeGenerated
+        {
+            PhysicalAsset = this,
+            PropertyNumber = PropertyNumber,
+            GeneratedDate = QRGeneratedDate.Value
+        });
+    }
+
+    /// <summary>
+    /// Assigns the asset to a custodian/employee.
+    /// </summary>
+    public void AssignToCustodian(Guid employeeId)
+    {
+        if (employeeId == Guid.Empty)
+            throw new ArgumentException("Employee ID must be provided.", nameof(employeeId));
+
+        if (IsDisposed)
+            throw new InvalidOperationException("Cannot assign disposed asset.");
+
+        CurrentCustodianId = employeeId;
+
+        QueueDomainEvent(new PhysicalAssetAssignedToCustodian
+        {
+            PhysicalAsset = this,
+            CustodianId = employeeId,
+            AssignmentDate = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
+    /// Generates a property number if not already set.
+    /// Format: PPE-{Year}{Month}-{SequenceNumber} or SEMI-{Year}{Month}-{SequenceNumber}
+    /// </summary>
+    private string GeneratePropertyNumber()
+    {
+        var prefix = CurrentClassification == PropertyClassification.PropertyPlantEquipment ? "PPE" : "SEMI";
+        var now = DateTime.UtcNow;
+        var timestamp = now.Ticks % 10000;
+        return $"{prefix}-{now:yyyyMM}-{timestamp:D5}";
     }
 
     private static void ValidateCreate(

@@ -1,4 +1,4 @@
-﻿namespace AMIS.Shared.Authorization;
+﻿namespace Shared.Authorization;
 public static class IdentityConstants
 {
     public const int PasswordLength = 6;

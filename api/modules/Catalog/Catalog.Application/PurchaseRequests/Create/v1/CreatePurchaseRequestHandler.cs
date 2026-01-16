@@ -21,7 +21,7 @@ public sealed class CreatePurchaseRequestHandler(
         {
             foreach (var item in request.Items)
             {
-                pr.AddItem(item.ProductId, item.Qty, item.Unit, item.Description);
+                pr.AddItem(item.ProductId, item.ManualProductName, item.Qty, item.Unit, item.Description);
             }
         }
 

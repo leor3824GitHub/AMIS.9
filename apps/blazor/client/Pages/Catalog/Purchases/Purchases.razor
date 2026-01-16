@@ -160,7 +160,11 @@
                              Class="text-uppercase">
                         @context.Item.Status
                     </MudChip>
+<<<<<<< HEAD
                     @if (context.Item.Status == PurchaseStatus.Draft || context.Item.Status == PurchaseStatus.Submitted)
+=======
+                    @if (context.Item.Status == PurchaseStatus.Draft)
+>>>>>>> origin/jan1626
                     {
                         <MudText Typo="Typo.caption" Color="Color.Secondary">Step 1: PO Creation</MudText>
                     }

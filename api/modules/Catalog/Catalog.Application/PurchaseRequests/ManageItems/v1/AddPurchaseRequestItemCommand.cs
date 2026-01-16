@@ -5,6 +5,7 @@ namespace AMIS.WebApi.Catalog.Application.PurchaseRequests.ManageItems.v1;
 public sealed record AddPurchaseRequestItemCommand(
     Guid PurchaseRequestId,
     Guid? ProductId,
+    string? ManualProductName,
     int Qty,
     string Unit,
     string? Description

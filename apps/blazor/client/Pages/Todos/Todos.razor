@@ -4,22 +4,22 @@
 
 <EntityTable @ref="_table" TEntity="GetTodoResponse" TId="Guid" TRequest="TodoViewModel" Context="@Context">
     <EditFormContent>
-        @if (!Context.AddEditModal.IsCreate)
+        @if (!context.IsCreate)
         {
             <MudItem xs="12" md="6">
-                <MudTextField Value="context.Id" Underline=false ReadOnly Label="Product Id" />
+                <MudTextField Value="@context.RequestModel.Id" Underline=false ReadOnly Label="Product Id" />
             </MudItem>
         }
         <MudItem xs="12" md="6">
-            <MudTextField Label="Name" For="@(() => context.Title)" @bind-Value="context.Title" />
+            <MudTextField Label="Name" For="@(() => context.RequestModel.Title)" @bind-Value="context.RequestModel.Title" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField Label="Note" For="@(() => context.Note)" @bind-Value="context.Note" />
+            <MudTextField Label="Note" For="@(() => context.RequestModel.Note)" @bind-Value="context.RequestModel.Note" />
         </MudItem>
         <MudItem xs="12" md="12">
             <MudItem>
                 <div>
-                    @if(!Context.AddEditModal.IsCreate)
+                    @if(!context.IsCreate)
                     {
                         <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Info" Size="Size.Small" Target="_blank"
                             StartIcon="@Icons.Material.Filled.RemoveRedEye" Style="margin-left: 5px;" >

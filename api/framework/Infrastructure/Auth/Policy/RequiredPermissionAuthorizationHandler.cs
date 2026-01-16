@@ -1,7 +1,7 @@
 ﻿using AMIS.Framework.Core.Identity.Users.Abstractions;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Auth.Policy;
 public sealed class RequiredPermissionAuthorizationHandler(IUserService userService) : AuthorizationHandler<PermissionAuthorizationRequirement>

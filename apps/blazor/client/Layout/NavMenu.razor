@@ -25,6 +25,14 @@
         {
             <MudNavLink Href="/catalog/canvasses" Icon="@Icons.Material.Filled.Gavel" Class="fsh-nav-child">Canvasses</MudNavLink>
         }
+        @if (_canViewProcurementPlans)
+        {
+            <MudNavLink Href="/catalog/procurementplans" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">PPMP</MudNavLink>
+        }
+        @if (_canViewAnnualProcurementPlans)
+        {
+            <MudNavLink Href="/catalog/annualprocurementplans" Icon="@Icons.Material.Filled.CalendarMonth" Class="fsh-nav-child">APP</MudNavLink>
+        }
         @if (_canViewInspectionRequests)
         {
             <MudNavLink Href="/catalog/inspectionrequests" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Inspection Request</MudNavLink>

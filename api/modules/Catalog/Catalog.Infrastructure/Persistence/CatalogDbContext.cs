@@ -40,16 +40,36 @@ public sealed class CatalogDbContext : FshDbContext
     // COA-Compliant Inventory Tables (Separate per Classification)
     public DbSet<ConsumableInventory> ConsumableInventories { get; set; } = null!;
     // Removed legacy separated tables in favor of unified PhysicalAsset
-    // public DbSet<SemiExpendableInventory> SemiExpendableInventories { get; set; } = null!;
-    // public DbSet<PropertyPlantEquipment> PropertyPlantEquipments { get; set; } = null!;
-    // public DbSet<PPEAssignmentHistory> PPEAssignmentHistories { get; set; } = null!;
 
     // Unified Physical Asset with Dynamic Classification
     public DbSet<PhysicalAsset> PhysicalAssets { get; set; } = null!;
     public DbSet<AssetAssignmentHistory> AssetAssignmentHistories { get; set; } = null!;
     public DbSet<AssetReclassificationHistory> AssetReclassificationHistories { get; set; } = null!;
     public DbSet<AssetClassificationRule> AssetClassificationRules { get; set; } = null!;
+    public DbSet<RcaAccountCodeDefinition> RcaAccountCodes { get; set; } = null!;
     public DbSet<PPETypeAccountMapping> PPETypeAccountMappings { get; set; } = null!;
+
+    // Configuration Tables for Database-Driven Behavior
+    public DbSet<AssetConditionConfiguration> AssetConditionConfigurations { get; set; } = null!;
+    public DbSet<PPETypeDefinition> PPETypeDefinitions { get; set; } = null!;
+    public DbSet<UnitOfMeasure> UnitsOfMeasure { get; set; } = null!;
+
+    // Procurement Planning (PPMP)
+    public DbSet<ProcurementPlanHeader> ProcurementPlans { get; set; } = null!;
+
+    // Annual Procurement Planning (APP)
+    public DbSet<AnnualProcurementPlanHeader> AnnualProcurementPlans { get; set; } = null!;
+
+    // Procurement Projects
+    public DbSet<ProcurementProject> ProcurementProjects { get; set; } = null!;
+
+    // UI Workflow - Asset Requisition & Acceptance
+    public DbSet<AssetRequisition> AssetRequisitions { get; set; } = null!;
+
+    // UI Workflow - Depreciation & Accounting
+    public DbSet<DepreciationSchedule> DepreciationSchedules { get; set; } = null!;
+    public DbSet<JournalEntryVoucher> JournalEntryVouchers { get; set; } = null!;
+    public DbSet<JournalEntry> JournalEntries { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

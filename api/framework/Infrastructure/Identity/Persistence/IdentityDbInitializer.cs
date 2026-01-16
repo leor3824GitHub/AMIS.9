@@ -5,12 +5,12 @@ using AMIS.Framework.Infrastructure.Identity.RoleClaims;
 using AMIS.Framework.Infrastructure.Identity.Roles;
 using AMIS.Framework.Infrastructure.Identity.Users;
 using AMIS.Framework.Infrastructure.Tenant;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using IdentityConstants = AMIS.Shared.Authorization.IdentityConstants;
+using IdentityConstants = Shared.Authorization.IdentityConstants;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Persistence;
 internal sealed class IdentityDbInitializer(

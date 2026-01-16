@@ -1,4 +1,4 @@
-﻿namespace AMIS.Shared.Authorization;
+﻿namespace Shared.Authorization;
 
 public static class FshResources
 {
@@ -29,6 +29,16 @@ public static class FshResources
     public const string AcceptanceItems = nameof(AcceptanceItems);
     public const string InspectionRequests = nameof(InspectionRequests);
     public const string PPETypeMappings = nameof(PPETypeMappings);
+    public const string AssetRequisitions = nameof(AssetRequisitions);
+    public const string DepreciationSchedules = nameof(DepreciationSchedules);
+    public const string JournalEntryVouchers = nameof(JournalEntryVouchers);
     public const string Todos = nameof(Todos);
     public const string AuditTrails = nameof(AuditTrails);
+
+    // Procurement / PPMP
+    public const string ProcurementPlans = nameof(ProcurementPlans);
+    public const string ProcurementPlanItems = nameof(ProcurementPlanItems);
+    public const string AnnualProcurementPlans = nameof(AnnualProcurementPlans);
+    public const string AnnualProcurementPlanItems = nameof(AnnualProcurementPlanItems);
+    public const string ProcurementProjects = nameof(ProcurementProjects);
 }

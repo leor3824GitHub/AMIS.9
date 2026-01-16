@@ -1,7 +1,7 @@
 ﻿using AMIS.Framework.Core.Caching;
 using AMIS.Framework.Core.Exceptions;
-using AMIS.Shared.Authorization;
 using Microsoft.EntityFrameworkCore;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Identity.Users.Services;
 internal sealed partial class UserService

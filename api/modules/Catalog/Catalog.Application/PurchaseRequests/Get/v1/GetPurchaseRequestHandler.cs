@@ -31,7 +31,7 @@ public sealed class GetPurchaseRequestHandler : IRequestHandler<GetPurchaseReque
             pr.ApprovalRemarks,
             pr.ApprovedBy,
             pr.ApprovedOn,
-            pr.Items.Select(i => new PurchaseRequestItemResponse(i.Id, i.ProductId, i.Qty, i.Unit, i.Description, null)).ToList()
+            pr.Items.Select(i => new PurchaseRequestItemResponse(i.Id, i.ProductId, i.ManualProductName, i.Qty, i.Unit, i.Description, null)).ToList()
         );
         _logger.LogInformation("Fetched PurchaseRequest {PRId}", pr.Id);
         return response;

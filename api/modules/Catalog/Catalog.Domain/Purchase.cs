@@ -7,6 +7,8 @@ namespace AMIS.WebApi.Catalog.Domain;
 
 public class Purchase : AuditableEntity, IAggregateRoot
 {
+    public Guid? PurchaseRequestId { get; private set; }
+    public Guid? SelectedCanvassId { get; private set; }
     public Guid? SupplierId { get; private set; }
     public DateTime? PurchaseDate { get; private set; }
     public decimal TotalAmount { get; private set; } = 0;
@@ -15,10 +17,13 @@ public class Purchase : AuditableEntity, IAggregateRoot
     public string? Remarks { get; private set; }
     public string? DeliveryAddress { get; private set; }
     
-    public virtual Supplier? Supplier { get; private set; }
+    public virtual Supplier? Supplier { get; init; }
+    public virtual PurchaseRequest? PurchaseRequest { get; init; }
+    public virtual Canvass? SelectedCanvass { get; init; }
     public virtual ICollection<PurchaseItem> Items { get; private set; } = [];
     public virtual ICollection<Inspection> Inspections { get; private set; } = [];
     public virtual ICollection<Acceptance> Acceptances { get; private set; } = [];
+    public virtual ICollection<GoodsReceipt> GoodsReceipts { get; private set; } = [];
 
     // Computed properties - not persisted
     public bool HasItems => Items.Count > 0;
@@ -36,9 +41,11 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
     private Purchase() { }
 
-    private Purchase(Guid id, Guid? supplierId, DateTime? purchaseDate, PurchaseStatus status, string? referenceNumber, string? remarks, string? deliveryAddress)
+    private Purchase(Guid id, Guid? purchaseRequestId, Guid? selectedCanvassId, Guid? supplierId, DateTime? purchaseDate, PurchaseStatus status, string? referenceNumber, string? remarks, string? deliveryAddress)
     {
         Id = id;
+        PurchaseRequestId = purchaseRequestId;
+        SelectedCanvassId = selectedCanvassId;
         SupplierId = supplierId;
         PurchaseDate = purchaseDate ?? DateTime.UtcNow;
         Status = status;
@@ -50,9 +57,9 @@ public class Purchase : AuditableEntity, IAggregateRoot
         QueueDomainEvent(new PurchaseCreated { Purchase = this });
     }
 
-    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate = null, string? referenceNumber = null, string? remarks = null, string? deliveryAddress = null)
+    public static Purchase Create(Guid? supplierId, DateTime? purchaseDate = null, string? referenceNumber = null, string? remarks = null, string? deliveryAddress = null, Guid? purchaseRequestId = null, Guid? selectedCanvassId = null)
     {
-        var purchase = new Purchase(Guid.NewGuid(), supplierId, purchaseDate, PurchaseStatus.Draft, referenceNumber, remarks, deliveryAddress);
+        var purchase = new Purchase(Guid.NewGuid(), purchaseRequestId, selectedCanvassId, supplierId, purchaseDate, PurchaseStatus.Draft, referenceNumber, remarks, deliveryAddress);
         return purchase;
     }
 
@@ -101,6 +108,36 @@ public class Purchase : AuditableEntity, IAggregateRoot
         }
 
         return this;
+    }
+
+    public void LinkToPurchaseRequest(Guid purchaseRequestId)
+    {
+        if (purchaseRequestId == Guid.Empty)
+            throw new ArgumentException("PurchaseRequestId must be provided.", nameof(purchaseRequestId));
+
+        if (Status != PurchaseStatus.Draft)
+            throw new InvalidOperationException("Can only link a purchase request while purchase is in Draft.");
+
+        if (PurchaseRequestId.HasValue && PurchaseRequestId != purchaseRequestId)
+            throw new InvalidOperationException("Purchase is already linked to a different purchase request.");
+
+        PurchaseRequestId = purchaseRequestId;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
+    }
+
+    public void SelectCanvass(Guid canvassId)
+    {
+        if (canvassId == Guid.Empty)
+            throw new ArgumentException("CanvassId must be provided.", nameof(canvassId));
+
+        if (Status != PurchaseStatus.Draft)
+            throw new InvalidOperationException("Can only select canvass while purchase is in Draft.");
+
+        if (SelectedCanvassId.HasValue && SelectedCanvassId != canvassId)
+            throw new InvalidOperationException("A different canvass is already selected for this purchase.");
+
+        SelectedCanvassId = canvassId;
+        QueueDomainEvent(new PurchaseUpdated { Purchase = this });
     }
 
     public void AddItem(Guid? productId, int qty, decimal unitPrice, PurchaseStatus? itemStatus = null)
@@ -171,7 +208,7 @@ public class Purchase : AuditableEntity, IAggregateRoot
 
     public void Submit()
     {
-        if (Status != PurchaseStatus.Draft && Status != PurchaseStatus.Pending)
+        if (Status != PurchaseStatus.Draft)
         {
             throw new InvalidOperationException($"Cannot submit a purchase with status {Status}.");
         }
@@ -272,7 +309,6 @@ public class Purchase : AuditableEntity, IAggregateRoot
             { PurchaseStatus.Submitted, new[] { PurchaseStatus.PartiallyDelivered, PurchaseStatus.Delivered, PurchaseStatus.Cancelled } },
             { PurchaseStatus.PartiallyDelivered, new[] { PurchaseStatus.Delivered, PurchaseStatus.Cancelled } },
             { PurchaseStatus.Delivered, new[] { PurchaseStatus.Closed } },
-            { PurchaseStatus.Pending, new[] { PurchaseStatus.Submitted, PurchaseStatus.Cancelled } },
             { PurchaseStatus.Closed, Array.Empty<PurchaseStatus>() },
             { PurchaseStatus.Cancelled, Array.Empty<PurchaseStatus>() }
         };

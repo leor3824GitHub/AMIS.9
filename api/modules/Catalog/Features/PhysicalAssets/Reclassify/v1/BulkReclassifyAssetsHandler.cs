@@ -1,9 +1,10 @@
+using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Catalog.Domain;
-using AMIS.WebApi.Catalog.Domain.Services;
 using AMIS.WebApi.Catalog.Domain.ValueObjects;
 using AMIS.WebApi.Catalog.Infrastructure.Persistence;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace AMIS.WebApi.Catalog.Features.PhysicalAssets.Reclassify.v1;
@@ -11,16 +12,16 @@ namespace AMIS.WebApi.Catalog.Features.PhysicalAssets.Reclassify.v1;
 public class BulkReclassifyAssetsHandler : IRequestHandler<BulkReclassifyAssetsCommand, BulkReclassifyAssetsResponse>
 {
     private readonly CatalogDbContext _context;
-    private readonly IAssetClassificationService _classificationService;
+    private readonly IReadRepository<AssetClassificationRule> _classificationRulesRepo;
     private readonly ILogger<BulkReclassifyAssetsHandler> _logger;
 
     public BulkReclassifyAssetsHandler(
         CatalogDbContext context,
-        IAssetClassificationService classificationService,
+        [FromKeyedServices("catalog:classificationRules")] IReadRepository<AssetClassificationRule> classificationRulesRepo,
         ILogger<BulkReclassifyAssetsHandler> logger)
     {
         _context = context;
-        _classificationService = classificationService;
+        _classificationRulesRepo = classificationRulesRepo;
         _logger = logger;
     }
 
@@ -38,16 +39,26 @@ public class BulkReclassifyAssetsHandler : IRequestHandler<BulkReclassifyAssetsC
         int semiToPPE = 0;
         var summary = new List<AssetReclassificationSummary>();
 
+        // Load active classification rules
+        var activeRules = await _classificationRulesRepo
+            .ListAsync(cancellationToken);
+
+        var effectiveRules = activeRules
+            .Where(r => r.IsActive &&
+                       r.EffectiveDate <= request.EffectiveDate &&
+                       (r.ExpiryDate == null || r.ExpiryDate >= request.EffectiveDate))
+            .OrderByDescending(r => r.Priority)
+            .ToList();
+
         foreach (var asset in assets)
         {
             var oldClassification = asset.CurrentClassification;
 
             // Determine new classification based on updated rules
-            var newClassification = await _classificationService
-                .DetermineClassificationAsync(
-                    asset.AcquisitionCost,
-                    asset.EstimatedUsefulLife,
-                    cancellationToken);
+            var newClassification = DetermineClassification(
+                asset.AcquisitionCost,
+                asset.EstimatedUsefulLife,
+                effectiveRules);
 
             if (oldClassification != newClassification)
             {
@@ -89,5 +100,34 @@ public class BulkReclassifyAssetsHandler : IRequestHandler<BulkReclassifyAssetsC
             ppeToSemi,
             semiToPPE,
             summary);
+    }
+
+    private static PropertyClassification DetermineClassification(
+        decimal acquisitionCost,
+        int estimatedUsefulLifeMonths,
+        List<AssetClassificationRule> rules)
+    {
+        // Find matching rule with highest priority
+        var matchingRule = rules
+            .FirstOrDefault(r => r.AppliesToAsset(acquisitionCost, estimatedUsefulLifeMonths));
+
+        if (matchingRule != null)
+        {
+            return matchingRule.Classification;
+        }
+
+        // Fallback to default logic if no rules configured
+        // Based on COA Circular 2022-004 defaults
+        if (acquisitionCost <= 1000)
+            return PropertyClassification.Consumable;
+
+        if (acquisitionCost > 50000) // Current threshold as of 2022
+            return PropertyClassification.PropertyPlantEquipment;
+
+        // Between 1000 and 50000
+        if (estimatedUsefulLifeMonths >= 12) // > 1 year
+            return PropertyClassification.SemiExpendable;
+
+        return PropertyClassification.Consumable;
     }
 }

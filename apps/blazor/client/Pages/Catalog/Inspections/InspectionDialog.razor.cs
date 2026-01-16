@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
-using AMIS.Shared.Authorization;
+using Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;

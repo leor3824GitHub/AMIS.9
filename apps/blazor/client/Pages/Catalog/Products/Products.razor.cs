@@ -1,7 +1,6 @@
 using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -10,6 +9,7 @@ using AMIS.Blazor.Infrastructure.Auth;
 using MapsterMapper;
 using Mapster;
 using static MudBlazor.CategoryTypes;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Products;
 public partial class Products

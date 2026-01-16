@@ -7,12 +7,13 @@ using AMIS.Framework.Infrastructure.Persistence;
 using AMIS.Framework.Infrastructure.Persistence.Services;
 using AMIS.Framework.Infrastructure.Tenant.Persistence;
 using AMIS.Framework.Infrastructure.Tenant.Services;
-using AMIS.Shared.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Serilog;
+using Shared.Authorization;
 
 namespace AMIS.Framework.Infrastructure.Tenant;
 internal static class Extensions
@@ -62,6 +63,13 @@ internal static class Extensions
     {
         ArgumentNullException.ThrowIfNull(app);
         app.UseMultiTenant();
+
+        var dbOptions = app.Services.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+        if (dbOptions.SkipInitialization)
+        {
+            Log.Warning("Skipping tenant database initialization (migrations/seeding) because {Option} is enabled.", $"{nameof(DatabaseOptions)}:{nameof(DatabaseOptions.SkipInitialization)}");
+            return app;
+        }
 
         // set up tenant store
         var tenants = TenantStoreSetup(app);

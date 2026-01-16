@@ -1,6 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 
-namespace AMIS.Shared.Authorization;
+namespace Shared.Authorization;
 
 public static class FshPermissions
 {
@@ -188,6 +188,21 @@ public static class FshPermissions
         new("Accept InspectionRequests", FshActions.Accept, FshResources.InspectionRequests),
         new("StatusUpdate InspectionRequests", FshActions.StatusUpdate, FshResources.InspectionRequests),
 
+        //asset requisitions
+        new("View AssetRequisitions", FshActions.View, FshResources.AssetRequisitions, IsBasic: true),
+        new("Create AssetRequisitions", FshActions.Create, FshResources.AssetRequisitions),
+        new("Accept AssetRequisitions", FshActions.Accept, FshResources.AssetRequisitions),
+
+        //depreciation schedules
+        new("View DepreciationSchedules", FshActions.View, FshResources.DepreciationSchedules, IsBasic: true),
+        new("Create DepreciationSchedules", FshActions.Create, FshResources.DepreciationSchedules),
+        new("Post DepreciationSchedules", FshActions.Post, FshResources.DepreciationSchedules),
+
+        //journal entry vouchers
+        new("View JournalEntryVouchers", FshActions.View, FshResources.JournalEntryVouchers, IsBasic: true),
+        new("Create JournalEntryVouchers", FshActions.Create, FshResources.JournalEntryVouchers),
+        new("Post JournalEntryVouchers", FshActions.Post, FshResources.JournalEntryVouchers),
+
         //ppe type mappings
         new("View PPE Type Mappings", FshActions.View, FshResources.PPETypeMappings, IsBasic: true),
         new("Manage PPE Type Mappings", FshActions.Manage, FshResources.PPETypeMappings),
@@ -199,6 +214,45 @@ public static class FshPermissions
         new("Update Todos", FshActions.Update, FshResources.Todos),
         new("Delete Todos", FshActions.Delete, FshResources.Todos),
         new("Export Todos", FshActions.Export, FshResources.Todos),
+
+        //procurement plans (PPMP)
+        new("View Procurement Plans", FshActions.View, FshResources.ProcurementPlans, IsBasic: true),
+        new("Search Procurement Plans", FshActions.Search, FshResources.ProcurementPlans, IsBasic: true),
+        new("Create Procurement Plans", FshActions.Create, FshResources.ProcurementPlans),
+        new("Update Procurement Plans", FshActions.Update, FshResources.ProcurementPlans),
+        new("Delete Procurement Plans", FshActions.Delete, FshResources.ProcurementPlans),
+        new("Submit Procurement Plans", FshActions.Submit, FshResources.ProcurementPlans),
+        new("Approve Procurement Plans", FshActions.Approve, FshResources.ProcurementPlans),
+
+        //procurement plan items (PPMP items)
+        new("View Procurement Plan Items", FshActions.View, FshResources.ProcurementPlanItems, IsBasic: true),
+        new("Search Procurement Plan Items", FshActions.Search, FshResources.ProcurementPlanItems, IsBasic: true),
+        new("Create Procurement Plan Items", FshActions.Create, FshResources.ProcurementPlanItems),
+        new("Update Procurement Plan Items", FshActions.Update, FshResources.ProcurementPlanItems),
+        new("Delete Procurement Plan Items", FshActions.Delete, FshResources.ProcurementPlanItems),
+
+        //annual procurement plans (APP)
+        new("View Annual Procurement Plans", FshActions.View, FshResources.AnnualProcurementPlans, IsBasic: true),
+        new("Search Annual Procurement Plans", FshActions.Search, FshResources.AnnualProcurementPlans, IsBasic: true),
+        new("Create Annual Procurement Plans", FshActions.Create, FshResources.AnnualProcurementPlans),
+        new("Update Annual Procurement Plans", FshActions.Update, FshResources.AnnualProcurementPlans),
+        new("Delete Annual Procurement Plans", FshActions.Delete, FshResources.AnnualProcurementPlans),
+        new("Submit Annual Procurement Plans", FshActions.Submit, FshResources.AnnualProcurementPlans),
+        new("Approve Annual Procurement Plans", FshActions.Approve, FshResources.AnnualProcurementPlans),
+
+        //annual procurement plan items (APP items)
+        new("View Annual Procurement Plan Items", FshActions.View, FshResources.AnnualProcurementPlanItems, IsBasic: true),
+        new("Search Annual Procurement Plan Items", FshActions.Search, FshResources.AnnualProcurementPlanItems, IsBasic: true),
+        new("Create Annual Procurement Plan Items", FshActions.Create, FshResources.AnnualProcurementPlanItems),
+        new("Update Annual Procurement Plan Items", FshActions.Update, FshResources.AnnualProcurementPlanItems),
+        new("Delete Annual Procurement Plan Items", FshActions.Delete, FshResources.AnnualProcurementPlanItems),
+
+        //procurement projects
+        new("View Procurement Projects", FshActions.View, FshResources.ProcurementProjects, IsBasic: true),
+        new("Search Procurement Projects", FshActions.Search, FshResources.ProcurementProjects, IsBasic: true),
+        new("Create Procurement Projects", FshActions.Create, FshResources.ProcurementProjects),
+        new("Update Procurement Projects", FshActions.Update, FshResources.ProcurementProjects),
+        new("Delete Procurement Projects", FshActions.Delete, FshResources.ProcurementProjects),
 
          new("View Hangfire", FshActions.View, FshResources.Hangfire),
          new("View Dashboard", FshActions.View, FshResources.Dashboard),

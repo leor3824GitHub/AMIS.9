@@ -5,6 +5,7 @@ public class DatabaseOptions : IValidatableObject
 {
     public string Provider { get; set; } = "postgresql";
     public string ConnectionString { get; set; } = string.Empty;
+    public bool SkipInitialization { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {

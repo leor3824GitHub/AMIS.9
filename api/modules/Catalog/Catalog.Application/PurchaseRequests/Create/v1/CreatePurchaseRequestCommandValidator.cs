@@ -13,6 +13,15 @@ public sealed class CreatePurchaseRequestCommandValidator : AbstractValidator<Cr
             item.RuleFor(i => i.Qty).GreaterThan(0);
             item.RuleFor(i => i.Unit).NotEmpty().MaximumLength(50);
             item.RuleFor(i => i.Description).MaximumLength(512);
+
+            item.RuleFor(i => i)
+                .Must(i => (i.ProductId is not null) ^ !string.IsNullOrWhiteSpace(i.ManualProductName))
+                .WithMessage("Exactly one of ProductId or ManualProductName must be provided.");
+
+            item.When(i => i.ManualProductName is not null, () =>
+            {
+                item.RuleFor(i => i.ManualProductName).NotEmpty().MaximumLength(256);
+            });
         }).When(x => x.Items != null && x.Items.Count > 0);
     }
 }

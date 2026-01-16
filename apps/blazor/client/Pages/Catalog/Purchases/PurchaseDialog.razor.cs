@@ -16,7 +16,8 @@ public partial class PurchaseDialog
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
     [CascadingParameter] private IMudDialogInstance MudDialog { get; set; } = default!;
-    [Parameter] public CreatePurchaseCommand Model { get; set; }
+    [Parameter] public CreatePurchaseCommand Model { get; set; } = new();
+    [Parameter] public Guid? PurchaseId { get; set; }
     [Parameter] public EventCallback OnCancel { get; set; }
     [Parameter] public EventCallback Refresh { get; set; }
     [Parameter] public bool? IsCreate { get; set; }
@@ -24,6 +25,8 @@ public partial class PurchaseDialog
 
     private List<SupplierResponse> _suppliers = new();
     private List<ProductResponse> _products = new();
+
+    private double _totalAmount;
 
     private PurchaseItemDto? EditingItem { get; set; }
 
@@ -43,11 +46,9 @@ public partial class PurchaseDialog
         await LoadSupplierAsync();
         await LoadProductAsync();
 
-        // Auto-generate PO Number for new purchases
-        if (IsCreate == true && string.IsNullOrEmpty(Model.ReferenceNumber))
-        {
-            Model.ReferenceNumber = $"PO-{DateTime.Now:yyyy-MMdd}-{Guid.NewGuid().ToString()[..5].ToUpper()}";
-        }
+        Model.Items ??= new List<PurchaseItemDto>();
+
+        _totalAmount = Model.Items.Sum(i => i.Qty * i.UnitPrice);
     }
 
     private async Task LoadProductAsync()
@@ -76,45 +77,48 @@ public partial class PurchaseDialog
     }
     private async Task OnValidSubmit()
     {
+        if (IsCreate is not true && IsCreate is not false) return;
+
+        if (IsCreate == false && (PurchaseId is null || PurchaseId == Guid.Empty))
         {
-            if (IsCreate is not true && IsCreate is not false) return;
+            Snackbar.Add("Cannot update purchase: missing PurchaseId.", Severity.Error);
+            return;
+        }
 
-            Snackbar.Add(IsCreate.Value ? "Creating purchase order..." : "Updating purchase order...", Severity.Info);
+        if (Model.SupplierId is null)
+        {
+            Snackbar.Add("Select a supplier before saving.", Severity.Warning);
+            return;
+        }
 
-            try
+        if (Model.Items is null || Model.Items.Count == 0)
+        {
+            Snackbar.Add("Add at least one item before saving.", Severity.Warning);
+            return;
+        }
+
+        _totalAmount = Model.Items.Sum(i => i.Qty * i.UnitPrice);
+
+        Snackbar.Add(IsCreate.Value ? "Creating purchase order..." : "Updating purchase order...", Severity.Info);
+
+        var saved = false;
+
+        try
+        {
+            if (IsCreate.Value) // Create Purchase Order
             {
-                if (IsCreate.Value) // Create Purchase Order
+                var response = await PurchaseClient.CreatePurchaseEndpointAsync("1", Model);
+
+                if (response.Id.HasValue)
                 {
-                    var model = Model.Adapt<CreatePurchaseCommand>();
-
-                    var response = await PurchaseClient.CreatePurchaseEndpointAsync("1", model);
-
-                    if (response.Id.HasValue)
-                    {
-                        Model.Id = (Guid)response.Id;
-                        StateHasChanged();
-                        Snackbar.Add("Purchase order created successfully!", Severity.Success);
-                        await Refresh.InvokeAsync();
-
-                    }
-                }
-                else // Update Purchase Order
-                {
-                    var model = Model.Adapt<UpdatePurchaseCommand>();
-
-                    var response = await PurchaseClient.UpdatePurchaseEndpointAsync("1", model.Id, model);
-
-                    if (response != null)
-                    {
-                        StateHasChanged();
-                        Snackbar.Add("Purchase order updated successfully!", Severity.Success);
-                        await Refresh.InvokeAsync();
-
-                    }
+                    PurchaseId = response.Id.Value;
+                    saved = true;
+                    Snackbar.Add("Purchase order created successfully!", Severity.Success);
                 }
             }
-            catch (ApiException ex)
+            else // Update Purchase Order
             {
+<<<<<<< HEAD
                 //if (ex.StatusCode == 400)
                 //{
                 //    var errors = await ex.GetValidationErrorsAsync();
@@ -127,9 +131,40 @@ public partial class PurchaseDialog
             }
         }
     }
+=======
+                var update = new UpdatePurchaseCommand
+                {
+                    Id = PurchaseId!.Value,
+                    SupplierId = Model.SupplierId,
+                    PurchaseDate = Model.PurchaseDate,
+                    Status = Model.Status,
+                    DeliveryAddress = Model.DeliveryAddress
+                };
+
+                var response = await PurchaseClient.UpdatePurchaseEndpointAsync("1", update.Id, update);
+
+                if (response != null)
+                {
+                    saved = true;
+                    Snackbar.Add("Purchase order updated successfully!", Severity.Success);
+                }
+            }
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add($"Error: {ex.Message}", Severity.Error);
+        }
+
+        if (saved)
+        {
+            await Refresh.InvokeAsync();
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+    }    
+>>>>>>> origin/jan1626
     private void UpdateTotalAmount(double value)
     {
-        Model.TotalAmount = value;
+        _totalAmount = value;
         StateHasChanged();
     }
 
@@ -142,9 +177,13 @@ public partial class PurchaseDialog
     // Workflow Action Methods
     private async Task SubmitPurchase()
     {
+<<<<<<< HEAD
         if (Model.Status != PurchaseStatus.Draft && Model.Status != PurchaseStatus.Submitted)
+=======
+        if (Model.Status != PurchaseStatus.Draft)
+>>>>>>> origin/jan1626
         {
-            Snackbar.Add("Purchase order must be in Draft or Pending status to submit.", Severity.Warning);
+            Snackbar.Add("Purchase order must be in Draft status to submit.", Severity.Warning);
             return;
         }
 
@@ -203,8 +242,22 @@ public partial class PurchaseDialog
     {
         try
         {
-            var model = Model.Adapt<UpdatePurchaseCommand>();
-            await PurchaseClient.UpdatePurchaseEndpointAsync("1", model.Id, model);
+            if (PurchaseId is null || PurchaseId == Guid.Empty)
+            {
+                Snackbar.Add("Cannot update purchase: missing PurchaseId.", Severity.Error);
+                return;
+            }
+
+            var update = new UpdatePurchaseCommand
+            {
+                Id = PurchaseId.Value,
+                SupplierId = Model.SupplierId,
+                PurchaseDate = Model.PurchaseDate,
+                Status = Model.Status,
+                DeliveryAddress = Model.DeliveryAddress
+            };
+
+            await PurchaseClient.UpdatePurchaseEndpointAsync("1", update.Id, update);
             await Refresh.InvokeAsync();
             StateHasChanged();
         }
@@ -240,7 +293,11 @@ public partial class PurchaseDialog
     private string GetWorkflowStepText() => Model.Status switch
     {
         PurchaseStatus.Draft => "Step 1: Draft",
+<<<<<<< HEAD
         PurchaseStatus.Submitted => "Step 1: Submitted",
+=======
+        PurchaseStatus.Submitted => "Step 1: Ready to Issue",
+>>>>>>> origin/jan1626
         PurchaseStatus.PartiallyDelivered => "Step 2: Partially Delivered",
         PurchaseStatus.Delivered => "Step 3: Ready for Inspection",
         PurchaseStatus.Closed => "Complete",

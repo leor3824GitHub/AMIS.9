@@ -17,29 +17,29 @@
 
     <EditFormContent>
         <MudItem xs="12" md="6">
-            <MudTextField For="@(() => context.UserName)" @bind-Value="context.UserName" Label="User Name" />
+            <MudTextField For="@(() => context.RequestModel.UserName)" @bind-Value="context.RequestModel.UserName" Label="User Name" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField For="@(() => context.FirstName)" @bind-Value="context.FirstName" Label="First Name" />
+            <MudTextField For="@(() => context.RequestModel.FirstName)" @bind-Value="context.RequestModel.FirstName" Label="First Name" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField For="@(() => context.LastName)" @bind-Value="context.LastName" Label="Last Name" />
+            <MudTextField For="@(() => context.RequestModel.LastName)" @bind-Value="context.RequestModel.LastName" Label="Last Name" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField For="@(() => context.Email)" InputType="InputType.Email" @bind-Value="context.Email"
+            <MudTextField For="@(() => context.RequestModel.Email)" InputType="InputType.Email" @bind-Value="context.RequestModel.Email"
                 Label="Email" />
         </MudItem>
         <MudItem xs="12" md="12">
-            <MudTextField For="@(() => context.PhoneNumber)" @bind-Value="context.PhoneNumber"
+            <MudTextField For="@(() => context.RequestModel.PhoneNumber)" @bind-Value="context.RequestModel.PhoneNumber"
                 Label="Phone Number" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField For="@(() => context.Password)" @bind-Value="context.Password" Label="Password"
+            <MudTextField For="@(() => context.RequestModel.Password)" @bind-Value="context.RequestModel.Password" Label="Password"
                 InputType="@_passwordInput" Adornment="Adornment.End" AdornmentIcon="@_passwordInputIcon"
                 OnAdornmentClick="TogglePasswordVisibility" />
         </MudItem>
         <MudItem xs="12" md="6">
-            <MudTextField For="@(() => context.ConfirmPassword)" @bind-Value="context.ConfirmPassword"
+            <MudTextField For="@(() => context.RequestModel.ConfirmPassword)" @bind-Value="context.RequestModel.ConfirmPassword"
                 Label="Confirm Password" InputType="InputType.Password" />
         </MudItem>
     </EditFormContent>

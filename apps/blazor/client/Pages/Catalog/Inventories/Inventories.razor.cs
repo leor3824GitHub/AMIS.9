@@ -3,7 +3,6 @@ using AMIS.Blazor.Client.Components.Dialogs;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
 using AMIS.Blazor.Infrastructure.Notifications;
-using AMIS.Shared.Authorization;
 using Mapster;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
@@ -11,6 +10,7 @@ using Microsoft.AspNetCore.Components.Authorization;
 using MudBlazor;
 using MediatR.Courier;
 using AMIS.Blazor.Shared.Notifications;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Inventories;
 
