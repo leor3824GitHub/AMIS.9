@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Inspections;
+
 public partial class InspectionItemList
 {
     [Inject]
@@ -37,7 +38,7 @@ public partial class InspectionItemList
     {
         Items ??= new List<PurchaseItemDto>();
     }
-   
+
     private void EditItem(PurchaseItemDto item)
     {
         EditingItem = item;
@@ -47,7 +48,7 @@ public partial class InspectionItemList
     {
         if (EditingItem == null || EditingItem.Qty <= 0 || EditingItem.UnitPrice <= 0)
             return;
-        try 
+        try
         {
             if (IsCreate == false)
             {
@@ -59,7 +60,7 @@ public partial class InspectionItemList
             EditingItem = null;
 
             StateHasChanged();
-          
+
         }
         catch (ApiException ex)
         {
@@ -85,7 +86,7 @@ public partial class InspectionItemList
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
-            ItemStatus = Status ?? PurchaseStatus.Pending
+            ItemStatus = Status ?? PurchaseStatus.Submitted
         };
         Items.Add(newItem);
 
@@ -95,13 +96,13 @@ public partial class InspectionItemList
             // Items in inspections should be managed through the inspection aggregate
             Snackbar?.Add("Item addition temporarily disabled. Use inspection item management.", Severity.Warning);
         }
-        
+
         // Reset fields after adding
         Productid = null;
         Qty = 0;
         Unitprice = 0;
 
-    StateHasChanged();
+        StateHasChanged();
     }
 
     private void RemoveItem(PurchaseItemDto item)

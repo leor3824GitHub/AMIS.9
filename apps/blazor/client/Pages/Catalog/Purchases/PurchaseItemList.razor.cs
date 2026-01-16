@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
+
 public partial class PurchaseItemList
 {
     [Inject]
@@ -41,7 +42,7 @@ public partial class PurchaseItemList
     {
         Items ??= new List<PurchaseItemDto>();
     }
-   
+
     private void EditItem(PurchaseItemDto item)
     {
         EditingItem = item;
@@ -51,7 +52,7 @@ public partial class PurchaseItemList
     {
         if (EditingItem == null || EditingItem.Qty <= 0 || EditingItem.UnitPrice <= 0)
             return;
-        try 
+        try
         {
             if (IsCreate == false)
             {
@@ -64,7 +65,7 @@ public partial class PurchaseItemList
             EditingItem = null;
 
             UpdateTotalAmount();
-          
+
         }
         catch (ApiException ex)
         {
@@ -90,7 +91,7 @@ public partial class PurchaseItemList
             ProductId = Productid.Value,
             Qty = Qty,
             UnitPrice = Unitprice,
-            ItemStatus = Status ?? PurchaseStatus.Pending
+            ItemStatus = Status ?? PurchaseStatus.Submitted
         };
         Items.Add(newItem);
 
@@ -101,7 +102,7 @@ public partial class PurchaseItemList
             // await ApiClient.AddPurchaseItemAsync(PurchaseId, model);
             Snackbar?.Add("Item addition temporarily disabled. Use purchase management instead.", Severity.Warning);
         }
-        
+
         // Reset fields after adding
         Productid = null;
         Qty = 0;

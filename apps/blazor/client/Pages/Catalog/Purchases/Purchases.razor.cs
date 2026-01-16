@@ -12,6 +12,7 @@ using Mapster;
 using System.Linq;
 
 namespace AMIS.Blazor.Client.Pages.Catalog.Purchases;
+
 public partial class Purchases
 {
     private MudDataGrid<PurchaseResponse> _table = default!;
@@ -108,12 +109,13 @@ public partial class Purchases
             { nameof(PurchaseDialog.Refresh), EventCallback.Factory.Create(this, OnRefresh) }
 
         };
-        var options = new DialogOptions { 
-            CloseButton = true, 
-            MaxWidth = MaxWidth.Large, 
-            FullWidth = true, 
-            BackdropClick = false, 
-            Position = DialogPosition.Center 
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Large,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.Center
         };
         var dialog = await DialogService.ShowAsync<PurchaseDialog>(title, parameters, options);
         var state = await dialog.Result;
@@ -138,7 +140,7 @@ public partial class Purchases
         {
             PurchaseDate = DateTime.Today,
             SupplierId = null,
-            Status = PurchaseStatus.Pending,
+            Status = PurchaseStatus.Submitted,
             Items = new List<PurchaseItemDto>()
         };
     }
@@ -154,7 +156,7 @@ public partial class Purchases
         }
     }
     private async Task OnEdit(PurchaseResponse dto)
-    {        
+    {
         var command = dto.Adapt<CreatePurchaseCommand>();
         await ShowEditFormDialog("Edit the purchase", command, false);
     }
@@ -240,12 +242,12 @@ public partial class Purchases
     private static Color GetStatusColor(PurchaseStatus status)
         => status switch
         {
+            PurchaseStatus.Draft => Color.Default,
             PurchaseStatus.Delivered => Color.Success,
             PurchaseStatus.PartiallyDelivered => Color.Warning,
             PurchaseStatus.Cancelled => Color.Error,
             PurchaseStatus.Closed => Color.Info,
             PurchaseStatus.Submitted => Color.Primary,
-            PurchaseStatus.Pending => Color.Secondary,
             _ => Color.Default
         };
 
@@ -253,8 +255,7 @@ public partial class Purchases
         => status switch
         {
             PurchaseStatus.Draft => Icons.Material.Filled.Edit,
-            PurchaseStatus.Pending => Icons.Material.Filled.HourglassEmpty,
-            PurchaseStatus.Submitted => Icons.Material.Filled.Send,
+            PurchaseStatus.Submitted => Icons.Material.Filled.HourglassEmpty,
             PurchaseStatus.PartiallyDelivered => Icons.Material.Filled.LocalShipping,
             PurchaseStatus.Delivered => Icons.Material.Filled.Inventory,
             PurchaseStatus.Closed => Icons.Material.Filled.CheckCircle,
@@ -263,27 +264,27 @@ public partial class Purchases
         };
 
     private static bool CanRecordDelivery(PurchaseResponse purchase)
-        => purchase.Status == PurchaseStatus.Submitted 
+        => purchase.Status == PurchaseStatus.Submitted
            || purchase.Status == PurchaseStatus.PartiallyDelivered;
 
     private async Task OnRecordDelivery(PurchaseResponse dto)
     {
         var command = dto.Adapt<CreatePurchaseCommand>();
-        
+
         var parameters = new DialogParameters
         {
             { nameof(GoodsReceiptDialog.Purchase), command }
         };
-        
-        var options = new DialogOptions 
-        { 
-            CloseButton = true, 
-            MaxWidth = MaxWidth.Large, 
-            FullWidth = true, 
-            BackdropClick = false, 
-            Position = DialogPosition.Center 
+
+        var options = new DialogOptions
+        {
+            CloseButton = true,
+            MaxWidth = MaxWidth.Large,
+            FullWidth = true,
+            BackdropClick = false,
+            Position = DialogPosition.Center
         };
-        
+
         var dialog = await DialogService.ShowAsync<GoodsReceiptDialog>("Record Goods Receipt", parameters, options);
         var result = await dialog.Result;
 
