@@ -1,0 +1,13 @@
+using System.ComponentModel;
+using AMIS.Framework.Core.Storage.File.Features;
+using MediatR;
+
+namespace AMIS.WebApi.Inventories.Application.Products.Create.v1;
+public sealed record CreateProductCommand(
+    [property: DefaultValue("Sample Product")] string? Name,
+    [property: DefaultValue("Descriptive Description")] string? Description = null,
+    [property: DefaultValue(10)] decimal SKU =10,
+    [property: DefaultValue("pc")] string Unit = "pc",
+    FileUploadCommand? Image = null,
+    Guid? CategoryId = null) : IRequest<CreateProductResponse>;
+

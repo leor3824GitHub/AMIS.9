@@ -1,0 +1,12 @@
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
+using MediatR;
+
+namespace AMIS.WebApi.Inventories.Application.Purchases.Update.v1;
+public sealed record UpdatePurchaseCommand(
+    Guid Id,           // The ID of the purchase to update
+    Guid? SupplierId,          // The optional supplier ID (could be null)
+    DateTime? PurchaseDate,    // The optional purchase date
+    PurchaseStatus? Status,           // The optional purchase status
+    string? DeliveryAddress = null    // Optional delivery address
+) : IRequest<UpdatePurchaseResponse>;
+

@@ -1,4 +1,4 @@
-<MudAppBar Color="Color.Surface" Elevation="0">
+﻿<MudAppBar Color="Color.Surface" Elevation="0">
     <MudTooltip Text="Toggle Drawer">
         <MudIconButton Icon="@Icons.Material.Rounded.Notes" Color="Color.Inherit" Edge="Edge.Start"
             OnClick="@((e) => DrawerToggle())" />
@@ -84,7 +84,7 @@
                             </div>
                             <MudIcon Icon="@Icons.Material.Filled.Receipt" Color="Color.Info" Size="Size.Large" />
                         </div>
-                        <MudButton Variant="Variant.Text" Color="Color.Info" OnClick="@(() => Navigation.NavigateTo("/catalog/purchases"))">View</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Info" OnClick="@(() => Navigation.NavigateTo("/inventories/purchases"))">View</MudButton>
                     </MudPaper>
                 </MudItem>
 
@@ -97,7 +97,7 @@
                             </div>
                             <MudIcon Icon="@Icons.Material.Filled.Assignment" Color="Color.Primary" Size="Size.Large" />
                         </div>
-                        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/catalog/inspectionrequests"))">View</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Primary" OnClick="@(() => Navigation.NavigateTo("/inventories/inspectionrequests"))">View</MudButton>
                     </MudPaper>
                 </MudItem>
 
@@ -110,7 +110,7 @@
                             </div>
                             <MudIcon Icon="@Icons.Material.Filled.Search" Color="Color.Success" Size="Size.Large" />
                         </div>
-                        <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => Navigation.NavigateTo("/catalog/inspections"))">View</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Success" OnClick="@(() => Navigation.NavigateTo("/inventories/inspections"))">View</MudButton>
                     </MudPaper>
                 </MudItem>
 
@@ -123,7 +123,7 @@
                             </div>
                             <MudIcon Icon="@Icons.Material.Filled.HowToReg" Color="Color.Tertiary" Size="Size.Large" />
                         </div>
-                        <MudButton Variant="Variant.Text" Color="Color.Tertiary" OnClick="@(() => Navigation.NavigateTo("/catalog/acceptances"))">View</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Tertiary" OnClick="@(() => Navigation.NavigateTo("/inventories/acceptances"))">View</MudButton>
                     </MudPaper>
                 </MudItem>
 
@@ -136,7 +136,7 @@
                             </div>
                             <MudIcon Icon="@Icons.Material.Filled.Store" Color="Color.Warning" Size="Size.Large" />
                         </div>
-                        <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => Navigation.NavigateTo("/catalog/suppliers"))">View</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Warning" OnClick="@(() => Navigation.NavigateTo("/inventories/suppliers"))">View</MudButton>
                     </MudPaper>
                 </MudItem>
 
@@ -160,3 +160,4 @@
         </MudScrollToTop>
     </MudContainer>
 </MudMainContent>
+

@@ -1,4 +1,4 @@
-@page "/dashboard"
+﻿@page "/dashboard"
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
 
@@ -25,7 +25,7 @@
                                 <MudText Typo="Typo.body2" Color="Color.Tertiary">@_purchaseCount</MudText>
                             </MudCardContent>
                             <MudCardActions>
-                                <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/catalog/purchases">View
+                                <MudButton Variant="Variant.Text" Color="Color.Primary" Href="/inventories/purchases">View
                                 </MudButton>
                             </MudCardActions>
                         </MudCard>
@@ -42,7 +42,7 @@
                                 <MudText Typo="Typo.body2" Color="Color.Tertiary">@_issuanceCount</MudText>
                             </MudCardContent>
                             <MudCardActions>
-                                <MudButton Variant="Variant.Text" Color="Color.Success" Href="/catalog/issuances">Manage
+                                <MudButton Variant="Variant.Text" Color="Color.Success" Href="/inventories/issuances">Manage
                                 </MudButton>
                             </MudCardActions>
                         </MudCard>
@@ -59,7 +59,7 @@
                                 <MudText Typo="Typo.body2" Color="Color.Tertiary">@_pendingAcceptance</MudText>
                             </MudCardContent>
                             <MudCardActions>
-                                <MudButton Variant="Variant.Text" Color="Color.Warning" Href="/catalog/acceptances">Review
+                                <MudButton Variant="Variant.Text" Color="Color.Warning" Href="/inventories/acceptances">Review
                                 </MudButton>
                             </MudCardActions>
                         </MudCard>
@@ -75,7 +75,7 @@
                                 <MudText Typo="Typo.body2" Color="Color.Tertiary">@_inventoryCount</MudText>
                             </MudCardContent>
                             <MudCardActions>
-                                <MudButton Variant="Variant.Text" Color="Color.Info" Href="/catalog/inventories">Check
+                                <MudButton Variant="Variant.Text" Color="Color.Info" Href="/inventories/inventories">Check
                                 </MudButton>
                             </MudCardActions>
                         </MudCard>
@@ -85,11 +85,11 @@
                         <MudPaper Elevation="0" Class="pa-6 mud-theme-tertiary">
                             <MudText Typo="Typo.h6" GutterBottom="true">Quick Actions</MudText>
                             <MudStack Row="true" Spacing="2">
-                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/catalog/purchases"
+                                <MudButton Variant="Variant.Filled" Color="Color.Primary" Href="/inventories/purchases"
                                     StartIcon="@Icons.Material.Filled.Add">Create Purchase Order</MudButton>
-                                <MudButton Variant="Variant.Filled" Color="Color.Success" Href="/catalog/issuances"
+                                <MudButton Variant="Variant.Filled" Color="Color.Success" Href="/inventories/issuances"
                                     StartIcon="@Icons.Material.Filled.LocalShipping">Issue Asset</MudButton>
-                                <MudButton Variant="Variant.Outlined" Color="Color.Warning" Href="/catalog/acceptances"
+                                <MudButton Variant="Variant.Outlined" Color="Color.Warning" Href="/inventories/acceptances"
                                     StartIcon="@Icons.Material.Filled.AssignmentTurnedIn">Review Acceptances</MudButton>
                             </MudStack>
                         </MudPaper>
@@ -112,7 +112,7 @@
                             </MudCardContent>
                             <MudCardActions>
                                 <MudButton Variant="Variant.Text" Color="Color.Primary"
-                                    Href="/catalog/journalentryvouchers">View</MudButton>
+                                    Href="/inventories/journalentryvouchers">View</MudButton>
                             </MudCardActions>
                         </MudCard>
                     </MudItem>

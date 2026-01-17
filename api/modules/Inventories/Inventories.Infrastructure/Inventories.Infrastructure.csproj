@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>AMIS.WebApi.Inventories.Infrastructure</RootNamespace>
+    <AssemblyName>AMIS.WebApi.Inventories.Infrastructure</AssemblyName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Persistence\Repositories\**" />
+    <EmbeddedResource Remove="Persistence\Repositories\**" />
+    <None Remove="Persistence\Repositories\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Persistence\Repositories\PPETypeAccountMappingRepository.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\framework\Infrastructure\Infrastructure.csproj" />
+    <ProjectReference Include="..\Inventories.Application\Inventories.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Endpoints\v1\AcceptanceItem\" />
+    <Folder Include="Endpoints\v1\InspectionItem\" />
+    <Folder Include="Endpoints\v1\PurchaseItem\" />
+  </ItemGroup>
+</Project>
+

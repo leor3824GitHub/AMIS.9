@@ -22,6 +22,10 @@ public static class FshResources
     public const string Employees = nameof(Employees);
     public const string Issuances = nameof(Issuances);
     public const string IssuanceItems = nameof(IssuanceItems);
+    public const string SuppliesAndMaterialsIssuance = nameof(SuppliesAndMaterialsIssuance);
+    public const string SuppliesAndMaterialsReceiving = nameof(SuppliesAndMaterialsReceiving);
+    public const string PpeIssuance = nameof(PpeIssuance);
+    public const string PpeReceiving = nameof(PpeReceiving);
     public const string InventoryTransactions = nameof(InventoryTransactions);
     public const string Inspections = nameof(Inspections);
     public const string InspectionItems = nameof(InspectionItems);

@@ -1,0 +1,29 @@
+using Microsoft.Extensions.DependencyInjection;
+using AMIS.WebApi.Inventories.Domain.Exceptions;
+using AMIS.Framework.Core.Persistence;
+using AMIS.Framework.Core.Caching;
+using AMIS.WebApi.Inventories.Domain;
+using MediatR;
+
+namespace AMIS.WebApi.Inventories.Application.Suppliers.Get.v1;
+public sealed class GetSupplierHandler(
+    [FromKeyedServices("inventories:suppliers")] IReadRepository<Supplier> repository,
+    ICacheService cache)
+    : IRequestHandler<GetSupplierRequest, SupplierResponse>
+{
+    public async Task<SupplierResponse> Handle(GetSupplierRequest request, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        var item = await cache.GetOrSetAsync(
+            $"supplier:{request.Id}",
+            async () =>
+            {
+                var supplierItem = await repository.GetByIdAsync(request.Id, cancellationToken);
+                if (supplierItem == null) throw new SupplierNotFoundException(request.Id);
+                return new SupplierResponse(supplierItem.Id, supplierItem.Name, supplierItem.Address, supplierItem.Tin, supplierItem.TaxClassification, supplierItem.ContactNo, supplierItem.Emailadd);
+            },
+            cancellationToken: cancellationToken);
+        return item!;
+    }
+}
+

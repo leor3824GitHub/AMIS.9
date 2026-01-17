@@ -2,8 +2,8 @@
 using Asp.Versioning.Conventions;
 using Carter;
 using FluentValidation;
-using AMIS.WebApi.Catalog.Application;
-using AMIS.WebApi.Catalog.Infrastructure;
+using AMIS.WebApi.Inventories.Application;
+using AMIS.WebApi.Inventories.Infrastructure;
 using AMIS.WebApi.Todo;
 using System.Text.Json.Serialization;
 
@@ -18,7 +18,7 @@ public static class Extensions
         //define module assemblies
         var assemblies = new Assembly[]
         {
-            typeof(CatalogMetadata).Assembly,
+            typeof(InventoriesMetadata).Assembly,
             typeof(TodoModule).Assembly
         };
 
@@ -32,13 +32,13 @@ public static class Extensions
         });
 
         //register module services
-        builder.RegisterCatalogServices();
+        builder.RegisterInventoriesServices();
         builder.RegisterTodoServices();
 
         //add carter endpoint modules
         builder.Services.AddCarter(configurator: config =>
         {
-            config.WithModule<CatalogModule.Endpoints>();
+            config.WithModule<InventoriesModule.Endpoints>();
             config.WithModule<TodoModule.Endpoints>();
         });
 
@@ -50,7 +50,7 @@ public static class Extensions
         ArgumentNullException.ThrowIfNull(app);
 
         //register modules
-        app.UseCatalogModule();
+        app.UseInventoriesModule();
         app.UseTodoModule();
 
         //register api versions

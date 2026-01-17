@@ -131,6 +131,34 @@ public static class FshPermissions
         new("Delete IssuanceItems", FshActions.Delete, FshResources.IssuanceItems),
         new("Export IssuanceItems", FshActions.Export, FshResources.IssuanceItems),
 
+        //supplies and materials issuance reports (SMIR)
+        new("View SuppliesAndMaterialsIssuance", FshActions.View, FshResources.SuppliesAndMaterialsIssuance, IsBasic: true),
+        new("Search SuppliesAndMaterialsIssuance", FshActions.Search, FshResources.SuppliesAndMaterialsIssuance, IsBasic: true),
+        new("Create SuppliesAndMaterialsIssuance", FshActions.Create, FshResources.SuppliesAndMaterialsIssuance),
+        new("Update SuppliesAndMaterialsIssuance", FshActions.Update, FshResources.SuppliesAndMaterialsIssuance),
+        new("Delete SuppliesAndMaterialsIssuance", FshActions.Delete, FshResources.SuppliesAndMaterialsIssuance),
+
+        //supplies and materials receiving reports (SMRR)
+        new("View SuppliesAndMaterialsReceiving", FshActions.View, FshResources.SuppliesAndMaterialsReceiving, IsBasic: true),
+        new("Search SuppliesAndMaterialsReceiving", FshActions.Search, FshResources.SuppliesAndMaterialsReceiving, IsBasic: true),
+        new("Create SuppliesAndMaterialsReceiving", FshActions.Create, FshResources.SuppliesAndMaterialsReceiving),
+        new("Update SuppliesAndMaterialsReceiving", FshActions.Update, FshResources.SuppliesAndMaterialsReceiving),
+        new("Delete SuppliesAndMaterialsReceiving", FshActions.Delete, FshResources.SuppliesAndMaterialsReceiving),
+
+        //ppe issuance reports (PPEIR)
+        new("View PpeIssuance", FshActions.View, FshResources.PpeIssuance, IsBasic: true),
+        new("Search PpeIssuance", FshActions.Search, FshResources.PpeIssuance, IsBasic: true),
+        new("Create PpeIssuance", FshActions.Create, FshResources.PpeIssuance),
+        new("Update PpeIssuance", FshActions.Update, FshResources.PpeIssuance),
+        new("Delete PpeIssuance", FshActions.Delete, FshResources.PpeIssuance),
+
+        //ppe receiving reports (PPER)
+        new("View PpeReceiving", FshActions.View, FshResources.PpeReceiving, IsBasic: true),
+        new("Search PpeReceiving", FshActions.Search, FshResources.PpeReceiving, IsBasic: true),
+        new("Create PpeReceiving", FshActions.Create, FshResources.PpeReceiving),
+        new("Update PpeReceiving", FshActions.Update, FshResources.PpeReceiving),
+        new("Delete PpeReceiving", FshActions.Delete, FshResources.PpeReceiving),
+
         //inventorytransactions
         new("View InventoryTransactions", FshActions.View, FshResources.InventoryTransactions, IsBasic: true),
         new("Search InventoryTransactions", FshActions.Search, FshResources.InventoryTransactions, IsBasic: true),

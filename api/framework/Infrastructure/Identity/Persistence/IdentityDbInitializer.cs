@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using IdentityConstants = Shared.Authorization.IdentityConstants;
 using Shared.Authorization;
+using Npgsql;
 
 namespace AMIS.Framework.Infrastructure.Identity.Persistence;
 internal sealed class IdentityDbInitializer(
@@ -24,10 +25,22 @@ internal sealed class IdentityDbInitializer(
 {
     public async Task MigrateAsync(CancellationToken cancellationToken)
     {
-        if ((await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false)).Any())
+        try
         {
-            await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
-            logger.LogInformation("[{Tenant}] applied database migrations for identity module", context.TenantInfo?.Identifier);
+            if ((await context.Database.GetPendingMigrationsAsync(cancellationToken).ConfigureAwait(false)).Any())
+            {
+                await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+                logger.LogInformation("[{Tenant}] applied database migrations for identity module", context.TenantInfo?.Identifier);
+            }
+        }
+        catch (PostgresException ex) when (ex.SqlState == "42P07")
+        {
+            // Table already exists - skip migration
+            logger.LogWarning("[{Tenant}] identity tables already exist, skipping migration", context.TenantInfo?.Identifier);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning("Identity migration check failed: {Message}. Proceeding with initialization.", ex.Message);
         }
     }
 

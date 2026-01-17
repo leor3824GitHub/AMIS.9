@@ -1,4 +1,4 @@
-<PersonCard
+﻿<PersonCard
     Style="background-color: var(--mud-palette-drawer-background);color: var(--mud-palette-drawer-text); margin-bottom:0px!important" />
 <MudNavMenu>
     <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Start</MudText>
@@ -12,81 +12,85 @@
             Trail</MudNavLink>
     }
     <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Modules</MudText>
-    <MudNavGroup Title="Catalog" Icon="@Icons.Material.Filled.AddBox">
+    <MudNavGroup Title="Inventories" Icon="@Icons.Material.Filled.AddBox">
         @if (_canViewProducts)
         {
-            <MudNavLink Href="/catalog/products" Icon="@Icons.Material.Filled.List" Class="fsh-nav-child">Products
+            <MudNavLink Href="/inventories/products" Icon="@Icons.Material.Filled.List" Class="fsh-nav-child">Products
             </MudNavLink>
         }
         @if (_canViewPurchases)
         {
-            <MudNavLink Href="/catalog/purchases" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Purchases
+            <MudNavLink Href="/inventories/purchases" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Purchases
             </MudNavLink>
         }
         @if (_canViewPurchaseRequests)
         {
-            <MudNavLink Href="/catalog/purchaserequests" Icon="@Icons.Material.Filled.Description" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/purchaserequests" Icon="@Icons.Material.Filled.Description" Class="fsh-nav-child">
                 Purchase Requests</MudNavLink>
         }
         @if (_canViewCanvasses)
         {
-            <MudNavLink Href="/catalog/canvasses" Icon="@Icons.Material.Filled.Gavel" Class="fsh-nav-child">Canvasses
+            <MudNavLink Href="/inventories/canvasses" Icon="@Icons.Material.Filled.Gavel" Class="fsh-nav-child">Canvasses
             </MudNavLink>
         }
         @if (_canViewProcurementPlans)
         {
-            <MudNavLink Href="/catalog/procurementplans" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">PPMP
+            <MudNavLink Href="/inventories/procurementplans" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">PPMP
             </MudNavLink>
         }
         @if (_canViewAnnualProcurementPlans)
         {
-            <MudNavLink Href="/catalog/annualprocurementplans" Icon="@Icons.Material.Filled.CalendarMonth"
+            <MudNavLink Href="/inventories/annualprocurementplans" Icon="@Icons.Material.Filled.CalendarMonth"
                 Class="fsh-nav-child">APP</MudNavLink>
         }
         @if (_canViewInspectionRequests)
         {
-            <MudNavLink Href="/catalog/inspectionrequests" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/inspectionrequests" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">
                 Inspection Request</MudNavLink>
         }
         @if (_canViewInspections)
         {
-            <MudNavLink Href="/catalog/inspections" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/inspections" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">
                 Inspections</MudNavLink>
         }
         @if (_canViewIssuances)
         {
-            <MudNavLink Href="/catalog/issuances" Icon="@Icons.Material.Filled.LocalShipping" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/issuances" Icon="@Icons.Material.Filled.LocalShipping" Class="fsh-nav-child">
                 Issuances</MudNavLink>
         }
-        @if (_canViewInventories)
-                @if (_canViewIssuances)
-                {
-                    <MudNavLink Href="/catalog/asset-issuance" Icon="@Icons.Material.Filled.QrCode2" Class="fsh-nav-child">
-                        Asset Issuance (PAR/ICS)</MudNavLink>
-                }
-                @if (_canViewInventories)
+        @if (_canViewIssuances)
         {
-            <MudNavLink Href="/catalog/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/asset-issuance" Icon="@Icons.Material.Filled.QrCode2" Class="fsh-nav-child">
+                Asset Issuance (PAR/ICS)</MudNavLink>
+        }
+        @if (_canViewSmir || _canViewSmrr || _canViewPpeIssuanceReports || _canViewPpeReceivingReports)
+        {
+            <MudNavLink Href="/inventories/reports/supply-ppe" Icon="@Icons.Material.Filled.ReceiptLong" Class="fsh-nav-child">
+                SMIR / SMRR / PPE Reports</MudNavLink>
+        }
+        @if (_canViewInventories)
+        {
+            <MudNavLink Href="/inventories/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">
                 Inventories</MudNavLink>
         }
         @if (_canViewAcceptances)
         {
-            <MudNavLink Href="/catalog/acceptances" Icon="@Icons.Material.Filled.AssignmentTurnedIn" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/acceptances" Icon="@Icons.Material.Filled.AssignmentTurnedIn" Class="fsh-nav-child">
                 Acceptances</MudNavLink>
         }
         @if (_canViewCategories)
         {
-            <MudNavLink Href="/catalog/categories" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Categories
+            <MudNavLink Href="/inventories/categories" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Categories
             </MudNavLink>
         }
         @if (_canViewSuppliers)
         {
-            <MudNavLink Href="/catalog/suppliers" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Suppliers
+            <MudNavLink Href="/inventories/suppliers" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Suppliers
             </MudNavLink>
         }
         @if (_canViewEmployees)
         {
-            <MudNavLink Href="/catalog/employees" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Employees
+            <MudNavLink Href="/inventories/employees" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Employees
             </MudNavLink>
         }
     </MudNavGroup>

@@ -1,4 +1,4 @@
-@page "/catalog/journalentryvouchers"
+﻿@page "/inventories/journalentryvouchers"
 @using AMIS.Blazor.Infrastructure.Api
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Globalization
@@ -45,7 +45,7 @@
                     <MudCard>
                         <MudCardContent>
                             <MudText Typo="Typo.subtitle2" Color="Color.Default">Total Amount</MudText>
-                            <MudText Typo="Typo.h5" Color="Color.Info">₱ @_totalAmount.ToString("N0")</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info">â‚± @_totalAmount.ToString("N0")</MudText>
                         </MudCardContent>
                     </MudCard>
                 </MudItem>
@@ -118,7 +118,7 @@
                                 <PropertyColumn Property="x => x.Description" Title="Description" />
                                 <PropertyColumn Property="x => x.Amount" Title="Amount">
                                     <CellTemplate Context="item">
-                                        <MudText>₱ @item.Item.Amount.ToString("N0")</MudText>
+                                        <MudText>â‚± @item.Item.Amount.ToString("N0")</MudText>
                                     </CellTemplate>
                                 </PropertyColumn>
                                 <PropertyColumn Property="x => x.PreparedBy" Title="Prepared By" />

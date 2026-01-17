@@ -1,0 +1,483 @@
+﻿@page "/inventories/reports/supply-ppe"
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@inherits SupplyAndPpeReports
+
+<PageHeader Title="Supply & PPE Reports" Header="SMIR / SMRR / PPE Issuance & Receiving" SubHeader="Capture COA-compliant issuance and receiving reports for supplies and property" />
+
+<MudPaper Class="report-shell pa-4">
+    <MudTabs Rounded="true" Centered="true" Color="Color.Primary" ApplyEffectsToContainer="true">
+        <MudTabPanel Text="SMIR" Icon="@Icons.Material.Filled.LocalShipping">
+            <MudStack Spacing="3">
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    Supplies and Materials Issuance Report (SMIR) for consumables leaving the warehouse.
+                </MudAlert>
+                <MudForm @ref="_smirForm" Model="_smirModel">
+                    <MudGrid GutterSize="2">
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.SmirNumber" For="@(() => _smirModel.SmirNumber)" Label="SMIR Number" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_smirModel.TransactionDate" Label="Transaction Date" Required="true" MaxDate="@DateTime.Today" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudSelect T="string" @bind-Value="_smirModel.IssuanceReason" Label="Issuance Reason" Required="true">
+                                @foreach (var reason in SmirReasons)
+                                {
+                                    <MudSelectItem Value="@reason">@reason</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.RecipientName" For="@(() => _smirModel.RecipientName)" Label="Recipient Name" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.RecipientAddress" For="@(() => _smirModel.RecipientAddress)" Label="Recipient Address" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.RecipientContactNumber" Label="Recipient Contact No." />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.IssuingOfficerName" For="@(() => _smirModel.IssuingOfficerName)" Label="Issuing Officer" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_smirModel.IssuingDate" Label="Issuing Date" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.IssuingOfficerSignature" Label="Issuing Officer Signature" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.ApprovingOfficerName" Label="Approving Officer" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_smirModel.ApprovingDate" Label="Approving Date" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.ApprovingOfficerSignature" Label="Approving Officer Signature" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.AuthRecipientName" For="@(() => _smirModel.AuthRecipientName)" Label="Authorized Recipient" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_smirModel.AuthReceiptDate" Label="Authorized Receipt Date" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.AuthRecipientSignature" Label="Authorized Recipient Signature" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.DriverName" Label="Driver Name" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.DriverSignature" Label="Driver Signature" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smirModel.BillOfLadingNumber" Label="Bill of Lading No." />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="_smirModel.Notes" Label="Notes" Lines="3" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudPaper Class="line-card pa-3 mt-4">
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.subtitle1">Line Items</MudText>
+                            <MudChip Color="Color.Info" Variant="Variant.Outlined">@_smirModel.LineItems.Count item(s)</MudChip>
+                        </MudStack>
+                        <MudGrid GutterSize="2" Class="mt-2">
+                            <MudItem xs="12" md="3">
+                                <MudTextField @bind-Value="_smirDraft.Name" For="@(() => _smirDraft.Name)" Label="Item Name" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="3">
+                                <MudTextField @bind-Value="_smirDraft.Description" Label="Description" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudDatePicker @bind-Date="_smirDraft.AcquisitionDate" Label="Acquisition Date" />
+                            </MudItem>
+                            <MudItem xs="6" md="1">
+                                <MudNumericField T="double" @bind-Value="_smirDraft.Quantity" Label="Qty" Min="0" Required="true" HideSpinButtons="true" />
+                            </MudItem>
+                            <MudItem xs="6" md="1">
+                                <MudTextField @bind-Value="_smirDraft.Unit" Label="Unit" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudNumericField T="double" @bind-Value="_smirDraft.UnitCost" Label="Unit Cost" Min="0" HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="â‚±" />
+                            </MudItem>
+                        </MudGrid>
+                        <MudStack Row="true" Spacing="1" Class="mt-2">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddSmirLineItem" StartIcon="@Icons.Material.Filled.Add" Disabled="_smirModel.LineItems.Count >= 25">Add Item</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetSmirDraft" StartIcon="@Icons.Material.Filled.Refresh">Clear Draft</MudButton>
+                        </MudStack>
+
+                        <MudTable Items="_smirModel.LineItems" Dense="true" Hover="true" Class="mt-3">
+                            <HeaderContent>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Description</MudTh>
+                                <MudTh>Qty</MudTh>
+                                <MudTh>Unit</MudTh>
+                                <MudTh align="right">Unit Cost</MudTh>
+                                <MudTh align="right">Total</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Name">@context.Name</MudTd>
+                                <MudTd DataLabel="Description">@context.Description</MudTd>
+                                <MudTd DataLabel="Qty">@context.Quantity</MudTd>
+                                <MudTd DataLabel="Unit">@context.Unit</MudTd>
+                                <MudTd DataLabel="Unit Cost" align="right">@context.UnitCost.ToString("C2")</MudTd>
+                                <MudTd DataLabel="Total" align="right">@(context.UnitCost * context.Quantity).ToString("C2")</MudTd>
+                                <MudTd align="right">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveSmirItem(context)" />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
+
+                    <MudStack Row="true" Spacing="2" Class="mt-3">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitSmirAsync" StartIcon="@Icons.Material.Filled.Save">Save SMIR</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="ResetSmir" StartIcon="@Icons.Material.Filled.Restore">Reset</MudButton>
+                    </MudStack>
+                </MudForm>
+
+                @if (_smirCreatedId is not null)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Filled">
+                        SMIR created with Id: @_smirCreatedId
+                    </MudAlert>
+                }
+            </MudStack>
+        </MudTabPanel>
+
+        <MudTabPanel Text="SMRR" Icon="@Icons.Material.Filled.Inventory">
+            <MudStack Spacing="3">
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    Supplies and Materials Receiving Report (SMRR) for goods entering the warehouse.
+                </MudAlert>
+                <MudForm @ref="_smrrForm" Model="_smrrModel">
+                    <MudGrid GutterSize="2">
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smrrModel.SmrrNumber" For="@(() => _smrrModel.SmrrNumber)" Label="SMRR Number" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smrrModel.Location" For="@(() => _smrrModel.Location)" Label="Location" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudSelect T="string" @bind-Value="_smrrModel.TransactionType" Label="Transaction Type" Required="true">
+                                @foreach (var type in SmrrTransactionTypes)
+                                {
+                                    <MudSelectItem Value="@type">@type</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smrrModel.SourceName" For="@(() => _smrrModel.SourceName)" Label="Source Name" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smrrModel.SourceAddress" For="@(() => _smrrModel.SourceAddress)" Label="Source Address" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_smrrModel.ReceivingDate" Label="Receiving Date" Required="true" MaxDate="@DateTime.Today" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smrrModel.ReceivedByName" For="@(() => _smrrModel.ReceivedByName)" Label="Received By" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smrrModel.ReceivedBySignature" Label="Received By Signature" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_smrrModel.ReceivedDate" Label="Received Date" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smrrModel.NotedByName" For="@(() => _smrrModel.NotedByName)" Label="Noted By" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_smrrModel.NotedBySignature" Label="Noted By Signature" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_smrrModel.NotedDate" Label="Noted Date" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="_smrrModel.Notes" Label="Notes" Lines="3" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudPaper Class="line-card pa-3 mt-4">
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.subtitle1">Line Items</MudText>
+                            <MudChip Color="Color.Info" Variant="Variant.Outlined">@_smrrModel.LineItems.Count item(s)</MudChip>
+                        </MudStack>
+                        <MudGrid GutterSize="2" Class="mt-2">
+                            <MudItem xs="12" md="3">
+                                <MudTextField @bind-Value="_smrrDraft.Name" For="@(() => _smrrDraft.Name)" Label="Item Name" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="3">
+                                <MudTextField @bind-Value="_smrrDraft.Description" Label="Description" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudDatePicker @bind-Date="_smrrDraft.AcquisitionDate" Label="Acquisition Date" />
+                            </MudItem>
+                            <MudItem xs="6" md="1">
+                                <MudNumericField T="double" @bind-Value="_smrrDraft.Quantity" Label="Qty" Min="0" Required="true" HideSpinButtons="true" />
+                            </MudItem>
+                            <MudItem xs="6" md="1">
+                                <MudTextField @bind-Value="_smrrDraft.Unit" Label="Unit" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudNumericField T="double" @bind-Value="_smrrDraft.UnitCost" Label="Unit Cost" Min="0" HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="â‚±" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudTextField @bind-Value="_smrrDraft.Reference" Label="Reference / DR No." />
+                            </MudItem>
+                        </MudGrid>
+                        <MudStack Row="true" Spacing="1" Class="mt-2">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddSmrrLineItem" StartIcon="@Icons.Material.Filled.Add" Disabled="_smrrModel.LineItems.Count >= 25">Add Item</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetSmrrDraft" StartIcon="@Icons.Material.Filled.Refresh">Clear Draft</MudButton>
+                        </MudStack>
+
+                        <MudTable Items="_smrrModel.LineItems" Dense="true" Hover="true" Class="mt-3">
+                            <HeaderContent>
+                                <MudTh>Name</MudTh>
+                                <MudTh>Description</MudTh>
+                                <MudTh>Qty</MudTh>
+                                <MudTh>Unit</MudTh>
+                                <MudTh align="right">Unit Cost</MudTh>
+                                <MudTh align="right">Total</MudTh>
+                                <MudTh>Reference</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Name">@context.Name</MudTd>
+                                <MudTd DataLabel="Description">@context.Description</MudTd>
+                                <MudTd DataLabel="Qty">@context.Quantity</MudTd>
+                                <MudTd DataLabel="Unit">@context.Unit</MudTd>
+                                <MudTd DataLabel="Unit Cost" align="right">@context.UnitCost.ToString("C2")</MudTd>
+                                <MudTd DataLabel="Total" align="right">@(context.UnitCost * context.Quantity).ToString("C2")</MudTd>
+                                <MudTd DataLabel="Reference">@context.Reference</MudTd>
+                                <MudTd align="right">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemoveSmrrItem(context)" />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
+
+                    <MudStack Row="true" Spacing="2" Class="mt-3">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitSmrrAsync" StartIcon="@Icons.Material.Filled.Save">Save SMRR</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="ResetSmrr" StartIcon="@Icons.Material.Filled.Restore">Reset</MudButton>
+                    </MudStack>
+                </MudForm>
+
+                @if (_smrrCreatedId is not null)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Filled">
+                        SMRR created with Id: @_smrrCreatedId
+                    </MudAlert>
+                }
+            </MudStack>
+        </MudTabPanel>
+
+        <MudTabPanel Text="PPE Issuance" Icon="@Icons.Material.Filled.AssignmentTurnedIn">
+            <MudStack Spacing="3">
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    PPE Issuance Report for PAR movements (PPEIR).
+                </MudAlert>
+                <MudForm @ref="_ppeIssuanceForm" Model="_ppeIssuanceModel">
+                    <MudGrid GutterSize="2">
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_ppeIssuanceModel.ReportNumber" For="@(() => _ppeIssuanceModel.ReportNumber)" Label="Report Number" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_ppeIssuanceModel.IssuanceDate" Label="Issuance Date" Required="true" MaxDate="@DateTime.Today" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_ppeIssuanceModel.IssuanceType" For="@(() => _ppeIssuanceModel.IssuanceType)" Label="Issuance Type" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="_ppeIssuanceModel.RecipientName" For="@(() => _ppeIssuanceModel.RecipientName)" Label="Recipient Name" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="_ppeIssuanceModel.RecipientAddress" For="@(() => _ppeIssuanceModel.RecipientAddress)" Label="Recipient Address" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="_ppeIssuanceModel.Notes" Label="Notes" Lines="3" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudPaper Class="line-card pa-3 mt-4">
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.subtitle1">Line Items</MudText>
+                            <MudChip Color="Color.Info" Variant="Variant.Outlined">@_ppeIssuanceModel.LineItems.Count item(s)</MudChip>
+                        </MudStack>
+                        <MudGrid GutterSize="2" Class="mt-2">
+                            <MudItem xs="12" md="3">
+                                <MudTextField @bind-Value="_ppeIssuanceDraft.PropertyCode" For="@(() => _ppeIssuanceDraft.PropertyCode)" Label="Property Code" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="3">
+                                <MudTextField @bind-Value="_ppeIssuanceDraft.Description" For="@(() => _ppeIssuanceDraft.Description)" Label="Description" Required="true" />
+                            </MudItem>
+                            <MudItem xs="6" md="1">
+                                <MudNumericField T="double" @bind-Value="_ppeIssuanceDraft.Quantity" Label="Qty" Min="0" Required="true" HideSpinButtons="true" />
+                            </MudItem>
+                            <MudItem xs="6" md="1">
+                                <MudTextField @bind-Value="_ppeIssuanceDraft.Unit" For="@(() => _ppeIssuanceDraft.Unit)" Label="Unit" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudNumericField T="double" @bind-Value="_ppeIssuanceDraft.AcquisitionCost" Label="Acquisition Cost" Min="0" HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="â‚±" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudNumericField T="double?" @bind-Value="_ppeIssuanceDraft.AccumulatedDepreciation" Label="Accumulated Depreciation" Min="0" HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="â‚±" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudNumericField T="double?" @bind-Value="_ppeIssuanceDraft.BookValue" Label="Book Value" Min="0" HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="â‚±" />
+                            </MudItem>
+                        </MudGrid>
+                        <MudStack Row="true" Spacing="1" Class="mt-2">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddPpeIssuanceLineItem" StartIcon="@Icons.Material.Filled.Add" Disabled="_ppeIssuanceModel.LineItems.Count >= 25">Add Item</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetPpeIssuanceDraft" StartIcon="@Icons.Material.Filled.Refresh">Clear Draft</MudButton>
+                        </MudStack>
+
+                        <MudTable Items="_ppeIssuanceModel.LineItems" Dense="true" Hover="true" Class="mt-3">
+                            <HeaderContent>
+                                <MudTh>Property Code</MudTh>
+                                <MudTh>Description</MudTh>
+                                <MudTh>Qty</MudTh>
+                                <MudTh>Unit</MudTh>
+                                <MudTh align="right">Acquisition</MudTh>
+                                <MudTh align="right">Book Value</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
+                                <MudTd DataLabel="Description">@context.Description</MudTd>
+                                <MudTd DataLabel="Qty">@context.Quantity</MudTd>
+                                <MudTd DataLabel="Unit">@context.Unit</MudTd>
+                                <MudTd DataLabel="Acquisition" align="right">@context.AcquisitionCost.ToString("C2")</MudTd>
+                                <MudTd DataLabel="Book Value" align="right">@(context.BookValue ?? 0).ToString("C2")</MudTd>
+                                <MudTd align="right">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemovePpeIssuanceItem(context)" />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
+
+                    <MudStack Row="true" Spacing="2" Class="mt-3">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitPpeIssuanceAsync" StartIcon="@Icons.Material.Filled.Save">Save PPEIR</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="ResetPpeIssuance" StartIcon="@Icons.Material.Filled.Restore">Reset</MudButton>
+                    </MudStack>
+                </MudForm>
+
+                @if (_ppeIssuanceCreatedId is not null)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Filled">
+                        PPE Issuance Report created with Id: @_ppeIssuanceCreatedId
+                    </MudAlert>
+                }
+            </MudStack>
+        </MudTabPanel>
+
+        <MudTabPanel Text="PPE Receiving" Icon="@Icons.Material.Filled.Inventory2">
+            <MudStack Spacing="3">
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                    PPE Receiving Report (PPER) for PPE receipts.
+                </MudAlert>
+                <MudForm @ref="_ppeReceivingForm" Model="_ppeReceivingModel">
+                    <MudGrid GutterSize="2">
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_ppeReceivingModel.ReportNumber" For="@(() => _ppeReceivingModel.ReportNumber)" Label="Report Number" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField @bind-Value="_ppeReceivingModel.Location" For="@(() => _ppeReceivingModel.Location)" Label="Location" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudSelect T="string" @bind-Value="_ppeReceivingModel.ReceiptType" Label="Receipt Type" Required="true">
+                                @foreach (var type in PpeReceiptTypes)
+                                {
+                                    <MudSelectItem Value="@type">@type</MudSelectItem>
+                                }
+                            </MudSelect>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="_ppeReceivingModel.SourceName" For="@(() => _ppeReceivingModel.SourceName)" Label="Source Name" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="_ppeReceivingModel.SourceAddress" For="@(() => _ppeReceivingModel.SourceAddress)" Label="Source Address" Required="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudDatePicker @bind-Date="_ppeReceivingModel.SourceReceiptDate" Label="Receipt Date" Required="true" MaxDate="@DateTime.Today" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="_ppeReceivingModel.Notes" Label="Notes" Lines="3" />
+                        </MudItem>
+                    </MudGrid>
+
+                    <MudPaper Class="line-card pa-3 mt-4">
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudText Typo="Typo.subtitle1">Line Items</MudText>
+                            <MudChip Color="Color.Info" Variant="Variant.Outlined">@_ppeReceivingModel.LineItems.Count item(s)</MudChip>
+                        </MudStack>
+                        <MudGrid GutterSize="2" Class="mt-2">
+                            <MudItem xs="12" md="3">
+                                <MudTextField @bind-Value="_ppeReceivingDraft.PropertyCode" For="@(() => _ppeReceivingDraft.PropertyCode)" Label="Property Code" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="3">
+                                <MudTextField @bind-Value="_ppeReceivingDraft.Description" For="@(() => _ppeReceivingDraft.Description)" Label="Description" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudDatePicker @bind-Date="_ppeReceivingDraft.DateAcquired" Label="Date Acquired" />
+                            </MudItem>
+                            <MudItem xs="6" md="1">
+                                <MudNumericField T="double" @bind-Value="_ppeReceivingDraft.Quantity" Label="Qty" Min="0" Required="true" HideSpinButtons="true" />
+                            </MudItem>
+                            <MudItem xs="6" md="1">
+                                <MudTextField @bind-Value="_ppeReceivingDraft.Unit" For="@(() => _ppeReceivingDraft.Unit)" Label="Unit" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudNumericField T="double" @bind-Value="_ppeReceivingDraft.UnitCost" Label="Unit Cost" Min="0" HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="â‚±" Required="true" />
+                            </MudItem>
+                        </MudGrid>
+                        <MudStack Row="true" Spacing="1" Class="mt-2">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddPpeReceivingLineItem" StartIcon="@Icons.Material.Filled.Add" Disabled="_ppeReceivingModel.LineItems.Count >= 25">Add Item</MudButton>
+                            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetPpeReceivingDraft" StartIcon="@Icons.Material.Filled.Refresh">Clear Draft</MudButton>
+                        </MudStack>
+
+                        <MudTable Items="_ppeReceivingModel.LineItems" Dense="true" Hover="true" Class="mt-3">
+                            <HeaderContent>
+                                <MudTh>Property Code</MudTh>
+                                <MudTh>Description</MudTh>
+                                <MudTh>Date Acquired</MudTh>
+                                <MudTh>Qty</MudTh>
+                                <MudTh>Unit</MudTh>
+                                <MudTh align="right">Unit Cost</MudTh>
+                                <MudTh align="right">Total</MudTh>
+                                <MudTh></MudTh>
+                            </HeaderContent>
+                            <RowTemplate>
+                                <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
+                                <MudTd DataLabel="Description">@context.Description</MudTd>
+                                <MudTd DataLabel="Date Acquired">@context.DateAcquired.ToShortDateString()</MudTd>
+                                <MudTd DataLabel="Qty">@context.Quantity</MudTd>
+                                <MudTd DataLabel="Unit">@context.Unit</MudTd>
+                                <MudTd DataLabel="Unit Cost" align="right">@context.UnitCost.ToString("C2")</MudTd>
+                                <MudTd DataLabel="Total" align="right">@(context.UnitCost * context.Quantity).ToString("C2")</MudTd>
+                                <MudTd align="right">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="() => RemovePpeReceivingItem(context)" />
+                                </MudTd>
+                            </RowTemplate>
+                        </MudTable>
+                    </MudPaper>
+
+                    <MudStack Row="true" Spacing="2" Class="mt-3">
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitPpeReceivingAsync" StartIcon="@Icons.Material.Filled.Save">Save PPER</MudButton>
+                        <MudButton Variant="Variant.Text" Color="Color.Secondary" OnClick="ResetPpeReceiving" StartIcon="@Icons.Material.Filled.Restore">Reset</MudButton>
+                    </MudStack>
+                </MudForm>
+
+                @if (_ppeReceivingCreatedId is not null)
+                {
+                    <MudAlert Severity="Severity.Success" Variant="Variant.Filled">
+                        PPE Receiving Report created with Id: @_ppeReceivingCreatedId
+                    </MudAlert>
+                }
+            </MudStack>
+        </MudTabPanel>
+    </MudTabs>
+</MudPaper>
+

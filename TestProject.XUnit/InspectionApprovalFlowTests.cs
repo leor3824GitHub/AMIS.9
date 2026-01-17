@@ -4,17 +4,17 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using AMIS.Framework.Core.Persistence;
-using AMIS.WebApi.Catalog.Application.Inspections.Events;
-using AMIS.WebApi.Catalog.Application.Inventories.Get.v1;
-using AMIS.WebApi.Catalog.Domain;
-using AMIS.WebApi.Catalog.Domain.Events;
-using AMIS.WebApi.Catalog.Domain.ValueObjects;
+using AMIS.WebApi.Inventories.Application.Inspections.Events;
+using AMIS.WebApi.Inventories.Application.Inventories.Get.v1;
+using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Domain.Events;
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using Ardalis.Specification;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace AMIS.Tests.Catalog
+namespace AMIS.Tests.Inventories
 {
     public class InspectionApprovalFlowTests
     {

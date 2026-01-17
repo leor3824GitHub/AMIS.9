@@ -1,0 +1,54 @@
+using Ardalis.Specification;
+using AMIS.Framework.Core.Paging;
+using AMIS.WebApi.Inventories.Application.Acceptances.Get.v1;
+using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
+using AMIS.Framework.Core.Specifications;
+using AMIS.WebApi.Inventories.Application.Employees.Get.v1;
+using AMIS.WebApi.Inventories.Application.AcceptanceItems.Get.v1;
+using System.Linq;
+
+namespace AMIS.WebApi.Inventories.Application.Acceptances.Search.v1;
+
+public class SearchAcceptanceSpecs : EntitiesByPaginationFilterSpec<Acceptance, AcceptanceResponse>
+{
+    public SearchAcceptanceSpecs(SearchAcceptancesCommand command)
+        : base(command)
+    {
+        Query
+            .Include(a => a.SupplyOfficer)
+            .Include(a => a.Purchase)
+            .Include(a => a.Items)
+                .ThenInclude(item => item.PurchaseItem)
+            .OrderBy(a => a.AcceptanceDate, !command.HasOrderBy())
+            .Where(a => a.InspectionId == command.InspectionId!.Value, command.InspectionId.HasValue)
+            .Where(a => a.PurchaseId == command.PurchaseId!.Value, command.PurchaseId.HasValue)
+            .Where(a => a.AcceptanceDate >= command.FromDate, command.FromDate.HasValue)
+            .Where(a => a.AcceptanceDate <= command.ToDate, command.ToDate.HasValue);
+        
+        Query.Select(a => new AcceptanceResponse(
+                a.Id,
+                a.PurchaseId,
+                a.SupplyOfficerId,
+                a.AcceptanceDate,
+                a.Remarks ?? string.Empty,
+                a.IsPosted,
+                a.PostedOn,
+                a.Status,
+                new EmployeeResponse(
+                    a.SupplyOfficer.Id,
+                    a.SupplyOfficer.Name,
+                    a.SupplyOfficer.Designation,
+                    a.SupplyOfficer.ResponsibilityCode,
+                    a.SupplyOfficer.UserId),
+                a.Items.Select(item => new AcceptanceItemResponse(
+                    item.Id,
+                    item.AcceptanceId,
+                    item.PurchaseItemId,
+                    item.QtyAccepted,
+                    item.Remarks
+                )).ToList()
+            ));
+    }
+}
+

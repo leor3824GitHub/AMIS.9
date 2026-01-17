@@ -26,6 +26,10 @@ public partial class NavMenu
     private bool _canViewAcceptances;
     private bool _canViewIssuances;
     private bool _canViewInventories;
+    private bool _canViewSmir;
+    private bool _canViewSmrr;
+    private bool _canViewPpeIssuanceReports;
+    private bool _canViewPpeReceivingReports;
     private bool _canViewCategories;
     private bool _canViewSuppliers;
     private bool _canViewEmployees;
@@ -55,6 +59,10 @@ public partial class NavMenu
         _canViewAcceptances = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Acceptances);
         _canViewIssuances = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Issuances);
         _canViewInventories = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Inventories);
+        _canViewSmir = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.SuppliesAndMaterialsIssuance);
+        _canViewSmrr = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.SuppliesAndMaterialsReceiving);
+        _canViewPpeIssuanceReports = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PpeIssuance);
+        _canViewPpeReceivingReports = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PpeReceiving);
         _canViewCategories = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Categories);
         _canViewSuppliers = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Suppliers);
         _canViewEmployees = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Employees);

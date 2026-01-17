@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Catalog", "Catalog", "{93324D12-DE1B-4C1B-934A-92AA140FF6F6}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Inventories", "Inventories", "{93324D12-DE1B-4C1B-934A-92AA140FF6F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Todo", "Todo", "{79981A5A-207A-4A16-A21B-5E80394082F6}"
 EndProject
@@ -37,11 +37,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PostgreSQL", "api\migration
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Todo", "api\modules\Todo\Todo.csproj", "{B3866EEF-8F46-4302-ABAC-A95EE2F27331}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Catalog.Application", "api\modules\Catalog\Catalog.Application\Catalog.Application.csproj", "{8C7DAF8E-F792-4092-8BBF-31A6B898B39A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inventories.Application", "api\modules\Inventories\Inventories.Application\Inventories.Application.csproj", "{8C7DAF8E-F792-4092-8BBF-31A6B898B39A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Catalog.Domain", "api\modules\Catalog\Catalog.Domain\Catalog.Domain.csproj", "{B15705B5-041C-4F1E-8342-AD03182EDD42}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inventories.Domain", "api\modules\Inventories\Inventories.Domain\Inventories.Domain.csproj", "{B15705B5-041C-4F1E-8342-AD03182EDD42}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Catalog.Infrastructure", "api\modules\Catalog\Catalog.Infrastructure\Catalog.Infrastructure.csproj", "{89FE1C3B-29D3-48A8-8E7D-90C261D266C5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Inventories.Infrastructure", "api\modules\Inventories\Inventories.Infrastructure\Inventories.Infrastructure.csproj", "{89FE1C3B-29D3-48A8-8E7D-90C261D266C5}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "apps\blazor\client\Client.csproj", "{BCE4A428-8B97-4B56-AE45-496EE3906667}"
 EndProject

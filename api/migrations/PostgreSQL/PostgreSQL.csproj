@@ -5,11 +5,11 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\framework\Infrastructure\Infrastructure.csproj" />
-    <ProjectReference Include="..\..\modules\Catalog\Catalog.Infrastructure\Catalog.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\modules\Inventories\Inventories.Infrastructure\Inventories.Infrastructure.csproj" />
     <ProjectReference Include="..\..\modules\Todo\Todo.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Catalog\" />
+    <Folder Include="Inventories\" />
     <Folder Include="Identity\" />
     <Folder Include="Procurement\" />
     <Folder Include="Tenant\" />

@@ -1,0 +1,379 @@
+﻿@page "/inventories/inspections/acceptance"
+@using AMIS.Blazor.Infrastructure.Api
+@using Mapster
+@using Microsoft.AspNetCore.Components.Authorization
+@inject ISnackbar Snackbar
+
+<PageHeader Title="Inspection & Acceptance"
+    Description="Review received items and generate Item Acceptance Report (IAR)" BreadcrumbItems="_breadcrumbItems" />
+
+<AuthorizeView Roles="Supply Officer">
+    <Authorized>
+        <MudContainer MaxWidth="MaxWidth.Large" Class="pt-8">
+            <MudGrid>
+                <!-- Summary Cards -->
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Default">Pending Inspection</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Warning">@_pendingCount</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Default">Completed Today</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Success">@_completedCount</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Default">With Issues</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Error">@_issueCount</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <MudItem xs="12" sm="6" md="3">
+                    <MudCard>
+                        <MudCardContent>
+                            <MudText Typo="Typo.subtitle2" Color="Color.Default">Accepted</MudText>
+                            <MudText Typo="Typo.h5" Color="Color.Info">@_acceptedCount</MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+
+                <!-- Filter & Search -->
+                <MudItem xs="12">
+                    <MudPaper Class="pa-6">
+                        <MudText Typo="Typo.h6" GutterBottom="true">Pending Deliveries</MudText>
+                        <MudGrid>
+                            <MudItem xs="12" sm="6">
+                                <MudTextField @bind-Value="_searchText" Label="Search by PO#, Item, or Supplier"
+                                    Variant="Variant.Outlined" FullWidth="true" Clearable="true"
+                                    OnClearedClick="@ClearSearch" />
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudSelect @bind-Value="_filterStatus" Label="Filter by Status"
+                                    Variant="Variant.Outlined" FullWidth="true">
+                                    <MudSelectItem Value="string.Empty">All Statuses</MudSelectItem>
+                                    <MudSelectItem Value="@("Pending")">Pending Inspection</MudSelectItem>
+                                    <MudSelectItem Value="@("InspectionInProgress")">Inspection In Progress</MudSelectItem>
+                                    <MudSelectItem Value="@("IssuesFound")">Issues Found</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                        </MudGrid>
+                    </MudPaper>
+                </MudItem>
+
+                <!-- Deliveries DataGrid -->
+                <MudItem xs="12">
+                    <MudDataGrid Items="@FilteredDeliveries" Hover="true" Striped="true" Elevation="0">
+                        <Columns>
+                            <PropertyColumn Property="x => x.DeliveryId" Title="DR #" CellStyle="width:120px;">
+                                <CellTemplate Context="item">
+                                    <MudText Typo="Typo.body2">@item.Item.DeliveryId.ToString().Substring(0, 8)...
+                                    </MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
+
+                            <PropertyColumn Property="x => x.PoNumber" Title="PO #" CellStyle="width:120px;">
+                                <CellTemplate Context="item">
+                                    <MudText Typo="Typo.body2">@item.Item.PoNumber</MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
+
+                            <PropertyColumn Property="x => x.SupplierName" Title="Supplier" CellStyle="width:200px;">
+                                <CellTemplate Context="item">
+                                    <MudText Typo="Typo.body2">@item.Item.SupplierName</MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
+
+                            <PropertyColumn Property="x => x.ItemCount" Title="Items" CellStyle="width:100px;">
+                                <CellTemplate Context="item">
+                                    <MudText Typo="Typo.body2">@item.Item.ItemCount</MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
+
+                            <PropertyColumn Property="x => x.DeliveryDate" Title="Delivered" CellStyle="width:130px;">
+                                <CellTemplate Context="item">
+                                    <MudText Typo="Typo.body2">@item.Item.DeliveryDate.ToString("MMM dd, yyyy")
+                                    </MudText>
+                                </CellTemplate>
+                            </PropertyColumn>
+
+                            <PropertyColumn Property="x => x.Status" Title="Status" CellStyle="width:150px;">
+                                <CellTemplate Context="item">
+                                    <MudChip T="string" Color="@GetStatusColor(item.Item.Status)" Size="Size.Small"
+                                        Variant="Variant.Text">
+                                        @item.Item.Status
+                                    </MudChip>
+                                </CellTemplate>
+                            </PropertyColumn>
+
+                            <TemplateColumn Title="Actions" CellStyle="width:200px;">
+                                <CellTemplate Context="item">
+                                    <MudButton Size="Size.Small" Variant="Variant.Filled" Color="Color.Primary"
+                                        OnClick="@(() => OpenInspectionDialog(item.Item))">
+                                        @(item.Item.Status == "InspectionInProgress" ? "Continue" : "Inspect")
+                                    </MudButton>
+                                    <MudButton Size="Size.Small" Variant="Variant.Text" Color="Color.Info"
+                                        OnClick="@(() => ViewDetails(item.Item))">
+                                        Details
+                                    </MudButton>
+                                </CellTemplate>
+                            </TemplateColumn>
+                        </Columns>
+                    </MudDataGrid>
+                </MudItem>
+            </MudGrid>
+        </MudContainer>
+
+        <!-- Inspection Dialog -->
+        <MudDialog @bind-IsOpen="@_showInspectionDialog">
+            <DialogContent>
+                <MudText Typo="Typo.h6" GutterBottom="true">Inspection Report for @_selectedDelivery?.PoNumber</MudText>
+
+                <MudAlert Severity="Severity.Info" Class="mb-4">
+                    Verify all items match the PO. Document any discrepancies, damage, or quality issues.
+                </MudAlert>
+
+                <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Delivery Information</MudText>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="@_selectedDelivery.PoNumber" Label="PO Number" ReadOnly="true"
+                            Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudTextField Value="@_selectedDelivery?.SupplierName" Label="Supplier" ReadOnly="true"
+                            Variant="Variant.Outlined" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Inspection Details</MudText>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudTextField @bind-Value="@_inspectorName" Label="Inspector Name" Variant="Variant.Outlined"
+                            FullWidth="true" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudDatePicker @bind-Date="@_inspectionDate" Label="Inspection Date" Variant="Variant.Outlined"
+                            FullWidth="true" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Items Status</MudText>
+                <MudText Typo="Typo.body2" Class="mb-3">
+                    Total Items: <strong>@_selectedDelivery?.ItemCount</strong>
+                </MudText>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField @bind-Value="@_itemsAccepted" Label="Items Accepted" Min="0"
+                            Variant="Variant.Outlined" FullWidth="true" />
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudNumericField @bind-Value="@_itemsRejected" Label="Items Rejected/Damaged" Min="0"
+                            Variant="Variant.Outlined" FullWidth="true" />
+                    </MudItem>
+                </MudGrid>
+
+                <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Remarks</MudText>
+                <MudTextField @bind-Value="@_inspectionRemarks" Label="Inspection Findings" Lines="4"
+                    Variant="Variant.Outlined" FullWidth="true"
+                    Placeholder="Document any discrepancies, damage, or quality issues..." />
+
+                <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Acceptance Decision</MudText>
+                <MudRadioGroup T="string" @bind-SelectedOption="@_inspectionOutcome">
+                    <MudRadio T="string" Option="Accept" Color="Color.Success">âœ“ Accept - All items satisfactory
+                    </MudRadio>
+                    <MudRadio T="string" Option="Partial" Color="Color.Warning">âš  Partial - Some items rejected
+                    </MudRadio>
+                    <MudRadio T="string" Option="Reject" Color="Color.Error">âœ— Reject - Return to supplier</MudRadio>
+                </MudRadioGroup>
+            </DialogContent>
+
+            <DialogActions>
+                <MudButton OnClick="@(() => _showInspectionDialog = false)">Cancel</MudButton>
+                <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@SubmitInspection">
+                    @(_selectedDelivery?.Status == "InspectionInProgress" ? "Update" : "Start") Inspection
+                </MudButton>
+            </DialogActions>
+        </MudDialog>
+
+        <!-- Details Dialog -->
+        <MudDialog @bind-IsOpen="@_showDetailsDialog">
+            <DialogContent>
+                <MudText Typo="Typo.h6" GutterBottom="true">Delivery Details</MudText>
+                <MudText Typo="Typo.subtitle2" Class="mt-4 mb-2">Delivery Receipt Information</MudText>
+                <MudList T="string">
+                    <MudListItem T="string">
+                        <MudText><strong>DR Number:</strong> @_selectedDelivery?.DeliveryId.ToString().Substring(0, 8)
+                        </MudText>
+                    </MudListItem>
+                    <MudListItem T="string">
+                        <MudText><strong>PO Number:</strong> @_selectedDelivery?.PoNumber</MudText>
+                    </MudListItem>
+                    <MudListItem T="string">
+                        <MudText><strong>Supplier:</strong> @_selectedDelivery?.SupplierName</MudText>
+                    </MudListItem>
+                    <MudListItem T="string">
+                        <MudText><strong>Delivery Date:</strong> @_selectedDelivery?.DeliveryDate.ToString("MMMM dd, yyyy")</MudText>
+                    </MudListItem>
+                    <MudListItem T="string">
+                        <MudText><strong>Total Items:</strong> @_selectedDelivery?.ItemCount</MudText>
+                    </MudListItem>
+                    <MudListItem T="string">
+                        <MudText><strong>Status:</strong> @_selectedDelivery?.Status</MudText>
+                    </MudListItem>
+                </MudList>
+            </DialogContent>
+
+            <DialogActions>
+                <MudButton OnClick="@(() => _showDetailsDialog = false)">Close</MudButton>
+            </DialogActions>
+        </MudDialog>
+    </Authorized>
+    <NotAuthorized>
+        <MudAlert Severity="Severity.Error">
+            Access Denied. Only Supply Officers can access the Inspection & Acceptance module.
+        </MudAlert>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private List<DeliveryDto> _deliveries = new();
+    private DeliveryDto? _selectedDelivery;
+    private bool _showInspectionDialog = false;
+    private bool _showDetailsDialog = false;
+    private string _searchText = string.Empty;
+    private string _filterStatus = string.Empty;
+
+    private int _pendingCount = 0;
+    private int _completedCount = 0;
+    private int _issueCount = 0;
+    private int _acceptedCount = 0;
+
+    private string _inspectorName = string.Empty;
+    private DateTime? _inspectionDate = DateTime.Now;
+    private int _itemsAccepted = 0;
+    private int _itemsRejected = 0;
+    private string _inspectionRemarks = string.Empty;
+    private string _inspectionOutcome = "Accept";
+
+    private List<BreadcrumbItem> _breadcrumbItems = new()
+    {
+        new BreadcrumbItem("Home", href: "/"),
+        new BreadcrumbItem("Dashboard", href: "/dashboard"),
+        new BreadcrumbItem("Inspection & Acceptance", href: null, disabled: true)
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDeliveries();
+    }
+
+    private async Task LoadDeliveries()
+    {
+        try
+        {
+            // TODO: Load deliveries from API when goods receipt is integrated
+            // Mock data for demo
+            _deliveries = new()
+            {
+                new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-001", SupplierName = "TechSupply Ltd", ItemCount = 5,
+                    DeliveryDate = DateTime.Now.AddDays(-3), Status = "Pending" },
+                new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-002", SupplierName = "Office Furnishings Inc",
+                    ItemCount = 12, DeliveryDate = DateTime.Now.AddDays(-2), Status = "Pending" },
+                new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-003", SupplierName = "Electronics World", ItemCount = 3,
+                    DeliveryDate = DateTime.Now.AddDays(-1), Status = "InspectionInProgress" },
+            };
+
+            UpdateCounters();
+            Snackbar.Add("Loaded deliveries pending inspection", Severity.Info);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading deliveries: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void UpdateCounters()
+    {
+        _pendingCount = _deliveries.Count(d => d.Status == "Pending");
+        _completedCount = _deliveries.Count(d => d.Status == "Completed");
+        _issueCount = _deliveries.Count(d => d.Status == "IssuesFound");
+        _acceptedCount = _deliveries.Count(d => d.Status == "Accepted");
+    }
+
+    private void OpenInspectionDialog(DeliveryDto delivery)
+    {
+        _selectedDelivery = delivery;
+        _inspectorName = string.Empty;
+        _inspectionDate = DateTime.Now;
+        _itemsAccepted = 0;
+        _itemsRejected = 0;
+        _inspectionRemarks = string.Empty;
+        _inspectionOutcome = "Accept";
+        _showInspectionDialog = true;
+    }
+
+    private void ViewDetails(DeliveryDto delivery)
+    {
+        _selectedDelivery = delivery;
+        _showDetailsDialog = true;
+    }
+
+    private async Task SubmitInspection()
+    {
+        try
+        {
+            // TODO: Save inspection report and generate IAR
+            // TODO: Update delivery status
+            // TODO: Create inventory records for accepted items
+
+            _showInspectionDialog = false;
+            Snackbar.Add($"Inspection recorded for {_selectedDelivery?.PoNumber}", Severity.Success);
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error submitting inspection: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void ClearSearch()
+    {
+        _searchText = string.Empty;
+    }
+
+    private IEnumerable<DeliveryDto> FilteredDeliveries =>
+        _deliveries
+            .Where(d => string.IsNullOrEmpty(_searchText) ||
+                d.PoNumber.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
+                d.SupplierName.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+            .Where(d => string.IsNullOrEmpty(_filterStatus) || d.Status == _filterStatus);
+
+    private Color GetStatusColor(string status) => status switch
+    {
+        "Pending" => Color.Warning,
+        "InspectionInProgress" => Color.Info,
+        "IssuesFound" => Color.Error,
+        "Accepted" => Color.Success,
+        "Completed" => Color.Success,
+        _ => Color.Default
+    };
+
+    private sealed class DeliveryDto
+    {
+        public Guid DeliveryId { get; set; }
+        public string PoNumber { get; set; } = string.Empty;
+        public string SupplierName { get; set; } = string.Empty;
+        public int ItemCount { get; set; }
+        public DateTime DeliveryDate { get; set; }
+        public string Status { get; set; } = "Pending";
+    }
+}

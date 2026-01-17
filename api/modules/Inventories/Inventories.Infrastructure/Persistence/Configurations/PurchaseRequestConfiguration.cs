@@ -1,0 +1,25 @@
+using Finbuckle.MultiTenant;
+using AMIS.WebApi.Inventories.Domain;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace AMIS.WebApi.Inventories.Infrastructure.Persistence.Configurations;
+internal sealed class PurchaseRequestConfiguration : IEntityTypeConfiguration<PurchaseRequest>
+{
+    public void Configure(EntityTypeBuilder<PurchaseRequest> builder)
+    {
+        builder.IsMultiTenant();
+        builder.HasKey(x => x.Id);
+        builder.Property(x => x.RequestDate).IsRequired();
+        builder.Property(x => x.RequestedBy).IsRequired();
+        builder.Property(x => x.Purpose).HasMaxLength(512).IsRequired();
+        builder.Property(x => x.ApprovalRemarks).HasMaxLength(1024);
+        // Relationship: PurchaseRequest.RequestedBy -> Employee.Id
+        builder
+            .HasOne(pr => pr.RequestedByEmployee)
+            .WithMany()
+            .HasForeignKey(pr => pr.RequestedBy);
+        builder.HasMany(x => x.Items).WithOne(i => i.PurchaseRequest).HasForeignKey(i => i.PurchaseRequestId);
+    }
+}
+

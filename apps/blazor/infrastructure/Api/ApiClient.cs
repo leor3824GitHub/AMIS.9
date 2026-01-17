@@ -1431,6 +1431,54 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// Create PPE Issuance Report
+        /// </summary>
+        /// <remarks>
+        /// Creates a new PPE (Property, Plant &amp; Equipment) Issuance Report for tracking PPE issuance, transfer, or disposal.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<CreatePpeIssuanceReportResponse> CreatePpeIssuanceReportEndpointAsync(string version, CreatePpeIssuanceReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Get PPE Issuance Report
+        /// </summary>
+        /// <remarks>
+        /// Retrieves a specific PPE Issuance Report by ID.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetPpeIssuanceReportByIdResponse> GetPpeIssuanceReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Create PPE Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Creates a new PPE (Property, Plant &amp; Equipment) Receiving Report for tracking PPE receipt from suppliers, transfers, or donations.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<CreatePpeReceivingReportResponse> CreatePpeReceivingReportEndpointAsync(string version, CreatePpeReceivingReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Get PPE Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Retrieves a specific PPE Receiving Report by ID.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetPpeReceivingReportByIdResponse> GetPpeReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// create procurement plan (PPMP)
         /// </summary>
         /// <remarks>
@@ -2031,6 +2079,54 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// creates a supplies and materials issuance report (SMIR)
+        /// </summary>
+        /// <remarks>
+        /// creates a supplies and materials issuance report (SMIR) to track the movement of inventory from the facility
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<CreateSuppliesAndMaterialsIssuanceReportResponse> CreateSuppliesAndMaterialsIssuanceReportEndpointAsync(string version, CreateSuppliesAndMaterialsIssuanceReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// gets supplies and materials issuance report by id
+        /// </summary>
+        /// <remarks>
+        /// retrieves a specific supplies and materials issuance report (SMIR) by its ID
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetSuppliesAndMaterialsIssuanceReportByIdResponse> GetSuppliesAndMaterialsIssuanceReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// creates a supplies and materials receiving report (SMRR)
+        /// </summary>
+        /// <remarks>
+        /// creates a supplies and materials receiving report (SMRR) to document the arrival and intake of goods into inventory
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<CreateSuppliesAndMaterialsReceivingReportResponse> CreateSuppliesAndMaterialsReceivingReportEndpointAsync(string version, CreateSuppliesAndMaterialsReceivingReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// gets supplies and materials receiving report by id
+        /// </summary>
+        /// <remarks>
+        /// retrieves a specific supplies and materials receiving report (SMRR) by its ID
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetSuppliesAndMaterialsReceivingReportByIdResponse> GetSuppliesAndMaterialsReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// creates a tenant
         /// </summary>
         /// <remarks>
@@ -2362,9 +2458,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         private static System.Lazy<System.Text.Json.JsonSerializerOptions> _settings = new System.Lazy<System.Text.Json.JsonSerializerOptions>(CreateSerializerSettings, true);
         private System.Text.Json.JsonSerializerOptions _instanceSettings;
 
-#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    #pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         public ApiClient(System.Net.Http.HttpClient httpClient)
-#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
+    #pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
         {
             _httpClient = httpClient;
             Initialize();
@@ -2421,11 +2517,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/acceptances/{acceptanceId}/items"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/acceptances/{acceptanceId}/items"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(acceptanceId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items");
 
@@ -2513,11 +2609,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/acceptances/{acceptanceId}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/acceptances/{acceptanceId}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(acceptanceId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -2599,11 +2695,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/acceptances/{acceptanceId}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/acceptances/{acceptanceId}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(acceptanceId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -2687,11 +2783,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances");
+                    urlBuilder_.Append("/inventories/acceptances");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -2773,11 +2869,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -2860,11 +2956,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -2954,11 +3050,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -3045,11 +3141,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/search"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/search");
+                    urlBuilder_.Append("/inventories/acceptances/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -3132,11 +3228,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/{id}/post"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/{id}/post"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/post");
 
@@ -3224,11 +3320,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/{acceptanceId}/link-inspection/{inspectionId}"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/{acceptanceId}/link-inspection/{inspectionId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(acceptanceId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/link-inspection/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(inspectionId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -3314,11 +3410,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/acceptances/{id}/cancel"
+                
+                    // Operation Path: "api/v{version}/inventories/acceptances/{id}/cancel"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/acceptances/");
+                    urlBuilder_.Append("/inventories/acceptances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/cancel");
                     urlBuilder_.Append('?');
@@ -3412,11 +3508,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -3495,11 +3591,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -3535,16 +3631,16 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 404)
-                            {
-                                string responseText_ = (response_.Content == null) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                throw new ApiException("Not Found", status_, responseText_, headers_, null);
-                            }
-                            else
-                            {
-                                var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                            }
+                        if (status_ == 404)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Not Found", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -3592,11 +3688,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -3683,11 +3779,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/search"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/search");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -3769,11 +3865,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{id}/submit"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{id}/submit"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/submit");
 
@@ -3805,30 +3901,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -3878,11 +3974,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{id}/approve"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{id}/approve"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/approve");
 
@@ -3914,30 +4010,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -3987,11 +4083,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{id}/reject"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{id}/reject"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/reject");
 
@@ -4023,30 +4119,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -4090,11 +4186,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{id}/cancel"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{id}/cancel"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/cancel");
 
@@ -4126,30 +4222,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -4193,11 +4289,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{id}/revert-to-draft"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{id}/revert-to-draft"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/revert-to-draft");
 
@@ -4229,30 +4325,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -4299,11 +4395,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{planId}/items"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{planId}/items"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(planId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items");
 
@@ -4388,11 +4484,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{planId}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{planId}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(planId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -4471,11 +4567,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/annualProcurementPlans/{planId}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/annualProcurementPlans/{planId}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/annualProcurementPlans/");
+                    urlBuilder_.Append("/inventories/annualProcurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(planId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -4559,11 +4655,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/assetRequisitions"
+                
+                    // Operation Path: "api/v{version}/inventories/assetRequisitions"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/assetRequisitions");
+                    urlBuilder_.Append("/inventories/assetRequisitions");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -4652,11 +4748,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/assetRequisitions/{id}/accept"
+                
+                    // Operation Path: "api/v{version}/inventories/assetRequisitions/{id}/accept"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/assetRequisitions/");
+                    urlBuilder_.Append("/inventories/assetRequisitions/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/accept");
 
@@ -4741,11 +4837,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/assetRequisitions/{id}/reject"
+                
+                    // Operation Path: "api/v{version}/inventories/assetRequisitions/{id}/reject"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/assetRequisitions/");
+                    urlBuilder_.Append("/inventories/assetRequisitions/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/reject");
 
@@ -4824,11 +4920,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/assetRequisitions/{id}/cancel"
+                
+                    // Operation Path: "api/v{version}/inventories/assetRequisitions/{id}/cancel"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/assetRequisitions/");
+                    urlBuilder_.Append("/inventories/assetRequisitions/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/cancel");
 
@@ -4910,11 +5006,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/assetRequisitions/search"
+                
+                    // Operation Path: "api/v{version}/inventories/assetRequisitions/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/assetRequisitions/search");
+                    urlBuilder_.Append("/inventories/assetRequisitions/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -4990,11 +5086,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/assetRequisitions/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/assetRequisitions/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/assetRequisitions/");
+                    urlBuilder_.Append("/inventories/assetRequisitions/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -5078,11 +5174,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/assetRequisitions/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/assetRequisitions/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/assetRequisitions/");
+                    urlBuilder_.Append("/inventories/assetRequisitions/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -5159,11 +5255,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/assetRequisitions/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/assetRequisitions/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/assetRequisitions/");
+                    urlBuilder_.Append("/inventories/assetRequisitions/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -5250,11 +5346,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/brands"
+                
+                    // Operation Path: "api/v{version}/inventories/brands"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/brands");
+                    urlBuilder_.Append("/inventories/brands");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -5336,11 +5432,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/brands/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/brands/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/brands/");
+                    urlBuilder_.Append("/inventories/brands/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -5430,11 +5526,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/brands/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/brands/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/brands/");
+                    urlBuilder_.Append("/inventories/brands/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -5516,11 +5612,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/brands/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/brands/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/brands/");
+                    urlBuilder_.Append("/inventories/brands/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -5602,11 +5698,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/brands/search"
+                
+                    // Operation Path: "api/v{version}/inventories/brands/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/brands/search");
+                    urlBuilder_.Append("/inventories/brands/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -5692,11 +5788,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/canvasses"
+                
+                    // Operation Path: "api/v{version}/inventories/canvasses"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/canvasses");
+                    urlBuilder_.Append("/inventories/canvasses");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -5778,11 +5874,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/canvasses/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/canvasses/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/canvasses/");
+                    urlBuilder_.Append("/inventories/canvasses/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -5872,11 +5968,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/canvasses/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/canvasses/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/canvasses/");
+                    urlBuilder_.Append("/inventories/canvasses/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -5959,11 +6055,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/canvasses/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/canvasses/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/canvasses/");
+                    urlBuilder_.Append("/inventories/canvasses/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -6050,11 +6146,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/canvasses/search"
+                
+                    // Operation Path: "api/v{version}/inventories/canvasses/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/canvasses/search");
+                    urlBuilder_.Append("/inventories/canvasses/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -6140,11 +6236,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/canvasses/select-lowest"
+                
+                    // Operation Path: "api/v{version}/inventories/canvasses/select-lowest"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/canvasses/select-lowest");
+                    urlBuilder_.Append("/inventories/canvasses/select-lowest");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -6227,11 +6323,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/canvasses/{id}/award"
+                
+                    // Operation Path: "api/v{version}/inventories/canvasses/{id}/award"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/canvasses/");
+                    urlBuilder_.Append("/inventories/canvasses/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/award");
 
@@ -6319,11 +6415,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/categories"
+                
+                    // Operation Path: "api/v{version}/inventories/categories"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/categories");
+                    urlBuilder_.Append("/inventories/categories");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -6405,11 +6501,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/categories/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/categories/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/categories/");
+                    urlBuilder_.Append("/inventories/categories/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -6499,11 +6595,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/categories/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/categories/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/categories/");
+                    urlBuilder_.Append("/inventories/categories/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -6585,11 +6681,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/categories/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/categories/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/categories/");
+                    urlBuilder_.Append("/inventories/categories/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -6671,11 +6767,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/categories/search"
+                
+                    // Operation Path: "api/v{version}/inventories/categories/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/categories/search");
+                    urlBuilder_.Append("/inventories/categories/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -6761,11 +6857,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/depreciationSchedules"
+                
+                    // Operation Path: "api/v{version}/inventories/depreciationSchedules"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/depreciationSchedules");
+                    urlBuilder_.Append("/inventories/depreciationSchedules");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -6854,11 +6950,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/depreciationSchedules/{id}/post"
+                
+                    // Operation Path: "api/v{version}/inventories/depreciationSchedules/{id}/post"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/depreciationSchedules/");
+                    urlBuilder_.Append("/inventories/depreciationSchedules/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/post");
 
@@ -6949,11 +7045,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/depreciationSchedules/{id}/reverse"
+                
+                    // Operation Path: "api/v{version}/inventories/depreciationSchedules/{id}/reverse"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/depreciationSchedules/");
+                    urlBuilder_.Append("/inventories/depreciationSchedules/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/reverse");
 
@@ -7035,11 +7131,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/depreciationSchedules/search"
+                
+                    // Operation Path: "api/v{version}/inventories/depreciationSchedules/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/depreciationSchedules/search");
+                    urlBuilder_.Append("/inventories/depreciationSchedules/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -7115,11 +7211,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/depreciationSchedules/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/depreciationSchedules/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/depreciationSchedules/");
+                    urlBuilder_.Append("/inventories/depreciationSchedules/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -7203,11 +7299,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/depreciationSchedules/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/depreciationSchedules/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/depreciationSchedules/");
+                    urlBuilder_.Append("/inventories/depreciationSchedules/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -7284,11 +7380,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/depreciationSchedules/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/depreciationSchedules/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/depreciationSchedules/");
+                    urlBuilder_.Append("/inventories/depreciationSchedules/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -7375,11 +7471,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/employees"
+                
+                    // Operation Path: "api/v{version}/inventories/employees"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/employees");
+                    urlBuilder_.Append("/inventories/employees");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -7461,11 +7557,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/employees/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/employees/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/employees/");
+                    urlBuilder_.Append("/inventories/employees/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -7555,11 +7651,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/employees/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/employees/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/employees/");
+                    urlBuilder_.Append("/inventories/employees/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -7641,11 +7737,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/employees/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/employees/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/employees/");
+                    urlBuilder_.Append("/inventories/employees/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -7727,11 +7823,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/employees/search"
+                
+                    // Operation Path: "api/v{version}/inventories/employees/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/employees/search");
+                    urlBuilder_.Append("/inventories/employees/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -7810,11 +7906,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/employees/check-registration"
+                
+                    // Operation Path: "api/v{version}/inventories/employees/check-registration"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/employees/check-registration");
+                    urlBuilder_.Append("/inventories/employees/check-registration");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -7900,11 +7996,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/employees/self-register"
+                
+                    // Operation Path: "api/v{version}/inventories/employees/self-register"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/employees/self-register");
+                    urlBuilder_.Append("/inventories/employees/self-register");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -7990,11 +8086,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection");
+                    urlBuilder_.Append("/inventories/inspection");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -8076,11 +8172,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection/");
+                    urlBuilder_.Append("/inventories/inspection/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -8163,11 +8259,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection/");
+                    urlBuilder_.Append("/inventories/inspection/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -8257,11 +8353,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection/");
+                    urlBuilder_.Append("/inventories/inspection/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -8348,11 +8444,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection/search"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection/search");
+                    urlBuilder_.Append("/inventories/inspection/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -8435,11 +8531,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection/{id}/approve"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection/{id}/approve"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection/");
+                    urlBuilder_.Append("/inventories/inspection/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/approve");
 
@@ -8524,11 +8620,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection/{id}/reject"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection/{id}/reject"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection/");
+                    urlBuilder_.Append("/inventories/inspection/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/reject");
                     urlBuilder_.Append('?');
@@ -8619,11 +8715,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection/{id}/cancel"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection/{id}/cancel"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection/");
+                    urlBuilder_.Append("/inventories/inspection/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/cancel");
                     urlBuilder_.Append('?');
@@ -8714,11 +8810,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspection/{id}/complete"
+                
+                    // Operation Path: "api/v{version}/inventories/inspection/{id}/complete"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspection/");
+                    urlBuilder_.Append("/inventories/inspection/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/complete");
 
@@ -8806,11 +8902,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests");
+                    urlBuilder_.Append("/inventories/inspectionRequests");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -8895,11 +8991,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests");
+                    urlBuilder_.Append("/inventories/inspectionRequests");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -8929,22 +9025,22 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
-                            {
-                                string responseText_ = (response_.Content == null) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                throw new ApiException("Bad Request", status_, responseText_, headers_, null);
-                            }
-                            else
-                                if (status_ == 500)
-                                {
-                                    string responseText_ = (response_.Content == null) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("Internal Server Error", status_, responseText_, headers_, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                        if (status_ == 400)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Bad Request", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Internal Server Error", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -8988,11 +9084,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests/");
+                    urlBuilder_.Append("/inventories/inspectionRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -9075,11 +9171,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests/");
+                    urlBuilder_.Append("/inventories/inspectionRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -9169,11 +9265,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests/");
+                    urlBuilder_.Append("/inventories/inspectionRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -9260,11 +9356,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests/search"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests/search");
+                    urlBuilder_.Append("/inventories/inspectionRequests/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -9350,11 +9446,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests/{id}/assign/{inspectorId}"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests/{id}/assign/{inspectorId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests/");
+                    urlBuilder_.Append("/inventories/inspectionRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/assign/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(inspectorId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -9440,11 +9536,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests/{id}/complete"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests/{id}/complete"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests/");
+                    urlBuilder_.Append("/inventories/inspectionRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/complete");
 
@@ -9529,11 +9625,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests/{id}/accept"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests/{id}/accept"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests/");
+                    urlBuilder_.Append("/inventories/inspectionRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/accept");
 
@@ -9621,11 +9717,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inspectionRequests/{id}/status"
+                
+                    // Operation Path: "api/v{version}/inventories/inspectionRequests/{id}/status"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inspectionRequests/");
+                    urlBuilder_.Append("/inventories/inspectionRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/status");
                     urlBuilder_.Append('?');
@@ -9716,11 +9812,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventories"
+                
+                    // Operation Path: "api/v{version}/inventories/inventories"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventories");
+                    urlBuilder_.Append("/inventories/inventories");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -9802,11 +9898,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventories/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inventories/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventories/");
+                    urlBuilder_.Append("/inventories/inventories/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -9896,11 +9992,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventories/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inventories/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventories/");
+                    urlBuilder_.Append("/inventories/inventories/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -9982,11 +10078,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventories/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inventories/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventories/");
+                    urlBuilder_.Append("/inventories/inventories/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -10068,11 +10164,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventories/search"
+                
+                    // Operation Path: "api/v{version}/inventories/inventories/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventories/search");
+                    urlBuilder_.Append("/inventories/inventories/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -10158,11 +10254,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventoryTranscation"
+                
+                    // Operation Path: "api/v{version}/inventories/inventoryTranscation"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventoryTranscation");
+                    urlBuilder_.Append("/inventories/inventoryTranscation");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -10243,11 +10339,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventoryTranscation/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inventoryTranscation/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventoryTranscation/");
+                    urlBuilder_.Append("/inventories/inventoryTranscation/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -10325,11 +10421,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventoryTranscation/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inventoryTranscation/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventoryTranscation/");
+                    urlBuilder_.Append("/inventories/inventoryTranscation/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -10419,11 +10515,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventoryTranscation/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/inventoryTranscation/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventoryTranscation/");
+                    urlBuilder_.Append("/inventories/inventoryTranscation/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -10510,11 +10606,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/inventoryTranscation/search"
+                
+                    // Operation Path: "api/v{version}/inventories/inventoryTranscation/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/inventoryTranscation/search");
+                    urlBuilder_.Append("/inventories/inventoryTranscation/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -10600,11 +10696,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuanceItems"
+                
+                    // Operation Path: "api/v{version}/inventories/issuanceItems"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuanceItems");
+                    urlBuilder_.Append("/inventories/issuanceItems");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -10686,11 +10782,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuanceItems/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/issuanceItems/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuanceItems/");
+                    urlBuilder_.Append("/inventories/issuanceItems/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -10780,11 +10876,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuanceItems/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/issuanceItems/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuanceItems/");
+                    urlBuilder_.Append("/inventories/issuanceItems/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -10866,11 +10962,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuanceItems/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/issuanceItems/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuanceItems/");
+                    urlBuilder_.Append("/inventories/issuanceItems/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -10952,11 +11048,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuanceItems/search"
+                
+                    // Operation Path: "api/v{version}/inventories/issuanceItems/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuanceItems/search");
+                    urlBuilder_.Append("/inventories/issuanceItems/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -11042,11 +11138,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances");
+                    urlBuilder_.Append("/inventories/issuances");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -11128,11 +11224,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances/");
+                    urlBuilder_.Append("/inventories/issuances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -11222,11 +11318,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances/");
+                    urlBuilder_.Append("/inventories/issuances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -11308,11 +11404,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances/");
+                    urlBuilder_.Append("/inventories/issuances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -11394,11 +11490,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances/search"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances/search");
+                    urlBuilder_.Append("/inventories/issuances/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -11487,11 +11583,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances/{id}/accept"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances/{id}/accept"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances/");
+                    urlBuilder_.Append("/inventories/issuances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/accept");
 
@@ -11528,30 +11624,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -11602,11 +11698,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances/{id}/reject"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances/{id}/reject"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances/");
+                    urlBuilder_.Append("/inventories/issuances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/reject");
 
@@ -11643,30 +11739,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -11711,11 +11807,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances/{id}/cancel"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances/{id}/cancel"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances/");
+                    urlBuilder_.Append("/inventories/issuances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/cancel");
 
@@ -11752,30 +11848,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -11820,11 +11916,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/issuances/{id}/return"
+                
+                    // Operation Path: "api/v{version}/inventories/issuances/{id}/return"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/issuances/");
+                    urlBuilder_.Append("/inventories/issuances/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/return");
 
@@ -11861,30 +11957,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -11932,11 +12028,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -12025,11 +12121,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/{id}/post"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/{id}/post"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/post");
 
@@ -12114,11 +12210,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/{id}/submit"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/{id}/submit"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/submit");
 
@@ -12203,11 +12299,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/{id}/approve"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/{id}/approve"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/approve");
 
@@ -12298,11 +12394,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/{id}/reject"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/{id}/reject"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/reject");
 
@@ -12387,11 +12483,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/{id}/export"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/{id}/export"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/export");
 
@@ -12473,11 +12569,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/search"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/search");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -12553,11 +12649,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -12641,11 +12737,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -12722,11 +12818,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/journalEntryVouchers/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/journalEntryVouchers/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/journalEntryVouchers/");
+                    urlBuilder_.Append("/inventories/journalEntryVouchers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -12807,11 +12903,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets");
+                    urlBuilder_.Append("/inventories/physicalAssets");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -12891,11 +12987,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/search"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/search");
+                    urlBuilder_.Append("/inventories/physicalAssets/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -12971,11 +13067,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -13059,11 +13155,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -13140,11 +13236,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -13234,11 +13330,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}/generate-qrcode"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}/generate-qrcode"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/generate-qrcode");
 
@@ -13275,30 +13371,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -13349,11 +13445,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}/assign-custodian"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}/assign-custodian"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/assign-custodian");
 
@@ -13390,30 +13486,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -13464,11 +13560,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}/update-condition"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}/update-condition"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/update-condition");
 
@@ -13505,30 +13601,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -13579,11 +13675,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}/record-depreciation"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}/record-depreciation"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/record-depreciation");
 
@@ -13620,30 +13716,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return objectResponse_.Object;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -13694,11 +13790,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}/issue"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}/issue"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/issue");
 
@@ -13789,11 +13885,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/{id}/return"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/{id}/return"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/");
+                    urlBuilder_.Append("/inventories/physicalAssets/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/return");
 
@@ -13881,11 +13977,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/export"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/export"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/export");
+                    urlBuilder_.Append("/inventories/physicalAssets/export");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -13918,20 +14014,20 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return fileResponse_;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                            {
-                                var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                            }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -13972,11 +14068,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/physicalAssets/stock-levels"
+                
+                    // Operation Path: "api/v{version}/inventories/physicalAssets/stock-levels"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/physicalAssets/stock-levels");
+                    urlBuilder_.Append("/inventories/physicalAssets/stock-levels");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -14032,6 +14128,440 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// Create PPE Issuance Report
+        /// </summary>
+        /// <remarks>
+        /// Creates a new PPE (Property, Plant &amp; Equipment) Issuance Report for tracking PPE issuance, transfer, or disposal.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<CreatePpeIssuanceReportResponse> CreatePpeIssuanceReportEndpointAsync(string version, CreatePpeIssuanceReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("POST");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/ppe-issuance"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/ppe-issuance");
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 201)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<CreatePpeIssuanceReportResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Internal Server Error", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Get PPE Issuance Report
+        /// </summary>
+        /// <remarks>
+        /// Retrieves a specific PPE Issuance Report by ID.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<GetPpeIssuanceReportByIdResponse> GetPpeIssuanceReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (id == null)
+                throw new System.ArgumentNullException("id");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/ppe-issuance/{id}"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/ppe-issuance/");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<GetPpeIssuanceReportByIdResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Internal Server Error", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Create PPE Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Creates a new PPE (Property, Plant &amp; Equipment) Receiving Report for tracking PPE receipt from suppliers, transfers, or donations.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<CreatePpeReceivingReportResponse> CreatePpeReceivingReportEndpointAsync(string version, CreatePpeReceivingReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("POST");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/ppe-receiving"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/ppe-receiving");
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 201)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<CreatePpeReceivingReportResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Internal Server Error", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Get PPE Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Retrieves a specific PPE Receiving Report by ID.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<GetPpeReceivingReportByIdResponse> GetPpeReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (id == null)
+                throw new System.ArgumentNullException("id");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/ppe-receiving/{id}"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/ppe-receiving/");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<GetPpeReceivingReportByIdResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Internal Server Error", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// create procurement plan (PPMP)
         /// </summary>
         /// <remarks>
@@ -14062,11 +14592,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans");
+                    urlBuilder_.Append("/inventories/procurementPlans");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -14148,11 +14678,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -14242,11 +14772,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -14333,11 +14863,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/search"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/search");
+                    urlBuilder_.Append("/inventories/procurementPlans/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -14419,11 +14949,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{id}/submit"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{id}/submit"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/submit");
 
@@ -14455,30 +14985,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -14528,11 +15058,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{id}/approve"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{id}/approve"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/approve");
 
@@ -14564,30 +15094,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -14637,11 +15167,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{id}/reject"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{id}/reject"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/reject");
 
@@ -14673,30 +15203,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -14740,11 +15270,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{id}/cancel"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{id}/cancel"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/cancel");
 
@@ -14776,30 +15306,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -14843,11 +15373,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{id}/revert-to-draft"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{id}/revert-to-draft"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/revert-to-draft");
 
@@ -14879,30 +15409,30 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
                             {
-                                var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                if (objectResponse_.Object == null)
-                                {
-                                    throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                }
-                                throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
-                            else
-                                if (status_ == 404)
-                                {
-                                    var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
-                                    if (objectResponse_.Object == null)
-                                    {
-                                        throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
-                                    }
-                                    throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -14949,11 +15479,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{planId}/items"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{planId}/items"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(planId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items");
 
@@ -15038,11 +15568,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{planId}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{planId}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(planId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -15121,11 +15651,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementPlans/{planId}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementPlans/{planId}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementPlans/");
+                    urlBuilder_.Append("/inventories/procurementPlans/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(planId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -15209,11 +15739,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementProjects"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementProjects"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementProjects");
+                    urlBuilder_.Append("/inventories/procurementProjects");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -15295,11 +15825,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementProjects/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementProjects/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementProjects/");
+                    urlBuilder_.Append("/inventories/procurementProjects/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -15389,11 +15919,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementProjects/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementProjects/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementProjects/");
+                    urlBuilder_.Append("/inventories/procurementProjects/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -15480,11 +16010,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/procurementProjects/search"
+                
+                    // Operation Path: "api/v{version}/inventories/procurementProjects/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/procurementProjects/search");
+                    urlBuilder_.Append("/inventories/procurementProjects/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -15570,11 +16100,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/products"
+                
+                    // Operation Path: "api/v{version}/inventories/products"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/products");
+                    urlBuilder_.Append("/inventories/products");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -15659,11 +16189,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/products"
+                
+                    // Operation Path: "api/v{version}/inventories/products"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/products");
+                    urlBuilder_.Append("/inventories/products");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -15693,22 +16223,22 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
-                            {
-                                string responseText_ = (response_.Content == null) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                throw new ApiException("Bad Request", status_, responseText_, headers_, null);
-                            }
-                            else
-                                if (status_ == 500)
-                                {
-                                    string responseText_ = (response_.Content == null) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("Internal Server Error", status_, responseText_, headers_, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                        if (status_ == 400)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Bad Request", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Internal Server Error", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -15752,11 +16282,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/products/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/products/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/products/");
+                    urlBuilder_.Append("/inventories/products/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -15846,11 +16376,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/products/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/products/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/products/");
+                    urlBuilder_.Append("/inventories/products/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -15932,11 +16462,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/products/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/products/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/products/");
+                    urlBuilder_.Append("/inventories/products/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -16018,11 +16548,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/products/search"
+                
+                    // Operation Path: "api/v{version}/inventories/products/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/products/search");
+                    urlBuilder_.Append("/inventories/products/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -16110,11 +16640,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases/purchases/{purchaseId}/items"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases/purchases/{purchaseId}/items"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases/purchases/");
+                    urlBuilder_.Append("/inventories/purchases/purchases/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(purchaseId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items");
 
@@ -16202,11 +16732,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases/purchases/{purchaseId}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases/purchases/{purchaseId}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases/purchases/");
+                    urlBuilder_.Append("/inventories/purchases/purchases/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(purchaseId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -16288,11 +16818,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases/purchases/{purchaseId}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases/purchases/{purchaseId}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases/purchases/");
+                    urlBuilder_.Append("/inventories/purchases/purchases/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(purchaseId, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -16376,11 +16906,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests");
+                    urlBuilder_.Append("/inventories/purchaseRequests");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -16461,11 +16991,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("GET");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/");
+                    urlBuilder_.Append("/inventories/purchaseRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -16547,11 +17077,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/search"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/search");
+                    urlBuilder_.Append("/inventories/purchaseRequests/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -16633,11 +17163,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/{id}/submit"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/{id}/submit"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/");
+                    urlBuilder_.Append("/inventories/purchaseRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/submit");
 
@@ -16719,11 +17249,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/{id}/approve"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/{id}/approve"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/");
+                    urlBuilder_.Append("/inventories/purchaseRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/approve");
                     urlBuilder_.Append('?');
@@ -16815,11 +17345,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/{id}/reject"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/{id}/reject"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/");
+                    urlBuilder_.Append("/inventories/purchaseRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/reject");
                     urlBuilder_.Append('?');
@@ -16902,11 +17432,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/{id}/cancel"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/{id}/cancel"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/");
+                    urlBuilder_.Append("/inventories/purchaseRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/cancel");
                     urlBuilder_.Append('?');
@@ -16994,11 +17524,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/{id}/items"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/{id}/items"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/");
+                    urlBuilder_.Append("/inventories/purchaseRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items");
 
@@ -17083,11 +17613,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/{id}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/{id}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/");
+                    urlBuilder_.Append("/inventories/purchaseRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -17166,11 +17696,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchaseRequests/{id}/items/{itemId}"
+                
+                    // Operation Path: "api/v{version}/inventories/purchaseRequests/{id}/items/{itemId}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchaseRequests/");
+                    urlBuilder_.Append("/inventories/purchaseRequests/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
                     urlBuilder_.Append("/items/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(itemId, System.Globalization.CultureInfo.InvariantCulture)));
@@ -17254,11 +17784,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases");
+                    urlBuilder_.Append("/inventories/purchases");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -17343,11 +17873,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases");
+                    urlBuilder_.Append("/inventories/purchases");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -17377,22 +17907,22 @@ namespace AMIS.Blazor.Infrastructure.Api
                             return;
                         }
                         else
-                            if (status_ == 400)
-                            {
-                                string responseText_ = (response_.Content == null) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                throw new ApiException("Bad Request", status_, responseText_, headers_, null);
-                            }
-                            else
-                                if (status_ == 500)
-                                {
-                                    string responseText_ = (response_.Content == null) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("Internal Server Error", status_, responseText_, headers_, null);
-                                }
-                                else
-                                {
-                                    var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
-                                    throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
-                                }
+                        if (status_ == 400)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Bad Request", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Internal Server Error", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
                     }
                     finally
                     {
@@ -17436,11 +17966,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases/");
+                    urlBuilder_.Append("/inventories/purchases/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -17530,11 +18060,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases/");
+                    urlBuilder_.Append("/inventories/purchases/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -17616,11 +18146,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases/");
+                    urlBuilder_.Append("/inventories/purchases/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -17702,11 +18232,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/purchases/search"
+                
+                    // Operation Path: "api/v{version}/inventories/purchases/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/purchases/search");
+                    urlBuilder_.Append("/inventories/purchases/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -17784,7 +18314,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/roles/{id}"
                     urlBuilder_.Append("api/roles/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -17864,7 +18394,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/roles/{id}"
                     urlBuilder_.Append("api/roles/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -17937,7 +18467,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/roles"
                     urlBuilder_.Append("api/roles");
 
@@ -18021,7 +18551,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/roles"
                     urlBuilder_.Append("api/roles");
 
@@ -18101,7 +18631,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/roles/{id}/permissions"
                     urlBuilder_.Append("api/roles/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -18189,7 +18719,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/roles/{id}/permissions"
                     urlBuilder_.Append("api/roles/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -18274,11 +18804,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/suppliers"
+                
+                    // Operation Path: "api/v{version}/inventories/suppliers"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/suppliers");
+                    urlBuilder_.Append("/inventories/suppliers");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -18360,11 +18890,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/suppliers/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/suppliers/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/suppliers/");
+                    urlBuilder_.Append("/inventories/suppliers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -18454,11 +18984,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/suppliers/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/suppliers/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/suppliers/");
+                    urlBuilder_.Append("/inventories/suppliers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -18540,11 +19070,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/suppliers/{id}"
+                
+                    // Operation Path: "api/v{version}/inventories/suppliers/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/suppliers/");
+                    urlBuilder_.Append("/inventories/suppliers/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
 
                     PrepareRequest(client_, request_, urlBuilder_);
@@ -18626,11 +19156,11 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
-                    // Operation Path: "api/v{version}/catalog/suppliers/search"
+                
+                    // Operation Path: "api/v{version}/inventories/suppliers/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
-                    urlBuilder_.Append("/catalog/suppliers/search");
+                    urlBuilder_.Append("/inventories/suppliers/search");
 
                     PrepareRequest(client_, request_, urlBuilder_);
 
@@ -18686,6 +19216,408 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// creates a supplies and materials issuance report (SMIR)
+        /// </summary>
+        /// <remarks>
+        /// creates a supplies and materials issuance report (SMIR) to track the movement of inventory from the facility
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<CreateSuppliesAndMaterialsIssuanceReportResponse> CreateSuppliesAndMaterialsIssuanceReportEndpointAsync(string version, CreateSuppliesAndMaterialsIssuanceReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("POST");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/supplies-materials-issuance"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/supplies-materials-issuance");
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 201)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<CreateSuppliesAndMaterialsIssuanceReportResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Bad Request", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 401)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Unauthorized", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// gets supplies and materials issuance report by id
+        /// </summary>
+        /// <remarks>
+        /// retrieves a specific supplies and materials issuance report (SMIR) by its ID
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<GetSuppliesAndMaterialsIssuanceReportByIdResponse> GetSuppliesAndMaterialsIssuanceReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (id == null)
+                throw new System.ArgumentNullException("id");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/supplies-materials-issuance/{id}"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/supplies-materials-issuance/");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<GetSuppliesAndMaterialsIssuanceReportByIdResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 401)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Unauthorized", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Not Found", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// creates a supplies and materials receiving report (SMRR)
+        /// </summary>
+        /// <remarks>
+        /// creates a supplies and materials receiving report (SMRR) to document the arrival and intake of goods into inventory
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<CreateSuppliesAndMaterialsReceivingReportResponse> CreateSuppliesAndMaterialsReceivingReportEndpointAsync(string version, CreateSuppliesAndMaterialsReceivingReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("POST");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/supplies-materials-receiving"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/supplies-materials-receiving");
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 201)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<CreateSuppliesAndMaterialsReceivingReportResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Bad Request", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 401)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Unauthorized", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// gets supplies and materials receiving report by id
+        /// </summary>
+        /// <remarks>
+        /// retrieves a specific supplies and materials receiving report (SMRR) by its ID
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<GetSuppliesAndMaterialsReceivingReportByIdResponse> GetSuppliesAndMaterialsReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (id == null)
+                throw new System.ArgumentNullException("id");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/supplies-materials-receiving/{id}"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/supplies-materials-receiving/");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<GetSuppliesAndMaterialsReceivingReportByIdResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 401)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Unauthorized", status_, responseText_, headers_, null);
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            string responseText_ = ( response_.Content == null ) ? string.Empty : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("Not Found", status_, responseText_, headers_, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// creates a tenant
         /// </summary>
         /// <remarks>
@@ -18712,7 +19644,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/tenants"
                     urlBuilder_.Append("api/tenants");
 
@@ -18789,7 +19721,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/tenants"
                     urlBuilder_.Append("api/tenants");
 
@@ -18869,7 +19801,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/tenants/{id}"
                     urlBuilder_.Append("api/tenants/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -18954,7 +19886,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/tenants/upgrade"
                     urlBuilder_.Append("api/tenants/upgrade");
 
@@ -19035,7 +19967,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/tenants/{id}/activate"
                     urlBuilder_.Append("api/tenants/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -19118,7 +20050,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/tenants/{id}/deactivate"
                     urlBuilder_.Append("api/tenants/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -19208,7 +20140,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/v{version}/todos"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
@@ -19294,7 +20226,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/v{version}/todos/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
@@ -19388,7 +20320,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/v{version}/todos/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
@@ -19474,7 +20406,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/v{version}/todos/{id}"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
@@ -19560,7 +20492,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/v{version}/todos/search"
                     urlBuilder_.Append("api/v");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
@@ -19650,7 +20582,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/token/refresh"
                     urlBuilder_.Append("api/token/refresh");
 
@@ -19738,7 +20670,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/token"
                     urlBuilder_.Append("api/token");
 
@@ -19822,7 +20754,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/register"
                     urlBuilder_.Append("api/users/register");
 
@@ -19910,7 +20842,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/self-register"
                     urlBuilder_.Append("api/users/self-register");
 
@@ -19993,7 +20925,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("PUT");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/profile"
                     urlBuilder_.Append("api/users/profile");
 
@@ -20065,7 +20997,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/profile"
                     urlBuilder_.Append("api/users/profile");
 
@@ -20142,7 +21074,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users"
                     urlBuilder_.Append("api/users");
 
@@ -20221,7 +21153,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("DELETE");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/{id}"
                     urlBuilder_.Append("api/users/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -20297,7 +21229,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/{id}"
                     urlBuilder_.Append("api/users/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -20385,7 +21317,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/forgot-password"
                     urlBuilder_.Append("api/users/forgot-password");
 
@@ -20463,7 +21395,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/change-password"
                     urlBuilder_.Append("api/users/change-password");
 
@@ -20545,7 +21477,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/reset-password"
                     urlBuilder_.Append("api/users/reset-password");
 
@@ -20617,7 +21549,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/permissions"
                     urlBuilder_.Append("api/users/permissions");
 
@@ -20703,7 +21635,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/{id}/toggle-status"
                     urlBuilder_.Append("api/users/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -20786,7 +21718,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Method = new System.Net.Http.HttpMethod("POST");
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/{id}/roles"
                     urlBuilder_.Append("api/users/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -20863,7 +21795,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/{id}/roles"
                     urlBuilder_.Append("api/users/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -20945,7 +21877,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/{id}/audit-trails"
                     urlBuilder_.Append("api/users/");
                     urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
@@ -21033,7 +21965,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("text/plain"));
 
                     var urlBuilder_ = new System.Text.StringBuilder();
-
+                
                     // Operation Path: "api/users/confirm-email"
                     urlBuilder_.Append("api/users/confirm-email");
                     urlBuilder_.Append('?');
@@ -21107,21 +22039,21 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         private static System.Threading.Tasks.Task<string> ReadAsStringAsync(System.Net.Http.HttpContent content, System.Threading.CancellationToken cancellationToken)
         {
-#if NET5_0_OR_GREATER
+    #if NET5_0_OR_GREATER
             return content.ReadAsStringAsync(cancellationToken);
-#else
+    #else
             return content.ReadAsStringAsync();
-#endif
+    #endif
         }
 
         [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         private static System.Threading.Tasks.Task<System.IO.Stream> ReadAsStreamAsync(System.Net.Http.HttpContent content, System.Threading.CancellationToken cancellationToken)
         {
-#if NET5_0_OR_GREATER
+    #if NET5_0_OR_GREATER
             return content.ReadAsStreamAsync(cancellationToken);
-#else
+    #else
             return content.ReadAsStreamAsync();
-#endif
+    #endif
         }
 
         public bool ReadResponseAsString { get; set; }
@@ -21180,7 +22112,7 @@ namespace AMIS.Blazor.Infrastructure.Api
                     var field_ = System.Reflection.IntrospectionExtensions.GetTypeInfo(value.GetType()).GetDeclaredField(name);
                     if (field_ != null)
                     {
-                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field_, typeof(System.Runtime.Serialization.EnumMemberAttribute))
+                        var attribute = System.Reflection.CustomAttributeExtensions.GetCustomAttribute(field_, typeof(System.Runtime.Serialization.EnumMemberAttribute)) 
                             as System.Runtime.Serialization.EnumMemberAttribute;
                         if (attribute != null)
                         {
@@ -21192,13 +22124,13 @@ namespace AMIS.Blazor.Infrastructure.Api
                     return converted == null ? string.Empty : converted;
                 }
             }
-            else if (value is bool)
+            else if (value is bool) 
             {
                 return System.Convert.ToString((bool)value, cultureInfo).ToLowerInvariant();
             }
             else if (value is byte[])
             {
-                return System.Convert.ToBase64String((byte[])value);
+                return System.Convert.ToBase64String((byte[]) value);
             }
             else if (value is string[])
             {
@@ -22480,6 +23412,30 @@ namespace AMIS.Blazor.Infrastructure.Api
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreateIssuanceLineItemRequest
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("acquisitionDate")]
+        public System.DateTime AcquisitionDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("quantity")]
+        public double Quantity { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unit")]
+        public string Unit { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unitCost")]
+        public double UnitCost { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class CreateIssuanceResponse
     {
 
@@ -22587,6 +23543,138 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("classification")]
         public PropertyClassification Classification { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreatePpeIssuanceLineItemRequest
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("propertyCode")]
+        public string PropertyCode { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("quantity")]
+        public double Quantity { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unit")]
+        public string Unit { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("acquisitionCost")]
+        public double AcquisitionCost { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("accumulatedDepreciation")]
+        public double? AccumulatedDepreciation { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("bookValue")]
+        public double? BookValue { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreatePpeIssuanceReportCommand
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("reportNumber")]
+        public string ReportNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("recipientName")]
+        public string RecipientName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("recipientAddress")]
+        public string RecipientAddress { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuanceType")]
+        public string IssuanceType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuanceDate")]
+        public System.DateTime IssuanceDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItems")]
+        public System.Collections.Generic.ICollection<CreatePpeIssuanceLineItemRequest> LineItems { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string Notes { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreatePpeIssuanceReportResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("reportNumber")]
+        public string ReportNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+        public System.DateTime CreatedAt { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreatePpeReceivingLineItemRequest
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("propertyCode")]
+        public string PropertyCode { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("dateAcquired")]
+        public System.DateTime DateAcquired { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("quantity")]
+        public double Quantity { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unit")]
+        public string Unit { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unitCost")]
+        public double UnitCost { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreatePpeReceivingReportCommand
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("reportNumber")]
+        public string ReportNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string Location { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItems")]
+        public System.Collections.Generic.ICollection<CreatePpeReceivingLineItemRequest> LineItems { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
+        public string SourceName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceAddress")]
+        public string SourceAddress { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceReceiptDate")]
+        public System.DateTime SourceReceiptDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("receiptType")]
+        public string ReceiptType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string Notes { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreatePpeReceivingReportResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
 
     }
 
@@ -22802,6 +23890,33 @@ namespace AMIS.Blazor.Infrastructure.Api
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreateReceivingLineItemRequest
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("name")]
+        public string Name { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("acquisitionDate")]
+        public System.DateTime AcquisitionDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("quantity")]
+        public double Quantity { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unit")]
+        public string Unit { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unitCost")]
+        public double UnitCost { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("reference")]
+        public string Reference { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class CreateSupplierCommand
     {
 
@@ -22827,6 +23942,138 @@ namespace AMIS.Blazor.Infrastructure.Api
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class CreateSupplierResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreateSuppliesAndMaterialsIssuanceReportCommand
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("smirNumber")]
+        public string SmirNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("transactionDate")]
+        public System.DateTime TransactionDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("recipientName")]
+        public string RecipientName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("recipientAddress")]
+        public string RecipientAddress { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("recipientContactNumber")]
+        public string RecipientContactNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuanceReason")]
+        public string IssuanceReason { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItems")]
+        public System.Collections.Generic.ICollection<CreateIssuanceLineItemRequest> LineItems { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuingOfficerName")]
+        public string IssuingOfficerName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuingOfficerSignature")]
+        public string IssuingOfficerSignature { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuingDate")]
+        public System.DateTime IssuingDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("approvingOfficerName")]
+        public string ApprovingOfficerName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("approvingOfficerSignature")]
+        public string ApprovingOfficerSignature { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("approvingDate")]
+        public System.DateTime ApprovingDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("authRecipientName")]
+        public string AuthRecipientName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("authRecipientSignature")]
+        public string AuthRecipientSignature { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("authReceiptDate")]
+        public System.DateTime AuthReceiptDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("driverName")]
+        public string DriverName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("driverSignature")]
+        public string DriverSignature { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("billOfLadingNumber")]
+        public string BillOfLadingNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string Notes { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreateSuppliesAndMaterialsIssuanceReportResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid? Id { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreateSuppliesAndMaterialsReceivingReportCommand
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("smrrNumber")]
+        public string SmrrNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string Location { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
+        public string SourceName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceAddress")]
+        public string SourceAddress { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("receivingDate")]
+        public System.DateTime ReceivingDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("transactionType")]
+        public string TransactionType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItems")]
+        public System.Collections.Generic.ICollection<CreateReceivingLineItemRequest> LineItems { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("receivedByName")]
+        public string ReceivedByName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("receivedBySignature")]
+        public string ReceivedBySignature { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("receivedDate")]
+        public System.DateTime ReceivedDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notedByName")]
+        public string NotedByName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notedBySignature")]
+        public string NotedBySignature { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notedDate")]
+        public System.DateTime NotedDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string Notes { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class CreateSuppliesAndMaterialsReceivingReportResponse
     {
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
@@ -23333,6 +24580,66 @@ namespace AMIS.Blazor.Infrastructure.Api
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class GetPpeIssuanceReportByIdResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("reportNumber")]
+        public string ReportNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("recipientName")]
+        public string RecipientName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("recipientAddress")]
+        public string RecipientAddress { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuanceType")]
+        public string IssuanceType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuanceDate")]
+        public System.DateTime IssuanceDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("totalAcquisitionCost")]
+        public double TotalAcquisitionCost { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItemCount")]
+        public int LineItemCount { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("createdOnUtc")]
+        public System.DateTime CreatedOnUtc { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class GetPpeReceivingReportByIdResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("reportNumber")]
+        public string ReportNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string Location { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
+        public string SourceName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("receiptType")]
+        public string ReceiptType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("totalAmount")]
+        public double TotalAmount { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string Notes { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class GetProcurementPlanResponse
     {
 
@@ -23443,6 +24750,54 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("assetsByLocation")]
         public System.Collections.Generic.IDictionary<string, int> AssetsByLocation { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class GetSuppliesAndMaterialsIssuanceReportByIdResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("smirNumber")]
+        public string SmirNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("transactionDate")]
+        public System.DateTime TransactionDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("issuanceReason")]
+        public string IssuanceReason { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("totalAmount")]
+        public double TotalAmount { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string Notes { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class GetSuppliesAndMaterialsReceivingReportByIdResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("smrrNumber")]
+        public string SmrrNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string Location { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("transactionType")]
+        public string TransactionType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("totalAmount")]
+        public double TotalAmount { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string Notes { get; set; }
 
     }
 
@@ -27165,11 +28520,11 @@ namespace AMIS.Blazor.Infrastructure.Api
 
 }
 
-#pragma warning restore 108
-#pragma warning restore 114
-#pragma warning restore 472
-#pragma warning restore 612
-#pragma warning restore 649
+#pragma warning restore  108
+#pragma warning restore  114
+#pragma warning restore  472
+#pragma warning restore  612
+#pragma warning restore  649
 #pragma warning restore 1573
 #pragma warning restore 1591
 #pragma warning restore 8073

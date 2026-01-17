@@ -1,0 +1,11 @@
+using FluentValidation;
+
+namespace AMIS.WebApi.Inventories.Application.Inventories.Update.v1;
+public class UpdateInventoryCommandValidator : AbstractValidator<UpdateInventoryCommand>
+{
+    public UpdateInventoryCommandValidator()
+    {
+        RuleFor(p => p.ProductId).NotEmpty();
+    }
+}
+

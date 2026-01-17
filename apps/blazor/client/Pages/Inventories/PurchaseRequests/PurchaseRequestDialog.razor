@@ -1,0 +1,114 @@
+﻿@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Blazor.Client.Pages.Inventories.PurchaseRequests
+@using MudBlazor
+
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Description" Class="mr-3 mb-n1" />
+            @(IsCreate ? "Create Purchase Request" : (ReadOnly ? "View Purchase Request" : "Purchase Request"))
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        @if (IsCreate)
+        {
+            <MudStack Spacing="1">
+                <MudDatePicker @bind-Date="RequestDateValue" Label="Request Date" Dense="true" Margin="Margin.Dense" />
+                <MudTextField T="string" @bind-Value="CreateModel.Purpose" Label="Purpose" Dense="true"
+                    Margin="Margin.Dense" Required="true" />
+                <PurchaseRequestItemList Items="CreateModel.Items" Products="_products" OnItemsChanged="StateHasChanged" />
+            </MudStack>
+        }
+        else if (ReadOnly)
+        {
+            <MudStack Spacing="2">
+                <MudText Typo="Typo.body1"><b>Date:</b> @ViewModel.RequestDate.ToString("yyyy-MM-dd")</MudText>
+                <MudText Typo="Typo.body1"><b>Requested By:</b> @ViewModel.RequestedBy</MudText>
+                <MudText Typo="Typo.body1"><b>Purpose:</b> @ViewModel.Purpose</MudText>
+                <MudTable T="PurchaseRequestItemResponse" Items="ViewModel.Items">
+                    <HeaderContent>
+                        <MudTh>Product</MudTh>
+                        <MudTh>Qty</MudTh>
+                        <MudTh>Unit</MudTh>
+                        <MudTh>Description</MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd>@GetProductLabel(context.Product, context.ManualProductName)</MudTd>
+                        <MudTd>@context.Qty</MudTd>
+                        <MudTd>@context.Unit</MudTd>
+                        <MudTd>@context.Description</MudTd>
+                    </RowTemplate>
+                </MudTable>
+            </MudStack>
+        }
+    </DialogContent>
+    <DialogActions>
+        <MudButton DropShadow=false StartIcon="@Icons.Material.Filled.Cancel" OnClick="Cancel">Close</MudButton>
+        @if (IsCreate)
+        {
+            <MudButton DropShadow=false StartIcon="@Icons.Material.Filled.Check" Color="Color.Primary"
+                Variant="Variant.Filled" Disabled="@(!CanSave())" OnClick="Save">Create</MudButton>
+        }
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public CreatePurchaseRequestCommand CreateModel { get; set; } = new();
+    [Parameter] public PurchaseRequestResponse ViewModel { get; set; } = new();
+    [Parameter] public bool IsCreate { get; set; }
+    [Parameter] public bool ReadOnly { get; set; }
+
+    [Inject] protected IApiClient Api { get; set; } = default!;
+    [Inject] protected ISnackbar Snackbar { get; set; } = default!;
+
+    private IReadOnlyList<ProductResponse> _products = Array.Empty<ProductResponse>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load products for item selection
+        var products = await Api.SearchProductsEndpointAsync("1", new SearchProductsCommand { PageNumber = 1, PageSize = 200 });
+        _products = products?.Items?.ToList() ?? new List<ProductResponse>();
+        RequestDateValue = CreateModel.RequestDate;
+    }
+
+    private bool CanSave()
+    {
+        if (RequestDateValue.HasValue)
+            CreateModel.RequestDate = RequestDateValue.Value;
+        return CreateModel.RequestDate != default &&
+        !string.IsNullOrWhiteSpace(CreateModel.Purpose) &&
+        CreateModel.Items != null &&
+        CreateModel.Items.Count > 0;
+    }
+
+    private async Task Save()
+    {
+        try
+        {
+            var result = await Api.CreatePurchaseRequestEndpointAsync("1", CreateModel);
+            MudDialog.Close(DialogResult.Ok(result));
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add($"Failed to create purchase request: {ex.Message}", Severity.Error);
+            // Don't close dialog on error so user can retry
+        }
+    }
+
+    private void Cancel() => MudDialog.Cancel();
+
+    private DateTime? RequestDateValue { get; set; }
+
+    private static string GetProductLabel(ProductResponse product, string manualProductName)
+    {
+        if (product is not null && !string.IsNullOrWhiteSpace(product.Name))
+        {
+            return product.Name;
+        }
+
+        if (string.IsNullOrWhiteSpace(manualProductName)) return string.Empty;
+        return $"{manualProductName} (Manual)";
+    }
+}
+

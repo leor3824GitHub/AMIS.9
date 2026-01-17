@@ -1,0 +1,41 @@
+﻿@page "/inventories/categories"
+
+<PageHeader Title="Categories" Header="Categories" SubHeader="Manage your Categories." />
+
+<EntityTable @ref="_table" TEntity="CategoryResponse" TId="Guid" TRequest="CategoryViewModel" Context="@Context">
+
+    <EditFormContent>
+        @if (!context.IsCreate)
+        {
+            <MudItem xs="12" md="6">
+                <MudTextField Value="@context.RequestModel.Id" Underline=false ReadOnly Label="Category Id" />
+            </MudItem>
+        }
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Name" For="@(() => context.RequestModel.Name)" @bind-Value="context.RequestModel.Name" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Description" For="@(() => context.RequestModel.Description)" @bind-Value="context.RequestModel.Description" />
+        </MudItem>
+        @* <MudItem xs="12" md="12">
+            <MudItem>
+                <div>
+                    @if(!context.IsCreate)
+                    {
+                        <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Info" Size="Size.Small" Target="_blank"
+                            StartIcon="@Icons.Material.Filled.RemoveRedEye" Style="margin-left: 5px;" >
+                            View
+                        </MudButton>
+
+                        <MudButton HtmlTag="label" Variant="Variant.Filled" Color="Color.Error" Size="Size.Small"
+                                   StartIcon="@Icons.Material.Filled.Delete" Style="margin-left: 5px;">
+                            Delete
+                        </MudButton>
+                    }
+                </div>
+            </MudItem>
+        </MudItem> *@
+    </EditFormContent>
+
+</EntityTable>
+
