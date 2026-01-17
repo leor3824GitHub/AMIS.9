@@ -1,4 +1,4 @@
-using AMIS.Catalog.Application.Issuances.Features.Reject.v1;
+using AMIS.Inventories.Application.Issuances.Features.Reject.v1;
 using AMIS.Framework.Infrastructure.Auth.Policy;
 using Asp.Versioning;
 using MediatR;
@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
-namespace AMIS.Catalog.Infrastructure.Issuances.Features.Reject.v1;
+namespace AMIS.Inventories.Infrastructure.Issuances.Features.Reject.v1;
 
 public static class RejectIssuanceEndpoint
 {

@@ -85,13 +85,11 @@ public partial class SupplyAndPpeReports : ComponentBase
             return;
         }
 
-        var acquisitionDate = _smirDraft.AcquisitionDate ?? _smirModel.TransactionDate;
-
         _smirModel.LineItems.Add(new SmirLineItemModel
         {
             Name = _smirDraft.Name.Trim(),
             Description = _smirDraft.Description?.Trim(),
-            AcquisitionDate = acquisitionDate,
+            AcquisitionDate = _smirDraft.AcquisitionDate,
             Quantity = _smirDraft.Quantity,
             Unit = _smirDraft.Unit?.Trim(),
             UnitCost = _smirDraft.UnitCost,
@@ -162,7 +160,6 @@ public partial class SupplyAndPpeReports : ComponentBase
                 Quantity = li.Quantity,
                 Unit = li.Unit,
                 UnitCost = li.UnitCost,
-                Reference = li.Reference,
             }).ToList(),
         };
 
@@ -467,13 +464,11 @@ public partial class SupplyAndPpeReports : ComponentBase
             return;
         }
 
-        var dateAcquired = _ppeReceivingDraft.DateAcquired ?? _ppeReceivingModel.SourceReceiptDate;
-
         _ppeReceivingModel.LineItems.Add(new PpeReceivingLineItemModel
         {
             PropertyCode = _ppeReceivingDraft.PropertyCode.Trim(),
-            Description = _ppeReceivingDraft.Description.Trim(),
-            DateAcquired = dateAcquired,
+            Description = _ppeReceivingDraft.Description?.Trim(),
+            DateAcquired = _ppeReceivingDraft.DateAcquired,
             Quantity = _ppeReceivingDraft.Quantity,
             Unit = _ppeReceivingDraft.Unit?.Trim() ?? string.Empty,
             UnitCost = _ppeReceivingDraft.UnitCost,

@@ -4,7 +4,7 @@ using AMIS.Framework.Core.Persistence;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AMIS.Catalog.Application.Issuances.Features.Accept.v1;
+namespace AMIS.Inventories.Application.Issuances.Features.Accept.v1;
 
 public sealed class AcceptIssuanceHandler(
     [FromKeyedServices("inventories:issuances")] IRepository<Issuance> repository)

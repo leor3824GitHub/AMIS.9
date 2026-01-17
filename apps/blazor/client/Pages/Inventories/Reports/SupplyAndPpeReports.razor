@@ -1,8 +1,6 @@
 ﻿@page "/inventories/reports/supply-ppe"
 @using AMIS.Blazor.Client.Components
 @using AMIS.Blazor.Infrastructure.Api
-@inherits SupplyAndPpeReports
-
 <PageHeader Title="Supply & PPE Reports" Header="SMIR / SMRR / PPE Issuance & Receiving" SubHeader="Capture COA-compliant issuance and receiving reports for supplies and property" />
 
 <MudPaper Class="report-shell pa-4">
@@ -81,7 +79,7 @@
                     <MudPaper Class="line-card pa-3 mt-4">
                         <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
                             <MudText Typo="Typo.subtitle1">Line Items</MudText>
-                            <MudChip Color="Color.Info" Variant="Variant.Outlined">@_smirModel.LineItems.Count item(s)</MudChip>
+                            <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">@_smirModel.LineItems.Count item(s)</MudChip>
                         </MudStack>
                         <MudGrid GutterSize="2" Class="mt-2">
                             <MudItem xs="12" md="3">
@@ -203,7 +201,7 @@
                     <MudPaper Class="line-card pa-3 mt-4">
                         <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
                             <MudText Typo="Typo.subtitle1">Line Items</MudText>
-                            <MudChip Color="Color.Info" Variant="Variant.Outlined">@_smrrModel.LineItems.Count item(s)</MudChip>
+                            <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">@_smrrModel.LineItems.Count item(s)</MudChip>
                         </MudStack>
                         <MudGrid GutterSize="2" Class="mt-2">
                             <MudItem xs="12" md="3">
@@ -304,7 +302,7 @@
                     <MudPaper Class="line-card pa-3 mt-4">
                         <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
                             <MudText Typo="Typo.subtitle1">Line Items</MudText>
-                            <MudChip Color="Color.Info" Variant="Variant.Outlined">@_ppeIssuanceModel.LineItems.Count item(s)</MudChip>
+                            <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">@_ppeIssuanceModel.LineItems.Count item(s)</MudChip>
                         </MudStack>
                         <MudGrid GutterSize="2" Class="mt-2">
                             <MudItem xs="12" md="3">
@@ -411,7 +409,7 @@
                     <MudPaper Class="line-card pa-3 mt-4">
                         <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
                             <MudText Typo="Typo.subtitle1">Line Items</MudText>
-                            <MudChip Color="Color.Info" Variant="Variant.Outlined">@_ppeReceivingModel.LineItems.Count item(s)</MudChip>
+                            <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">@_ppeReceivingModel.LineItems.Count item(s)</MudChip>
                         </MudStack>
                         <MudGrid GutterSize="2" Class="mt-2">
                             <MudItem xs="12" md="3">
@@ -452,7 +450,7 @@
                             <RowTemplate>
                                 <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
                                 <MudTd DataLabel="Description">@context.Description</MudTd>
-                                <MudTd DataLabel="Date Acquired">@context.DateAcquired.ToShortDateString()</MudTd>
+                                <MudTd DataLabel="Date Acquired">@(context.DateAcquired?.ToShortDateString() ?? "N/A")</MudTd>
                                 <MudTd DataLabel="Qty">@context.Quantity</MudTd>
                                 <MudTd DataLabel="Unit">@context.Unit</MudTd>
                                 <MudTd DataLabel="Unit Cost" align="right">@context.UnitCost.ToString("C2")</MudTd>

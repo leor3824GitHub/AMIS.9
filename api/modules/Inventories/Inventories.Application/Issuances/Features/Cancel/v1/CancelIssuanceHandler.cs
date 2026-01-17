@@ -3,7 +3,7 @@ using AMIS.Framework.Core.Persistence;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AMIS.Catalog.Application.Issuances.Features.Cancel.v1;
+namespace AMIS.Inventories.Application.Issuances.Features.Cancel.v1;
 
 public sealed class CancelIssuanceHandler(
     [FromKeyedServices("inventories:issuances")] IRepository<Issuance> repository)
