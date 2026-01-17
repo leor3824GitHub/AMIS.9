@@ -125,7 +125,7 @@ public partial class SupplyAndPpeReports : ComponentBase
             return;
         }
 
-        if (_smirModel.TransactionDate.Date > DateTime.Today)
+        if (_smirModel.TransactionDate?.Date > DateTime.Today)
         {
             Snackbar.Add("Transaction date cannot be in the future", Severity.Warning);
             return;
@@ -134,20 +134,20 @@ public partial class SupplyAndPpeReports : ComponentBase
         var command = new CreateSuppliesAndMaterialsIssuanceReportCommand
         {
             SmirNumber = _smirModel.SmirNumber,
-            TransactionDate = _smirModel.TransactionDate,
+            TransactionDate = _smirModel.TransactionDate ?? DateTime.Today,
             RecipientName = _smirModel.RecipientName,
             RecipientAddress = _smirModel.RecipientAddress,
             RecipientContactNumber = _smirModel.RecipientContactNumber,
             IssuanceReason = _smirModel.IssuanceReason,
             IssuingOfficerName = _smirModel.IssuingOfficerName,
             IssuingOfficerSignature = _smirModel.IssuingOfficerSignature,
-            IssuingDate = _smirModel.IssuingDate ?? _smirModel.TransactionDate,
+            IssuingDate = _smirModel.IssuingDate ?? _smirModel.TransactionDate ?? DateTime.Today,
             ApprovingOfficerName = _smirModel.ApprovingOfficerName,
             ApprovingOfficerSignature = _smirModel.ApprovingOfficerSignature,
-            ApprovingDate = _smirModel.ApprovingDate ?? _smirModel.TransactionDate,
+            ApprovingDate = _smirModel.ApprovingDate ?? _smirModel.TransactionDate ?? DateTime.Today,
             AuthRecipientName = _smirModel.AuthRecipientName,
             AuthRecipientSignature = _smirModel.AuthRecipientSignature,
-            AuthReceiptDate = _smirModel.AuthReceiptDate ?? _smirModel.TransactionDate,
+            AuthReceiptDate = _smirModel.AuthReceiptDate ?? _smirModel.TransactionDate ?? DateTime.Today,
             DriverName = _smirModel.DriverName,
             DriverSignature = _smirModel.DriverSignature,
             BillOfLadingNumber = _smirModel.BillOfLadingNumber,
@@ -156,7 +156,7 @@ public partial class SupplyAndPpeReports : ComponentBase
             {
                 Name = li.Name,
                 Description = li.Description,
-                AcquisitionDate = li.AcquisitionDate ?? _smirModel.TransactionDate,
+                AcquisitionDate = li.AcquisitionDate ?? _smirModel.TransactionDate ?? DateTime.Today,
                 Quantity = li.Quantity,
                 Unit = li.Unit,
                 UnitCost = li.UnitCost,
@@ -255,7 +255,7 @@ public partial class SupplyAndPpeReports : ComponentBase
             return;
         }
 
-        if (_smrrModel.ReceivingDate.Date > DateTime.Today)
+        if (_smrrModel.ReceivingDate?.Date > DateTime.Today)
         {
             Snackbar.Add("Receiving date cannot be in the future", Severity.Warning);
             return;
@@ -267,20 +267,20 @@ public partial class SupplyAndPpeReports : ComponentBase
             Location = _smrrModel.Location,
             SourceName = _smrrModel.SourceName,
             SourceAddress = _smrrModel.SourceAddress,
-            ReceivingDate = _smrrModel.ReceivingDate,
+            ReceivingDate = _smrrModel.ReceivingDate ?? DateTime.Today,
             TransactionType = _smrrModel.TransactionType,
             ReceivedByName = _smrrModel.ReceivedByName,
             ReceivedBySignature = _smrrModel.ReceivedBySignature,
-            ReceivedDate = _smrrModel.ReceivedDate ?? _smrrModel.ReceivingDate,
+            ReceivedDate = _smrrModel.ReceivedDate ?? _smrrModel.ReceivingDate ?? DateTime.Today,
             NotedByName = _smrrModel.NotedByName,
             NotedBySignature = _smrrModel.NotedBySignature,
-            NotedDate = _smrrModel.NotedDate ?? _smrrModel.ReceivingDate,
+            NotedDate = _smrrModel.NotedDate ?? _smrrModel.ReceivingDate ?? DateTime.Today,
             Notes = _smrrModel.Notes,
             LineItems = _smrrModel.LineItems.Select(li => new CreateReceivingLineItemRequest
             {
                 Name = li.Name,
                 Description = li.Description,
-                AcquisitionDate = li.AcquisitionDate ?? _smrrModel.ReceivingDate,
+                AcquisitionDate = li.AcquisitionDate ?? _smrrModel.ReceivingDate ?? DateTime.Today,
                 Quantity = li.Quantity,
                 Unit = li.Unit,
                 UnitCost = li.UnitCost,
@@ -382,7 +382,7 @@ public partial class SupplyAndPpeReports : ComponentBase
             return;
         }
 
-        if (_ppeIssuanceModel.IssuanceDate.Date > DateTime.Today)
+        if (_ppeIssuanceModel.IssuanceDate?.Date > DateTime.Today)
         {
             Snackbar.Add("Issuance date cannot be in the future", Severity.Warning);
             return;
@@ -394,7 +394,7 @@ public partial class SupplyAndPpeReports : ComponentBase
             RecipientName = _ppeIssuanceModel.RecipientName,
             RecipientAddress = _ppeIssuanceModel.RecipientAddress,
             IssuanceType = _ppeIssuanceModel.IssuanceType,
-            IssuanceDate = _ppeIssuanceModel.IssuanceDate,
+            IssuanceDate = _ppeIssuanceModel.IssuanceDate ?? DateTime.Today,
             Notes = _ppeIssuanceModel.Notes,
             LineItems = _ppeIssuanceModel.LineItems.Select(li => new CreatePpeIssuanceLineItemRequest
             {
@@ -503,7 +503,7 @@ public partial class SupplyAndPpeReports : ComponentBase
             return;
         }
 
-        if (_ppeReceivingModel.SourceReceiptDate.Date > DateTime.Today)
+        if (_ppeReceivingModel.SourceReceiptDate?.Date > DateTime.Today)
         {
             Snackbar.Add("Receipt date cannot be in the future", Severity.Warning);
             return;
@@ -516,13 +516,13 @@ public partial class SupplyAndPpeReports : ComponentBase
             SourceName = _ppeReceivingModel.SourceName,
             SourceAddress = _ppeReceivingModel.SourceAddress,
             ReceiptType = _ppeReceivingModel.ReceiptType,
-            SourceReceiptDate = _ppeReceivingModel.SourceReceiptDate,
+            SourceReceiptDate = _ppeReceivingModel.SourceReceiptDate ?? DateTime.Today,
             Notes = _ppeReceivingModel.Notes,
             LineItems = _ppeReceivingModel.LineItems.Select(li => new CreatePpeReceivingLineItemRequest
             {
                 PropertyCode = li.PropertyCode,
                 Description = li.Description,
-                DateAcquired = li.DateAcquired ?? _ppeReceivingModel.SourceReceiptDate,
+                DateAcquired = li.DateAcquired ?? _ppeReceivingModel.SourceReceiptDate ?? DateTime.Today,
                 Quantity = li.Quantity,
                 Unit = li.Unit,
                 UnitCost = li.UnitCost,
@@ -551,7 +551,7 @@ public class SmirModel
     public string SmirNumber { get; set; } = string.Empty;
 
     [Required]
-    public DateTime TransactionDate { get; set; } = DateTime.Today;
+    public DateTime? TransactionDate { get; set; } = DateTime.Today;
 
     [Required, MaxLength(200)]
     public string RecipientName { get; set; } = string.Empty;
@@ -630,7 +630,7 @@ public class SmrrModel
     public string SourceAddress { get; set; } = string.Empty;
 
     [Required]
-    public DateTime ReceivingDate { get; set; } = DateTime.Today;
+    public DateTime? ReceivingDate { get; set; } = DateTime.Today;
 
     [Required]
     public string TransactionType { get; set; } = "Purchase";
@@ -689,7 +689,7 @@ public class PpeIssuanceModel
     public string IssuanceType { get; set; } = string.Empty;
 
     [Required]
-    public DateTime IssuanceDate { get; set; } = DateTime.Today;
+    public DateTime? IssuanceDate { get; set; } = DateTime.Today;
 
     public string Notes { get; set; } = string.Empty;
 
@@ -736,7 +736,7 @@ public class PpeReceivingModel
     public string ReceiptType { get; set; } = "Purchase";
 
     [Required]
-    public DateTime SourceReceiptDate { get; set; } = DateTime.Today;
+    public DateTime? SourceReceiptDate { get; set; } = DateTime.Today;
 
     public string Notes { get; set; } = string.Empty;
 
