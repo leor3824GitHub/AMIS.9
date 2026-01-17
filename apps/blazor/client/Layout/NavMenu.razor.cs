@@ -31,7 +31,13 @@ public partial class NavMenu
     private bool _canViewEmployees;
     private bool _canViewTenants;
     private bool _canViewAuditTrails;
+    private bool _canViewDepreciationSchedules;
+    private bool _canViewJournalEntryVouchers;
+    private bool _canViewAssetRequisitions;
+    private bool _canViewPhysicalAssets;
     private bool CanViewAdministrationGroup => _canViewUsers || _canViewRoles || _canViewTenants;
+    private bool CanViewAccountingGroup => _canViewDepreciationSchedules || _canViewJournalEntryVouchers;
+    private bool CanViewMyAccountabilityGroup => _canViewAssetRequisitions || _canViewPhysicalAssets;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -54,5 +60,9 @@ public partial class NavMenu
         _canViewEmployees = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Employees);
         _canViewTenants = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Tenants);
         _canViewAuditTrails = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.AuditTrails);
+        _canViewDepreciationSchedules = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.DepreciationSchedules);
+        _canViewJournalEntryVouchers = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.JournalEntryVouchers);
+        _canViewAssetRequisitions = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.AssetRequisitions);
+        _canViewPhysicalAssets = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PhysicalAssets);
     }
 }

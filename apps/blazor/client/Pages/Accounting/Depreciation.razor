@@ -199,13 +199,13 @@
                                     Variant="Variant.Outlined" FullWidth="true" Clearable="true" />
                             </MudItem>
                             <MudItem xs="12" sm="6">
-                                <MudSelect @bind-Value="_assetCategoryFilter" Label="Category"
+                                <MudSelect T="string" @bind-Value="_assetCategoryFilter" Label="Category"
                                     Variant="Variant.Outlined" FullWidth="true">
-                                    <MudSelectItem Value="string.Empty">All Categories</MudSelectItem>
-                                    <MudSelectItem Value="Building">Building</MudSelectItem>
-                                    <MudSelectItem Value="Equipment">Equipment</MudSelectItem>
-                                    <MudSelectItem Value="Vehicle">Vehicle</MudSelectItem>
-                                    <MudSelectItem Value="Furniture">Furniture</MudSelectItem>
+                                    <MudSelectItem Value="@string.Empty">All Categories</MudSelectItem>
+                                    <MudSelectItem Value="@("Building")">Building</MudSelectItem>
+                                    <MudSelectItem Value="@("Equipment")">Equipment</MudSelectItem>
+                                    <MudSelectItem Value="@("Vehicle")">Vehicle</MudSelectItem>
+                                    <MudSelectItem Value="@("Furniture")">Furniture</MudSelectItem>
                                 </MudSelect>
                             </MudItem>
                         </MudGrid>
@@ -244,7 +244,7 @@
                         <MudGrid>
                             <MudItem xs="12" sm="6" md="3">
                                 <MudButton Variant="Variant.Text" Class="mud-action-card pa-4 h-100"
-                                    OnClick="@(() => GenerateReport("FixedAssetSummary"))"
+                                    OnClick='@(() => GenerateReport("FixedAssetSummary"))'
                                     Style="text-transform: none; height: auto;">
                                     <MudStack AlignItems="AlignItems.Center">
                                         <MudIcon Icon="@Icons.Material.Filled.TableChart" Size="Size.Large"
@@ -256,7 +256,7 @@
 
                             <MudItem xs="12" sm="6" md="3">
                                 <MudButton Variant="Variant.Text" Class="mud-action-card pa-4 h-100"
-                                    OnClick="@(() => GenerateReport("DepreciationAnalysis"))"
+                                    OnClick='@(() => GenerateReport("DepreciationAnalysis"))'
                                     Style="text-transform: none; height: auto;">
                                     <MudStack AlignItems="AlignItems.Center">
                                         <MudIcon Icon="@Icons.Material.Filled.Timeline" Size="Size.Large"
@@ -268,7 +268,7 @@
 
                             <MudItem xs="12" sm="6" md="3">
                                 <MudButton Variant="Variant.Text" Class="mud-action-card pa-4 h-100"
-                                    OnClick="@(() => GenerateReport("DisposalReport"))"
+                                    OnClick='@(() => GenerateReport("DisposalReport"))'
                                     Style="text-transform: none; height: auto;">
                                     <MudStack AlignItems="AlignItems.Center">
                                         <MudIcon Icon="@Icons.Material.Filled.DeleteOutline" Size="Size.Large"
@@ -280,10 +280,10 @@
 
                             <MudItem xs="12" sm="6" md="3">
                                 <MudButton Variant="Variant.Text" Class="mud-action-card pa-4 h-100"
-                                    OnClick="@(() => GenerateReport("TrialBalance"))"
+                                    OnClick='@(() => GenerateReport("TrialBalance"))'
                                     Style="text-transform: none; height: auto;">
                                     <MudStack AlignItems="AlignItems.Center">
-                                        <MudIcon Icon="@Icons.Material.Filled.BalanceScale" Size="Size.Large"
+                                        <MudIcon Icon="@Icons.Material.Filled.AccountBalance" Size="Size.Large"
                                             Color="Color.Info" />
                                         <MudText Typo="Typo.subtitle2" Class="mt-2">Trial Balance Report</MudText>
                                     </MudStack>
@@ -375,9 +375,9 @@ new DepreciationByCategory { Category = "Vehicles", AssetCount = 3, GrossValue =
 
         _journalEntries = new()
 {
-new JournalEntry { JevNumber = "JEV-2025-0001", EntryDate = DateTime.Now.AddDays(-10), Description = "Monthly Depreciation - January", Amount = 15000, Status = "Posted" },
-new JournalEntry { JevNumber = "JEV-2025-0002", EntryDate = DateTime.Now.AddDays(-5), Description = "Asset Receipt - Equipment", Amount = 50000, Status = "Pending" },
-new JournalEntry { JevNumber = "JEV-2025-0003", EntryDate = DateTime.Now, Description = "Depreciation Adjustment",
+new JournalEntry { Id = Guid.NewGuid(), JevNumber = "JEV-2025-0001", EntryDate = DateTime.Now.AddDays(-10), Description = "Monthly Depreciation - January", Amount = 15000, Status = "Posted" },
+new JournalEntry { Id = Guid.NewGuid(), JevNumber = "JEV-2025-0002", EntryDate = DateTime.Now.AddDays(-5), Description = "Asset Receipt - Equipment", Amount = 50000, Status = "Pending" },
+new JournalEntry { Id = Guid.NewGuid(), JevNumber = "JEV-2025-0003", EntryDate = DateTime.Now, Description = "Depreciation Adjustment",
 Amount = 5000, Status = "Pending" }
 };
 
@@ -415,7 +415,7 @@ new AssetRegisterItem { PropertyCode = "EQP-001", AssetName = "Server Computer",
                     for (int i = 0; i < 12; i++)
                     {
                         ytdExpense += monthlyExpense;
-                        _depreciationSchedule.Add(new DepreciationScheduleItem
+                        _depreciationSchedule.Add(new DepreciationSchedule
                         {
                             Month = months[i],
                             AssetName = asset.AssetName,
@@ -464,7 +464,11 @@ new AssetRegisterItem { PropertyCode = "EQP-001", AssetName = "Server Computer",
             // TODO: Generate depreciation JEV for current period
             Snackbar?.Add("Depreciation JEV generated successfully", Severity.Success);
         }
-}
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error generating JEV: {ex.Message}", Severity.Error);
+        }
+    }
 
     private async Task GenerateReport(string reportType)
     {
@@ -568,6 +572,7 @@ new AssetRegisterItem { PropertyCode = "EQP-001", AssetName = "Server Computer",
 
     private sealed class JournalEntry
     {
+        public Guid Id { get; set; }
         public string JevNumber { get; set; } = string.Empty;
         public DateTime EntryDate { get; set; }
         public string Description { get; set; } = string.Empty;

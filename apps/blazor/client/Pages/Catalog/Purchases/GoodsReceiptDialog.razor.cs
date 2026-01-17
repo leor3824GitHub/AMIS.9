@@ -3,7 +3,6 @@ using AMIS.Blazor.Client.Components;
 using AMIS.Blazor.Infrastructure.Api;
 using AMIS.Blazor.Infrastructure.Auth;
 using AMIS.Blazor.Shared.Purchases;
-using Shared.Authorization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
 using MudBlazor;

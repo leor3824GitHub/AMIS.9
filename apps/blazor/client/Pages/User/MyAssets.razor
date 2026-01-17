@@ -1,8 +1,8 @@
-@page "/user/assets"
+@page "/my-accountability/my-assets"
 @using AMIS.Blazor.Infrastructure.Api
 @using Microsoft.AspNetCore.Components.Authorization
 
-<PageHeader Title="My Assets" Description="View assets in your custody" BreadcrumbItems="_breadcrumbItems" />
+<PageHeader Title="My Assets" Description="View assets in your custody" />
 
 <AuthorizeView>
     <Authorized>
@@ -17,7 +17,7 @@
                                 Placeholder="Search by asset name or property code..." Variant="Variant.Outlined"
                                 FullWidth="true" Adornment="Adornment.Start"
                                 AdornmentIcon="@Icons.Material.Filled.Search" />
-                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@SearchAssets">Search
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SearchAssets">Search
                             </MudButton>
                         </MudStack>
 
@@ -133,104 +133,196 @@
 </AuthorizeView>
 
 <!-- Asset Details Dialog -->
-<MudDialog @bind-IsOpen="@_showDetailsDialog">
+<MudDialog @bind-IsOpen="@_showDetailsDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Info" Class="mr-2" />
+            Asset Details
+        </MudText>
+    </TitleContent>
     <DialogContent>
         @if (_selectedAsset != null)
         {
-            <MudText Typo="Typo.h6" GutterBottom="true">@_selectedAsset.AssetName</MudText>
+            <MudCard Elevation="0" Outlined="true" Class="mb-4">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText Typo="Typo.h6">@_selectedAsset.AssetName</MudText>
+                        <MudText Typo="Typo.body2" Color="Color.Secondary">@_selectedAsset.PropertyCode</MudText>
+                    </CardHeaderContent>
+                    <CardHeaderActions>
+                        <MudChip T="string" Color="@GetConditionColor(_selectedAsset.Condition)" Size="Size.Small">
+                            @_selectedAsset.Condition
+                        </MudChip>
+                    </CardHeaderActions>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Category</MudText>
+                            <MudText Typo="Typo.body1">@_selectedAsset.Category</MudText>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Acquisition Cost</MudText>
+                            <MudText Typo="Typo.body1" Color="Color.Success">₱ @_selectedAsset.AcquisitionCost?.ToString("N2")</MudText>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Date Assigned</MudText>
+                            <MudText Typo="Typo.body1">@_selectedAsset.DateAssigned?.ToString("MMM dd, yyyy")</MudText>
+                        </MudItem>
+                        <MudItem xs="6">
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Days in Custody</MudText>
+                            <MudText Typo="Typo.body1">@GetDaysInCustody(_selectedAsset.DateAssigned) days</MudText>
+                        </MudItem>
+                    </MudGrid>
 
-            <MudSimpleTable Striped="true" Class="mt-4">
-                <tbody>
-                    <tr>
-                        <td><strong>Property Code:</strong></td>
-                        <td>@_selectedAsset.PropertyCode</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Category:</strong></td>
-                        <td>@_selectedAsset.Category</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Acquisition Cost:</strong></td>
-                        <td>₱ @_selectedAsset.AcquisitionCost?.ToString("N2")</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Date Assigned:</strong></td>
-                        <td>@_selectedAsset.DateAssigned?.ToString("MMM dd, yyyy")</td>
-                    </tr>
-                    <tr>
-                        <td><strong>Condition:</strong></td>
-                        <td>
-                            <MudChip T="string" Color="@GetConditionColor(_selectedAsset.Condition)" Size="Size.Small"
-                                Variant="Variant.Text">
-                                @_selectedAsset.Condition
-                            </MudChip>
-                        </td>
-                    </tr>
-                </tbody>
-            </MudSimpleTable>
+                    <MudDivider Class="my-4" />
+
+                    <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-2">Description</MudText>
+                    <MudText Typo="Typo.body2">
+                        This asset is currently assigned to you. Please ensure it is properly maintained and used according to company policies.
+                    </MudText>
+                </MudCardContent>
+            </MudCard>
         }
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(() => _showDetailsDialog = false)">Close</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="@(() => { _showDetailsDialog = false; OpenReturnDialog(_selectedAsset!); })">
+            Return Asset
+        </MudButton>
     </DialogActions>
 </MudDialog>
 
 <!-- Asset Return Dialog -->
-<MudDialog @bind-IsOpen="@_showReturnDialog">
+<MudDialog @bind-IsOpen="@_showReturnDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true })">
     <TitleContent>
-        <MudText Typo="Typo.h6">Return Asset</MudText>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.AssignmentReturn" Class="mr-2" />
+            Return Asset
+        </MudText>
     </TitleContent>
     <DialogContent>
         @if (_selectedAsset != null)
         {
-            <MudText Typo="Typo.subtitle2" GutterBottom="true">Returning: @_selectedAsset.AssetName</MudText>
+            <MudAlert Severity="Severity.Info" Class="mb-4">
+                You are returning <strong>@_selectedAsset.AssetName</strong> (@_selectedAsset.PropertyCode)
+            </MudAlert>
 
-            <MudSelect @bind-Value="_returnCondition" Label="Asset Condition" Variant="Variant.Outlined" FullWidth="true"
-                Class="mt-4">
-                <MudSelectItem Value="@("Good")">Good</MudSelectItem>
-                <MudSelectItem Value="@("Fair")">Fair</MudSelectItem>
-                <MudSelectItem Value="@("For Repair")">For Repair</MudSelectItem>
+            <MudSelect @bind-Value="_returnCondition" Label="Asset Condition *" Variant="Variant.Outlined" FullWidth="true"
+                AdornmentIcon="@Icons.Material.Filled.HealthAndSafety" Adornment="Adornment.Start" Required="true">
+                <MudSelectItem Value="@("Good")">
+                    <div class="d-flex align-center">
+                        <MudIcon Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Size="Size.Small" Class="mr-2" />
+                        Good - No issues
+                    </div>
+                </MudSelectItem>
+                <MudSelectItem Value="@("Fair")">
+                    <div class="d-flex align-center">
+                        <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Warning" Size="Size.Small" Class="mr-2" />
+                        Fair - Minor wear and tear
+                    </div>
+                </MudSelectItem>
+                <MudSelectItem Value="@("For Repair")">
+                    <div class="d-flex align-center">
+                        <MudIcon Icon="@Icons.Material.Filled.Build" Color="Color.Error" Size="Size.Small" Class="mr-2" />
+                        For Repair - Requires maintenance
+                    </div>
+                </MudSelectItem>
             </MudSelect>
 
             <MudTextField @bind-Value="_returnNotes" Label="Return Notes" Variant="Variant.Outlined" FullWidth="true"
-                Lines="3" Class="mt-4" />
+                Lines="4" Class="mt-4" Placeholder="Describe any issues, damages, or observations about the asset..."
+                HelperText="Please provide details if condition is Fair or For Repair" />
+
+            <MudCheckBox @bind-Value="_confirmReturn" Color="Color.Primary" Class="mt-4">
+                I confirm that I am returning this asset in the stated condition
+            </MudCheckBox>
         }
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(() => _showReturnDialog = false)">Cancel</MudButton>
-        <MudButton Color="Color.Error" Variant="Variant.Filled" OnClick="@SubmitReturn">Return Asset</MudButton>
+        <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="@SubmitReturn" Disabled="@(!_confirmReturn)">
+            <MudIcon Icon="@Icons.Material.Filled.AssignmentReturn" Class="mr-1" />
+            Return Asset
+        </MudButton>
     </DialogActions>
 </MudDialog>
 
 <!-- Asset Issue Dialog -->
-<MudDialog @bind-IsOpen="@_showIssueDialog">
+<MudDialog @bind-IsOpen="@_showIssueDialog" Options="@(new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true })">
     <TitleContent>
-        <MudText Typo="Typo.h6">Issue Asset</MudText>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.LocalShipping" Class="mr-2" />
+            Issue Asset to Another Employee
+        </MudText>
     </TitleContent>
     <DialogContent>
         @if (_selectedAsset != null)
         {
-            <MudText Typo="Typo.subtitle2" GutterBottom="true">Issuing: @_selectedAsset.AssetName</MudText>
+            <MudAlert Severity="Severity.Info" Class="mb-4" Dense="true">
+                Transferring custody of <strong>@_selectedAsset.AssetName</strong> (@_selectedAsset.PropertyCode)
+            </MudAlert>
 
-            <MudTextField @bind-Value="_issueEmployeeName" Label="Employee Name" Variant="Variant.Outlined" FullWidth="true"
-                Class="mt-4" />
+            <MudGrid>
+                <MudItem xs="12">
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Employee Information</MudText>
+                </MudItem>
+                
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_issueEmployeeId" Label="Employee ID *" Variant="Variant.Outlined" 
+                        FullWidth="true" Required="true"
+                        Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Badge"
+                        HelperText="Enter the employee ID or GUID"
+                        @onblur="ValidateEmployeeId" />
+                </MudItem>
 
-            <MudTextField @bind-Value="_issueEmployeeId" Label="Employee ID" Variant="Variant.Outlined" FullWidth="true"
-                Class="mt-4" />
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_issueEmployeeName" Label="Employee Name *" Variant="Variant.Outlined" 
+                        FullWidth="true" Required="true"
+                        Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Person"
+                        HelperText="Full name of the receiving employee" />
+                </MudItem>
 
-            <MudTextField @bind-Value="_issueDocumentNumber" Label="Document Number" Variant="Variant.Outlined"
-                FullWidth="true" Class="mt-4" />
+                <MudItem xs="12">
+                    <MudDivider Class="my-2" />
+                    <MudText Typo="Typo.subtitle2" Class="mb-2">Transfer Details</MudText>
+                </MudItem>
 
-            <MudNumericField @bind-Value="_issueQuantity" Label="Quantity to Issue" Variant="Variant.Outlined"
-                FullWidth="true" Min="1" Class="mt-4" />
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_issueDocumentNumber" Label="Document/Reference Number" 
+                        Variant="Variant.Outlined" FullWidth="true"
+                        Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Description"
+                        HelperText="Optional transfer document reference" />
+                </MudItem>
 
-            <MudTextField @bind-Value="_issueNotes" Label="Issue Notes" Variant="Variant.Outlined" FullWidth="true"
-                Lines="3" Class="mt-4" />
+                <MudItem xs="12" md="6">
+                    <MudDatePicker @bind-Date="_issueDate" Label="Transfer Date" Variant="Variant.Outlined" 
+                        FullWidth="true" DisableFuture="true"
+                        Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.CalendarToday" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_issueNotes" Label="Transfer Notes" Variant="Variant.Outlined" 
+                        FullWidth="true" Lines="3"
+                        Placeholder="Reason for transfer, project assignment, etc..."
+                        HelperText="Document the reason for this asset transfer" />
+                </MudItem>
+
+                <MudItem xs="12">
+                    <MudCheckBox @bind-Value="_confirmIssue" Color="Color.Primary">
+                        I confirm that I am transferring custody of this asset to the specified employee
+                    </MudCheckBox>
+                </MudItem>
+            </MudGrid>
         }
     </DialogContent>
     <DialogActions>
         <MudButton OnClick="@(() => _showIssueDialog = false)">Cancel</MudButton>
-        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@SubmitIssue">Issue Asset</MudButton>
+        <MudButton Color="Color.Success" Variant="Variant.Filled" OnClick="@SubmitIssue" 
+            Disabled="@(!CanSubmitIssue())">
+            <MudIcon Icon="@Icons.Material.Filled.Send" Class="mr-1" />
+            Transfer Asset
+        </MudButton>
     </DialogActions>
 </MudDialog>
 
@@ -245,163 +337,16 @@
     private string _issueEmployeeName = string.Empty;
     private string _issueEmployeeId = string.Empty;
     private string _issueDocumentNumber = string.Empty;
-    private int _issueQuantity = 1;
+    private DateTime? _issueDate = DateTime.Today;
     private string _issueNotes = string.Empty;
+    private bool _confirmReturn = false;
+    private bool _confirmIssue = false;
     private string _searchTerm = string.Empty;
 
     private List<BreadcrumbItem> _breadcrumbItems = new()
-{
-new BreadcrumbItem("Home", href: "/"),
-new BreadcrumbItem("Dashboard", href: "/dashboard"),
-new BreadcrumbItem("My Assets", href: null, disabled: true)
-};
-
-    protected override async Task OnInitializedAsync()
     {
-        await LoadUserAssets();
-    }
-
-    private async Task LoadUserAssets()
-    {
-        try
-        {
-            // TODO: Load assets for current user
-            // var result = await ApiClient.GetUserAssetsAsync("1");
-            // _assets = result?.ToList() ?? new();
-
-            // Mock data for now
-            _assets = new();
-
-            Snackbar?.Add("Loaded your assets", Severity.Info);
-        }
-        catch (Exception ex)
-        {
-            Snackbar?.Add($"Error loading assets: {ex.Message}", Severity.Error);
-        }
-    }
-
-    private async Task SearchAssets()
-    {
-        if (string.IsNullOrWhiteSpace(_searchTerm))
-        {
-            await LoadUserAssets();
-            return;
-        }
-
-        // Filter locally for now
-        _assets = _assets.Where(a =>
-        (a.AssetName?.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ?? false) ||
-        (a.PropertyCode?.Contains(_searchTerm, StringComparison.OrdinalIgnoreCase) ?? false)
-        ).ToList();
-    }
-
-    private void ViewDetails(AssetViewModel asset)
-    {
-        _selectedAsset = asset;
-        _showDetailsDialog = true;
-    }
-
-    private void OpenReturnDialog(AssetViewModel asset)
-    {
-        _selectedAsset = asset;
-        _returnCondition = "Good";
-        _returnNotes = string.Empty;
-        _showReturnDialog = true;
-    }
-
-    private void OpenIssueDialog(AssetViewModel asset)
-    {
-        _selectedAsset = asset;
-        _issueEmployeeName = string.Empty;
-        _issueEmployeeId = string.Empty;
-        _issueDocumentNumber = string.Empty;
-        _issueQuantity = 1;
-        _issueNotes = string.Empty;
-        _showIssueDialog = true;
-    }
-
-    private async Task SubmitIssue()
-    {
-        if (_selectedAsset == null || string.IsNullOrWhiteSpace(_issueEmployeeId))
-        {
-            Snackbar?.Add("Please fill in all required fields", Severity.Warning);
-            return;
-        }
-
-        try
-        {
-            // Parse employee ID to Guid
-            if (!Guid.TryParse(_issueEmployeeId, out var employeeGuid))
-            {
-                Snackbar?.Add("Invalid Employee ID format", Severity.Warning);
-                return;
-            }
-
-            // Issue asset via API
-            var command = new IssuePhysicalAssetCommand
-            {
-                Id = _selectedAsset.Id,
-                EmployeeId = employeeGuid,
-                EmployeeName = _issueEmployeeName,
-                DocumentNumber = _issueDocumentNumber,
-                QuantityIssued = _issueQuantity
-            };
-
-            await ApiClient.IssuePhysicalAssetEndpointAsync("1", _selectedAsset.Id, command);
-
-            Snackbar?.Add("Asset issued successfully", Severity.Success);
-            _showIssueDialog = false;
-            await LoadUserAssets();
-        }
-        catch (Exception ex)
-        {
-            Snackbar?.Add($"Error issuing asset: {ex.Message}", Severity.Error);
-        }
-    }
-
-    private async Task SubmitReturn()
-    {
-        if (_selectedAsset == null) return;
-
-        try
-        {
-            var command = new ReturnPhysicalAssetCommand
-            {
-                Id = _selectedAsset.Id,
-                Reason = _returnNotes,
-                Condition = _returnCondition,
-                AcceptedBy = Guid.Empty, // Set to current user ID in real implementation
-                QuantityReturned = 1
-            };
-
-            await ApiClient.ReturnPhysicalAssetEndpointAsync("1", _selectedAsset.Id, command);
-
-            Snackbar?.Add("Asset returned successfully", Severity.Success);
-            _showReturnDialog = false;
-            await LoadUserAssets();
-        }
-        catch (Exception ex)
-        {
-            Snackbar?.Add($"Error returning asset: {ex.Message}", Severity.Error);
-        }
-    }
-
-    private Color GetConditionColor(string? condition) => condition switch
-    {
-        "Good" => Color.Success,
-        "Fair" => Color.Warning,
-        "For Repair" => Color.Error,
-        _ => Color.Default
+        new BreadcrumbItem("Home", href: "/"),
+        new BreadcrumbItem("Dashboard", href: "/dashboard"),
+        new BreadcrumbItem("My Assets", href: null, disabled: true)
     };
-
-    private class AssetViewModel
-    {
-        public Guid Id { get; set; }
-        public string PropertyCode { get; set; } = string.Empty;
-        public string AssetName { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public decimal? AcquisitionCost { get; set; }
-        public string Condition { get; set; } = "Good";
-        public DateTime? DateAssigned { get; set; }
-    }
 }

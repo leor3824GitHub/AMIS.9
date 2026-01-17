@@ -59,6 +59,12 @@
                 Issuances</MudNavLink>
         }
         @if (_canViewInventories)
+                @if (_canViewIssuances)
+                {
+                    <MudNavLink Href="/catalog/asset-issuance" Icon="@Icons.Material.Filled.QrCode2" Class="fsh-nav-child">
+                        Asset Issuance (PAR/ICS)</MudNavLink>
+                }
+                @if (_canViewInventories)
         {
             <MudNavLink Href="/catalog/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">
                 Inventories</MudNavLink>
@@ -85,6 +91,37 @@
         }
     </MudNavGroup>
     <MudNavLink Href="/todos" Icon="@Icons.Material.Filled.Checklist" Class="fsh-nav-child">Todos</MudNavLink>
+    
+    @if (CanViewAccountingGroup)
+    {
+        <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Accounting</MudText>
+        @if (_canViewDepreciationSchedules)
+        {
+            <MudNavLink Href="/accounting/depreciation" Icon="@Icons.Material.Filled.TrendingDown" Class="fsh-nav-child">
+                Depreciation</MudNavLink>
+        }
+        @if (_canViewJournalEntryVouchers)
+        {
+            <MudNavLink Href="/accounting/jev-export" Icon="@Icons.Material.Filled.Receipt" Class="fsh-nav-child">
+                Journal Entry Vouchers</MudNavLink>
+        }
+    }
+    
+    @if (CanViewMyAccountabilityGroup)
+    {
+        <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">My Accountability</MudText>
+        @if (_canViewAssetRequisitions)
+        {
+            <MudNavLink Href="/my-accountability/pending-actions" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PendingActions" Class="fsh-nav-child">
+                Pending Actions</MudNavLink>
+        }
+        @if (_canViewPhysicalAssets)
+        {
+            <MudNavLink Href="/my-accountability/my-assets" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox" Class="fsh-nav-child">
+                My Assets</MudNavLink>
+        }
+    }
+    
     @if (CanViewAdministrationGroup)
     {
         <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Administration</MudText>

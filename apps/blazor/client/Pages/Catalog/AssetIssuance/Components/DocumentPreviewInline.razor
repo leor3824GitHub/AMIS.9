@@ -1,0 +1,279 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Blazor.Client.Pages.Catalog.AssetIssuance.Components
+
+@* PAR Document (Property Acknowledgment Receipt) for PPE *@
+@if (DocumentType == "PAR")
+{
+    <div style="font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.4; color: #000;">
+        <!-- Document Header -->
+        <table style="width: 100%; border: 2px solid #000; margin-bottom: 10px;">
+            <tr>
+                <td style="text-align: center; padding: 8px; font-weight: bold; border-bottom: 1px solid #000;">
+                    PROPERTY ACKNOWLEDGMENT RECEIPT (PAR)<br/>
+                    <span style="font-size: 10px;">Government Property Distribution Form</span>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Header Information Row -->
+        <table style="width: 100%; margin-bottom: 10px;">
+            <tr>
+                <td style="width: 50%; border: 1px solid #000; padding: 4px;">
+                    <strong>PAR No.:</strong> ___________________<br/>
+                    <strong>Date Issued:</strong> @DateTime.Now.ToString("MMMM dd, yyyy")
+                </td>
+                <td style="width: 50%; border: 1px solid #000; padding: 4px;">
+                    <strong>Accountable Officer:</strong><br/>
+                    ___________________<br/>
+                    <span style="font-size: 9px;">(Signature over printed name)</span>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Custodian Information -->
+        <table style="width: 100%; margin-bottom: 10px; border-collapse: collapse;">
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; width: 20%; font-weight: bold;">CUSTODIAN:</td>
+                <td style="border: 1px solid #000; padding: 4px; width: 80;">
+                    @(Custodian?.Name ?? "___________________")
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">DESIGNATION:</td>
+                <td style="border: 1px solid #000; padding: 4px;">
+                    @(Custodian?.Designation ?? "___________________")
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">OFFICE:</td>
+                <td style="border: 1px solid #000; padding: 4px;">
+                    @(Custodian?.ResponsibilityCode ?? "___________________")
+                </td>
+            </tr>
+        </table>
+
+        <!-- Items Table -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+            <tr style="background-color: #e0e0e0;">
+                <th style="border: 1px solid #000; padding: 4px; text-align: center; width: 5%;">#</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; width: 35%;">ARTICLE/DESCRIPTION</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: center; width: 10%;">UNIT</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: center; width: 10%;">QTY</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: right; width: 15%;">UNIT COST</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: right; width: 15%;">TOTAL COST</th>
+            </tr>
+            @if (Items != null)
+            {
+                @foreach (var (item, index) in Items.Select((x, i) => (x, i + 1)))
+                {
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">@index</td>
+                        <td style="border: 1px solid #000; padding: 4px;">@item.ProductName</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">PC</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">@item.QuantityToIssue</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">@item.UnitPrice.ToString("C2")</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">@(item.UnitPrice * item.QuantityToIssue).ToString("C2")</td>
+                    </tr>
+                }
+            }
+            <!-- Empty rows for additional items -->
+            @for (int i = Items?.Count ?? 0; i < 8; i++)
+            {
+                <tr>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">@(i + 1)</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                </tr>
+            }
+        </table>
+
+        <!-- Totals Section -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+            <tr>
+                <td style="width: 60%; text-align: right; padding: 4px; font-weight: bold;">TOTAL VALUE:</td>
+                <td style="width: 40%; border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold;">
+                    @TotalAmount.ToString("C2")
+                </td>
+            </tr>
+        </table>
+
+        <!-- Certification Section -->
+        <table style="width: 100%; margin-bottom: 10px;">
+            <tr>
+                <td colspan="2" style="padding: 4px; font-weight: bold; text-decoration: underline;">CERTIFICATION:</td>
+            </tr>
+            <tr>
+                <td colspan="2" style="padding: 4px; font-size: 10px; text-align: justify;">
+                    I hereby acknowledge receipt and assume full responsibility of all the above-described properties. 
+                    I shall use them solely for official purposes in accordance with the regulations and shall return them 
+                    or account for them upon separation from service or upon demand.
+                </td>
+            </tr>
+        </table>
+
+        <!-- Signatures Section -->
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 50%; padding: 20px 4px 4px; border-top: 1px solid #000; text-align: center;">
+                    <strong>Custodian's Signature</strong><br/>
+                    <span style="font-size: 9px;">@Custodian?.Name</span>
+                </td>
+                <td style="width: 50%; padding: 20px 4px 4px; border-top: 1px solid #000; text-align: center;">
+                    <strong>Date Received</strong><br/>
+                    <span style="font-size: 9px;">_______________</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+}
+
+@* ICS Document (Inventory Custodian Slip) for Semi-Expendable Property *@
+@if (DocumentType == "ICS")
+{
+    <div style="font-family: 'Courier New', monospace; font-size: 11px; line-height: 1.4; color: #000;">
+        <!-- Document Header -->
+        <table style="width: 100%; border: 2px solid #000; margin-bottom: 10px;">
+            <tr>
+                <td style="text-align: center; padding: 8px; font-weight: bold; border-bottom: 1px solid #000;">
+                    INVENTORY CUSTODIAN SLIP (ICS)<br/>
+                    <span style="font-size: 10px;">Semi-Expendable Property Distribution Form</span>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Header Information Row -->
+        <table style="width: 100%; margin-bottom: 10px;">
+            <tr>
+                <td style="width: 50%; border: 1px solid #000; padding: 4px;">
+                    <strong>ICS No.:</strong> ___________________<br/>
+                    <strong>Date Issued:</strong> @DateTime.Now.ToString("MMMM dd, yyyy")
+                </td>
+                <td style="width: 50%; border: 1px solid #000; padding: 4px;">
+                    <strong>Issued By:</strong><br/>
+                    ___________________<br/>
+                    <span style="font-size: 9px;">(Supply Officer - Signature)</span>
+                </td>
+            </tr>
+        </table>
+
+        <!-- Custodian Information -->
+        <table style="width: 100%; margin-bottom: 10px; border-collapse: collapse;">
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; width: 20%; font-weight: bold;">CUSTODIAN:</td>
+                <td style="border: 1px solid #000; padding: 4px; width: 80%;">
+                    @(Custodian?.Name ?? "___________________")
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">DESIGNATION:</td>
+                <td style="border: 1px solid #000; padding: 4px;">
+                    @(Custodian?.Designation ?? "___________________")
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">DEPARTMENT:</td>
+                <td style="border: 1px solid #000; padding: 4px;">
+                    @(Custodian?.ResponsibilityCode ?? "___________________")
+                </td>
+            </tr>
+        </table>
+
+        <!-- Items Table -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+            <tr style="background-color: #e0e0e0;">
+                <th style="border: 1px solid #000; padding: 4px; text-align: center; width: 5%;">#</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; width: 30%;">ARTICLE/DESCRIPTION</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: center; width: 12%;">PROPERTY CODE</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: center; width: 8%;">QTY</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: center; width: 8%;">UNIT</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: right; width: 12%;">UNIT COST</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: right; width: 12%;">TOTAL VALUE</th>
+            </tr>
+            @if (Items != null)
+            {
+                @foreach (var (item, index) in Items.Select((x, i) => (x, i + 1)))
+                {
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">@index</td>
+                        <td style="border: 1px solid #000; padding: 4px;">@item.ProductName</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">___________</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">@item.QuantityToIssue</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">PC</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">@item.UnitPrice.ToString("C2")</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">@(item.UnitPrice * item.QuantityToIssue).ToString("C2")</td>
+                    </tr>
+                }
+            }
+            <!-- Empty rows for additional items -->
+            @for (int i = Items?.Count ?? 0; i < 6; i++)
+            {
+                <tr>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">@(i + 1)</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                    <td style="border: 1px solid #000; padding: 4px;">&nbsp;</td>
+                </tr>
+            }
+        </table>
+
+        <!-- Totals Section -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+            <tr>
+                <td style="width: 55%; text-align: right; padding: 4px; font-weight: bold;">TOTAL VALUE:</td>
+                <td style="width: 45%; border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold;">
+                    @TotalAmount.ToString("C2")
+                </td>
+            </tr>
+        </table>
+
+        <!-- Remarks Section -->
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 10px;">
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; font-weight: bold;">REMARKS:</td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 20px 4px; text-align: left;">
+                    &nbsp;
+                </td>
+            </tr>
+        </table>
+
+        <!-- Signatures Section -->
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="width: 33%; padding: 20px 4px 4px; border-top: 1px solid #000; text-align: center; font-size: 9px;">
+                    <strong>Custodian's Signature</strong><br/>
+                    @Custodian?.Name
+                </td>
+                <td style="width: 33%; padding: 20px 4px 4px; border-top: 1px solid #000; text-align: center; font-size: 9px;">
+                    <strong>Supply Officer</strong><br/>
+                    _______________
+                </td>
+                <td style="width: 33%; padding: 20px 4px 4px; border-top: 1px solid #000; text-align: center; font-size: 9px;">
+                    <strong>Date Received</strong><br/>
+                    _______________
+                </td>
+            </tr>
+        </table>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public EmployeeResponse? Custodian { get; set; }
+
+    [Parameter]
+    public List<InventoryItemForIssuance>? Items { get; set; }
+
+    [Parameter]
+    public decimal TotalAmount { get; set; }
+
+    [Parameter]
+    public string DocumentType { get; set; } = "PAR";
+}

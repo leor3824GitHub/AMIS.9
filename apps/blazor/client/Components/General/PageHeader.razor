@@ -1,16 +1,26 @@
 @using MudBlazor
 <div class="pb-6">
     <PageTitle>@Title</PageTitle>
-    <MudText Typo="Typo.h2">@Header</MudText>
-    <MudText Typo="Typo.body1" >@SubHeader</MudText>
+    <MudText Typo="Typo.h2">@(Header ?? Title)</MudText>
+    <MudText Typo="Typo.body1" >@(SubHeader ?? Description)</MudText>
+    @if (BreadcrumbItems != null && BreadcrumbItems.Any())
+    {
+        <MudBreadcrumbs Items="BreadcrumbItems" Class="pt-3"></MudBreadcrumbs>
+    }
 </div >
 @code {
     [Parameter]
     public required string Title { get; set; }
 
     [Parameter]
-    public required string Header { get; set; }
+    public string? Header { get; set; }
 
     [Parameter]
-    public required string SubHeader { get; set; }
+    public string? SubHeader { get; set; }
+
+    [Parameter]
+    public string? Description { get; set; }
+
+    [Parameter]
+    public List<BreadcrumbItem>? BreadcrumbItems { get; set; }
 }

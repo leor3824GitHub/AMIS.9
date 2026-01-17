@@ -2,6 +2,7 @@
 @using AMIS.Blazor.Infrastructure.Api
 @using Mapster
 @using Microsoft.AspNetCore.Components.Authorization
+@inject ISnackbar Snackbar
 
 <PageHeader Title="Inspection & Acceptance"
     Description="Review received items and generate Item Acceptance Report (IAR)" BreadcrumbItems="_breadcrumbItems" />
@@ -61,9 +62,9 @@
                                 <MudSelect @bind-Value="_filterStatus" Label="Filter by Status"
                                     Variant="Variant.Outlined" FullWidth="true">
                                     <MudSelectItem Value="string.Empty">All Statuses</MudSelectItem>
-                                    <MudSelectItem Value="Pending">Pending Inspection</MudSelectItem>
-                                    <MudSelectItem Value="InspectionInProgress">Inspection In Progress</MudSelectItem>
-                                    <MudSelectItem Value="IssuesFound">Issues Found</MudSelectItem>
+                                    <MudSelectItem Value="@("Pending")">Pending Inspection</MudSelectItem>
+                                    <MudSelectItem Value="@("InspectionInProgress")">Inspection In Progress</MudSelectItem>
+                                    <MudSelectItem Value="@("IssuesFound")">Issues Found</MudSelectItem>
                                 </MudSelect>
                             </MudItem>
                         </MudGrid>
@@ -221,7 +222,7 @@
                         <MudText><strong>Supplier:</strong> @_selectedDelivery?.SupplierName</MudText>
                     </MudListItem>
                     <MudListItem T="string">
-                        <MudText><strong>Delivery Date:</strong> @_selectedDelivery?.DeliveryDate.ToString("MMMM dd,                            yyyy")</MudText>
+                        <MudText><strong>Delivery Date:</strong> @_selectedDelivery?.DeliveryDate.ToString("MMMM dd, yyyy")</MudText>
                     </MudListItem>
                     <MudListItem T="string">
                         <MudText><strong>Total Items:</strong> @_selectedDelivery?.ItemCount</MudText>
@@ -265,11 +266,11 @@
     private string _inspectionOutcome = "Accept";
 
     private List<BreadcrumbItem> _breadcrumbItems = new()
-{
-new BreadcrumbItem("Home", href: "/"),
-new BreadcrumbItem("Dashboard", href: "/dashboard"),
-new BreadcrumbItem("Inspection & Acceptance", href: null, disabled: true)
-};
+    {
+        new BreadcrumbItem("Home", href: "/"),
+        new BreadcrumbItem("Dashboard", href: "/dashboard"),
+        new BreadcrumbItem("Inspection & Acceptance", href: null, disabled: true)
+    };
 
     protected override async Task OnInitializedAsync()
     {
@@ -283,21 +284,21 @@ new BreadcrumbItem("Inspection & Acceptance", href: null, disabled: true)
             // TODO: Load deliveries from API when goods receipt is integrated
             // Mock data for demo
             _deliveries = new()
-{
-new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-001", SupplierName = "TechSupply Ltd", ItemCount = 5,
-DeliveryDate = DateTime.Now.AddDays(-3), Status = "Pending" },
-new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-002", SupplierName = "Office Furnishings Inc",
-ItemCount = 12, DeliveryDate = DateTime.Now.AddDays(-2), Status = "Pending" },
-new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-003", SupplierName = "Electronics World", ItemCount =
-3, DeliveryDate = DateTime.Now.AddDays(-1), Status = "InspectionInProgress" },
-};
+            {
+                new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-001", SupplierName = "TechSupply Ltd", ItemCount = 5,
+                    DeliveryDate = DateTime.Now.AddDays(-3), Status = "Pending" },
+                new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-002", SupplierName = "Office Furnishings Inc",
+                    ItemCount = 12, DeliveryDate = DateTime.Now.AddDays(-2), Status = "Pending" },
+                new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-003", SupplierName = "Electronics World", ItemCount = 3,
+                    DeliveryDate = DateTime.Now.AddDays(-1), Status = "InspectionInProgress" },
+            };
 
             UpdateCounters();
-            Snackbar?.Add("Loaded deliveries pending inspection", Severity.Info);
+            Snackbar.Add("Loaded deliveries pending inspection", Severity.Info);
         }
         catch (Exception ex)
         {
-            Snackbar?.Add($"Error loading deliveries: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Error loading deliveries: {ex.Message}", Severity.Error);
         }
     }
 
@@ -336,10 +337,13 @@ new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-003", Supplie
             // TODO: Create inventory records for accepted items
 
             _showInspectionDialog = false;
-            Snackbar?.Add($"Inspection recorded for {_selectedDelivery?.PoNumber}", Severity.Success);
-            Snackbar?.Add($"Error submitting inspection: {ex.Message}", Severity.Error);
+            Snackbar.Add($"Inspection recorded for {_selectedDelivery?.PoNumber}", Severity.Success);
         }
-}
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error submitting inspection: {ex.Message}", Severity.Error);
+        }
+    }
 
     private void ClearSearch()
     {
@@ -347,11 +351,11 @@ new DeliveryDto { DeliveryId = Guid.NewGuid(), PoNumber = "PO-2025-003", Supplie
     }
 
     private IEnumerable<DeliveryDto> FilteredDeliveries =>
-    _deliveries
-    .Where(d => string.IsNullOrEmpty(_searchText) ||
-    d.PoNumber.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
-    d.SupplierName.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
-    .Where(d => string.IsNullOrEmpty(_filterStatus) || d.Status == _filterStatus);
+        _deliveries
+            .Where(d => string.IsNullOrEmpty(_searchText) ||
+                d.PoNumber.Contains(_searchText, StringComparison.OrdinalIgnoreCase) ||
+                d.SupplierName.Contains(_searchText, StringComparison.OrdinalIgnoreCase))
+            .Where(d => string.IsNullOrEmpty(_filterStatus) || d.Status == _filterStatus);
 
     private Color GetStatusColor(string status) => status switch
     {

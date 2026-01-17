@@ -1,0 +1,196 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudText Typo="Typo.h6" Color="Color.Primary">@(_isEditMode ? "Edit Issuance Items" : "Create New Asset Issuance")</MudText>
+            
+            <!-- Step Indicator -->
+            <MudStepper @ref="_stepper" DisableStepNavigation="true" ActiveIndex="@_currentStep">
+                <!-- Step 1: Select Custodian -->
+                <MudStep Title="Select Custodian" Completed="_step1Completed">
+                    <MudText Typo="Typo.body2" Class="mb-3">
+                        Choose the employee or custodian who will receive the asset(s).
+                    </MudText>
+                    <MudAutocomplete 
+                        T="EmployeeResponse"
+                        SearchFunc="SearchEmployees"
+                        Placeholder="Search custodian by name or employee ID..."
+                        DebounceInterval="200"
+                        @bind-Value="_selectedCustodian"
+                        ToStringFunc="@(e => e == null ? null : $"{e.Name} ({e.Designation})")"
+                        AdornmentIcon="@Icons.Material.Filled.Person"
+                        Variant="Variant.Outlined"
+                        Dense="true"
+                        Class="mb-4" />
+                    
+                    @if (_selectedCustodian != null)
+                    {
+                        <MudAlert Severity="Severity.Success" Class="mb-3">
+                            Selected: <strong>@_selectedCustodian.Name</strong> — @_selectedCustodian.Designation
+                        </MudAlert>
+                    }
+                    <MudStack Row="true" Class="mt-4">
+                        <MudSpacer />
+                        <MudButton Variant="Variant.Text" OnClick="CloseCustodianStep">Cancel</MudButton>
+                        <MudButton 
+                            Variant="Variant.Filled" 
+                            Color="Color.Primary"
+                            Disabled="@(_selectedCustodian == null)"
+                            OnClick="AdvanceToStep2">
+                            Next: Select Assets
+                        </MudButton>
+                    </MudStack>
+                </MudStep>
+
+                <!-- Step 2: Select Assets -->
+                <MudStep Title="Select Assets" Completed="_step2Completed">
+                    <MudText Typo="Typo.body2" Class="mb-3">
+                        Select items from inventory to issue to @(_selectedCustodian?.Name ?? "the custodian").
+                    </MudText>
+
+                    <!-- Asset Selection Table -->
+                    <MudDataGrid 
+                        T="InventoryItemForIssuance"
+                        ServerData="LoadAvailableInventory"
+                        Hoverable="true"
+                        Bordered="true"
+                        Striped="true"
+                        Dense="true"
+                        @ref="_inventoryGrid">
+                        <Columns>
+                            <SelectColumn T="InventoryItemForIssuance" />
+                            <PropertyColumn Property="x => x.ProductName" Title="Asset Name" />
+                            <PropertyColumn Property="x => x.Category" Title="Category" />
+                            <PropertyColumn Property="x => x.PropertyCode" Title="Property Code" />
+                            <TemplateColumn Title="Classification" Sortable="false">
+                                <CellTemplate>
+                                    <MudChip 
+                                        Size="Size.Small"
+                                        Color="@GetClassificationColor(context.Item.Classification)"
+                                        Variant="Variant.Filled">
+                                        @context.Item.Classification
+                                    </MudChip>
+                                </CellTemplate>
+                            </TemplateColumn>
+                            <PropertyColumn Property="x => x.AvailableQty" Title="Available" />
+                            <TemplateColumn Title="Unit Price" Sortable="false">
+                                <CellTemplate>
+                                    <MudText Typo="Typo.body2">@context.Item.UnitPrice.ToString("C2")</MudText>
+                                </CellTemplate>
+                            </TemplateColumn>
+                        </Columns>
+                        <PagerContent>
+                            <MudDataGridPager T="InventoryItemForIssuance" />
+                        </PagerContent>
+                    </MudDataGrid>
+
+                    <!-- Selected Items Summary -->
+                    @if (_selectedItems.Any())
+                    {
+                        <MudPaper Class="pa-3 mt-4 mud-palette-action">
+                            <MudText Typo="Typo.subtitle2" Class="mb-2">
+                                <strong>@_selectedItems.Count Item(s) Selected</strong>
+                            </MudText>
+                            <MudSimpleTable Striped="true" Dense="true">
+                                <thead>
+                                    <tr>
+                                        <th>Asset</th>
+                                        <th style="text-align: right;">Qty</th>
+                                        <th style="text-align: right;">Unit Price</th>
+                                        <th style="text-align: right;">Total</th>
+                                        <th style="text-align: center;">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in _selectedItems)
+                                    {
+                                        <tr>
+                                            <td>@item.ProductName</td>
+                                            <td style="text-align: right;">
+                                                <MudNumericField 
+                                                    @bind-Value="item.QuantityToIssue"
+                                                    Min="1"
+                                                    Max="item.AvailableQty"
+                                                    HideSpinButtons="true"
+                                                    Variant="Variant.Outlined"
+                                                    Margin="Margin.Dense"
+                                                    Style="max-width: 80px;" />
+                                            </td>
+                                            <td style="text-align: right;">@item.UnitPrice.ToString("C2")</td>
+                                            <td style="text-align: right; font-weight: bold;">
+                                                @((item.UnitPrice * item.QuantityToIssue).ToString("C2"))
+                                            </td>
+                                            <td style="text-align: center;">
+                                                <MudIconButton 
+                                                    Icon="@Icons.Material.Filled.Close"
+                                                    Size="Size.Small"
+                                                    Color="Color.Error"
+                                                    OnClick="@(() => RemoveSelectedItem(item))" />
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </MudSimpleTable>
+                            <MudText Typo="Typo.body2" Class="mt-3" Style="text-align: right; font-weight: bold;">
+                                Total Amount: <span style="color: var(--mud-palette-primary);">@_totalIssuanceAmount.ToString("C2")</span>
+                            </MudText>
+                        </MudPaper>
+                    }
+
+                    <MudStack Row="true" Class="mt-4">
+                        <MudSpacer />
+                        <MudButton Variant="Variant.Text" OnClick="GoBackToStep1">Back</MudButton>
+                        <MudButton 
+                            Variant="Variant.Filled" 
+                            Color="Color.Primary"
+                            Disabled="@(!_selectedItems.Any())"
+                            OnClick="AdvanceToStep3">
+                            Next: Document Preview
+                        </MudButton>
+                    </MudStack>
+                </MudStep>
+
+                <!-- Step 3: Document Preview & Confirm -->
+                <MudStep Title="Review & Confirm">
+                    <MudText Typo="Typo.body2" Class="mb-4">
+                        Review the document details before confirming the issuance.
+                    </MudText>
+
+                    <!-- Document Type Indicator -->
+                    <MudAlert Severity="Severity.Info" Class="mb-4">
+                        <strong>Document Type:</strong>
+                        @if (_documentType == "PAR")
+                        {
+                            <span style="color: #ff9800;">📋 PAR (Property Acknowledgment Receipt)</span>
+                        }
+                        else
+                        {
+                            <span style="color: #2196f3;">📋 ICS (Inventory Custodian Slip)</span>
+                        }
+                    </MudAlert>
+
+                    <!-- Document Preview -->
+                    <DocumentPreviewInline 
+                        Custodian="@_selectedCustodian"
+                        Items="@_selectedItems"
+                        TotalAmount="@_totalIssuanceAmount"
+                        DocumentType="@_documentType" />
+
+                    <MudStack Row="true" Class="mt-4">
+                        <MudSpacer />
+                        <MudButton Variant="Variant.Text" OnClick="GoBackToStep2">Back</MudButton>
+                        <MudButton 
+                            Variant="Variant.Filled" 
+                            Color="Color.Success"
+                            StartIcon="@Icons.Material.Filled.CheckCircle"
+                            OnClick="ConfirmIssuance">
+                            Confirm & Issue
+                        </MudButton>
+                    </MudStack>
+                </MudStep>
+            </MudStepper>
+        </MudStack>
+    </DialogContent>
+</MudDialog>

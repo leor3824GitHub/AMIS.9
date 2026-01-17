@@ -1,0 +1,146 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudText Typo="Typo.h6" Color="Color.Primary">
+                Document Preview
+            </MudText>
+
+            @if (IssuanceData != null)
+            {
+                <MudTabs Elevation="2" Rounded="true">
+                    <!-- PAR/ICS Document Tab -->
+                    <MudTabPanel Text="Document" Icon="@Icons.Material.Filled.DocumentScanner">
+                        <div class="pa-6" Style="background-color: white; border: 1px solid #ddd; min-height: 600px;">
+                            <DocumentPreviewInline 
+                                Custodian="@IssuanceData.Employee"
+                                Items="@ConvertToPreviewItems()"
+                                TotalAmount="@Convert.ToDecimal(IssuanceData.TotalAmount)"
+                                DocumentType="PAR" />
+                        </div>
+                    </MudTabPanel>
+
+                    <!-- Issuance Details Tab -->
+                    <MudTabPanel Text="Details" Icon="@Icons.Material.Filled.Info">
+                        <MudStack Spacing="3" Class="pa-4">
+                            <!-- Header Info -->
+                            <MudGrid>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">
+                                        Issuance ID
+                                    </MudText>
+                                    <MudText Typo="Typo.body2">@IssuanceData.Id</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">
+                                        Date Issued
+                                    </MudText>
+                                    <MudText Typo="Typo.body2">@IssuanceData.IssuanceDate.ToString("MMM dd, yyyy HH:mm")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">
+                                        Custodian
+                                    </MudText>
+                                    <MudText Typo="Typo.body2">@(IssuanceData.Employee?.Name ?? "Unknown")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">
+                                        Designation
+                                    </MudText>
+                                    <MudText Typo="Typo.body2">@(IssuanceData.Employee?.Designation ?? "N/A")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Default">
+                                        Document Type
+                                    </MudText>
+                                    <MudChip T="string" Size="Size.Small" Color="@GetDocTypeColor(null)">
+                                        @GetDocTypeLabel(null)
+                                    </MudChip>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.subtitle2" Color="Color.Secondary">
+                                        Status
+                                    </MudText>
+                                    <MudChip T="string" Size="Size.Small" Color="@GetStatusColor(IssuanceData.IsClosed ? "Closed" : "Open")">
+                                        @(IssuanceData.IsClosed ? "Closed" : "Open")
+                                    </MudChip>
+                                </MudItem>
+                            </MudGrid>
+
+                            <!-- Items Section -->
+                            <MudDivider />
+                            <MudText Typo="Typo.subtitle1">Issued Items</MudText>
+                            <MudSimpleTable Striped="true" Dense="false">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Asset Name</th>
+                                        <th>Category</th>
+                                        <th style="text-align: right;">Qty</th>
+                                        <th style="text-align: right;">Unit Price</th>
+                                        <th style="text-align: right;">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var (item, index) in ConvertToPreviewItems().Select((x, i) => (x, i + 1)))
+                                    {
+                                        <tr>
+                                            <td>@index</td>
+                                            <td>@item.ProductName</td>
+                                            <td>@item.Category</td>
+                                            <td style="text-align: right;">@item.QuantityToIssue</td>
+                                            <td style="text-align: right;">@item.UnitPrice.ToString("C2")</td>
+                                            <td style="text-align: right; font-weight: bold;">
+                                                @((item.UnitPrice * item.QuantityToIssue).ToString("C2"))
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </MudSimpleTable>
+
+                            <!-- Totals -->
+                            <MudStack Row="true" Spacing="2">
+                                <MudSpacer />
+                                <MudStack Row="false" Spacing="1" Style="min-width: 250px;">
+                                    <MudText Typo="Typo.body2">
+                                        <strong>Total Items:</strong>
+                                        <span style="float: right;">@ConvertToPreviewItems().Count</span>
+                                    </MudText>
+                                    <MudText Typo="Typo.body2">
+                                        <strong>Total Quantity:</strong>
+                                        <span style="float: right;">@ConvertToPreviewItems().Sum(x => x.QuantityToIssue) units</span>
+                                    </MudText>
+                                    <MudDivider />
+                                    <MudText Typo="Typo.h6" Style="color: var(--mud-palette-primary);">
+                                        <strong>Total Amount:</strong>
+                                        <span style="float: right;">@IssuanceData.TotalAmount.ToString("C2")</span>
+                                    </MudText>
+                                </MudStack>
+                            </MudStack>
+
+                            <!-- Acceptance Status -->
+                            <MudAlert Severity="Severity.Info" Class="mt-3">
+                                Status: @(IssuanceData.IsClosed ? "Closed" : "Open")
+                            </MudAlert>
+                        </MudStack>
+                    </MudTabPanel>
+                </MudTabs>
+            }
+            else
+            {
+                <MudAlert Severity="Severity.Warning">
+                    No issuance data available to preview.
+                </MudAlert>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Close">Close</MudButton>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="PrintDocument">
+            <MudIcon Icon="@Icons.Material.Filled.Print" Class="mr-2" />
+            Print Document
+        </MudButton>
+    </DialogActions>
+</MudDialog>

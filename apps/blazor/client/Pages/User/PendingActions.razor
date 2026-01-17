@@ -1,10 +1,9 @@
-@page "/user/pending"
+@page "/my-accountability/pending-actions"
 @using AMIS.Blazor.Infrastructure.Api
 @using Mapster
 @using Microsoft.AspNetCore.Components.Authorization
 
-<PageHeader Title="Pending Actions" Description="Review and respond to asset issuances"
-    BreadcrumbItems="_breadcrumbItems" />
+<PageHeader Title="Pending Actions" Description="Review and respond to asset issuances" />
 
 <AuthorizeView>
     <Authorized>
@@ -144,134 +143,9 @@
     private string _rejectionDetails = string.Empty;
 
     private List<BreadcrumbItem> _breadcrumbItems = new()
-{
-new BreadcrumbItem("Home", href: "/"),
-new BreadcrumbItem("Dashboard", href: "/dashboard"),
-new BreadcrumbItem("Pending Actions", href: null, disabled: true)
-};
-
-    protected override async Task OnInitializedAsync()
     {
-        await LoadPendingIssuances();
-    }
-
-    private async Task LoadPendingIssuances()
-    {
-        try
-        {
-            // TODO: Integrate with actual API when available
-            // Expected API endpoint: GET /api/v1/issuances?status=Pending
-            // _issuances = await ApiClient.GetPendingIssuancesAsync("1");
-
-            // Fallback to mock data
-            _issuances = GetMockPendingIssuances();
-            Snackbar?.Add("Loaded pending issuances", Severity.Info);
-        }
-        catch (Exception ex)
-        {
-            Snackbar?.Add($"Error loading issuances: {ex.Message}", Severity.Error);
-        }
-    }
-
-    private List<IssuanceDto> GetMockPendingIssuances() => new()
-{
-new IssuanceDto { IssuanceId = Guid.NewGuid(), AssetName = "Dell Laptop", IssuedDate = DateTime.Now.AddDays(-5), Status
-= "Pending" },
-new IssuanceDto { IssuanceId = Guid.NewGuid(), AssetName = "Office Chair", IssuedDate = DateTime.Now.AddDays(-3), Status
-= "Pending" },
-new IssuanceDto { IssuanceId = Guid.NewGuid(), AssetName = "Monitor", IssuedDate = DateTime.Now.AddDays(-1), Status =
-"Pending" }
-};
-
-    private void OpenAcceptDialog(IssuanceDto issuance)
-    {
-        _selectedIssuance = issuance;
-        _employeeSignature = string.Empty;
-        _remarks = string.Empty;
-        _showAcceptDialog = true;
-    }
-
-    private void OpenRejectDialog(IssuanceDto issuance)
-    {
-        _selectedIssuance = issuance;
-        _rejectionReason = string.Empty;
-        _rejectionDetails = string.Empty;
-        _showRejectDialog = true;
-    }
-
-    private async Task AcceptAsset()
-    {
-        if (_selectedIssuance == null) return;
-
-        try
-        {
-            // Accept issuance via API (when endpoint is available)
-            // For now: Local state update with mock implementation
-            // Expected API endpoint: PUT /api/v1/issuances/{id}/accept
-            // var command = new AcceptIssuanceCommand { EmployeeName = _employeeSignature, Remarks = _remarks };
-            // await ApiClient.AcceptIssuanceEndpointAsync("1", _selectedIssuance.IssuanceId, command);
-
-            // Mock update
-            var issuance = _issuances.FirstOrDefault(i => i.IssuanceId == _selectedIssuance.IssuanceId);
-            if (issuance != null)
-            {
-                issuance.Status = "Accepted";
-                issuance.AcceptedDate = DateTime.Now;
-            }
-
-            Snackbar?.Add("Asset accepted successfully", Severity.Success);
-            _showAcceptDialog = false;
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Snackbar?.Add($"Error accepting asset: {ex.Message}", Severity.Error);
-        }
-    }
-
-    private async Task RejectAsset()
-    {
-        if (_selectedIssuance == null) return;
-
-        try
-        {
-            // Reject issuance via API (when endpoint is available)
-            // For now: Local state update with mock implementation
-            // Expected API endpoint: PUT /api/v1/issuances/{id}/reject
-            // var command = new RejectIssuanceCommand { Reason = _rejectionReason, Details = _rejectionDetails };
-            // await ApiClient.RejectIssuanceEndpointAsync("1", _selectedIssuance.IssuanceId, command);
-
-            // Mock update
-            var issuance = _issuances.FirstOrDefault(i => i.IssuanceId == _selectedIssuance.IssuanceId);
-            if (issuance != null)
-            {
-                issuance.Status = "Rejected";
-                issuance.RejectionReason = _rejectionReason;
-            }
-
-            Snackbar?.Add("Asset rejected successfully", Severity.Success);
-            _showRejectDialog = false;
-            StateHasChanged();
-        }
-        catch (Exception ex)
-        {
-            Snackbar?.Add($"Error rejecting asset: {ex.Message}", Severity.Error);
-        }
-    }
-
-    private Color GetStatusColor(string? status) => status?.ToLower() switch
-    {
-        "pending" => Color.Warning,
-        "accepted" => Color.Success,
-        "rejected" => Color.Error,
-        _ => Color.Default
+        new BreadcrumbItem("Home", href: "/"),
+        new BreadcrumbItem("Dashboard", href: "/dashboard"),
+        new BreadcrumbItem("Pending Actions", href: null, disabled: true)
     };
-
-    private sealed class IssuanceDto
-    {
-        public Guid IssuanceId { get; set; }
-        public string AssetName { get; set; } = string.Empty;
-        public DateTime IssuedDate { get; set; }
-        public string Status { get; set; } = "Pending";
-    }
 }
