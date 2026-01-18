@@ -77,19 +77,11 @@ public sealed class SuppliesAndMaterialsReceivingReportConfiguration
                 .HasMaxLength(200)
                 .IsRequired();
 
-            authBuilder.Property(a => a.ReceivedBySignature)
-                .HasMaxLength(500)
-                .IsRequired();
-
             authBuilder.Property(a => a.ReceivedDate)
                 .IsRequired();
 
             authBuilder.Property(a => a.NotedByName)
                 .HasMaxLength(200)
-                .IsRequired();
-
-            authBuilder.Property(a => a.NotedBySignature)
-                .HasMaxLength(500)
                 .IsRequired();
 
             authBuilder.Property(a => a.NotedDate)
