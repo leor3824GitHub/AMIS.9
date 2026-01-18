@@ -11,16 +11,12 @@ public sealed record CreateSuppliesAndMaterialsIssuanceReportCommand(
     string IssuanceReason,
     IReadOnlyList<CreateIssuanceLineItemRequest> LineItems,
     string IssuingOfficerName,
-    string IssuingOfficerSignature,
     DateTime IssuingDate,
     string ApprovingOfficerName,
-    string ApprovingOfficerSignature,
     DateTime ApprovingDate,
     string AuthRecipientName,
-    string AuthRecipientSignature,
     DateTime AuthReceiptDate,
     string? DriverName = null,
-    string? DriverSignature = null,
     string? BillOfLadingNumber = null,
     string? Notes = null) : IRequest<CreateSuppliesAndMaterialsIssuanceReportResponse>;
 

@@ -158,9 +158,7 @@ public sealed record PpeReceivingLineItem(
 /// </summary>
 public sealed record PpeReceivingAuthentication(
     string ReceivedByName,
-    string ReceivedBySignature,
     DateTime ReceivedDate,
     string NotedByName,
-    string NotedBySignature,
     DateTime NotedDate);
 

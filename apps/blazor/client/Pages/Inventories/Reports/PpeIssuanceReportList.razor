@@ -1,0 +1,123 @@
+@page "/inventories/reports/ppeir-list"
+@page "/inventories/reports/ppeir"
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Client.Components.General
+@using MudBlazor
+@using AMIS.Blazor.Client.Pages.Inventories.Reports
+
+<PageHeader Title="PPEIR List" Header="PPE Issuance Reports" SubHeader="View and manage PPE Issuance Reports" />
+
+<MudPaper Class="pa-4">
+    <MudStack Spacing="3">
+        <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => OpenNewReportDialog())" StartIcon="@Icons.Material.Filled.Add">New Report</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadReports" StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+        </MudStack>
+
+        @if (_isLoading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (_reports == null || _reports.Count == 0)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                No PPE Issuance Reports found. <MudLink OnClick="@(() => OpenNewReportDialog())" style="cursor: pointer;">Create one now</MudLink>
+            </MudAlert>
+        }
+        else
+        {
+            <MudTable Items="@_reports" Dense="true" Hover="true" Striped="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh>Report Number</MudTh>
+                    <MudTh>Recipient</MudTh>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Issuance Date</MudTh>
+                    <MudTh align="center">Items</MudTh>
+                    <MudTh>Created Date</MudTh>
+                    <MudTh align="center">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Report Number">@context.ReportNumber</MudTd>
+                    <MudTd DataLabel="Recipient">@context.RecipientName</MudTd>
+                    <MudTd DataLabel="Type">@context.IssuanceType</MudTd>
+                    <MudTd DataLabel="Issuance Date">@context.IssuanceDate.ToString("MMM dd, yyyy")</MudTd>
+                    <MudTd DataLabel="Items" align="center">
+                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">@context.LineItemsCount</MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Created Date">@context.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</MudTd>
+                    <MudTd align="center">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => EditReport(context.Id))" Title="Edit" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Info" OnClick="@(() => PrintReport(context.Id))" Title="Print" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteReport(context.Id))" Title="Delete" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudStack>
+</MudPaper>
+
+<PpeIssuanceReportFormDialog @ref="_formDialog" OnSaved="OnReportSaved" />
+
+@code {
+    private const string ApiVersion = "1";
+    [Inject] public IApiClient ApiClient { get; set; } = default!;
+    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
+    [Inject] public ISnackbar Snackbar { get; set; } = default!;
+
+    private PpeIssuanceReportFormDialog? _formDialog;
+    private List<PpeIssuanceReportDto> _reports = [];
+    private bool _isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReports();
+    }
+
+    private async Task LoadReports()
+    {
+        _isLoading = true;
+        try
+        {
+            var response = await ApiClient.ListPpeIssuanceReportsEndpointAsync(ApiVersion);
+            _reports = response.Reports?.ToList() ?? [];
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading reports: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void EditReport(Guid id)
+    {
+        Snackbar.Add("Edit functionality will be available soon", Severity.Info);
+    }
+
+    private async Task PrintReport(Guid id)
+    {
+        Snackbar.Add("Print functionality will be available after API implementation", Severity.Info);
+    }
+
+    private async Task DeleteReport(Guid id)
+    {
+        // TODO: Implement delete functionality
+        Snackbar.Add("Delete functionality to be implemented", Severity.Info);
+    }
+
+    private void OpenNewReportDialog()
+    {
+        _formDialog?.Open();
+    }
+
+    private async Task OnReportSaved()
+    {
+        await LoadReports();
+        Snackbar.Add("PPE Issuance Report saved successfully", Severity.Success);
+    }
+
+    // Using PpeIssuanceReportDto generated by NSwag in AMIS.Blazor.Infrastructure.Api
+}

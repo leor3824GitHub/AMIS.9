@@ -1,4 +1,7 @@
-﻿<PersonCard
+﻿@using MudBlazor
+@using AMIS.Blazor.Client.Components
+
+<PersonCard
     Style="background-color: var(--mud-palette-drawer-background);color: var(--mud-palette-drawer-text); margin-bottom:0px!important" />
 <MudNavMenu>
     <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Start</MudText>
@@ -63,10 +66,25 @@
             <MudNavLink Href="/inventories/asset-issuance" Icon="@Icons.Material.Filled.QrCode2" Class="fsh-nav-child">
                 Asset Issuance (PAR/ICS)</MudNavLink>
         }
-        @if (_canViewSmir || _canViewSmrr || _canViewPpeIssuanceReports || _canViewPpeReceivingReports)
+        @if (_canViewSmir)
         {
-            <MudNavLink Href="/inventories/reports/supply-ppe" Icon="@Icons.Material.Filled.ReceiptLong" Class="fsh-nav-child">
-                SMIR / SMRR / PPE Reports</MudNavLink>
+            <MudNavLink Href="/inventories/reports/smir" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">
+                SMIR</MudNavLink>
+        }
+        @if (_canViewSmrr)
+        {
+            <MudNavLink Href="/inventories/reports/smrr" Icon="@Icons.Material.Filled.ReceiptLong" Class="fsh-nav-child">
+                SMRR</MudNavLink>
+        }
+        @if (_canViewPpeIssuanceReports)
+        {
+            <MudNavLink Href="/inventories/reports/ppeir-list" Icon="@Icons.Material.Filled.Send" Class="fsh-nav-child">
+                PPE Issuance Reports</MudNavLink>
+        }
+        @if (_canViewPpeReceivingReports)
+        {
+            <MudNavLink Href="/inventories/reports/pper" Icon="@Icons.Material.Filled.Inbox" Class="fsh-nav-child">
+                PPE Receiving Report</MudNavLink>
         }
         @if (_canViewInventories)
         {

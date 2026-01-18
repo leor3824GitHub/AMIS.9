@@ -27,10 +27,8 @@ public sealed class CreateSuppliesAndMaterialsReceivingReportHandler(
 
         var authentication = new ReceivingAuthentication(
             request.ReceivedByName,
-            request.ReceivedBySignature,
             request.ReceivedDate,
             request.NotedByName,
-            request.NotedBySignature,
             request.NotedDate);
 
         // Create the aggregate root

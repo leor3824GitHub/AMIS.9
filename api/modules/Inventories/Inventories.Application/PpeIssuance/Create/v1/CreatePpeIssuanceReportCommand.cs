@@ -7,7 +7,8 @@ public sealed record CreatePpeIssuanceLineItemRequest(
     string Description,
     decimal Quantity,
     string Unit,
-    decimal AcquisitionCost,
+    DateTime? DateAcquired = null,
+    decimal AcquisitionCost = 0,
     decimal? AccumulatedDepreciation = null,
     decimal? BookValue = null);
 

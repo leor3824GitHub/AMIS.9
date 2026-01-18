@@ -27,16 +27,12 @@ public sealed class CreateSuppliesAndMaterialsIssuanceReportHandler(
 
         var authorization = new IssuanceAuthorization(
             request.IssuingOfficerName,
-            request.IssuingOfficerSignature,
             request.IssuingDate,
             request.ApprovingOfficerName,
-            request.ApprovingOfficerSignature,
             request.ApprovingDate,
             request.AuthRecipientName,
-            request.AuthRecipientSignature,
             request.AuthReceiptDate,
             request.DriverName,
-            request.DriverSignature,
             request.BillOfLadingNumber);
 
         // Create the aggregate root

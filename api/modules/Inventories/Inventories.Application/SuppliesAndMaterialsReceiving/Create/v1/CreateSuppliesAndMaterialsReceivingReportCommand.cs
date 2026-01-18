@@ -11,10 +11,8 @@ public sealed record CreateSuppliesAndMaterialsReceivingReportCommand(
     string TransactionType,
     IReadOnlyList<CreateReceivingLineItemRequest> LineItems,
     string ReceivedByName,
-    string ReceivedBySignature,
     DateTime ReceivedDate,
     string NotedByName,
-    string NotedBySignature,
     DateTime NotedDate,
     string? Notes = null) : IRequest<CreateSuppliesAndMaterialsReceivingReportResponse>;
 

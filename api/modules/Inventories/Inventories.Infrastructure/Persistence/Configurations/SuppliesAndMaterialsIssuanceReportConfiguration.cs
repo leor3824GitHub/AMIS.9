@@ -73,19 +73,11 @@ public sealed class SuppliesAndMaterialsIssuanceReportConfiguration
                 .HasMaxLength(200)
                 .IsRequired();
 
-            authBuilder.Property(a => a.IssuingOfficerSignature)
-                .HasMaxLength(500)
-                .IsRequired();
-
             authBuilder.Property(a => a.IssuingDate)
                 .IsRequired();
 
             authBuilder.Property(a => a.ApprovingOfficerName)
                 .HasMaxLength(200)
-                .IsRequired();
-
-            authBuilder.Property(a => a.ApprovingOfficerSignature)
-                .HasMaxLength(500)
                 .IsRequired();
 
             authBuilder.Property(a => a.ApprovingDate)
@@ -95,18 +87,11 @@ public sealed class SuppliesAndMaterialsIssuanceReportConfiguration
                 .HasMaxLength(200)
                 .IsRequired();
 
-            authBuilder.Property(a => a.RecipientSignature)
-                .HasMaxLength(500)
-                .IsRequired();
-
             authBuilder.Property(a => a.ReceiptDate)
                 .IsRequired();
 
             authBuilder.Property(a => a.DriverName)
                 .HasMaxLength(200);
-
-            authBuilder.Property(a => a.DriverSignature)
-                .HasMaxLength(500);
 
             authBuilder.Property(a => a.BillOfLadingNumber)
                 .HasMaxLength(100);
