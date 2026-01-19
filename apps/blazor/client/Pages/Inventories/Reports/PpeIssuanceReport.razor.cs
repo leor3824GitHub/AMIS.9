@@ -1,4 +1,3 @@
-using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using AMIS.Blazor.Infrastructure.Api;
 using Microsoft.AspNetCore.Components;
@@ -14,35 +13,26 @@ public partial class PpeIssuanceReport : ComponentBase
 {
     private const string ApiVersion = "1";
 
-    [Parameter] public Guid? Id { get; set; }
     [Inject] public IApiClient ApiClient { get; set; } = default!;
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
+    [Inject] public IJSRuntime JS { get; set; } = default!;
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
 
     private MudForm? _form;
     private PpeIssuanceModel _model = new();
     private PpeIssuanceLineItemModel _draft = new();
     private Guid? _createdId;
-    private Guid? _editingId;
-    private int _editingIndex = -1;
-    private bool _isPrintDialogOpen;
-    private bool _isLoading;
+    private Guid? _reportId;
     private int _reportStatus = 0; // 0 = Draft, 1 = Posted
-    private string _actionButtonText = "Save PPEIR";
     private string _reportStatusText = "Draft";
+    private string _actionButtonText = "CREATE PPEIR";
+    private bool _isPrintDialogOpen;
 
-    protected override async Task OnInitializedAsync()
+    private static readonly string[] IssuanceTypes = ["Sale", "Transfer to CO", "Transfer to RO", "Transfer to PO", "Donation", "Dumping", "Destruction", "Others"];
+
+    protected override void OnInitialized()
     {
-        if (Id.HasValue)
-        {
-            _editingId = Id.Value;
-            // TODO: Uncomment after API client regeneration
-            // await LoadReport();
-        }
-        else
-        {
-            Reset();
-        }
+        Reset();
     }
 
     // TODO: Uncomment after API client regeneration with Status, Notes, and LineItems properties
@@ -107,92 +97,197 @@ public partial class PpeIssuanceReport : ComponentBase
     private void Reset()
     {
         _model = new PpeIssuanceModel();
-        _draft = new PpeIssuanceLineItemModel();
+        _draft = new PpeIssuanceLineItemModel { DateAcquired = _model.IssuanceDate };
         _createdId = null;
-        _editingId = null;
         StateHasChanged();
     }
 
     private void ResetDraft()
     {
-        _draft = new PpeIssuanceLineItemModel();
-        _editingIndex = -1;
+        _draft = new PpeIssuanceLineItemModel { DateAcquired = _model.IssuanceDate };
     }
 
     private void AddLineItem()
     {
-        if (_editingIndex >= 0)
+        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
         {
-            // Update existing item
-            _model.LineItems[_editingIndex] = new PpeIssuanceLineItemModel
-            {
-                PropertyCode = _draft.PropertyCode.Trim(),
-                Description = _draft.Description.Trim(),
-                Quantity = _draft.Quantity,
-                Unit = _draft.Unit?.Trim() ?? string.Empty,
-                DateAcquired = _draft.DateAcquired,
-                AcquisitionCost = _draft.AcquisitionCost,
-                AccumulatedDepreciation = _draft.AccumulatedDepreciation,
-                BookValue = _draft.BookValue,
-            };
-            Snackbar.Add("Item updated", Severity.Success);
+            Snackbar.Add("Property code is required", Severity.Warning);
+            return;
         }
-        else
+
+        if (string.IsNullOrWhiteSpace(_draft.Description))
         {
-            // Add new item
-            _model.LineItems.Add(new PpeIssuanceLineItemModel
-            {
-                PropertyCode = _draft.PropertyCode.Trim(),
-                Description = _draft.Description.Trim(),
-                Quantity = _draft.Quantity,
-                Unit = _draft.Unit?.Trim() ?? string.Empty,
-                DateAcquired = _draft.DateAcquired,
-                AcquisitionCost = _draft.AcquisitionCost,
-                AccumulatedDepreciation = _draft.AccumulatedDepreciation,
-                BookValue = _draft.BookValue,
-            });
+            Snackbar.Add("Description is required", Severity.Warning);
+            return;
         }
+
+        if (_draft.Quantity <= 0)
+        {
+            Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
+            return;
+        }
+
+        if (_draft.AcquisitionCost < 0)
+        {
+            Snackbar.Add("Acquisition cost cannot be negative", Severity.Warning);
+            return;
+        }
+
+        _model.LineItems.Add(new PpeIssuanceLineItemModel
+        {
+            PropertyCode = _draft.PropertyCode.Trim(),
+            Description = _draft.Description?.Trim(),
+            DateAcquired = _draft.DateAcquired,
+            Quantity = _draft.Quantity,
+            Unit = _draft.Unit?.Trim() ?? string.Empty,
+            AcquisitionCost = _draft.AcquisitionCost,
+            AccumulatedDepreciation = _draft.AccumulatedDepreciation,
+            BookValue = _draft.BookValue,
+        });
 
         ResetDraft();
-    }
-
-    private void EditItem(PpeIssuanceLineItemModel item)
-    {
-        _editingIndex = _model.LineItems.IndexOf(item);
-        _draft = new PpeIssuanceLineItemModel
-        {
-            PropertyCode = item.PropertyCode,
-            Description = item.Description,
-            Quantity = item.Quantity,
-            Unit = item.Unit,
-            DateAcquired = item.DateAcquired,
-            AcquisitionCost = item.AcquisitionCost,
-            AccumulatedDepreciation = item.AccumulatedDepreciation,
-            BookValue = item.BookValue,
-        };
-    }
-
-    private void DuplicateItem(PpeIssuanceLineItemModel item)
-    {
-        _editingIndex = -1;
-        _draft = new PpeIssuanceLineItemModel
-        {
-            PropertyCode = item.PropertyCode,
-            Description = item.Description,
-            Quantity = item.Quantity,
-            DateAcquired = item.DateAcquired,
-            Unit = item.Unit,
-            AcquisitionCost = item.AcquisitionCost,
-            AccumulatedDepreciation = item.AccumulatedDepreciation,
-            BookValue = item.BookValue,
-        };
-        Snackbar.Add("Item duplicated to draft. Click 'Add Item' to save.", Severity.Info);
     }
 
     private void RemoveItem(PpeIssuanceLineItemModel item)
     {
         _model.LineItems.Remove(item);
     }
+
+    private async Task PostReportAsync()
+    {
+        // TODO: Uncomment after API client regeneration
+        /*
+        if (!_reportId.HasValue)
+        {
+            Snackbar.Add("Save the report first before posting", Severity.Warning);
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to post this report? Once posted, it cannot be edited.");
+        if (!confirmed) return;
+
+        try
+        {
+            var postCommand = new PostPpeIssuanceReportCommand { Id = _reportId.Value };
+            await ApiClient.PostPpeIssuanceReportEndpointAsync(ApiVersion, postCommand);
+            
+            _reportStatus = 1;
+            _reportStatusText = "Posted";
+            _actionButtonText = "Posted";
+            Snackbar.Add("PPE Issuance Report posted successfully. Inventory has been updated.", Severity.Success);
+            StateHasChanged();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.Response ?? "Failed to post report", Severity.Error);
+        }
+        */
+    }
+
+    private async Task CancelReportAsync()
+    {
+        // TODO: Uncomment after API client regeneration
+        /*
+        if (!_reportId.HasValue)
+        {
+            Snackbar.Add("No report to cancel", Severity.Warning);
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to cancel this posted report? This will reverse all inventory changes.");
+        if (!confirmed) return;
+
+        try
+        {
+            var cancelCommand = new CancelPpeIssuanceReportCommand { Id = _reportId.Value };
+            await ApiClient.CancelPpeIssuanceReportEndpointAsync(ApiVersion, cancelCommand);
+            
+            _reportStatus = 0;
+            _reportStatusText = "Draft";
+            _actionButtonText = "Update PPEIR";
+            Snackbar.Add("PPE Issuance Report cancelled. Inventory changes reversed.", Severity.Success);
+            StateHasChanged();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.Response ?? "Failed to cancel report", Severity.Error);
+        }
+        */
+    }
+
+    private async Task DeleteReportAsync()
+    {
+        // TODO: Uncomment after API client regeneration
+        /*
+        if (!_reportId.HasValue)
+        {
+            Snackbar.Add("No report to delete", Severity.Warning);
+            return;
+        }
+
+        if (_reportStatus != 0)
+        {
+            Snackbar.Add("Only Draft reports can be deleted. Cancel the posted report first.", Severity.Warning);
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this report? This action cannot be undone.");
+        if (!confirmed) return;
+
+        try
+        {
+            await ApiClient.DeletePpeIssuanceReportEndpointAsync(ApiVersion, _reportId.Value);
+            Snackbar.Add("PPE Issuance Report deleted", Severity.Success);
+            NavigationManager.NavigateTo("/inventories/reports/ppeir");
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.Response ?? "Failed to delete report", Severity.Error);
+        }
+        */
+    }
+
+    // TODO: Uncomment after API client regeneration with Get and Update endpoints
+    /*
+    private async Task LoadReportAsync(Guid reportId)
+    {
+        try
+        {
+            var response = await ApiClient.GetPpeIssuanceReportByIdEndpointAsync(ApiVersion, reportId);
+            _reportId = response.Id;
+            _reportStatus = response.Status;
+            _reportStatusText = response.Status == 0 ? "Draft" : "Posted";
+            _actionButtonText = response.Status == 0 ? "Update PPEIR" : "Posted";
+
+            _model = new PpeIssuanceModel
+            {
+                ReportNumber = response.ReportNumber,
+                RecipientName = response.RecipientName,
+                RecipientAddress = response.RecipientAddress,
+                IssuanceType = response.IssuanceType,
+                IssuanceDate = response.IssuanceDate,
+                Notes = response.Notes,
+                LineItems = response.LineItems?.Select(li => new PpeIssuanceLineItemModel
+                {
+                    PropertyCode = li.PropertyCode,
+                    Description = li.Description,
+                    DateAcquired = li.DateAcquired,
+                    Quantity = li.Quantity,
+                    Unit = li.Unit,
+                    AcquisitionCost = li.AcquisitionCost,
+                    AccumulatedDepreciation = li.AccumulatedDepreciation,
+                    BookValue = li.BookValue,
+                }).ToList() ?? new()
+            };
+
+            StateHasChanged();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.Response ?? "Failed to load report", Severity.Error);
+        }
+    }
+    */
 
     private async Task SubmitAsync()
     {
@@ -201,10 +296,10 @@ public partial class PpeIssuanceReport : ComponentBase
             return;
         }
 
-        // If posted, cannot edit
+        // Guard against editing Posted reports
         if (_reportStatus != 0)
         {
-            Snackbar.Add("Cannot edit posted reports. Cancel to reverse.", Severity.Warning);
+            Snackbar.Add("Cannot edit a Posted report. Cancel it first to make changes.", Severity.Warning);
             return;
         }
 
@@ -228,73 +323,38 @@ public partial class PpeIssuanceReport : ComponentBase
             return;
         }
 
-        // TODO: Uncomment after API client regeneration with Update endpoints
-        /*
-        if (_editingId.HasValue)
+        try
         {
-            // Edit mode - update existing
-            var command = new UpdatePpeIssuanceReportCommand
+            // Create new report (Update endpoint pending API client regeneration)
+            var command = new CreatePpeIssuanceReportCommand
             {
-                Id = _editingId.Value,
+                ReportNumber = _model.ReportNumber,
                 RecipientName = _model.RecipientName,
                 RecipientAddress = _model.RecipientAddress,
                 IssuanceType = _model.IssuanceType,
                 IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
                 Notes = _model.Notes,
-                LineItems = _model.LineItems.Select(li => new UpdatePpeIssuanceLineItemRequest
+                LineItems = _model.LineItems.Select(li => new CreatePpeIssuanceLineItemRequest
                 {
                     PropertyCode = li.PropertyCode,
                     Description = li.Description,
+                    DateAcquired = li.DateAcquired ?? _model.IssuanceDate ?? DateTime.Today,
+                    Quantity = li.Quantity,
+                    Unit = li.Unit,
                     AcquisitionCost = li.AcquisitionCost,
                     AccumulatedDepreciation = li.AccumulatedDepreciation,
                     BookValue = li.BookValue,
                 }).ToList(),
             };
 
-            try
-            {
-                var response = await ApiClient.UpdatePpeIssuanceReportEndpointAsync(ApiVersion, _editingId.Value, command);
-                Snackbar.Add("PPE Issuance Report updated", Severity.Success);
-                NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
-            }
-            catch (ApiException ex)
-            {
-                Snackbar.Add(ex.Response ?? "Failed to update PPE issuance", Severity.Error);
-            }
-            return;
-        }
-        */
-
-        var createCommand = new CreatePpeIssuanceReportCommand
-        {
-            ReportNumber = _model.ReportNumber,
-            RecipientName = _model.RecipientName,
-            RecipientAddress = _model.RecipientAddress,
-            IssuanceType = _model.IssuanceType,
-            IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
-            Notes = _model.Notes,
-            LineItems = _model.LineItems.Select(li => new CreatePpeIssuanceLineItemRequest
-            {
-                PropertyCode = li.PropertyCode,
-                Description = li.Description,
-                Quantity = li.Quantity,
-                Unit = li.Unit,
-                AcquisitionCost = li.AcquisitionCost,
-                AccumulatedDepreciation = li.AccumulatedDepreciation,
-                BookValue = li.BookValue,
-            }).ToList(),
-        };
-
-        try
-        {
-            var response = await ApiClient.CreatePpeIssuanceReportEndpointAsync(ApiVersion, createCommand);
-            _createdId = response.Id;
-            Snackbar.Add("PPE Issuance Report saved", Severity.Success);
-            NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
+            var response = await ApiClient.CreatePpeIssuanceReportEndpointAsync(ApiVersion, command);
+            _reportId = response.Id;
+            Snackbar.Add("PPE Issuance Report created", Severity.Success);
+            Reset();
         }
         catch (ApiException ex)
         {
-            Snackbar.Add(ex.Response ?? "Failed to save PPE issuance", Severity.Error);
+            Snackbar.Add(ex.Response ?? "Failed to save PPEIR", Severity.Error);
         }
     }
 
@@ -327,66 +387,12 @@ public partial class PpeIssuanceReport : ComponentBase
     {
         _isPrintDialogOpen = false;
     }
-
-    // NOTE: The following methods will work after API client is regenerated with NSwag
-    // Uncomment these methods after regenerating the client
-    /*
-    private async Task PostReportAsync()
-    {
-        if (_editingId is null)
-        {
-            Snackbar.Add("Report not saved yet. Save first before posting.", Severity.Warning);
-            return;
-        }
-
-        var confirmed = await JS.InvokeAsync<bool>("confirm",
-            "Post this report? It will be locked and cannot be edited. Inventory will be updated.");
-        if (!confirmed) return;
-
-        try
-        {
-            await ApiClient.PostPpeIssuanceReportEndpointAsync(ApiVersion, _editingId.Value);
-            Snackbar.Add("Report posted successfully. Inventory updated.", Severity.Success);
-            await LoadReport();
-        }
-        catch (ApiException ex)
-        {
-            Snackbar.Add(ex.Response ?? "Failed to post report", Severity.Error);
-        }
-    }
-
-    private async Task CancelReportAsync()
-    {
-        if (_editingId is null)
-        {
-            Snackbar.Add("Report not found.", Severity.Warning);
-            return;
-        }
-
-        var confirmed = await JS.InvokeAsync<bool>("confirm",
-            "Cancel this report? This will reverse the inventory changes and create reversal entries.");
-        if (!confirmed) return;
-
-        try
-        {
-            await ApiClient.CancelPpeIssuanceReportEndpointAsync(ApiVersion, _editingId.Value);
-            Snackbar.Add("Report cancelled. Inventory reversed.", Severity.Success);
-            NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
-        }
-        catch (ApiException ex)
-        {
-            Snackbar.Add(ex.Response ?? "Failed to cancel report", Severity.Error);
-        }
-    }
-    */
 }
 
 #region View models
 public class PpeIssuanceModel
 {
-    public Guid Id { get; set; }
-
-    [Required, MaxLength(50)]
+    [Required, MaxLength(10)]
     public string ReportNumber { get; set; } = string.Empty;
 
     [Required]
@@ -395,7 +401,7 @@ public class PpeIssuanceModel
     [Required]
     public string RecipientAddress { get; set; } = string.Empty;
 
-    [Required, MaxLength(50)]
+    [Required, MaxLength(30)]
     public string IssuanceType { get; set; } = "Sale";
 
     [Required]
@@ -403,28 +409,28 @@ public class PpeIssuanceModel
 
     public string Notes { get; set; } = string.Empty;
 
-    public Collection<PpeIssuanceLineItemModel> LineItems { get; } = new();
+    public List<PpeIssuanceLineItemModel> LineItems { get; } = new();
 }
 
 public class PpeIssuanceLineItemModel
 {
-    [MaxLength(50)]
+    [Required, MaxLength(50)]
     public string PropertyCode { get; set; } = string.Empty;
 
-    [MaxLength(500)]
+    [Required, MaxLength(500)]
     public string Description { get; set; } = string.Empty;
 
     public double Quantity { get; set; } = 1;
 
-    [MaxLength(50)]
+    [Required, MaxLength(10)]
     public string Unit { get; set; } = "pcs";
 
     public DateTime? DateAcquired { get; set; }
 
     public double AcquisitionCost { get; set; }
 
-    public double? AccumulatedDepreciation { get; set; } = 0;
+    public double? AccumulatedDepreciation { get; set; }
 
-    public double? BookValue { get; set; } = 0;
+    public double? BookValue { get; set; }
 }
 #endregion

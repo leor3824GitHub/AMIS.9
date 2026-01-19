@@ -3,20 +3,17 @@ using System;
 using AMIS.WebApi.Inventories.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
+namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
 {
     [DbContext(typeof(InventoriesDbContext))]
-    [Migration("20260117143824_Add Inventories Schema")]
-    partial class AddInventoriesSchema
+    partial class InventoriesDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -577,7 +574,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.HasData(
                         new
                         {
-                            Id = new Guid("29bfc207-dead-40c7-a11e-9c415c0c0203"),
+                            Id = new Guid("b2937323-4b41-4d7e-9667-80897e17d1f9"),
                             AllowsForUse = true,
                             Code = "Good",
                             ColorCode = "#28a745",
@@ -593,7 +590,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("3ba703de-c726-4551-9a0e-ad17dd905332"),
+                            Id = new Guid("c2971ae5-9df2-4541-bb5c-8643c9f7f894"),
                             AllowsForUse = true,
                             Code = "Fair",
                             ColorCode = "#ffc107",
@@ -609,7 +606,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("57005b5e-6e1f-412a-a32e-6eba726f3a02"),
+                            Id = new Guid("23774d04-162d-42bd-8f6f-9f2cdff6874f"),
                             AllowsForUse = true,
                             Code = "Poor",
                             ColorCode = "#fd7e14",
@@ -625,7 +622,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("e9363f2a-d5f1-4ba0-8d49-b2be5f1bd5b7"),
+                            Id = new Guid("77ab4b11-3916-4635-9aa5-dc31e7833d44"),
                             AllowsForUse = false,
                             Code = "Unserviceable",
                             ColorCode = "#dc3545",
@@ -641,7 +638,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("de048632-a321-42e0-9539-27b4c845fc2a"),
+                            Id = new Guid("dd5f74ea-6a69-4683-99ae-fa9df78046f1"),
                             AllowsForUse = false,
                             Code = "ForDisposal",
                             ColorCode = "#6c757d",
@@ -1493,6 +1490,78 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.HasAnnotation("Finbuckle:MultiTenant", true);
                 });
 
+            modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.InventoryRegistry", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime?>("IssuedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("LastTransactionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("LastTransactionReference")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("LastTransactionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)");
+
+                    b.Property<string>("PropertyCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("ReceivedDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyCode")
+                        .IsUnique();
+
+                    b.ToTable("InventoryRegistry", "inventories");
+                });
+
             modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.InventoryTransaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1540,6 +1609,81 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.HasIndex("ProductId");
 
                     b.ToTable("InventoryTransactions", "inventories");
+                });
+
+            modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.InventoryTransactionLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset>("Created")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTimeOffset?>("Deleted")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("DeletedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ErrorMessage")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<string>("InitiatedBy")
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<int>("InventoryAfter")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("InventoryBefore")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTimeOffset>("LastModified")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid?>("LastModifiedBy")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("PropertyCode")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("QuantityChange")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReportNumber")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<int>("StatusAfter")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StatusBefore")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("Success")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("TransactionType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PropertyCode", "TransactionDate");
+
+                    b.ToTable("InventoryTransactionLog", "inventories");
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.Issuance", b =>
@@ -1964,7 +2108,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.HasData(
                         new
                         {
-                            Id = new Guid("6cdbac2b-5059-4432-af9d-0f34fcddf797"),
+                            Id = new Guid("9f2386e2-42c0-457f-ada0-530dea447cb2"),
                             COAReference = "COA Circular 2022-002",
                             Category = "Production",
                             Code = "MACHINERY",
@@ -1983,7 +2127,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("ddf77535-144d-4cdc-b170-ccd1ac8fdf5a"),
+                            Id = new Guid("85ead93a-99df-4811-bb8e-fc2cb15b9ddd"),
                             COAReference = "COA Circular 2022-002",
                             Category = "Transportation",
                             Code = "TRANSPORTATION",
@@ -2002,7 +2146,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("d323626a-39f7-469f-ba74-6de8ad1828b7"),
+                            Id = new Guid("9a17ce6a-795d-40e1-b404-d4e11b3c6a15"),
                             COAReference = "COA Circular 2022-002",
                             Category = "Office",
                             Code = "FURNITURE",
@@ -2021,7 +2165,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("d20db417-b9bb-4501-979f-421fdfabf1dc"),
+                            Id = new Guid("9b947d11-d5c3-4850-81bd-2d52e232d5ec"),
                             COAReference = "COA Circular 2022-002",
                             Category = "Technology",
                             Code = "ICT",
@@ -2040,7 +2184,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("279c5996-2c49-4a03-9b7c-4532866f86d7"),
+                            Id = new Guid("8a15024d-7cc3-434a-a0a7-d64c66b287bb"),
                             COAReference = "COA Circular 2022-002",
                             Category = "General",
                             Code = "OTHER",
@@ -2242,6 +2386,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ReportNumber")
@@ -2259,7 +2406,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.Property<DateTimeOffset>("Created")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<Guid>("CreatedBy")
                         .HasMaxLength(200)
@@ -2286,7 +2433,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.Property<DateTimeOffset>("LastModified")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+                        .HasDefaultValueSql("GETUTCDATE()");
 
                     b.Property<Guid?>("LastModifiedBy")
                         .HasMaxLength(200)
@@ -2309,6 +2456,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer");
 
                     b.HasKey("Id");
 
@@ -3224,7 +3374,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.HasData(
                         new
                         {
-                            Id = new Guid("a492716d-49ea-4b91-9e25-18f36b0a4bed"),
+                            Id = new Guid("87c615ca-eff9-425c-b2ef-72163b1ef8f9"),
                             Abbreviation = "pc",
                             Code = "PC",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3238,7 +3388,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("f329162f-fe04-45fc-96e7-8afab3a22e24"),
+                            Id = new Guid("76520f83-a7ec-4349-a2e3-49dd8dca1170"),
                             Abbreviation = "set",
                             Code = "SET",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3252,7 +3402,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("d542f410-65ba-49b2-bb07-49416ba235df"),
+                            Id = new Guid("677860e3-fedb-4a4c-9fa6-c01edfc6c049"),
                             Abbreviation = "unit",
                             Code = "UNIT",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3266,7 +3416,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("974c58d0-0992-4638-84ae-530c9c22e75b"),
+                            Id = new Guid("73523200-e73f-49d8-83c8-a1d7b89e67ee"),
                             Abbreviation = "pair",
                             Code = "PAIR",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3280,7 +3430,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("949887b8-aea3-459d-80cb-26377cbc96fb"),
+                            Id = new Guid("3a6f45b1-e0bf-4564-8480-f744c30c6256"),
                             Abbreviation = "kg",
                             Code = "KG",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3294,7 +3444,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("c3746b2c-9d07-455f-8a66-aab33ae90606"),
+                            Id = new Guid("1a80f6ea-c77a-492a-8d10-5e37fe62ecf7"),
                             Abbreviation = "g",
                             Code = "G",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3308,7 +3458,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("a291c6dc-d2bc-4269-9de4-ee2a355207dc"),
+                            Id = new Guid("65f3d7de-68b1-4821-a4e2-789b27ab7504"),
                             Abbreviation = "MT",
                             Code = "MT",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3322,7 +3472,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("013711c7-392a-43bb-ba3c-cf74118c51f3"),
+                            Id = new Guid("29f06eb2-9cea-41ae-a7df-47402a4e17c2"),
                             Abbreviation = "L",
                             Code = "L",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3336,7 +3486,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("fe1fb17e-7b77-4fe9-beaf-fd2aa94156a8"),
+                            Id = new Guid("8697af4e-04bf-45a6-85ed-f7c43f1cab0c"),
                             Abbreviation = "mL",
                             Code = "ML",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3350,7 +3500,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("98cd553f-3f8d-4dbe-9493-e1640db349ec"),
+                            Id = new Guid("f6cc5358-93c5-4676-ae00-19fa67004cb5"),
                             Abbreviation = "gal",
                             Code = "GAL",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3364,7 +3514,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("03ad19d1-a793-4dc0-a85f-b4c744b0c4c7"),
+                            Id = new Guid("5656dd0a-d04d-4d2b-80a7-18404e076b46"),
                             Abbreviation = "m",
                             Code = "M",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3378,7 +3528,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("aef13e59-6ca0-4347-852f-f303429d2b28"),
+                            Id = new Guid("fd7a7e41-642a-4255-8529-433b4afb61e3"),
                             Abbreviation = "cm",
                             Code = "CM",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3392,7 +3542,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("8e9ed494-654f-4bea-a97f-bac76bf92495"),
+                            Id = new Guid("fc82ac92-142d-4656-9c38-1eb4569143b9"),
                             Abbreviation = "mm",
                             Code = "MM",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3406,7 +3556,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("f4ccfb87-72b2-41eb-b2c4-63fe9c627ed7"),
+                            Id = new Guid("b88af0c5-673e-4cf9-80a7-6d5cb1c6c2e8"),
                             Abbreviation = "ft",
                             Code = "FT",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3420,7 +3570,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("b60cf50e-138d-4dee-8e62-35354e04d2ae"),
+                            Id = new Guid("ddb358a0-a433-439c-99cc-9001d79fc104"),
                             Abbreviation = "m²",
                             Code = "SQM",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3434,7 +3584,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("56d921c7-d036-4bdb-8c1a-4e84903aa1b7"),
+                            Id = new Guid("470091fd-e299-4462-818f-b87e4f88a45d"),
                             Abbreviation = "box",
                             Code = "BOX",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3448,7 +3598,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("abe33f55-a670-413f-9ed8-63f7dfc2f3a7"),
+                            Id = new Guid("3d01ac89-e67f-4bb3-b10f-9d65c1b3e95f"),
                             Abbreviation = "pack",
                             Code = "PACK",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3462,7 +3612,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("bfe7cc9c-50f4-405b-a118-5d45e460e78a"),
+                            Id = new Guid("287984f5-ee51-4fde-9d11-1b64f8167dd2"),
                             Abbreviation = "btl",
                             Code = "BOTTLE",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3476,7 +3626,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         },
                         new
                         {
-                            Id = new Guid("3b836ff8-ab07-4eaa-b900-24649ed1af7a"),
+                            Id = new Guid("9dc2246f-9b54-4bd5-8e56-e0ce21fd8524"),
                             Abbreviation = "can",
                             Code = "CAN",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -4267,11 +4417,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                                 .HasMaxLength(200)
                                 .HasColumnType("character varying(200)");
 
-                            b1.Property<string>("ApprovingOfficerSignature")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)");
-
                             b1.Property<string>("BillOfLadingNumber")
                                 .HasMaxLength(100)
                                 .HasColumnType("character varying(100)");
@@ -4279,10 +4424,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                             b1.Property<string>("DriverName")
                                 .HasMaxLength(200)
                                 .HasColumnType("character varying(200)");
-
-                            b1.Property<string>("DriverSignature")
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)");
 
                             b1.Property<DateTime>("IssuingDate")
                                 .HasColumnType("timestamp with time zone");
@@ -4292,11 +4433,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                                 .HasMaxLength(200)
                                 .HasColumnType("character varying(200)");
 
-                            b1.Property<string>("IssuingOfficerSignature")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)");
-
                             b1.Property<DateTime>("ReceiptDate")
                                 .HasColumnType("timestamp with time zone");
 
@@ -4304,11 +4440,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                                 .IsRequired()
                                 .HasMaxLength(200)
                                 .HasColumnType("character varying(200)");
-
-                            b1.Property<string>("RecipientSignature")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)");
 
                             b1.HasKey("SuppliesAndMaterialsIssuanceReportId");
 
@@ -4413,11 +4544,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                                 .HasMaxLength(200)
                                 .HasColumnType("character varying(200)");
 
-                            b1.Property<string>("NotedBySignature")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)");
-
                             b1.Property<DateTime>("NotedDate")
                                 .HasColumnType("timestamp with time zone");
 
@@ -4425,11 +4551,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                                 .IsRequired()
                                 .HasMaxLength(200)
                                 .HasColumnType("character varying(200)");
-
-                            b1.Property<string>("ReceivedBySignature")
-                                .IsRequired()
-                                .HasMaxLength(500)
-                                .HasColumnType("character varying(500)");
 
                             b1.Property<DateTime>("ReceivedDate")
                                 .HasColumnType("timestamp with time zone");
