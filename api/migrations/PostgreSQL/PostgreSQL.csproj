@@ -4,6 +4,9 @@
     <AssemblyName>AMIS.WebApi.Migrations.PostgreSQL</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\framework\Infrastructure\Infrastructure.csproj" />
     <ProjectReference Include="..\..\modules\Inventories\Inventories.Infrastructure\Inventories.Infrastructure.csproj" />
     <ProjectReference Include="..\..\modules\Todo\Todo.csproj" />

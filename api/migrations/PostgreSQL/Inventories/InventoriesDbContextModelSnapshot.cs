@@ -3,20 +3,17 @@ using System;
 using AMIS.WebApi.Inventories.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
 
-namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
+namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
 {
     [DbContext(typeof(InventoriesDbContext))]
-    [Migration("20260119045454_InitialInventories")]
-    partial class InitialInventories
+    partial class InventoriesDbContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -577,7 +574,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("b2937323-4b41-4d7e-9667-80897e17d1f9"),
+                            Id = new Guid("cea157fb-a51b-4479-be8d-9770c42f7ba4"),
                             AllowsForUse = true,
                             Code = "Good",
                             ColorCode = "#28a745",
@@ -593,7 +590,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("c2971ae5-9df2-4541-bb5c-8643c9f7f894"),
+                            Id = new Guid("b0589b6d-e8ac-4c41-a436-a2460dddd6ad"),
                             AllowsForUse = true,
                             Code = "Fair",
                             ColorCode = "#ffc107",
@@ -609,7 +606,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("23774d04-162d-42bd-8f6f-9f2cdff6874f"),
+                            Id = new Guid("1b76dcbc-90d3-442d-a696-c21d35e5bdb6"),
                             AllowsForUse = true,
                             Code = "Poor",
                             ColorCode = "#fd7e14",
@@ -625,7 +622,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("77ab4b11-3916-4635-9aa5-dc31e7833d44"),
+                            Id = new Guid("e5997004-66d9-4386-8396-a2dd5bf690bb"),
                             AllowsForUse = false,
                             Code = "Unserviceable",
                             ColorCode = "#dc3545",
@@ -641,7 +638,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("dd5f74ea-6a69-4683-99ae-fa9df78046f1"),
+                            Id = new Guid("0441315f-d76f-40d5-952f-a1f85e1cf62a"),
                             AllowsForUse = false,
                             Code = "ForDisposal",
                             ColorCode = "#6c757d",
@@ -2111,7 +2108,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("9f2386e2-42c0-457f-ada0-530dea447cb2"),
+                            Id = new Guid("c1e9d25a-f367-4e0b-8178-e6f2d3e0be73"),
                             COAReference = "COA Circular 2022-002",
                             Category = "Production",
                             Code = "MACHINERY",
@@ -2130,7 +2127,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("85ead93a-99df-4811-bb8e-fc2cb15b9ddd"),
+                            Id = new Guid("394e2ad2-645e-4c26-9364-ee5906f76155"),
                             COAReference = "COA Circular 2022-002",
                             Category = "Transportation",
                             Code = "TRANSPORTATION",
@@ -2149,7 +2146,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("9a17ce6a-795d-40e1-b404-d4e11b3c6a15"),
+                            Id = new Guid("5083b9f4-07e6-4dc2-a86e-3cb82ce229e5"),
                             COAReference = "COA Circular 2022-002",
                             Category = "Office",
                             Code = "FURNITURE",
@@ -2168,7 +2165,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("9b947d11-d5c3-4850-81bd-2d52e232d5ec"),
+                            Id = new Guid("f6a1d714-c817-4c8b-b659-feacf1bb5c0f"),
                             COAReference = "COA Circular 2022-002",
                             Category = "Technology",
                             Code = "ICT",
@@ -2187,7 +2184,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("8a15024d-7cc3-434a-a0a7-d64c66b287bb"),
+                            Id = new Guid("a252df7c-3ab5-4754-bb76-6fe946e24c67"),
                             COAReference = "COA Circular 2022-002",
                             Category = "General",
                             Code = "OTHER",
@@ -3377,7 +3374,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("87c615ca-eff9-425c-b2ef-72163b1ef8f9"),
+                            Id = new Guid("ef711ad5-320e-42c5-87f7-e551e193ad13"),
                             Abbreviation = "pc",
                             Code = "PC",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3391,7 +3388,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("76520f83-a7ec-4349-a2e3-49dd8dca1170"),
+                            Id = new Guid("df69f2c8-17d0-4363-81b3-227364023321"),
                             Abbreviation = "set",
                             Code = "SET",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3405,7 +3402,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("677860e3-fedb-4a4c-9fa6-c01edfc6c049"),
+                            Id = new Guid("f2b20719-5856-4b2c-a080-6ebe868b24e2"),
                             Abbreviation = "unit",
                             Code = "UNIT",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3419,7 +3416,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("73523200-e73f-49d8-83c8-a1d7b89e67ee"),
+                            Id = new Guid("47e2ff9a-3148-402f-82ff-9b345f30491a"),
                             Abbreviation = "pair",
                             Code = "PAIR",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3433,7 +3430,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("3a6f45b1-e0bf-4564-8480-f744c30c6256"),
+                            Id = new Guid("7060ca5b-81ea-4d25-aea2-9dde4aa021ac"),
                             Abbreviation = "kg",
                             Code = "KG",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3447,7 +3444,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("1a80f6ea-c77a-492a-8d10-5e37fe62ecf7"),
+                            Id = new Guid("9be2df4c-9f9c-4147-942f-f68a18f9e322"),
                             Abbreviation = "g",
                             Code = "G",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3461,7 +3458,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("65f3d7de-68b1-4821-a4e2-789b27ab7504"),
+                            Id = new Guid("5cdcbf71-7999-4872-bee8-0daafba0a515"),
                             Abbreviation = "MT",
                             Code = "MT",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3475,7 +3472,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("29f06eb2-9cea-41ae-a7df-47402a4e17c2"),
+                            Id = new Guid("036d1a0e-d480-49ac-864c-05360a7d0fab"),
                             Abbreviation = "L",
                             Code = "L",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3489,7 +3486,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("8697af4e-04bf-45a6-85ed-f7c43f1cab0c"),
+                            Id = new Guid("e05810d5-da2b-455b-994d-7d0e1cfd5220"),
                             Abbreviation = "mL",
                             Code = "ML",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3503,7 +3500,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("f6cc5358-93c5-4676-ae00-19fa67004cb5"),
+                            Id = new Guid("25cf6692-a20d-4131-9711-c0ea013117c5"),
                             Abbreviation = "gal",
                             Code = "GAL",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3517,7 +3514,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("5656dd0a-d04d-4d2b-80a7-18404e076b46"),
+                            Id = new Guid("d57c3b61-c515-4fce-8f5c-5415222957e2"),
                             Abbreviation = "m",
                             Code = "M",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3531,7 +3528,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("fd7a7e41-642a-4255-8529-433b4afb61e3"),
+                            Id = new Guid("c061ae28-d980-4e51-812d-2f07f30e1fff"),
                             Abbreviation = "cm",
                             Code = "CM",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3545,7 +3542,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("fc82ac92-142d-4656-9c38-1eb4569143b9"),
+                            Id = new Guid("256c4553-eaeb-4431-a31a-42e44913b4d0"),
                             Abbreviation = "mm",
                             Code = "MM",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3559,7 +3556,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("b88af0c5-673e-4cf9-80a7-6d5cb1c6c2e8"),
+                            Id = new Guid("b4056f42-89bf-4ea4-842e-62feaa15cee5"),
                             Abbreviation = "ft",
                             Code = "FT",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3573,7 +3570,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("ddb358a0-a433-439c-99cc-9001d79fc104"),
+                            Id = new Guid("6c6657a0-a1d3-4327-bf27-0f3a97f8fd5c"),
                             Abbreviation = "m²",
                             Code = "SQM",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3587,7 +3584,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("470091fd-e299-4462-818f-b87e4f88a45d"),
+                            Id = new Guid("5b0d8d06-1418-464b-95ea-539b7fbc655c"),
                             Abbreviation = "box",
                             Code = "BOX",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3601,7 +3598,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("3d01ac89-e67f-4bb3-b10f-9d65c1b3e95f"),
+                            Id = new Guid("b0683b00-cc63-4c28-80bd-bb8dc3e2a6cf"),
                             Abbreviation = "pack",
                             Code = "PACK",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3615,7 +3612,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("287984f5-ee51-4fde-9d11-1b64f8167dd2"),
+                            Id = new Guid("26c67ecb-d862-47e4-ac4c-e0a07525d09a"),
                             Abbreviation = "btl",
                             Code = "BOTTLE",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),
@@ -3629,7 +3626,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
                         },
                         new
                         {
-                            Id = new Guid("9dc2246f-9b54-4bd5-8e56-e0ce21fd8524"),
+                            Id = new Guid("15b57ce7-4a14-4625-b778-7062bbcdcc3f"),
                             Abbreviation = "can",
                             Code = "CAN",
                             Created = new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)),

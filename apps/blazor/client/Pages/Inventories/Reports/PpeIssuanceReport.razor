@@ -112,27 +112,26 @@
                             <MudGrid GutterSize="2" Class="mt-2">
                                 <MudItem xs="12" md="3">
                                     <MudTextField @bind-Value="_draft.PropertyCode" For="@(() => _draft.PropertyCode)"
-                                        Label="Property Code" Required="true" />
+                                        Label="Property Code" />
                                 </MudItem>
                                 <MudItem xs="12" md="3">
                                     <MudTextField @bind-Value="_draft.Description" For="@(() => _draft.Description)"
-                                        Label="Description" Required="true" />
+                                        Label="Description" />
                                 </MudItem>
                                 <MudItem xs="6" md="1">
-                                    <MudNumericField T="double" @bind-Value="_draft.Quantity" Label="Qty" Min="0"
-                                        Required="true" HideSpinButtons="true" />
+                                    <MudNumericField T="double" @bind-Value="_draft.Quantity" Label="Qty"
+                                        HideSpinButtons="true" />
                                 </MudItem>
                                 <MudItem xs="6" md="1">
-                                    <MudTextField @bind-Value="_draft.Unit" For="@(() => _draft.Unit)" Label="Unit"
-                                        Required="true" />
+                                    <MudTextField @bind-Value="_draft.Unit" For="@(() => _draft.Unit)" Label="Unit" />
                                 </MudItem>
                                 <MudItem xs="12" md="2">
                                     <MudDatePicker @bind-Date="_draft.DateAcquired" Label="Date Acquired" />
                                 </MudItem>
                                 <MudItem xs="12" md="2">
                                     <MudNumericField T="double" @bind-Value="_draft.AcquisitionCost"
-                                        Label="Acquisition Cost" Min="0" HideSpinButtons="true" Adornment="Adornment.Start"
-                                        AdornmentText="₱" Required="true" />
+                                        Label="Acquisition Cost" HideSpinButtons="true" Adornment="Adornment.Start"
+                                        AdornmentText="₱" />
                                 </MudItem>
                             </MudGrid>
                             <MudStack Row="true" Spacing="1" Class="mt-2">

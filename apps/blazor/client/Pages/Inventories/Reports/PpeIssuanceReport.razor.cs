@@ -109,34 +109,11 @@ public partial class PpeIssuanceReport : ComponentBase
 
     private void AddLineItem()
     {
-        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
-        {
-            Snackbar.Add("Property code is required", Severity.Warning);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(_draft.Description))
-        {
-            Snackbar.Add("Description is required", Severity.Warning);
-            return;
-        }
-
-        if (_draft.Quantity <= 0)
-        {
-            Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
-            return;
-        }
-
-        if (_draft.AcquisitionCost < 0)
-        {
-            Snackbar.Add("Acquisition cost cannot be negative", Severity.Warning);
-            return;
-        }
-
+        // Just add the line item - API will perform detailed validation
         _model.LineItems.Add(new PpeIssuanceLineItemModel
         {
-            PropertyCode = _draft.PropertyCode.Trim(),
-            Description = _draft.Description?.Trim(),
+            PropertyCode = _draft.PropertyCode?.Trim() ?? string.Empty,
+            Description = _draft.Description?.Trim() ?? string.Empty,
             DateAcquired = _draft.DateAcquired,
             Quantity = _draft.Quantity,
             Unit = _draft.Unit?.Trim() ?? string.Empty,
@@ -304,10 +281,9 @@ public partial class PpeIssuanceReport : ComponentBase
         }
 
         await _form.Validate();
-
         if (!_form.IsValid)
         {
-            Snackbar.Add("Please fix validation errors", Severity.Warning);
+            Snackbar.Add("Fix report details before submitting.", Severity.Warning);
             return;
         }
 
@@ -414,16 +390,14 @@ public class PpeIssuanceModel
 
 public class PpeIssuanceLineItemModel
 {
-    [Required, MaxLength(50)]
-    public string PropertyCode { get; set; } = string.Empty;
 
-    [Required, MaxLength(500)]
-    public string Description { get; set; } = string.Empty;
 
     public double Quantity { get; set; } = 1;
-
-    [Required, MaxLength(10)]
-    public string Unit { get; set; } = "pcs";
+    public string PropertyCode { get; set; } = string.Empty;
+        
+    public string Description { get; set; } = string.Empty;
+        
+    public string Unit { get; set; } = string.Empty;
 
     public DateTime? DateAcquired { get; set; }
 

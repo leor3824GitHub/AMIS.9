@@ -46,34 +46,11 @@ public partial class PpeReceivingReport : ComponentBase
 
     private void AddLineItem()
     {
-        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
-        {
-            Snackbar.Add("Property code is required", Severity.Warning);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(_draft.Description))
-        {
-            Snackbar.Add("Description is required", Severity.Warning);
-            return;
-        }
-
-        if (_draft.Quantity <= 0)
-        {
-            Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
-            return;
-        }
-
-        if (_draft.UnitCost < 0)
-        {
-            Snackbar.Add("Unit cost cannot be negative", Severity.Warning);
-            return;
-        }
-
+        // Just add the line item - API will perform detailed validation
         _model.LineItems.Add(new PpeReceivingLineItemModel
         {
-            PropertyCode = _draft.PropertyCode.Trim(),
-            Description = _draft.Description?.Trim(),
+            PropertyCode = _draft.PropertyCode?.Trim() ?? string.Empty,
+            Description = _draft.Description?.Trim() ?? string.Empty,
             DateAcquired = _draft.DateAcquired,
             Quantity = _draft.Quantity,
             Unit = _draft.Unit?.Trim() ?? string.Empty,
@@ -320,10 +297,10 @@ public class PpeReceivingModel
 
 public class PpeReceivingLineItemModel
 {
-    [Required]
+    
     public string PropertyCode { get; set; } = string.Empty;
 
-    [Required]
+    
     public string Description { get; set; } = string.Empty;
 
     public DateTime? DateAcquired { get; set; } = DateTime.Today;
@@ -331,7 +308,7 @@ public class PpeReceivingLineItemModel
     [Range(0.01, double.MaxValue)]
     public double Quantity { get; set; } = 1;
 
-    [Required]
+    
     public string Unit { get; set; } = string.Empty;
 
     [Range(0, double.MaxValue)]

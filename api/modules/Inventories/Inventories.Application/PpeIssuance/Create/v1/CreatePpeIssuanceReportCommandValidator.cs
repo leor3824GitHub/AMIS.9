@@ -29,33 +29,6 @@ public sealed class CreatePpeIssuanceReportCommandValidator : AbstractValidator<
         RuleFor(x => x.LineItems)
             .NotEmpty().WithMessage("At least one line item is required.")
             .Must(items => items.Count > 0).WithMessage("Line items collection cannot be empty.");
-
-        RuleForEach(x => x.LineItems)
-            .SetValidator(new CreatePpeIssuanceLineItemValidator());
-    }
-}
-
-public sealed class CreatePpeIssuanceLineItemValidator : AbstractValidator<CreatePpeIssuanceLineItemRequest>
-{
-    public CreatePpeIssuanceLineItemValidator()
-    {
-        RuleFor(x => x.PropertyCode)
-            .NotEmpty().WithMessage("Property code is required.")
-            .MaximumLength(50).WithMessage("Property code cannot exceed 50 characters.");
-
-        RuleFor(x => x.Description)
-            .NotEmpty().WithMessage("Description is required.")
-            .MaximumLength(500).WithMessage("Description cannot exceed 500 characters.");
-
-        RuleFor(x => x.Quantity)
-            .GreaterThan(0).WithMessage("Quantity must be greater than 0.");
-
-        RuleFor(x => x.Unit)
-            .NotEmpty().WithMessage("Unit is required.")
-            .MaximumLength(50).WithMessage("Unit cannot exceed 50 characters.");
-
-        RuleFor(x => x.AcquisitionCost)
-            .GreaterThanOrEqualTo(0).WithMessage("Acquisition cost must be greater than or equal to 0.");
     }
 }
 
