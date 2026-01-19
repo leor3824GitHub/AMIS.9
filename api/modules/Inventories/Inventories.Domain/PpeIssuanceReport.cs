@@ -1,5 +1,6 @@
 using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Inventories.Domain;
 
@@ -12,6 +13,7 @@ public class PpeIssuanceReport : AuditableEntity, IAggregateRoot
 {
     // Header and Tracking
     public string ReportNumber { get; private set; }
+    public PpeReportStatus Status { get; private set; } = PpeReportStatus.Draft;
 
     // Recipient Information
     public PpeRecipientInfo Recipient { get; private set; }
@@ -68,6 +70,7 @@ public class PpeIssuanceReport : AuditableEntity, IAggregateRoot
     /// </summary>
     public void AddLineItem(PpeIssuanceLineItem lineItem)
     {
+        EnsureDraft();
         ArgumentNullException.ThrowIfNull(lineItem);
         _lineItems.Add(lineItem);
     }
@@ -118,6 +121,63 @@ public class PpeIssuanceReport : AuditableEntity, IAggregateRoot
         { "Accounting", DistributedToAccounting },
         { "File", DistributedToFile }
     };
+
+    /// <summary>
+    /// Posts the report, making it immutable and ready for registry update
+    /// </summary>
+    public void Post()
+    {
+        EnsureDraft();
+        if (_lineItems.Count == 0)
+        {
+            throw new InvalidOperationException("Cannot post a report with no line items.");
+        }
+        Status = PpeReportStatus.Posted;
+    }
+
+    /// <summary>
+    /// Cancels the report, marking it as void
+    /// </summary>
+    public void Cancel()
+    {
+        if (Status == PpeReportStatus.Cancelled)
+        {
+            throw new InvalidOperationException("Report is already cancelled.");
+        }
+        Status = PpeReportStatus.Cancelled;
+    }
+
+    /// <summary>
+    /// Clears all line items (only allowed in Draft)
+    /// </summary>
+    public void ClearLineItems()
+    {
+        EnsureDraft();
+        _lineItems.Clear();
+    }
+
+    /// <summary>
+    /// Updates report header (only allowed in Draft)
+    /// </summary>
+    public void UpdateHeader(PpeRecipientInfo recipient, PpeIssuanceType issuanceType, DateTime issuanceDate, string? notes)
+    {
+        EnsureDraft();
+        ArgumentNullException.ThrowIfNull(recipient);
+        ArgumentNullException.ThrowIfNull(issuanceType);
+
+        Recipient = recipient;
+        IssuanceType = issuanceType;
+        IssuanceDate = issuanceDate;
+        Notes = notes;
+    }
+
+    private void EnsureDraft()
+    {
+        if (Status != PpeReportStatus.Draft)
+        {
+            throw new InvalidOperationException($"Cannot modify report in {Status} status. Only Draft reports can be edited.");
+        }
+    }
 }
 
 /// <summary>

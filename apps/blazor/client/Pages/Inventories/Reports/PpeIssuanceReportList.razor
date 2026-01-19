@@ -4,14 +4,18 @@
 @using AMIS.Blazor.Client.Components.General
 @using MudBlazor
 @using AMIS.Blazor.Client.Pages.Inventories.Reports
+@inject IJSRuntime JS
+@inject NavigationManager NavigationManager
 
 <PageHeader Title="PPEIR List" Header="PPE Issuance Reports" SubHeader="View and manage PPE Issuance Reports" />
 
 <MudPaper Class="pa-4">
     <MudStack Spacing="3">
         <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => OpenNewReportDialog())" StartIcon="@Icons.Material.Filled.Add">New Report</MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadReports" StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => OpenNewReportDialog())"
+                StartIcon="@Icons.Material.Filled.Add">New Report</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadReports"
+                StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
         </MudStack>
 
         @if (_isLoading)
@@ -21,7 +25,8 @@
         else if (_reports == null || _reports.Count == 0)
         {
             <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-                No PPE Issuance Reports found. <MudLink OnClick="@(() => OpenNewReportDialog())" style="cursor: pointer;">Create one now</MudLink>
+                No PPE Issuance Reports found. <MudLink OnClick="@(() => OpenNewReportDialog())" style="cursor: pointer;">
+                    Create one now</MudLink>
             </MudAlert>
         }
         else
@@ -32,6 +37,7 @@
                     <MudTh>Recipient</MudTh>
                     <MudTh>Type</MudTh>
                     <MudTh>Issuance Date</MudTh>
+                    <MudTh>Status</MudTh>
                     <MudTh align="center">Items</MudTh>
                     <MudTh>Created Date</MudTh>
                     <MudTh align="center">Actions</MudTh>
@@ -41,14 +47,32 @@
                     <MudTd DataLabel="Recipient">@context.RecipientName</MudTd>
                     <MudTd DataLabel="Type">@context.IssuanceType</MudTd>
                     <MudTd DataLabel="Issuance Date">@context.IssuanceDate.ToString("MMM dd, yyyy")</MudTd>
+                    @* TODO: Show Status after API client regeneration
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Color="@(context.Status == 0 ? Color.Warning : Color.Success)"
+                            Variant="Variant.Filled" Size="Size.Small">
+                            @(context.Status == 0 ? "Draft" : "Posted")
+                        </MudChip>
+                    </MudTd>
+                    *@
                     <MudTd DataLabel="Items" align="center">
-                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">@context.LineItemsCount</MudChip>
+                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">
+                            @context.LineItemsCount</MudChip>
                     </MudTd>
                     <MudTd DataLabel="Created Date">@context.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</MudTd>
                     <MudTd align="center">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" OnClick="@(() => EditReport(context.Id))" Title="Edit" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Info" OnClick="@(() => PrintReport(context.Id))" Title="Print" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" OnClick="@(() => DeleteReport(context.Id))" Title="Delete" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                            OnClick="@(() => EditReport(context.Id))" Title="Edit" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Info"
+                            OnClick="@(() => PrintReport(context.Id))" Title="Print" />
+                        @* TODO: Enable Post/Cancel/Delete actions after API client regeneration
+                        <MudIconButton Icon="@Icons.Material.Filled.CheckCircle" Color="Color.Success" Disabled="true"
+                            Title="Post & Lock (Coming Soon)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Disabled="true"
+                            Title="Delete (Coming Soon)" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Undo" Color="Color.Warning" Disabled="true"
+                            Title="Cancel (Coming Soon)" />
+                        *@
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -61,7 +85,6 @@
 @code {
     private const string ApiVersion = "1";
     [Inject] public IApiClient ApiClient { get; set; } = default!;
-    [Inject] public NavigationManager NavigationManager { get; set; } = default!;
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
 
     private PpeIssuanceReportFormDialog? _formDialog;
@@ -93,19 +116,67 @@
 
     private void EditReport(Guid id)
     {
-        Snackbar.Add("Edit functionality will be available soon", Severity.Info);
+        NavigationManager.NavigateTo($"/inventories/reports/ppeir?id={id}");
     }
 
     private async Task PrintReport(Guid id)
     {
-        Snackbar.Add("Print functionality will be available after API implementation", Severity.Info);
+        NavigationManager.NavigateTo($"/inventories/reports/ppeir-print?id={id}");
+    }
+
+    // TODO: Uncomment after API client regeneration with Post/Cancel/Delete endpoints
+    /*
+    private async Task PostReport(Guid id)
+    {
+    var confirmed = await JS.InvokeAsync<bool>("confirm", "Post this report? It will be locked and cannot be edited.");
+    if (!confirmed) return;
+
+    try
+    {
+    await ApiClient.PostPpeIssuanceReportEndpointAsync(ApiVersion, id);
+    Snackbar.Add("Report posted successfully. Inventory updated.", Severity.Success);
+    await LoadReports();
+    }
+    catch (ApiException ex)
+    {
+    Snackbar.Add(ex.Response ?? "Failed to post report", Severity.Error);
+    }
+    }
+
+    private async Task CancelReport(Guid id)
+    {
+    var confirmed = await JS.InvokeAsync<bool>("confirm", "Cancel this report? This will reverse the inventory changes.");
+    if (!confirmed) return;
+
+    try
+    {
+    await ApiClient.CancelPpeIssuanceReportEndpointAsync(ApiVersion, id);
+    Snackbar.Add("Report cancelled. Inventory reversed.", Severity.Success);
+    await LoadReports();
+    }
+    catch (ApiException ex)
+    {
+    Snackbar.Add(ex.Response ?? "Failed to cancel report", Severity.Error);
+    }
     }
 
     private async Task DeleteReport(Guid id)
     {
-        // TODO: Implement delete functionality
-        Snackbar.Add("Delete functionality to be implemented", Severity.Info);
+    var confirmed = await JS.InvokeAsync<bool>("confirm", "Delete this draft report? This action cannot be undone.");
+    if (!confirmed) return;
+
+    try
+    {
+    await ApiClient.DeletePpeIssuanceReportEndpointAsync(ApiVersion, id);
+    Snackbar.Add("Report deleted successfully", Severity.Success);
+    await LoadReports();
     }
+    catch (ApiException ex)
+    {
+    Snackbar.Add(ex.Response ?? "Failed to delete report", Severity.Error);
+    }
+    }
+    */
 
     private void OpenNewReportDialog()
     {

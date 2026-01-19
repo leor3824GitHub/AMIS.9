@@ -30,6 +30,8 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PurchaseRequest;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Product;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Brand;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Category;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InventoryRegistry;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InventoryTransactionLog;
 using AMIS.Inventories.Infrastructure.Issuances.Features.Accept.v1;
 using AMIS.Inventories.Infrastructure.Issuances.Features.Reject.v1;
 using AMIS.Inventories.Infrastructure.Issuances.Features.Cancel.v1;
@@ -277,7 +279,16 @@ public static class InventoriesModule
 
             var ppeReceivingGroup = app.MapGroup("ppe-receiving").WithTags("ppe-receiving");
             ppeReceivingGroup.MapCreatePpeReceivingReportEndpoint();
-            ppeReceivingGroup.MapGetPpeReceivingReportEndpoint();        }
+            ppeReceivingGroup.MapGetPpeReceivingReportEndpoint();
+
+            var inventoryRegistryGroup = app.MapGroup("inventory-registries").WithTags("inventory-registries");
+            inventoryRegistryGroup.MapSearchInventoryRegistriesEndpoint();
+            inventoryRegistryGroup.MapGetInventoryRegistryEndpoint();
+
+            var inventoryTransactionLogGroup = app.MapGroup("inventory-transaction-logs").WithTags("inventory-transaction-logs");
+            inventoryTransactionLogGroup.MapSearchInventoryTransactionLogsEndpoint();
+            inventoryTransactionLogGroup.MapGetInventoryTransactionLogEndpoint();
+        }
     }
     public static WebApplicationBuilder RegisterInventoriesServices(this WebApplicationBuilder builder)
     {
@@ -388,6 +399,12 @@ public static class InventoriesModule
         // PPE Receiving Report (PPERR)
         builder.Services.AddKeyedScoped<IRepository<PpeReceivingReport>, InventoriesRepository<PpeReceivingReport>>("inventories:pperr");
         builder.Services.AddKeyedScoped<IReadRepository<PpeReceivingReport>, InventoriesRepository<PpeReceivingReport>>("inventories:pperr");
+
+        // Inventory Registry & Logs
+        builder.Services.AddKeyedScoped<IRepository<InventoryRegistry>, InventoriesRepository<InventoryRegistry>>("inventories:inventory-registries");
+        builder.Services.AddKeyedScoped<IReadRepository<InventoryRegistry>, InventoriesRepository<InventoryRegistry>>("inventories:inventory-registries");
+        builder.Services.AddKeyedScoped<IRepository<InventoryTransactionLog>, InventoriesRepository<InventoryTransactionLog>>("inventories:inventory-transaction-logs");
+        builder.Services.AddKeyedScoped<IReadRepository<InventoryTransactionLog>, InventoriesRepository<InventoryTransactionLog>>("inventories:inventory-transaction-logs");
 
         return builder;
     }

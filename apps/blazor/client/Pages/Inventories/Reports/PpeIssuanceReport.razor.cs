@@ -17,7 +17,6 @@ public partial class PpeIssuanceReport : ComponentBase
     [Parameter] public Guid? Id { get; set; }
     [Inject] public IApiClient ApiClient { get; set; } = default!;
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
-    [Inject] public IJSRuntime JS { get; set; } = default!;
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
 
     private MudForm? _form;
@@ -28,13 +27,17 @@ public partial class PpeIssuanceReport : ComponentBase
     private int _editingIndex = -1;
     private bool _isPrintDialogOpen;
     private bool _isLoading;
+    private int _reportStatus = 0; // 0 = Draft, 1 = Posted
+    private string _actionButtonText = "Save PPEIR";
+    private string _reportStatusText = "Draft";
 
     protected override async Task OnInitializedAsync()
     {
         if (Id.HasValue)
         {
             _editingId = Id.Value;
-            await LoadReport();
+            // TODO: Uncomment after API client regeneration
+            // await LoadReport();
         }
         else
         {
@@ -42,17 +45,56 @@ public partial class PpeIssuanceReport : ComponentBase
         }
     }
 
+    // TODO: Uncomment after API client regeneration with Status, Notes, and LineItems properties
+    /*
     private async Task LoadReport()
     {
         _isLoading = true;
         try
         {
-            Snackbar.Add("Edit functionality will be available after API implementation", Severity.Info);
-            NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
+            var report = await ApiClient.GetPpeIssuanceReportEndpointAsync(ApiVersion, _editingId!.Value);
+            if (report is null)
+            {
+                Snackbar.Add("Report not found", Severity.Error);
+                NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
+                return;
+            }
+
+            _model = new PpeIssuanceModel
+            {
+                Id = report.Id,
+                ReportNumber = report.ReportNumber,
+                RecipientName = report.RecipientName,
+                RecipientAddress = report.RecipientAddress,
+                IssuanceType = report.IssuanceType,
+                IssuanceDate = report.IssuanceDate,
+                Notes = report.Notes,
+            };
+
+            _reportStatus = report.Status;
+            _reportStatusText = report.Status == 0 ? "Draft" : "Posted";
+            _actionButtonText = report.Status == 0 ? "Update PPEIR" : "View Only";
+
+            // Load line items if available
+            if (report.LineItems != null)
+            {
+                foreach (var item in report.LineItems)
+                {
+                    _model.LineItems.Add(new PpeIssuanceLineItemModel
+                    {
+                        PropertyCode = item.PropertyCode,
+                        Description = item.Description,
+                        DateAcquired = item.DateAcquired,
+                        AcquisitionCost = item.AcquisitionCost,
+                        AccumulatedDepreciation = item.AccumulatedDepreciation,
+                        BookValue = item.BookValue,
+                    });
+                }
+            }
         }
-        catch (Exception ex)
+        catch (ApiException ex)
         {
-            Snackbar.Add($"Error loading report: {ex.Message}", Severity.Error);
+            Snackbar.Add(ex.Response ?? "Error loading report", Severity.Error);
             NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
         }
         finally
@@ -60,6 +102,7 @@ public partial class PpeIssuanceReport : ComponentBase
             _isLoading = false;
         }
     }
+    */
 
     private void Reset()
     {
@@ -158,6 +201,13 @@ public partial class PpeIssuanceReport : ComponentBase
             return;
         }
 
+        // If posted, cannot edit
+        if (_reportStatus != 0)
+        {
+            Snackbar.Add("Cannot edit posted reports. Cancel to reverse.", Severity.Warning);
+            return;
+        }
+
         await _form.Validate();
 
         if (!_form.IsValid)
@@ -178,14 +228,44 @@ public partial class PpeIssuanceReport : ComponentBase
             return;
         }
 
+        // TODO: Uncomment after API client regeneration with Update endpoints
+        /*
         if (_editingId.HasValue)
         {
             // Edit mode - update existing
-            Snackbar.Add("Edit functionality to be implemented on API", Severity.Info);
+            var command = new UpdatePpeIssuanceReportCommand
+            {
+                Id = _editingId.Value,
+                RecipientName = _model.RecipientName,
+                RecipientAddress = _model.RecipientAddress,
+                IssuanceType = _model.IssuanceType,
+                IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
+                Notes = _model.Notes,
+                LineItems = _model.LineItems.Select(li => new UpdatePpeIssuanceLineItemRequest
+                {
+                    PropertyCode = li.PropertyCode,
+                    Description = li.Description,
+                    AcquisitionCost = li.AcquisitionCost,
+                    AccumulatedDepreciation = li.AccumulatedDepreciation,
+                    BookValue = li.BookValue,
+                }).ToList(),
+            };
+
+            try
+            {
+                var response = await ApiClient.UpdatePpeIssuanceReportEndpointAsync(ApiVersion, _editingId.Value, command);
+                Snackbar.Add("PPE Issuance Report updated", Severity.Success);
+                NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
+            }
+            catch (ApiException ex)
+            {
+                Snackbar.Add(ex.Response ?? "Failed to update PPE issuance", Severity.Error);
+            }
             return;
         }
+        */
 
-        var command = new CreatePpeIssuanceReportCommand
+        var createCommand = new CreatePpeIssuanceReportCommand
         {
             ReportNumber = _model.ReportNumber,
             RecipientName = _model.RecipientName,
@@ -207,7 +287,7 @@ public partial class PpeIssuanceReport : ComponentBase
 
         try
         {
-            var response = await ApiClient.CreatePpeIssuanceReportEndpointAsync(ApiVersion, command);
+            var response = await ApiClient.CreatePpeIssuanceReportEndpointAsync(ApiVersion, createCommand);
             _createdId = response.Id;
             Snackbar.Add("PPE Issuance Report saved", Severity.Success);
             NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
@@ -247,6 +327,58 @@ public partial class PpeIssuanceReport : ComponentBase
     {
         _isPrintDialogOpen = false;
     }
+
+    // NOTE: The following methods will work after API client is regenerated with NSwag
+    // Uncomment these methods after regenerating the client
+    /*
+    private async Task PostReportAsync()
+    {
+        if (_editingId is null)
+        {
+            Snackbar.Add("Report not saved yet. Save first before posting.", Severity.Warning);
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm",
+            "Post this report? It will be locked and cannot be edited. Inventory will be updated.");
+        if (!confirmed) return;
+
+        try
+        {
+            await ApiClient.PostPpeIssuanceReportEndpointAsync(ApiVersion, _editingId.Value);
+            Snackbar.Add("Report posted successfully. Inventory updated.", Severity.Success);
+            await LoadReport();
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.Response ?? "Failed to post report", Severity.Error);
+        }
+    }
+
+    private async Task CancelReportAsync()
+    {
+        if (_editingId is null)
+        {
+            Snackbar.Add("Report not found.", Severity.Warning);
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm",
+            "Cancel this report? This will reverse the inventory changes and create reversal entries.");
+        if (!confirmed) return;
+
+        try
+        {
+            await ApiClient.CancelPpeIssuanceReportEndpointAsync(ApiVersion, _editingId.Value);
+            Snackbar.Add("Report cancelled. Inventory reversed.", Severity.Success);
+            NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.Response ?? "Failed to cancel report", Severity.Error);
+        }
+    }
+    */
 }
 
 #region View models

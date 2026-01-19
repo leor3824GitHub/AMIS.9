@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeIssuance.Create.v1;
 
 public sealed class CreatePpeIssuanceReportHandler(
     ILogger<CreatePpeIssuanceReportHandler> logger,
-    [FromKeyedServices("inventories:ppeir")] IRepository<PpeIssuanceReport> repository)
+    [FromKeyedServices("inventories:ppeir")] IRepository<PpeIssuanceReport> issuanceRepository)
     : IRequestHandler<CreatePpeIssuanceReportCommand, CreatePpeIssuanceReportResponse>
 {
     public async Task<CreatePpeIssuanceReportResponse> Handle(
@@ -48,11 +48,11 @@ public sealed class CreatePpeIssuanceReportHandler(
                 report.AddLineItem(item);
             }
 
-            await repository.AddAsync(report, cancellationToken);
-            await repository.SaveChangesAsync(cancellationToken);
+            await issuanceRepository.AddAsync(report, cancellationToken);
+            await issuanceRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             logger.LogInformation(
-                "Successfully created PPE Issuance Report with ID: {Id} and report number: {ReportNumber}",
+                "Successfully created PPE Issuance Report as Draft with ID: {Id} and report number: {ReportNumber}",
                 report.Id,
                 report.ReportNumber);
 

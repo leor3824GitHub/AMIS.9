@@ -79,6 +79,10 @@ public sealed class InventoriesDbContext : FshDbContext
     public DbSet<PpeIssuanceReport> PpeIssuanceReports { get; set; } = null!;
     public DbSet<PpeReceivingReport> PpeReceivingReports { get; set; } = null!;
 
+    // Inventory Registry & Audit
+    public DbSet<InventoryRegistry> InventoryRegistries { get; set; } = null!;
+    public DbSet<InventoryTransactionLog> InventoryTransactionLogs { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         ArgumentNullException.ThrowIfNull(modelBuilder);

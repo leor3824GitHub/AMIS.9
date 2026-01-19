@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Create.v1;
 
 public sealed class CreatePpeReceivingReportHandler(
     ILogger<CreatePpeReceivingReportHandler> logger,
-    [FromKeyedServices("inventories:pperr")] IRepository<PpeReceivingReport> repository)
+    [FromKeyedServices("inventories:pperr")] IRepository<PpeReceivingReport> receivingRepository)
     : IRequestHandler<CreatePpeReceivingReportCommand, CreatePpeReceivingReportResponse>
 {
     public async Task<CreatePpeReceivingReportResponse> Handle(CreatePpeReceivingReportCommand request, CancellationToken cancellationToken)
@@ -37,8 +37,10 @@ public sealed class CreatePpeReceivingReportHandler(
 
             report.AddLineItems(lineItems);
 
-            await repository.AddAsync(report, cancellationToken);
-            logger.LogInformation("PPE Receiving Report {ReportNumber} created successfully.", request.ReportNumber);
+            await receivingRepository.AddAsync(report, cancellationToken);
+            await receivingRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            logger.LogInformation("PPE Receiving Report {ReportNumber} created as Draft.", request.ReportNumber);
             return new CreatePpeReceivingReportResponse(report.Id);
         }
         catch (Exception ex)

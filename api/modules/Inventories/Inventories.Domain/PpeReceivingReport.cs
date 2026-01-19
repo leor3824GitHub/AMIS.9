@@ -1,5 +1,6 @@
 using AMIS.Framework.Core.Domain;
 using AMIS.Framework.Core.Domain.Contracts;
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Inventories.Domain;
 
@@ -13,6 +14,7 @@ public class PpeReceivingReport : AuditableEntity, IAggregateRoot
     // Header and Tracking
     public string ReportNumber { get; private set; }
     public string Location { get; private set; }
+    public PpeReportStatus Status { get; private set; } = PpeReportStatus.Draft;
 
     // Source Information
     public PpeSourceInfo Source { get; private set; }
@@ -68,6 +70,7 @@ public class PpeReceivingReport : AuditableEntity, IAggregateRoot
     /// </summary>
     public void AddLineItem(PpeReceivingLineItem lineItem)
     {
+        EnsureDraft();
         ArgumentNullException.ThrowIfNull(lineItem);
         _lineItems.Add(lineItem);
     }
@@ -108,6 +111,64 @@ public class PpeReceivingReport : AuditableEntity, IAggregateRoot
         { "Accounting", DistributedToAccounting },
         { "File", DistributedToFile }
     };
+
+    /// <summary>
+    /// Posts the report, making it immutable and ready for registry update
+    /// </summary>
+    public void Post()
+    {
+        EnsureDraft();
+        if (_lineItems.Count == 0)
+        {
+            throw new InvalidOperationException("Cannot post a report with no line items.");
+        }
+        Status = PpeReportStatus.Posted;
+    }
+
+    /// <summary>
+    /// Cancels the report, marking it as void
+    /// </summary>
+    public void Cancel()
+    {
+        if (Status == PpeReportStatus.Cancelled)
+        {
+            throw new InvalidOperationException("Report is already cancelled.");
+        }
+        Status = PpeReportStatus.Cancelled;
+    }
+
+    /// <summary>
+    /// Clears all line items (only allowed in Draft)
+    /// </summary>
+    public void ClearLineItems()
+    {
+        EnsureDraft();
+        _lineItems.Clear();
+    }
+
+    /// <summary>
+    /// Updates report header (only allowed in Draft)
+    /// </summary>
+    public void UpdateHeader(string location, PpeSourceInfo source, PpeReceiptType receiptType, string? notes)
+    {
+        EnsureDraft();
+        ArgumentNullException.ThrowIfNull(location);
+        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(receiptType);
+
+        Location = location;
+        Source = source;
+        ReceiptType = receiptType;
+        Notes = notes;
+    }
+
+    private void EnsureDraft()
+    {
+        if (Status != PpeReportStatus.Draft)
+        {
+            throw new InvalidOperationException($"Cannot modify report in {Status} status. Only Draft reports can be edited.");
+        }
+    }
 }
 
 /// <summary>
