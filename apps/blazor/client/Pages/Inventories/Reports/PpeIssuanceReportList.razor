@@ -12,7 +12,7 @@
 <MudPaper Class="pa-4">
     <MudStack Spacing="3">
         <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="@(() => OpenNewReportDialog())"
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateNewReport"
                 StartIcon="@Icons.Material.Filled.Add">New Report</MudButton>
             <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadReports"
                 StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
@@ -25,7 +25,7 @@
         else if (_reports == null || _reports.Count == 0)
         {
             <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-                No PPE Issuance Reports found. <MudLink OnClick="@(() => OpenNewReportDialog())" style="cursor: pointer;">
+                No PPE Issuance Reports found. <MudLink OnClick="CreateNewReport" style="cursor: pointer;">
                     Create one now</MudLink>
             </MudAlert>
         }
@@ -177,6 +177,12 @@
     }
     }
     */
+
+    private void CreateNewReport()
+    {
+        // Navigate to the PPEIR page without an ID to create a new report
+        NavigationManager.NavigateTo("/inventories/reports/ppeir");
+    }
 
     private void OpenNewReportDialog()
     {
