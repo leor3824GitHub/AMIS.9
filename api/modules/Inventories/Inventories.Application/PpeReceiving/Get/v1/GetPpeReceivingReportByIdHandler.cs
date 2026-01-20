@@ -22,14 +22,28 @@ public sealed class GetPpeReceivingReportByIdHandler(
             throw new KeyNotFoundException($"PPE Receiving Report with ID {request.Id} not found.");
         }
 
+        var lineItems = report.LineItems
+            .Select(li => new GetPpeReceivingLineItemResponse(
+                li.PropertyCode,
+                li.Description,
+                li.DateAcquired,
+                li.Quantity,
+                li.Unit,
+                li.UnitCost))
+            .ToList();
+
         return new GetPpeReceivingReportByIdResponse(
             report.Id,
             report.ReportNumber,
             report.Location,
             report.Source.Name,
+            report.Source.Address,
             report.ReceiptType.Value,
+            report.Source.ReceiptDate,
             report.GetTotalAmount(),
-            report.Notes);
+            report.Notes,
+            (int)report.Status,
+            lineItems);
     }
 }
 

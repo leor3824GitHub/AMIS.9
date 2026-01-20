@@ -1,0 +1,134 @@
+@page "/inventories/reports/pper-list"
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Blazor.Client.Components
+@using MudBlazor
+@inject NavigationManager NavigationManager
+
+<PageHeader Title="PPERR List" Header="PPE Receiving Reports" SubHeader="View and manage PPE Receiving Reports" />
+
+<MudPaper Class="pa-4">
+    <MudStack Spacing="3">
+        <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateNewReport"
+                StartIcon="@Icons.Material.Filled.Add">New Report</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadReports"
+                StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+        </MudStack>
+
+        @if (_isLoading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (_reports == null || _reports.Count == 0)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                No PPE Receiving Reports found. <MudLink OnClick="CreateNewReport" style="cursor: pointer;">
+                    Create one now</MudLink>
+            </MudAlert>
+        }
+        else
+        {
+            <MudTable Items="@_reports" Dense="true" Hover="true" Striped="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh>Report Number</MudTh>
+                    <MudTh>Source</MudTh>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Receipt Date</MudTh>
+                    <MudTh>Location</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh align="center">Items</MudTh>
+                    <MudTh align="right">Total Amount</MudTh>
+                    <MudTh>Created Date</MudTh>
+                    <MudTh align="center">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Report Number">@context.ReportNumber</MudTd>
+                    <MudTd DataLabel="Source">@context.SourceName</MudTd>
+                    <MudTd DataLabel="Type">@context.ReceiptType</MudTd>
+                    <MudTd DataLabel="Receipt Date">@context.SourceReceiptDate.ToString("MMM dd, yyyy")</MudTd>
+                    <MudTd DataLabel="Location">@context.Location</MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Color="@GetStatusColor(context.Status)" Variant="Variant.Filled" Size="Size.Small">
+                            @GetStatusText(context.Status)
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Items" align="center">
+                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">
+                            @context.LineItemsCount
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Total Amount" align="right">@context.TotalAmount.ToString("N2")</MudTd>
+                    <MudTd DataLabel="Created Date">@context.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</MudTd>
+                    <MudTd align="center">
+                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                            OnClick="@(() => EditReport(context.Id))" Title="Edit" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    private const string ApiVersion = "1";
+    [Inject] public IApiClient ApiClient { get; set; } = default!;
+    [Inject] public ISnackbar Snackbar { get; set; } = default!;
+
+    private List<PpeReceivingReportListItem> _reports = [];
+    private bool _isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReports();
+    }
+
+    private async Task LoadReports()
+    {
+        _isLoading = true;
+        try
+        {
+            var response = await ApiClient.ListPpeReceivingReportsEndpointAsync(ApiVersion);
+            _reports = response.Reports?.ToList() ?? [];
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading reports: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void CreateNewReport()
+    {
+        NavigationManager.NavigateTo("/inventories/reports/pper");
+    }
+
+    private void EditReport(Guid id)
+    {
+        NavigationManager.NavigateTo($"/inventories/reports/pper/{id}");
+    }
+
+    private string GetStatusText(int status)
+    {
+        return status switch
+        {
+            0 => "Draft",
+            1 => "Posted",
+            2 => "Cancelled",
+            _ => $"Unknown ({status})"
+        };
+    }
+
+    private Color GetStatusColor(int status)
+    {
+        return status switch
+        {
+            0 => Color.Warning,
+            1 => Color.Success,
+            2 => Color.Error,
+            _ => Color.Default
+        };
+    }
+}

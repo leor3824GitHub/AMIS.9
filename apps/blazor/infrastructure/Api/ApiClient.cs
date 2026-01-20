@@ -1515,6 +1515,18 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// List PPE Receiving Reports
+        /// </summary>
+        /// <remarks>
+        /// Retrieves all PPE Receiving Reports.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<ListPpeReceivingReportsResponse> ListPpeReceivingReportsEndpointAsync(string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// Create PPE Receiving Report
         /// </summary>
         /// <remarks>
@@ -1536,6 +1548,18 @@ namespace AMIS.Blazor.Infrastructure.Api
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<GetPpeReceivingReportByIdResponse> GetPpeReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Update PPE Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Updates an existing PPE Receiving Report while in Draft status.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<UpdatePpeReceivingReportResponse> UpdatePpeReceivingReportEndpointAsync(string version, System.Guid id, UpdatePpeReceivingReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
@@ -14852,6 +14876,99 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// List PPE Receiving Reports
+        /// </summary>
+        /// <remarks>
+        /// Retrieves all PPE Receiving Reports.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<ListPpeReceivingReportsResponse> ListPpeReceivingReportsEndpointAsync(string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    request_.Method = new System.Net.Http.HttpMethod("GET");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/ppe-receiving"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/ppe-receiving");
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ListPpeReceivingReportsResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Internal Server Error", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// Create PPE Receiving Report
         /// </summary>
         /// <remarks>
@@ -15026,6 +15143,130 @@ namespace AMIS.Blazor.Infrastructure.Api
                                 throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
                             }
                             return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 404)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Not Found", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        if (status_ == 500)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Internal Server Error", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
+                        }
+                        else
+                        {
+                            var responseData_ = response_.Content == null ? null : await ReadAsStringAsync(response_.Content, cancellationToken).ConfigureAwait(false);
+                            throw new ApiException("The HTTP status code of the response was not expected (" + status_ + ").", status_, responseData_, headers_, null);
+                        }
+                    }
+                    finally
+                    {
+                        if (disposeResponse_)
+                            response_.Dispose();
+                    }
+                }
+            }
+            finally
+            {
+                if (disposeClient_)
+                    client_.Dispose();
+            }
+        }
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Update PPE Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Updates an existing PPE Receiving Report while in Draft status.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        public virtual async System.Threading.Tasks.Task<UpdatePpeReceivingReportResponse> UpdatePpeReceivingReportEndpointAsync(string version, System.Guid id, UpdatePpeReceivingReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken))
+        {
+            if (version == null)
+                throw new System.ArgumentNullException("version");
+
+            if (id == null)
+                throw new System.ArgumentNullException("id");
+
+            if (body == null)
+                throw new System.ArgumentNullException("body");
+
+            var client_ = _httpClient;
+            var disposeClient_ = false;
+            try
+            {
+                using (var request_ = new System.Net.Http.HttpRequestMessage())
+                {
+                    var json_ = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(body, JsonSerializerSettings);
+                    var content_ = new System.Net.Http.ByteArrayContent(json_);
+                    content_.Headers.ContentType = System.Net.Http.Headers.MediaTypeHeaderValue.Parse("application/json");
+                    request_.Content = content_;
+                    request_.Method = new System.Net.Http.HttpMethod("PUT");
+                    request_.Headers.Accept.Add(System.Net.Http.Headers.MediaTypeWithQualityHeaderValue.Parse("application/json"));
+
+                    var urlBuilder_ = new System.Text.StringBuilder();
+                
+                    // Operation Path: "api/v{version}/inventories/ppe-receiving/{id}"
+                    urlBuilder_.Append("api/v");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(version, System.Globalization.CultureInfo.InvariantCulture)));
+                    urlBuilder_.Append("/inventories/ppe-receiving/");
+                    urlBuilder_.Append(System.Uri.EscapeDataString(ConvertToString(id, System.Globalization.CultureInfo.InvariantCulture)));
+
+                    PrepareRequest(client_, request_, urlBuilder_);
+
+                    var url_ = urlBuilder_.ToString();
+                    request_.RequestUri = new System.Uri(url_, System.UriKind.RelativeOrAbsolute);
+
+                    PrepareRequest(client_, request_, url_);
+
+                    var response_ = await client_.SendAsync(request_, System.Net.Http.HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+                    var disposeResponse_ = true;
+                    try
+                    {
+                        var headers_ = new System.Collections.Generic.Dictionary<string, System.Collections.Generic.IEnumerable<string>>();
+                        foreach (var item_ in response_.Headers)
+                            headers_[item_.Key] = item_.Value;
+                        if (response_.Content != null && response_.Content.Headers != null)
+                        {
+                            foreach (var item_ in response_.Content.Headers)
+                                headers_[item_.Key] = item_.Value;
+                        }
+
+                        ProcessResponse(client_, response_);
+
+                        var status_ = (int)response_.StatusCode;
+                        if (status_ == 200)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<UpdatePpeReceivingReportResponse>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            return objectResponse_.Object;
+                        }
+                        else
+                        if (status_ == 400)
+                        {
+                            var objectResponse_ = await ReadObjectResponseAsync<ProblemDetails>(response_, headers_, cancellationToken).ConfigureAwait(false);
+                            if (objectResponse_.Object == null)
+                            {
+                                throw new ApiException("Response was null which was not expected.", status_, objectResponse_.Text, headers_, null);
+                            }
+                            throw new ApiException<ProblemDetails>("Bad Request", status_, objectResponse_.Text, headers_, objectResponse_.Object, null);
                         }
                         else
                         if (status_ == 404)
@@ -24189,6 +24430,69 @@ namespace AMIS.Blazor.Infrastructure.Api
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class UpdatePpeReceivingLineItemRequest
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("propertyCode")]
+        public string PropertyCode { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("dateAcquired")]
+        public System.DateTime DateAcquired { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("quantity")]
+        public double Quantity { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unit")]
+        public string Unit { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unitCost")]
+        public double UnitCost { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class UpdatePpeReceivingReportCommand
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string Location { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItems")]
+        public System.Collections.Generic.ICollection<UpdatePpeReceivingLineItemRequest> LineItems { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
+        public string SourceName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceAddress")]
+        public string SourceAddress { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceReceiptDate")]
+        public System.DateTime SourceReceiptDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("receiptType")]
+        public string ReceiptType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("notes")]
+        public string Notes { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class UpdatePpeReceivingReportResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class CreateProcurementPlanCommand
     {
 
@@ -25189,14 +25493,50 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
         public string SourceName { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("sourceAddress")]
+        public string SourceAddress { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("receiptType")]
         public string ReceiptType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceReceiptDate")]
+        public System.DateTime SourceReceiptDate { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("totalAmount")]
         public double TotalAmount { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("notes")]
         public string Notes { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        public int Status { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItems")]
+        public System.Collections.Generic.ICollection<GetPpeReceivingLineItemResponse> LineItems { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class GetPpeReceivingLineItemResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("propertyCode")]
+        public string PropertyCode { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("description")]
+        public string Description { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("dateAcquired")]
+        public System.DateTime DateAcquired { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("quantity")]
+        public double Quantity { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unit")]
+        public string Unit { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("unitCost")]
+        public double UnitCost { get; set; }
 
     }
 
@@ -26112,6 +26452,15 @@ namespace AMIS.Blazor.Infrastructure.Api
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class ListPpeReceivingReportsResponse
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("reports")]
+        public System.Collections.Generic.ICollection<PpeReceivingReportListItem> Reports { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
     public partial class MarkInspectionRequestAcceptedResponse
     {
 
@@ -26335,6 +26684,42 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("lineItemsCount")]
         public int LineItemsCount { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("status")]
+        public int Status { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("createdAt")]
+        public System.DateTime CreatedAt { get; set; }
+
+    }
+
+    [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
+    public partial class PpeReceivingReportListItem
+    {
+
+        [System.Text.Json.Serialization.JsonPropertyName("id")]
+        public System.Guid Id { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("reportNumber")]
+        public string ReportNumber { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
+        public string SourceName { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("receiptType")]
+        public string ReceiptType { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("sourceReceiptDate")]
+        public System.DateTime SourceReceiptDate { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string Location { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItemsCount")]
+        public int LineItemsCount { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("totalAmount")]
+        public double TotalAmount { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("status")]
         public int Status { get; set; }

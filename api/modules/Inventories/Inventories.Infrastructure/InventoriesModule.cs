@@ -278,6 +278,7 @@ public static class InventoriesModule
             ppeIssuanceGroup.MapGetPpeIssuanceReportEndpoint();
 
             var ppeReceivingGroup = app.MapGroup("ppe-receiving").WithTags("ppe-receiving");
+            ppeReceivingGroup.MapListPpeReceivingReportsEndpoint();
             ppeReceivingGroup.MapCreatePpeReceivingReportEndpoint();
             ppeReceivingGroup.MapGetPpeReceivingReportEndpoint();
 

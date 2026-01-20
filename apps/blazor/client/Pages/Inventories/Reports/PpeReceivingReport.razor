@@ -6,24 +6,9 @@
 
 <PageHeader Title="PPER" Header="PPE Receiving Report" SubHeader="Capture receipt of PPE into inventory" />
 
-@* TODO: Uncomment when API client is regenerated with Get and Update endpoints *@
 @code {
     [Parameter]
     public string? ReportId { get; set; }
-
-    protected override async Task OnInitializedAsync()
-    {
-        // TODO: Uncomment after API client regeneration
-        // if (!string.IsNullOrEmpty(ReportId) && Guid.TryParse(ReportId, out var id))
-        // {
-        // await LoadReportAsync(id);
-        // }
-        // else
-        // {
-        // Reset();
-        // }
-        Reset();
-    }
 }
 
 <MudPaper Class="report-shell pa-4">
@@ -49,6 +34,11 @@
                 *@
                     <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Reset"
                     StartIcon="@Icons.Material.Filled.Refresh">Reset</MudButton>
+                @if (_reportId.HasValue)
+                {
+                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => CancelEdit())"
+                        StartIcon="@Icons.Material.Filled.Close">Cancel Edit</MudButton>
+                }
             }
             else
             {

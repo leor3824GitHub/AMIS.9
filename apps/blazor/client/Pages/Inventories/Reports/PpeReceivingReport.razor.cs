@@ -26,15 +26,26 @@ public partial class PpeReceivingReport : ComponentBase
 
     private static readonly string[] ReceiptTypes = ["Purchase", "Transfer", "Donation", "Return", "Others"];
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Reset();
+        if (!string.IsNullOrEmpty(ReportId) && Guid.TryParse(ReportId, out var id))
+        {
+            await LoadReportAsync(id);
+        }
+        else
+        {
+            Reset();
+        }
     }
 
     private void Reset()
     {
         _model = new PpeReceivingModel();
         _draft = new PpeReceivingLineItemModel { DateAcquired = _model.SourceReceiptDate };
+        _reportId = null;
+        _reportStatus = 0;
+        _reportStatusText = "Draft";
+        _actionButtonText = "Create PPER";
         _createdId = null;
         StateHasChanged();
     }
@@ -63,6 +74,13 @@ public partial class PpeReceivingReport : ComponentBase
     private void RemoveItem(PpeReceivingLineItemModel item)
     {
         _model.LineItems.Remove(item);
+    }
+
+    private void CancelEdit()
+    {
+        _reportId = null;
+        Reset();
+        NavigationManager.NavigateTo("/inventories/reports/pper");
     }
 
     private async Task PostReportAsync()
@@ -159,16 +177,20 @@ public partial class PpeReceivingReport : ComponentBase
         */
     }
 
-    // TODO: Uncomment after API client regeneration with Get and Update endpoints
-    /*
     private async Task LoadReportAsync(Guid reportId)
     {
         try
         {
-            var response = await ApiClient.GetPpeReceivingReportByIdEndpointAsync(ApiVersion, reportId);
+            var response = await ApiClient.GetPpeReceivingReportEndpointAsync(ApiVersion, reportId);
             _reportId = response.Id;
             _reportStatus = response.Status;
-            _reportStatusText = response.Status == 0 ? "Draft" : "Posted";
+            _reportStatusText = response.Status switch
+            {
+                0 => "Draft",
+                1 => "Posted",
+                2 => "Cancelled",
+                _ => "Unknown"
+            };
             _actionButtonText = response.Status == 0 ? "Update PPER" : "Posted";
 
             _model = new PpeReceivingModel
@@ -196,9 +218,9 @@ public partial class PpeReceivingReport : ComponentBase
         catch (ApiException ex)
         {
             Snackbar.Add(ex.Response ?? "Failed to load report", Severity.Error);
+            NavigationManager.NavigateTo("/inventories/reports/pper");
         }
     }
-    */
 
     private async Task SubmitAsync()
     {
@@ -236,31 +258,68 @@ public partial class PpeReceivingReport : ComponentBase
 
         try
         {
-            // Create new report (Update endpoint pending API client regeneration)
-            var command = new CreatePpeReceivingReportCommand
+            if (_reportId.HasValue)
             {
-                ReportNumber = _model.ReportNumber,
-                Location = _model.Location,
-                SourceName = _model.SourceName,
-                SourceAddress = _model.SourceAddress,
-                ReceiptType = _model.ReceiptType,
-                SourceReceiptDate = _model.SourceReceiptDate ?? DateTime.Today,
-                Notes = _model.Notes,
-                LineItems = _model.LineItems.Select(li => new CreatePpeReceivingLineItemRequest
+                var updateCommand = new UpdatePpeReceivingReportCommand
                 {
-                    PropertyCode = li.PropertyCode,
-                    Description = li.Description,
-                    DateAcquired = li.DateAcquired ?? _model.SourceReceiptDate ?? DateTime.Today,
-                    Quantity = li.Quantity,
-                    Unit = li.Unit,
-                    UnitCost = li.UnitCost,
-                }).ToList(),
-            };
+                    Id = _reportId.Value,
+                    Location = _model.Location,
+                    SourceName = _model.SourceName,
+                    SourceAddress = _model.SourceAddress,
+                    ReceiptType = _model.ReceiptType,
+                    SourceReceiptDate = _model.SourceReceiptDate ?? DateTime.Today,
+                    Notes = _model.Notes,
+                    LineItems = _model.LineItems.Select(li => new UpdatePpeReceivingLineItemRequest
+                    {
+                        PropertyCode = li.PropertyCode,
+                        Description = li.Description,
+                        DateAcquired = li.DateAcquired ?? _model.SourceReceiptDate ?? DateTime.Today,
+                        Quantity = li.Quantity,
+                        Unit = li.Unit,
+                        UnitCost = li.UnitCost,
+                    }).ToList(),
+                };
 
-            var response = await ApiClient.CreatePpeReceivingReportEndpointAsync(ApiVersion, command);
-            _reportId = response.Id;
-            Snackbar.Add("PPE Receiving Report created", Severity.Success);
-            Reset();
+                await ApiClient.UpdatePpeReceivingReportEndpointAsync(ApiVersion, _reportId.Value, updateCommand);
+                Snackbar.Add("PPE Receiving Report updated", Severity.Success);
+                await LoadReportAsync(_reportId.Value);
+            }
+            else
+            {
+                var command = new CreatePpeReceivingReportCommand
+                {
+                    ReportNumber = _model.ReportNumber,
+                    Location = _model.Location,
+                    SourceName = _model.SourceName,
+                    SourceAddress = _model.SourceAddress,
+                    ReceiptType = _model.ReceiptType,
+                    SourceReceiptDate = _model.SourceReceiptDate ?? DateTime.Today,
+                    Notes = _model.Notes,
+                    LineItems = _model.LineItems.Select(li => new CreatePpeReceivingLineItemRequest
+                    {
+                        PropertyCode = li.PropertyCode,
+                        Description = li.Description,
+                        DateAcquired = li.DateAcquired ?? _model.SourceReceiptDate ?? DateTime.Today,
+                        Quantity = li.Quantity,
+                        Unit = li.Unit,
+                        UnitCost = li.UnitCost,
+                    }).ToList(),
+                };
+
+                var response = await ApiClient.CreatePpeReceivingReportEndpointAsync(ApiVersion, command);
+                _reportId = response.Id;
+                _createdId = response.Id;
+                _actionButtonText = "Update PPER";
+                Snackbar.Add("PPE Receiving Report created", Severity.Success);
+                if (_reportId.HasValue)
+                {
+                    await LoadReportAsync(_reportId.Value);
+                }
+                else
+                {
+                    Reset();
+                }
+            }
         }
         catch (ApiException ex)
         {
