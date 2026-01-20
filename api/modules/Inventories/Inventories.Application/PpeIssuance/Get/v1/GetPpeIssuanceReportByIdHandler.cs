@@ -26,6 +26,15 @@ public sealed class GetPpeIssuanceReportByIdHandler(
         }
 
         var totalCost = report.GetTotalAcquisitionCost();
+        var lineItems = report.LineItems.Select(li => new PpeIssuanceLineItemResponse(
+            li.PropertyCode,
+            li.Specification,
+            1.0,  // Default quantity to 1 since domain doesn't have Quantity
+            "pc",  // Default unit since domain doesn't have Unit
+            li.DateAcquired,
+            li.AcquisitionCost,
+            li.AccumulatedDepreciation,
+            li.BookValue)).ToList();
 
         logger.LogInformation(
             "Successfully retrieved PPE Issuance Report with ID: {Id}, Report Number: {ReportNumber}",
@@ -41,6 +50,9 @@ public sealed class GetPpeIssuanceReportByIdHandler(
             report.IssuanceDate,
             totalCost,
             report.LineItems.Count,
+            (int)report.Status,
+            report.Notes,
+            lineItems,
             report.Created.DateTime);
     }
 }

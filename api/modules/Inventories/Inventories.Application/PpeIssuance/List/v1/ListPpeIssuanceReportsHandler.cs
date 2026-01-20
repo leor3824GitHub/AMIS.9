@@ -29,6 +29,7 @@ public sealed class ListPpeIssuanceReportsHandler(
                 IssuanceType = x.IssuanceType.Value,
                 IssuanceDate = x.IssuanceDate,
                 LineItemsCount = x.LineItems.Count,
+                Status = (int)x.Status,
                 CreatedAt = x.Created.DateTime,
             })
             .ToList();

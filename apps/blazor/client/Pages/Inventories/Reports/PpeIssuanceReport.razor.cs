@@ -35,14 +35,11 @@ public partial class PpeIssuanceReport : ComponentBase
         Reset();
     }
 
-    // TODO: Uncomment after API client regeneration with Status, Notes, and LineItems properties
-    /*
-    private async Task LoadReport()
+    private async Task LoadReportAsync(Guid id)
     {
-        _isLoading = true;
         try
         {
-            var report = await ApiClient.GetPpeIssuanceReportEndpointAsync(ApiVersion, _editingId!.Value);
+            var report = await ApiClient.GetPpeIssuanceReportEndpointAsync(ApiVersion, id);
             if (report is null)
             {
                 Snackbar.Add("Report not found", Severity.Error);
@@ -50,9 +47,9 @@ public partial class PpeIssuanceReport : ComponentBase
                 return;
             }
 
+            _reportId = report.Id;
             _model = new PpeIssuanceModel
             {
-                Id = report.Id,
                 ReportNumber = report.ReportNumber,
                 RecipientName = report.RecipientName,
                 RecipientAddress = report.RecipientAddress,
@@ -63,10 +60,10 @@ public partial class PpeIssuanceReport : ComponentBase
 
             _reportStatus = report.Status;
             _reportStatusText = report.Status == 0 ? "Draft" : "Posted";
-            _actionButtonText = report.Status == 0 ? "Update PPEIR" : "View Only";
+            _actionButtonText = report.Status == 0 ? "UPDATE PPEIR" : "View Only";
 
             // Load line items if available
-            if (report.LineItems != null)
+            if (report.LineItems?.Count > 0)
             {
                 foreach (var item in report.LineItems)
                 {
@@ -75,6 +72,8 @@ public partial class PpeIssuanceReport : ComponentBase
                         PropertyCode = item.PropertyCode,
                         Description = item.Description,
                         DateAcquired = item.DateAcquired,
+                        Quantity = item.Quantity,
+                        Unit = item.Unit,
                         AcquisitionCost = item.AcquisitionCost,
                         AccumulatedDepreciation = item.AccumulatedDepreciation,
                         BookValue = item.BookValue,
@@ -87,12 +86,7 @@ public partial class PpeIssuanceReport : ComponentBase
             Snackbar.Add(ex.Response ?? "Error loading report", Severity.Error);
             NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
         }
-        finally
-        {
-            _isLoading = false;
-        }
     }
-    */
 
     private void Reset()
     {
@@ -102,6 +96,17 @@ public partial class PpeIssuanceReport : ComponentBase
         StateHasChanged();
     }
 
+    private async Task ResetWithConfirmation()
+    {
+        if (_model.LineItems.Count > 0)
+        {
+            var confirmed = await JS.InvokeAsync<bool>("confirm", "This will clear all line items. Do you want to continue?");
+            if (!confirmed) return;
+        }
+
+        Reset();
+    }
+
     private void ResetDraft()
     {
         _draft = new PpeIssuanceLineItemModel { DateAcquired = _model.IssuanceDate };
@@ -109,11 +114,34 @@ public partial class PpeIssuanceReport : ComponentBase
 
     private void AddLineItem()
     {
-        // Just add the line item - API will perform detailed validation
+        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
+        {
+            Snackbar.Add("Property Code is required", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_draft.Description))
+        {
+            Snackbar.Add("Description is required", Severity.Warning);
+            return;
+        }
+
+        if (_draft.Quantity <= 0)
+        {
+            Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
+            return;
+        }
+
+        if (_draft.AcquisitionCost < 0)
+        {
+            Snackbar.Add("Acquisition cost cannot be negative", Severity.Warning);
+            return;
+        }
+
         _model.LineItems.Add(new PpeIssuanceLineItemModel
         {
-            PropertyCode = _draft.PropertyCode?.Trim() ?? string.Empty,
-            Description = _draft.Description?.Trim() ?? string.Empty,
+            PropertyCode = _draft.PropertyCode.Trim(),
+            Description = _draft.Description.Trim(),
             DateAcquired = _draft.DateAcquired,
             Quantity = _draft.Quantity,
             Unit = _draft.Unit?.Trim() ?? string.Empty,
@@ -128,6 +156,39 @@ public partial class PpeIssuanceReport : ComponentBase
     private void RemoveItem(PpeIssuanceLineItemModel item)
     {
         _model.LineItems.Remove(item);
+    }
+
+    private void EditItem(PpeIssuanceLineItemModel item)
+    {
+        _draft = new PpeIssuanceLineItemModel
+        {
+            PropertyCode = item.PropertyCode,
+            Description = item.Description,
+            DateAcquired = item.DateAcquired,
+            Quantity = item.Quantity,
+            Unit = item.Unit,
+            AcquisitionCost = item.AcquisitionCost,
+            AccumulatedDepreciation = item.AccumulatedDepreciation,
+            BookValue = item.BookValue,
+        };
+        _model.LineItems.Remove(item);
+        Snackbar.Add("Editing item - modify and click Add Item to save changes", Severity.Info);
+    }
+
+    private void DuplicateItem(PpeIssuanceLineItemModel item)
+    {
+        _model.LineItems.Add(new PpeIssuanceLineItemModel
+        {
+            PropertyCode = item.PropertyCode,
+            Description = item.Description,
+            DateAcquired = item.DateAcquired,
+            Quantity = item.Quantity,
+            Unit = item.Unit,
+            AcquisitionCost = item.AcquisitionCost,
+            AccumulatedDepreciation = item.AccumulatedDepreciation,
+            BookValue = item.BookValue,
+        });
+        Snackbar.Add("Item duplicated", Severity.Success);
     }
 
     private async Task PostReportAsync()
@@ -293,6 +354,34 @@ public partial class PpeIssuanceReport : ComponentBase
             return;
         }
 
+        // Validate all line items
+        foreach (var item in _model.LineItems)
+        {
+            if (string.IsNullOrWhiteSpace(item.PropertyCode))
+            {
+                Snackbar.Add("All line items must have a Property Code", Severity.Warning);
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(item.Description))
+            {
+                Snackbar.Add("All line items must have a Description", Severity.Warning);
+                return;
+            }
+
+            if (item.Quantity <= 0)
+            {
+                Snackbar.Add("All line items must have a quantity greater than zero", Severity.Warning);
+                return;
+            }
+
+            if (item.AcquisitionCost < 0)
+            {
+                Snackbar.Add("Acquisition cost cannot be negative", Severity.Warning);
+                return;
+            }
+        }
+
         if (_model.IssuanceDate?.Date > DateTime.Today)
         {
             Snackbar.Add("Issuance date cannot be in the future", Severity.Warning);
@@ -343,6 +432,11 @@ public partial class PpeIssuanceReport : ComponentBase
         }
 
         _isPrintDialogOpen = true;
+    }
+
+    private void GoToList()
+    {
+        NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
     }
 
     private async Task PrintDocument()
@@ -397,7 +491,7 @@ public class PpeIssuanceLineItemModel
         
     public string Description { get; set; } = string.Empty;
         
-    public string Unit { get; set; } = string.Empty;
+    public string Unit { get; set; } = "pc";
 
     public DateTime? DateAcquired { get; set; }
 

@@ -6,23 +6,20 @@
 
 <PageHeader Title="PPE Issuance Report" Header="PPE Issuance Report" SubHeader="Issue PPE items from inventory" />
 
-@* TODO: Uncomment when API client is regenerated with Get and Update endpoints *@
 @code {
     [Parameter]
     public string? ReportId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        // TODO: Uncomment after API client regeneration
-        // if (!string.IsNullOrEmpty(ReportId) && Guid.TryParse(ReportId, out var id))
-        // {
-        // await LoadReportAsync(id);
-        // }
-        // else
-        // {
-        // Reset();
-        // }
-        Reset();
+        if (!string.IsNullOrEmpty(ReportId) && Guid.TryParse(ReportId, out var id))
+        {
+            await LoadReportAsync(id);
+        }
+        else
+        {
+            Reset();
+        }
     }
 }
 
@@ -47,7 +44,7 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Info" Disabled="true"
                     StartIcon="@Icons.Material.Filled.Lock">Post & Lock (Coming Soon)</MudButton>
                 *@
-                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Reset"
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetWithConfirmation"
                     StartIcon="@Icons.Material.Filled.Refresh">Reset</MudButton>
             }
             else
@@ -61,6 +58,13 @@
             }
             <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="@(() => PrintAsync())"
                 StartIcon="@Icons.Material.Filled.Print">Print</MudButton>
+            @if (_reportId.HasValue && _reportStatus == 0)
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => GoToList())"
+                    StartIcon="@Icons.Material.Filled.Close">Cancel Edit</MudButton>
+            }
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(() => GoToList())"
+                StartIcon="@Icons.Material.Filled.ArrowBack">Back to List</MudButton>
         </MudStack>
         <MudForm @ref="_form" Model="_model">
             <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
@@ -170,14 +174,19 @@
                                 <MudTd DataLabel="Unit">@context.Unit</MudTd>
                                 <MudTd DataLabel="Date Acquired">@(context.DateAcquired?.ToShortDateString() ?? "N/A")
                                 </MudTd>
-                                <MudTd DataLabel="Acquisition Cost" align="right">@context.AcquisitionCost.ToString("C2")</MudTd>
-                                <MudTd DataLabel="Total" align="right">@(context.AcquisitionCost *
-                                                                        context.Quantity).ToString("C2")</MudTd>
+                                <MudTd DataLabel="Acquisition Cost" align="right">@context.AcquisitionCost.ToString("N2")</MudTd>
+                                <MudTd DataLabel="Total" align="right">@((context.AcquisitionCost * context.Quantity).ToString("N2"))</MudTd>
                                 <MudTd align="right">
                                     @if (_reportStatus == 0)
                                     {
-                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                                            OnClick="() => RemoveItem(context)" Title="Remove" />
+                                        <MudStack Row="true" Spacing="0">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info"
+                                                OnClick="() => EditItem(context)" Title="Edit" Size="Size.Small" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Warning"
+                                                OnClick="() => DuplicateItem(context)" Title="Duplicate" Size="Size.Small" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                                OnClick="() => RemoveItem(context)" Title="Remove" Size="Size.Small" />
+                                        </MudStack>
                                     }
                                     else
                                     {

@@ -13,5 +13,6 @@ public sealed class PpeIssuanceReportDto
     public string IssuanceType { get; set; } = string.Empty;
     public DateTime IssuanceDate { get; set; }
     public int LineItemsCount { get; set; }
+    public int Status { get; set; }
     public DateTime CreatedAt { get; set; }
 }
