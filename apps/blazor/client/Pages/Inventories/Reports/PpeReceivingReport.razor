@@ -16,6 +16,10 @@
         <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
             <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="flex-1">
                 PPE Receiving Report (PPER) for PPE receipts.
+                @if (_isReadOnly)
+                {
+                    <strong> - View Only Mode</strong>
+                }
             </MudAlert>
             <MudChip T="string" Variant="Variant.Outlined" Color="@(_reportStatus == 0 ? Color.Warning : Color.Success)"
                 Icon="@(_reportStatus == 0 ? Icons.Material.Filled.Edit : Icons.Material.Filled.Lock)">
@@ -24,33 +28,36 @@
         </MudStack>
 
         <MudStack Row="true" Spacing="1">
-            @if (_reportStatus == 0)
+            @if (!_isReadOnly)
             {
-                <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitAsync"
-                    Disabled="@(!CanSave)" StartIcon="@Icons.Material.Filled.Save">@_actionButtonText</MudButton>
-                @if (CanPost)
+                @if (_reportStatus == 0)
                 {
-                    <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="PostAsync"
-                        StartIcon="@Icons.Material.Filled.Lock">Post &amp; Lock</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitAsync"
+                        Disabled="@(!CanSave)" StartIcon="@Icons.Material.Filled.Save">@_actionButtonText</MudButton>
+                    @if (CanPost)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="PostAsync"
+                            StartIcon="@Icons.Material.Filled.Lock">Post &amp; Lock</MudButton>
+                    }
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetWithConfirmation"
+                        StartIcon="@Icons.Material.Filled.Refresh">Reset</MudButton>
+                    @if (_reportId.HasValue)
+                    {
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => CancelEdit())"
+                            StartIcon="@Icons.Material.Filled.Close">Cancel Edit</MudButton>
+                    }
                 }
-                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetWithConfirmation"
-                    StartIcon="@Icons.Material.Filled.Refresh">Reset</MudButton>
-                @if (_reportId.HasValue)
+                else
                 {
-                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => CancelEdit())"
-                        StartIcon="@Icons.Material.Filled.Close">Cancel Edit</MudButton>
+                    @* TODO: Enable after API client regeneration
+                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="true"
+                        StartIcon="@Icons.Material.Filled.Undo">Cancel & Reverse (Coming Soon)</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="true"
+                        StartIcon="@Icons.Material.Filled.Delete">Delete (Coming Soon)</MudButton>
+                    *@
                 }
             }
-            else
-            {
-                @* TODO: Enable after API client regeneration
-                <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="true"
-                    StartIcon="@Icons.Material.Filled.Undo">Cancel & Reverse (Coming Soon)</MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="true"
-                    StartIcon="@Icons.Material.Filled.Delete">Delete (Coming Soon)</MudButton>
-                *@
-            }
-            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="PrintAsync"
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="@(() => PrintAsync())"
                 StartIcon="@Icons.Material.Filled.Print">Print</MudButton>
             <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="GoToList"
                 StartIcon="@Icons.Material.Filled.ArrowBack">Back to List</MudButton>
@@ -61,15 +68,15 @@
                     <MudGrid GutterSize="2">
                         <MudItem xs="12" md="4">
                             <MudTextField @bind-Value="_model.ReportNumber" For="@(() => _model.ReportNumber)"
-                                Label="Report Number" Required="true" MaxLength="10" Disabled="@(_reportStatus != 0)" />
+                                Label="Report Number" Required="true" MaxLength="10" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                         </MudItem>
                         <MudItem xs="12" md="4">
                             <MudDatePicker @bind-Date="_model.SourceReceiptDate" Label="Receipt Date" Required="true"
-                                MaxDate="@DateTime.Today" Format="MM/dd/yyyy" Disabled="@(_reportStatus != 0)" />
+                                MaxDate="@DateTime.Today" Format="MM/dd/yyyy" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                         </MudItem>
                         <MudItem xs="12" md="4">
                             <MudSelect T="string" @bind-Value="_model.ReceiptType" Label="Receipt Type" Required="true"
-                                Disabled="@(_reportStatus != 0)">
+                                Disabled="@(_reportStatus != 0 || _isReadOnly)">
                                 @foreach (var type in ReceiptTypes)
                                 {
                                     <MudSelectItem Value="@type">@type</MudSelectItem>
@@ -78,15 +85,15 @@
                         </MudItem>
                         <MudItem xs="12" md="6">
                             <MudTextField @bind-Value="_model.SourceName" For="@(() => _model.SourceName)"
-                                Label="Source Name" Required="true" Disabled="@(_reportStatus != 0)" />
+                                Label="Source Name" Required="true" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                         </MudItem>
                         <MudItem xs="12" md="6">
                             <MudTextField @bind-Value="_model.SourceAddress" For="@(() => _model.SourceAddress)"
-                                Label="Source Address" Required="true" Disabled="@(_reportStatus != 0)" />
+                                Label="Source Address" Required="true" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                         </MudItem>
                         <MudItem xs="12">
                             <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3"
-                                Disabled="@(_reportStatus != 0)" />
+                                Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                         </MudItem>
                     </MudGrid>
                 </MudTabPanel>
@@ -100,7 +107,7 @@
                                 item(s)</MudChip>
                         </MudStack>
 
-                        @if (_reportStatus == 0)
+                        @if (_reportStatus == 0 && !_isReadOnly)
                         {
                             <MudGrid GutterSize="2" Class="mt-2">
                                 <MudItem xs="12" md="3">
@@ -134,7 +141,9 @@
                             </MudGrid>
                             <MudStack Row="true" Spacing="1" Class="mt-2">
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddLineItem"
-                                    StartIcon="@Icons.Material.Filled.Add" Disabled="_model.LineItems.Count >= 25">Add Item
+                                    StartIcon="@(_isEditingLineItem ? Icons.Material.Filled.Save : Icons.Material.Filled.Add)" 
+                                    Disabled="_model.LineItems.Count >= 25">
+                                    @(_isEditingLineItem ? "Save Item" : "Add Item")
                                 </MudButton>
                                 <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDraft"
                                     StartIcon="@Icons.Material.Filled.Refresh">Clear Draft</MudButton>
@@ -174,7 +183,7 @@
                                 <MudTd DataLabel="Total" align="right">@(context.UnitCost *
                                                                         context.Quantity).ToString("C2")</MudTd>
                                 <MudTd align="right">
-                                    @if (_reportStatus == 0)
+                                    @if (_reportStatus == 0 && !_isReadOnly)
                                     {
                                         <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
                                             OnClick="() => EditItem(context)" Title="Edit" Size="Size.Small" />
@@ -186,7 +195,9 @@
                                     else
                                     {
                                         <MudChip T="string" Disabled="true" Color="Color.Default"
-                                            Icon="@Icons.Material.Filled.Lock" Size="Size.Small">Locked</MudChip>
+                                            Icon="@Icons.Material.Filled.Lock" Size="Size.Small">
+                                            @(_isReadOnly ? "Read-Only" : "Locked")
+                                        </MudChip>
                                     }
                                 </MudTd>
                             </RowTemplate>
@@ -204,3 +215,16 @@
         }
     </MudStack>
 </MudPaper>
+
+<!-- Print Dialog -->
+<MudDialog @bind-Visible="_isPrintDialogOpen"
+    Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseOnEscapeKey = true })">
+    <DialogContent>
+        <PpeReceivingReportPrint Model="_model" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="PrintDocument" Variant="Variant.Filled" Color="Color.Primary"
+            StartIcon="@Icons.Material.Filled.Print">Print Now</MudButton>
+        <MudButton OnClick="ClosePrintDialog" Variant="Variant.Text" Color="Color.Secondary">Close</MudButton>
+    </DialogActions>
+</MudDialog>
