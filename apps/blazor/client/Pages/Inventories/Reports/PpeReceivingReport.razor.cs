@@ -25,6 +25,9 @@ public partial class PpeReceivingReport : ComponentBase
     private bool _canUpdate;
     private bool _canDelete;
     private bool _canPost;
+    private bool _isReadOnly;
+    private bool _isPrintDialogOpen;
+    private bool _isEditingLineItem;
 
     private MudForm? _form;
     private PpeReceivingModel _model = new();
@@ -35,8 +38,8 @@ public partial class PpeReceivingReport : ComponentBase
     private string _reportStatusText = "Draft";
     private string _actionButtonText = "Create PPER";
 
-    private bool CanSave => _reportStatus == 0 && ((_reportId is null && _canCreate) || (_reportId.HasValue && _canUpdate));
-    private bool CanPost => _reportStatus == 0 && _reportId.HasValue && _canPost;
+    private bool CanSave => !_isReadOnly && _reportStatus == 0 && ((_reportId is null && _canCreate) || (_reportId.HasValue && _canUpdate));
+    private bool CanPost => !_isReadOnly && _reportStatus == 0 && _reportId.HasValue && _canPost;
 
     private static readonly string[] ReceiptTypes = ["Purchase", "Transfer", "Donation", "Return", "Others"];
 
@@ -48,9 +51,22 @@ public partial class PpeReceivingReport : ComponentBase
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.PpeReceiving);
         _canPost = await AuthService.HasPermissionAsync(user, FshActions.Post, FshResources.PpeReceiving);
 
+        // Check for readonly query parameter
+        var uri = new Uri(NavigationManager.Uri);
+        var query = uri.Query;
+        _isReadOnly = query.Contains("readonly=true", StringComparison.OrdinalIgnoreCase);
+        var shouldPrint = query.Contains("print=true", StringComparison.OrdinalIgnoreCase);
+
         if (!string.IsNullOrEmpty(ReportId) && Guid.TryParse(ReportId, out var id))
         {
             await LoadReportAsync(id);
+            
+            // Auto-open print dialog if requested
+            if (shouldPrint && _model.LineItems.Count > 0)
+            {
+                _isPrintDialogOpen = true;
+                StateHasChanged();
+            }
         }
         else
         {
@@ -73,6 +89,7 @@ public partial class PpeReceivingReport : ComponentBase
     private void ResetDraft()
     {
         _draft = new PpeReceivingLineItemModel { DateAcquired = _model.SourceReceiptDate };
+        _isEditingLineItem = false;
     }
 
     private async Task ResetWithConfirmation()
@@ -121,7 +138,8 @@ public partial class PpeReceivingReport : ComponentBase
             Location = item.Location,
         };
         _model.LineItems.Remove(item);
-        Snackbar.Add("Editing item - modify and click Add Item to save changes", Severity.Info);
+        _isEditingLineItem = true;
+        Snackbar.Add("Editing item - modify and click Save Item to save changes", Severity.Info);
     }
 
     private void DuplicateItem(PpeReceivingLineItemModel item)
@@ -154,9 +172,20 @@ public partial class PpeReceivingReport : ComponentBase
             return;
         }
 
+        _isPrintDialogOpen = true;
+    }
+
+    private void ClosePrintDialog()
+    {
+        _isPrintDialogOpen = false;
+    }
+
+    private async Task PrintDocument()
+    {
         try
         {
             await JS.InvokeVoidAsync("window.print");
+            ClosePrintDialog();
         }
         catch (Exception ex)
         {

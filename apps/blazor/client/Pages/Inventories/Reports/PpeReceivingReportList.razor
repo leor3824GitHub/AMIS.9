@@ -61,8 +61,13 @@
                     <MudTd DataLabel="Total Amount" align="right">@context.TotalAmount.ToString("N2")</MudTd>
                     <MudTd DataLabel="Created Date">@context.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</MudTd>
                     <MudTd align="center">
-                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                            OnClick="@(() => EditReport(context.Id))" Title="Edit" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Info"
+                            OnClick="@(() => ViewDetails(context.Id))" Title="View Details" />
+                        @if (context.Status == 0)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                                OnClick="@(() => EditReport(context.Id))" Title="Edit" />
+                        }
                         <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Info"
                             OnClick="@(() => PrintReport(context.Id))" Title="Print" />
                         @if (context.Status == 0)
@@ -113,6 +118,11 @@
         NavigationManager.NavigateTo("/inventories/reports/pper");
     }
 
+    private void ViewDetails(Guid id)
+    {
+        NavigationManager.NavigateTo($"/inventories/reports/pper/{id}?readonly=true");
+    }
+
     private void EditReport(Guid id)
     {
         NavigationManager.NavigateTo($"/inventories/reports/pper/{id}");
@@ -120,7 +130,7 @@
 
     private void PrintReport(Guid id)
     {
-        NavigationManager.NavigateTo($"/inventories/reports/pper-print?id={id}");
+        NavigationManager.NavigateTo($"/inventories/reports/pper/{id}?readonly=true&print=true");
     }
 
     private async Task PostReport(Guid id)
