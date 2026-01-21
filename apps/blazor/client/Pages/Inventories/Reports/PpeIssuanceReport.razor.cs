@@ -77,6 +77,7 @@ public partial class PpeIssuanceReport : ComponentBase
                         AcquisitionCost = item.AcquisitionCost,
                         AccumulatedDepreciation = item.AccumulatedDepreciation,
                         BookValue = item.BookValue,
+                        Location = item.Location,
                     });
                 }
             }

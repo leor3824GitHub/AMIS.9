@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Carter;
+using AMIS.Framework.Infrastructure.Auth.Policy;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -7,14 +8,11 @@ using Microsoft.AspNetCore.Routing;
 
 namespace AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PpeReceiving;
 
-public sealed class PostPpeReceivingReportEndpoint : ICarterModule
+public static class PostPpeReceivingReportEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app)
+    public static RouteHandlerBuilder MapPostPpeReceivingReportEndpoint(this IEndpointRouteBuilder endpoints)
     {
-        var group = app.MapGroup("api/v{version:apiVersion}/ppe-receiving")
-            .WithTags("PPE Receiving");
-
-        group.MapPost("/{id:guid}/post", async (Guid id, ISender mediator) =>
+        return endpoints.MapPost("/{id:guid}/post", async (Guid id, ISender mediator) =>
             {
                 var command = new Application.PpeReceiving.Post.v1.PostPpeReceivingReportCommand(id);
                 var response = await mediator.Send(command);
@@ -26,6 +24,7 @@ public sealed class PostPpeReceivingReportEndpoint : ICarterModule
             .Produces<Application.PpeReceiving.Post.v1.PostPpeReceivingReportResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .MapToApiVersion(new ApiVersion(1, 0));
+                .RequirePermission("Permissions.PpeReceiving.Post")
+            .MapToApiVersion(1);
     }
 }

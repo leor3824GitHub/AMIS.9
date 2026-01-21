@@ -157,6 +157,7 @@ public static class FshPermissions
         new("Search PpeReceiving", FshActions.Search, FshResources.PpeReceiving, IsBasic: true),
         new("Create PpeReceiving", FshActions.Create, FshResources.PpeReceiving),
         new("Update PpeReceiving", FshActions.Update, FshResources.PpeReceiving),
+        new("Post PpeReceiving", FshActions.Post, FshResources.PpeReceiving),
         new("Delete PpeReceiving", FshActions.Delete, FshResources.PpeReceiving),
 
         //inventorytransactions

@@ -65,6 +65,11 @@
                             OnClick="@(() => EditReport(context.Id))" Title="Edit" />
                         <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Info"
                             OnClick="@(() => PrintReport(context.Id))" Title="Print" />
+                        @if (context.Status == 0)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Lock" Color="Color.Warning"
+                                OnClick="@(() => PostReport(context.Id))" Title="Post" />
+                        }
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -77,7 +82,7 @@
     [Inject] public IApiClient ApiClient { get; set; } = default!;
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
 
-    private List<PpeReceivingReportListItem> _reports = [];
+    private List<PpeReceivingReportDto> _reports = [];
     private bool _isLoading;
 
     protected override async Task OnInitializedAsync()
@@ -116,6 +121,20 @@
     private void PrintReport(Guid id)
     {
         NavigationManager.NavigateTo($"/inventories/reports/pper-print?id={id}");
+    }
+
+    private async Task PostReport(Guid id)
+    {
+        try
+        {
+            await ApiClient.PostPpeReceivingReportEndpointAsync(ApiVersion, id);
+            Snackbar.Add("PPE Receiving Report posted successfully", Severity.Success);
+            await LoadReports();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error posting report: {ex.Message}", Severity.Error);
+        }
     }
 
     private string GetStatusText(int status)

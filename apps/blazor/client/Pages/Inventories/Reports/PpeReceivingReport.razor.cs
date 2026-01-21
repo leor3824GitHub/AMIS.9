@@ -1,8 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using AMIS.Blazor.Infrastructure.Api;
+using AMIS.Blazor.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using MudBlazor;
+using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Inventories.Reports;
 
@@ -10,10 +14,17 @@ public partial class PpeReceivingReport : ComponentBase
 {
     private const string ApiVersion = "1";
 
+    [CascadingParameter] public Task<AuthenticationState> AuthState { get; set; } = default!;
+    [Inject] public IAuthorizationService AuthService { get; set; } = default!;
     [Inject] public IApiClient ApiClient { get; set; } = default!;
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
     [Inject] public IJSRuntime JS { get; set; } = default!;
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
+
+    private bool _canCreate;
+    private bool _canUpdate;
+    private bool _canDelete;
+    private bool _canPost;
 
     private MudForm? _form;
     private PpeReceivingModel _model = new();
@@ -24,10 +35,19 @@ public partial class PpeReceivingReport : ComponentBase
     private string _reportStatusText = "Draft";
     private string _actionButtonText = "Create PPER";
 
+    private bool CanSave => _reportStatus == 0 && ((_reportId is null && _canCreate) || (_reportId.HasValue && _canUpdate));
+    private bool CanPost => _reportStatus == 0 && _reportId.HasValue && _canPost;
+
     private static readonly string[] ReceiptTypes = ["Purchase", "Transfer", "Donation", "Return", "Others"];
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthState).User;
+        _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.PpeReceiving);
+        _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.PpeReceiving);
+        _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.PpeReceiving);
+        _canPost = await AuthService.HasPermissionAsync(user, FshActions.Post, FshResources.PpeReceiving);
+
         if (!string.IsNullOrEmpty(ReportId) && Guid.TryParse(ReportId, out var id))
         {
             await LoadReportAsync(id);
@@ -68,31 +88,7 @@ public partial class PpeReceivingReport : ComponentBase
 
     private void AddLineItem()
     {
-        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
-        {
-            Snackbar.Add("Property Code is required", Severity.Warning);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(_draft.Description))
-        {
-            Snackbar.Add("Description is required", Severity.Warning);
-            return;
-        }
-
-        if (_draft.Quantity <= 0)
-        {
-            Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
-            return;
-        }
-
-        if (_draft.UnitCost < 0)
-        {
-            Snackbar.Add("Unit cost cannot be negative", Severity.Warning);
-            return;
-        }
-
-        // Just add the line item - API will perform detailed validation
+        // Just add the line item - validation happens when saving/posting
         _model.LineItems.Add(new PpeReceivingLineItemModel
         {
             PropertyCode = _draft.PropertyCode?.Trim() ?? string.Empty,
@@ -286,7 +282,6 @@ public partial class PpeReceivingReport : ComponentBase
             _model = new PpeReceivingModel
             {
                 ReportNumber = response.ReportNumber,
-                Location = response.Location,
                 SourceName = response.SourceName,
                 SourceAddress = response.SourceAddress,
                 ReceiptType = response.ReceiptType,
@@ -300,6 +295,7 @@ public partial class PpeReceivingReport : ComponentBase
                     Quantity = li.Quantity,
                     Unit = li.Unit,
                     UnitCost = li.UnitCost,
+                    Location = li.Location,
                 }).ToList() ?? new()
             };
 
@@ -353,7 +349,7 @@ public partial class PpeReceivingReport : ComponentBase
                 var updateCommand = new UpdatePpeReceivingReportCommand
                 {
                     Id = _reportId.Value,
-                    Location = _model.Location,
+                    Location = _model.LineItems.FirstOrDefault()?.Location ?? string.Empty,
                     SourceName = _model.SourceName,
                     SourceAddress = _model.SourceAddress,
                     ReceiptType = _model.ReceiptType,
@@ -380,7 +376,7 @@ public partial class PpeReceivingReport : ComponentBase
                 var command = new CreatePpeReceivingReportCommand
                 {
                     ReportNumber = _model.ReportNumber,
-                    Location = _model.Location,
+                    Location = _model.LineItems.FirstOrDefault()?.Location ?? string.Empty,
                     SourceName = _model.SourceName,
                     SourceAddress = _model.SourceAddress,
                     ReceiptType = _model.ReceiptType,
@@ -411,6 +407,50 @@ public partial class PpeReceivingReport : ComponentBase
             Snackbar.Add(ex.Response ?? "Failed to save PPER", Severity.Error);
         }
     }
+
+    private async Task PostAsync()
+    {
+        if (!CanPost)
+        {
+            Snackbar.Add("Not authorized to post this report", Severity.Warning);
+            return;
+        }
+
+        if (!_reportId.HasValue)
+        {
+            Snackbar.Add("Save the report before posting", Severity.Warning);
+            return;
+        }
+
+        if (_reportStatus != 0)
+        {
+            Snackbar.Add("Report is already posted", Severity.Info);
+            return;
+        }
+
+        if (_model.LineItems.Count == 0)
+        {
+            Snackbar.Add("Add at least one line item before posting", Severity.Warning);
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Posting will lock this report and update inventory. Continue?");
+        if (!confirmed)
+        {
+            return;
+        }
+
+        try
+        {
+            await ApiClient.PostPpeReceivingReportEndpointAsync(ApiVersion, _reportId.Value);
+            Snackbar.Add("PPE Receiving Report posted", Severity.Success);
+            await LoadReportAsync(_reportId.Value);
+        }
+        catch (ApiException ex)
+        {
+            Snackbar.Add(ex.Response ?? "Failed to post PPER", Severity.Error);
+        }
+    }
 }
 
 #region View models
@@ -418,9 +458,6 @@ public class PpeReceivingModel
 {
     [Required]
     public string ReportNumber { get; set; } = string.Empty;
-
-    [Required]
-    public string Location { get; set; } = string.Empty;
 
     [Required]
     public string SourceName { get; set; } = string.Empty;

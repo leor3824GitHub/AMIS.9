@@ -281,6 +281,9 @@ public static class InventoriesModule
             ppeReceivingGroup.MapListPpeReceivingReportsEndpoint();
             ppeReceivingGroup.MapCreatePpeReceivingReportEndpoint();
             ppeReceivingGroup.MapGetPpeReceivingReportEndpoint();
+                ppeReceivingGroup.MapUpdatePpeReceivingReportEndpoint();
+                ppeReceivingGroup.MapPostPpeReceivingReportEndpoint();
+                ppeReceivingGroup.MapCancelPpeReceivingReportEndpoint();
 
             var inventoryRegistryGroup = app.MapGroup("inventory-registries").WithTags("inventory-registries");
             inventoryRegistryGroup.MapSearchInventoryRegistriesEndpoint();

@@ -11,10 +11,13 @@
 		<EnableDefaultStaticWebAssetsCompression>false</EnableDefaultStaticWebAssetsCompression>
 	</PropertyGroup>
 
-	<!-- Explicitly exclude appsettings.json from compression processing -->
+	<!-- Explicitly exclude appsettings.json from static web assets processing -->
 	<ItemGroup>
-		<Content Update="wwwroot/appsettings.json" ExcludeFromCompression="true" />
-		<StaticWebAssetExcludeFromCompression Include="wwwroot/appsettings.json" />
+		<Content Update="wwwroot/appsettings.json">
+			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+		</Content>
+		<StaticWebAsset Remove="wwwroot/appsettings.json" />
 	</ItemGroup>
 
 

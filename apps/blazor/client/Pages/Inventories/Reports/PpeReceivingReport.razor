@@ -27,11 +27,12 @@
             @if (_reportStatus == 0)
             {
                 <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitAsync"
-                    StartIcon="@Icons.Material.Filled.Save">@_actionButtonText</MudButton>
-                @* TODO: Enable after API client regeneration
-                <MudButton Variant="Variant.Filled" Color="Color.Info" Disabled="true"
-                    StartIcon="@Icons.Material.Filled.Lock">Post & Lock (Coming Soon)</MudButton>
-                *@
+                    Disabled="@(!CanSave)" StartIcon="@Icons.Material.Filled.Save">@_actionButtonText</MudButton>
+                @if (CanPost)
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="PostAsync"
+                        StartIcon="@Icons.Material.Filled.Lock">Post &amp; Lock</MudButton>
+                }
                 <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetWithConfirmation"
                     StartIcon="@Icons.Material.Filled.Refresh">Reset</MudButton>
                 @if (_reportId.HasValue)
@@ -83,10 +84,6 @@
                             <MudTextField @bind-Value="_model.SourceAddress" For="@(() => _model.SourceAddress)"
                                 Label="Source Address" Required="true" Disabled="@(_reportStatus != 0)" />
                         </MudItem>
-                        <MudItem xs="12" md="4">
-                            <MudTextField @bind-Value="_model.Location" For="@(() => _model.Location)" Label="Location"
-                                Required="true" MaxLength="30" Disabled="@(_reportStatus != 0)" />
-                        </MudItem>
                         <MudItem xs="12">
                             <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3"
                                 Disabled="@(_reportStatus != 0)" />
@@ -108,30 +105,31 @@
                             <MudGrid GutterSize="2" Class="mt-2">
                                 <MudItem xs="12" md="3">
                                     <MudTextField @bind-Value="_draft.PropertyCode" For="@(() => _draft.PropertyCode)"
-                                        Label="Property Code" Required="true" />
+                                        Label="Property Code"  />
                                 </MudItem>
                                 <MudItem xs="12" md="3">
                                     <MudTextField @bind-Value="_draft.Description" For="@(() => _draft.Description)"
-                                        Label="Description" Required="true" />
+                                        Label="Description"  />
                                 </MudItem>
                                 <MudItem xs="12" md="2">
                                     <MudDatePicker @bind-Date="_draft.DateAcquired" Label="Date Acquired" />
                                 </MudItem>
                                 <MudItem xs="6" md="1">
                                     <MudNumericField T="double" @bind-Value="_draft.Quantity" Label="Qty" Min="0"
-                                        Required="true" HideSpinButtons="true" />
+                                         HideSpinButtons="true" />
                                 </MudItem>
                                 <MudItem xs="6" md="1">
                                     <MudTextField @bind-Value="_draft.Unit" For="@(() => _draft.Unit)" Label="Unit"
-                                        Required="true" />
+                                         />
                                 </MudItem>
                                 <MudItem xs="12" md="2">
                                     <MudNumericField T="double" @bind-Value="_draft.UnitCost" Label="Unit Cost" Min="0"
                                         HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="₱"
-                                        Required="true" />
+                                         />
                                 </MudItem>
                                 <MudItem xs="12" md="3">
-                                    <MudTextField @bind-Value="_draft.Location" Label="Location" />
+                                    <MudTextField @bind-Value="_draft.Location" Label="Location" 
+                                        MaxLength="30" />
                                 </MudItem>
                             </MudGrid>
                             <MudStack Row="true" Spacing="1" Class="mt-2">
