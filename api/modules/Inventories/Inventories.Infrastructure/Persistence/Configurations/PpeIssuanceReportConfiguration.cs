@@ -46,6 +46,7 @@ public sealed class PpeIssuanceReportConfiguration : IEntityTypeConfiguration<Pp
             lineItems.Property(li => li.AcquisitionCost).HasPrecision(18, 2);
             lineItems.Property(li => li.AccumulatedDepreciation).HasPrecision(18, 2);
             lineItems.Property(li => li.BookValue).HasPrecision(18, 2);
+            lineItems.Property(li => li.Location).HasMaxLength(200);
         });
 
         // Auditable base properties

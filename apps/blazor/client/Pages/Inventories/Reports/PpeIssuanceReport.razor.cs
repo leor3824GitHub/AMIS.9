@@ -148,6 +148,7 @@ public partial class PpeIssuanceReport : ComponentBase
             AcquisitionCost = _draft.AcquisitionCost,
             AccumulatedDepreciation = _draft.AccumulatedDepreciation,
             BookValue = _draft.BookValue,
+            Location = _draft.Location?.Trim() ?? string.Empty,
         });
 
         ResetDraft();
@@ -170,6 +171,7 @@ public partial class PpeIssuanceReport : ComponentBase
             AcquisitionCost = item.AcquisitionCost,
             AccumulatedDepreciation = item.AccumulatedDepreciation,
             BookValue = item.BookValue,
+            Location = item.Location,
         };
         _model.LineItems.Remove(item);
         Snackbar.Add("Editing item - modify and click Add Item to save changes", Severity.Info);
@@ -187,6 +189,7 @@ public partial class PpeIssuanceReport : ComponentBase
             AcquisitionCost = item.AcquisitionCost,
             AccumulatedDepreciation = item.AccumulatedDepreciation,
             BookValue = item.BookValue,
+            Location = item.Location,
         });
         Snackbar.Add("Item duplicated", Severity.Success);
     }
@@ -409,13 +412,14 @@ public partial class PpeIssuanceReport : ComponentBase
                     AcquisitionCost = li.AcquisitionCost,
                     AccumulatedDepreciation = li.AccumulatedDepreciation,
                     BookValue = li.BookValue,
+                    Location = li.Location,
                 }).ToList(),
             };
 
             var response = await ApiClient.CreatePpeIssuanceReportEndpointAsync(ApiVersion, command);
             _reportId = response.Id;
             Snackbar.Add("PPE Issuance Report created", Severity.Success);
-            Reset();
+            NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
         }
         catch (ApiException ex)
         {
@@ -484,21 +488,14 @@ public class PpeIssuanceModel
 
 public class PpeIssuanceLineItemModel
 {
-
-
     public double Quantity { get; set; } = 1;
     public string PropertyCode { get; set; } = string.Empty;
-        
     public string Description { get; set; } = string.Empty;
-        
     public string Unit { get; set; } = "pc";
-
     public DateTime? DateAcquired { get; set; }
-
     public double AcquisitionCost { get; set; }
-
     public double? AccumulatedDepreciation { get; set; }
-
     public double? BookValue { get; set; }
+    public string Location { get; set; } = string.Empty;
 }
 #endregion

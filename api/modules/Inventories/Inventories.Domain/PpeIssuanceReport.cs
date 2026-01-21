@@ -226,7 +226,8 @@ public sealed record PpeIssuanceLineItem(
     DateTime DateAcquired,
     decimal AcquisitionCost,
     decimal? AccumulatedDepreciation = null,
-    decimal? BookValue = null);
+    decimal? BookValue = null,
+    string? Location = null);
 
 /// <summary>
 /// Value object representing authentication for PPE issuance

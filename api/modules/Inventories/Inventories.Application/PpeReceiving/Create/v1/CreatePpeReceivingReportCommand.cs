@@ -18,7 +18,8 @@ public sealed record CreatePpeReceivingLineItemRequest(
     DateTime DateAcquired,
     decimal Quantity,
     string Unit,
-    decimal UnitCost);
+    decimal UnitCost,
+    string? Location = null);
 
 public sealed record CreatePpeReceivingReportResponse(Guid? Id);
 

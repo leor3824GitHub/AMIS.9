@@ -1,6 +1,7 @@
 @using AMIS.Blazor.Client.Pages.Inventories.Reports
 
-<div style="width: 8.5in; margin: 0 auto; padding: 0.5in; font-family: Arial, sans-serif; line-height: 1.2; font-size: 12px;">
+<div
+    style="width: 8.5in; margin: 0 auto; padding: 0.5in; font-family: Arial, sans-serif; line-height: 1.2; font-size: 12px;">
     <!-- Header -->
     <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
         <div style="font-weight: bold; font-size: 11px;">Republic of the Philippines</div>
@@ -56,13 +57,26 @@
     <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
         <thead>
             <tr style="background-color: #f0f0f0;">
-                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">Property Code</th>
-                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">Serial Number</th>
-                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">PPE Specifications</th>
-                <th style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; font-size: 11px;">Date Acquired</th>
-                <th style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold; font-size: 11px;">Acquisition Cost</th>
-                <th style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold; font-size: 11px;">Accum. Depreciation</th>
-                <th style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold; font-size: 11px;">Book Value</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">
+                    Property Code</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">
+                    Serial Number</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">
+                    PPE Specifications</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; font-size: 11px;">
+                    Date Acquired</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold; font-size: 11px;">
+                    Acquisition Cost</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold; font-size: 11px;">
+                    Accum. Depreciation</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold; font-size: 11px;">
+                    Book Value</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">
+                    Location</th>
             </tr>
         </thead>
         <tbody>
@@ -72,10 +86,15 @@
                     <td style="border: 1px solid #000; padding: 4px;">@item.PropertyCode</td>
                     <td style="border: 1px solid #000; padding: 4px;"></td>
                     <td style="border: 1px solid #000; padding: 4px;">@item.Description</td>
-                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">@(item.DateAcquired?.ToString("MM/dd/yyyy") ?? "")</td>
-                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">@item.AcquisitionCost.ToString("C2")</td>
-                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">@((item.AccumulatedDepreciation ?? 0).ToString("C2"))</td>
-                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">@((item.BookValue ?? 0).ToString("C2"))</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                        @(item.DateAcquired?.ToString("MM/dd/yyyy") ?? "")</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">
+                        @item.AcquisitionCost.ToString("C2")</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">@((item.AccumulatedDepreciation ??
+                                            0).ToString("C2"))</td>
+                    <td style="border: 1px solid #000; padding: 4px; text-align: right;">@((item.BookValue ??
+                                            0).ToString("C2"))</td>
+                    <td style="border: 1px solid #000; padding: 4px;">@item.Location</td>
                 </tr>
             }
             <!-- Empty rows for printing -->

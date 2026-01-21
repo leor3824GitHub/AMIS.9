@@ -209,7 +209,8 @@ public sealed record PpeReceivingLineItem(
     DateTime DateAcquired,
     decimal Quantity,
     string Unit,
-    decimal UnitCost)
+    decimal UnitCost,
+    string? Location = null)
 {
     public decimal Amount => Quantity * UnitCost;
 }

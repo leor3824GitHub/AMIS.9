@@ -10,7 +10,8 @@ public sealed record CreatePpeIssuanceLineItemRequest(
     DateTime? DateAcquired = null,
     decimal AcquisitionCost = 0,
     decimal? AccumulatedDepreciation = null,
-    decimal? BookValue = null);
+    decimal? BookValue = null,
+    string? Location = null);
 
 public sealed record CreatePpeIssuanceReportCommand(
     string ReportNumber,

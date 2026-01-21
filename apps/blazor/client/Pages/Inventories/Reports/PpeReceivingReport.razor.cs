@@ -55,8 +55,43 @@ public partial class PpeReceivingReport : ComponentBase
         _draft = new PpeReceivingLineItemModel { DateAcquired = _model.SourceReceiptDate };
     }
 
+    private async Task ResetWithConfirmation()
+    {
+        if (_model.LineItems.Count > 0)
+        {
+            var confirmed = await JS.InvokeAsync<bool>("confirm", "This will clear all line items. Do you want to continue?");
+            if (!confirmed) return;
+        }
+
+        Reset();
+    }
+
     private void AddLineItem()
     {
+        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
+        {
+            Snackbar.Add("Property Code is required", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_draft.Description))
+        {
+            Snackbar.Add("Description is required", Severity.Warning);
+            return;
+        }
+
+        if (_draft.Quantity <= 0)
+        {
+            Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
+            return;
+        }
+
+        if (_draft.UnitCost < 0)
+        {
+            Snackbar.Add("Unit cost cannot be negative", Severity.Warning);
+            return;
+        }
+
         // Just add the line item - API will perform detailed validation
         _model.LineItems.Add(new PpeReceivingLineItemModel
         {
@@ -66,6 +101,7 @@ public partial class PpeReceivingReport : ComponentBase
             Quantity = _draft.Quantity,
             Unit = _draft.Unit?.Trim() ?? string.Empty,
             UnitCost = _draft.UnitCost,
+            Location = _draft.Location?.Trim() ?? string.Empty,
         });
 
         ResetDraft();
@@ -76,11 +112,65 @@ public partial class PpeReceivingReport : ComponentBase
         _model.LineItems.Remove(item);
     }
 
+    private void EditItem(PpeReceivingLineItemModel item)
+    {
+        _draft = new PpeReceivingLineItemModel
+        {
+            PropertyCode = item.PropertyCode,
+            Description = item.Description,
+            DateAcquired = item.DateAcquired,
+            Quantity = item.Quantity,
+            Unit = item.Unit,
+            UnitCost = item.UnitCost,
+            Location = item.Location,
+        };
+        _model.LineItems.Remove(item);
+        Snackbar.Add("Editing item - modify and click Add Item to save changes", Severity.Info);
+    }
+
+    private void DuplicateItem(PpeReceivingLineItemModel item)
+    {
+        _model.LineItems.Add(new PpeReceivingLineItemModel
+        {
+            PropertyCode = item.PropertyCode,
+            Description = item.Description,
+            DateAcquired = item.DateAcquired,
+            Quantity = item.Quantity,
+            Unit = item.Unit,
+            UnitCost = item.UnitCost,
+            Location = item.Location,
+        });
+        Snackbar.Add("Item duplicated", Severity.Success);
+    }
+
     private void CancelEdit()
     {
         _reportId = null;
         Reset();
         NavigationManager.NavigateTo("/inventories/reports/pper");
+    }
+
+    private async Task PrintAsync()
+    {
+        if (_model.LineItems.Count == 0)
+        {
+            Snackbar.Add("Add at least one line item before printing", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            await JS.InvokeVoidAsync("window.print");
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Print failed: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void GoToList()
+    {
+        NavigationManager.NavigateTo("/inventories/reports/pper-list");
     }
 
     private async Task PostReportAsync()
@@ -277,6 +367,7 @@ public partial class PpeReceivingReport : ComponentBase
                         Quantity = li.Quantity,
                         Unit = li.Unit,
                         UnitCost = li.UnitCost,
+                        Location = li.Location,
                     }).ToList(),
                 };
 
@@ -303,6 +394,7 @@ public partial class PpeReceivingReport : ComponentBase
                         Quantity = li.Quantity,
                         Unit = li.Unit,
                         UnitCost = li.UnitCost,
+                        Location = li.Location,
                     }).ToList(),
                 };
 
@@ -311,14 +403,7 @@ public partial class PpeReceivingReport : ComponentBase
                 _createdId = response.Id;
                 _actionButtonText = "Update PPER";
                 Snackbar.Add("PPE Receiving Report created", Severity.Success);
-                if (_reportId.HasValue)
-                {
-                    await LoadReportAsync(_reportId.Value);
-                }
-                else
-                {
-                    Reset();
-                }
+                NavigationManager.NavigateTo("/inventories/reports/pper-list");
             }
         }
         catch (ApiException ex)
@@ -356,21 +441,14 @@ public class PpeReceivingModel
 
 public class PpeReceivingLineItemModel
 {
-    
     public string PropertyCode { get; set; } = string.Empty;
-
-    
     public string Description { get; set; } = string.Empty;
-
     public DateTime? DateAcquired { get; set; } = DateTime.Today;
-
     [Range(0.01, double.MaxValue)]
     public double Quantity { get; set; } = 1;
-
-    
     public string Unit { get; set; } = string.Empty;
-
     [Range(0, double.MaxValue)]
     public double UnitCost { get; set; }
+    public string Location { get; set; } = string.Empty;
 }
 #endregion

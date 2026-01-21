@@ -137,6 +137,9 @@
                                         Label="Acquisition Cost" HideSpinButtons="true" Adornment="Adornment.Start"
                                         AdornmentText="₱" />
                                 </MudItem>
+                                <MudItem xs="12" md="3">
+                                    <MudTextField @bind-Value="_draft.Location" Label="Location" />
+                                </MudItem>
                             </MudGrid>
                             <MudStack Row="true" Spacing="1" Class="mt-2">
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddLineItem"
@@ -161,6 +164,7 @@
                                 <MudTh>Unit</MudTh>
                                 <MudTh>Date Acquired</MudTh>
                                 <MudTh align="right">Acquisition Cost</MudTh>
+                                <MudTh>Location</MudTh>
                                 <MudTh align="right">Total</MudTh>
                                 @if (_reportStatus == 0)
                                 {
@@ -174,8 +178,11 @@
                                 <MudTd DataLabel="Unit">@context.Unit</MudTd>
                                 <MudTd DataLabel="Date Acquired">@(context.DateAcquired?.ToShortDateString() ?? "N/A")
                                 </MudTd>
-                                <MudTd DataLabel="Acquisition Cost" align="right">@context.AcquisitionCost.ToString("N2")</MudTd>
-                                <MudTd DataLabel="Total" align="right">@((context.AcquisitionCost * context.Quantity).ToString("N2"))</MudTd>
+                                <MudTd DataLabel="Acquisition Cost" align="right">
+                                    @context.AcquisitionCost.ToString("N2")</MudTd>
+                                <MudTd DataLabel="Location">@context.Location</MudTd>
+                                <MudTd DataLabel="Total" align="right">@((context.AcquisitionCost *
+                                                                        context.Quantity).ToString("N2"))</MudTd>
                                 <MudTd align="right">
                                     @if (_reportStatus == 0)
                                     {
@@ -183,7 +190,8 @@
                                             <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Info"
                                                 OnClick="() => EditItem(context)" Title="Edit" Size="Size.Small" />
                                             <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Warning"
-                                                OnClick="() => DuplicateItem(context)" Title="Duplicate" Size="Size.Small" />
+                                                OnClick="() => DuplicateItem(context)" Title="Duplicate"
+                                                Size="Size.Small" />
                                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
                                                 OnClick="() => RemoveItem(context)" Title="Remove" Size="Size.Small" />
                                         </MudStack>

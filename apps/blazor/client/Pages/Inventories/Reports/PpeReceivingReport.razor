@@ -32,7 +32,7 @@
                 <MudButton Variant="Variant.Filled" Color="Color.Info" Disabled="true"
                     StartIcon="@Icons.Material.Filled.Lock">Post & Lock (Coming Soon)</MudButton>
                 *@
-                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Reset"
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetWithConfirmation"
                     StartIcon="@Icons.Material.Filled.Refresh">Reset</MudButton>
                 @if (_reportId.HasValue)
                 {
@@ -49,6 +49,10 @@
                     StartIcon="@Icons.Material.Filled.Delete">Delete (Coming Soon)</MudButton>
                 *@
             }
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="PrintAsync"
+                StartIcon="@Icons.Material.Filled.Print">Print</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="GoToList"
+                StartIcon="@Icons.Material.Filled.ArrowBack">Back to List</MudButton>
         </MudStack>
         <MudForm @ref="_form" Model="_model">
             <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
@@ -59,8 +63,8 @@
                                 Label="Report Number" Required="true" MaxLength="10" Disabled="@(_reportStatus != 0)" />
                         </MudItem>
                         <MudItem xs="12" md="4">
-                            <MudTextField @bind-Value="_model.Location" For="@(() => _model.Location)" Label="Location"
-                                Required="true" MaxLength="30" Disabled="@(_reportStatus != 0)" />
+                            <MudDatePicker @bind-Date="_model.SourceReceiptDate" Label="Receipt Date" Required="true"
+                                MaxDate="@DateTime.Today" Format="MM/dd/yyyy" Disabled="@(_reportStatus != 0)" />
                         </MudItem>
                         <MudItem xs="12" md="4">
                             <MudSelect T="string" @bind-Value="_model.ReceiptType" Label="Receipt Type" Required="true"
@@ -80,8 +84,8 @@
                                 Label="Source Address" Required="true" Disabled="@(_reportStatus != 0)" />
                         </MudItem>
                         <MudItem xs="12" md="4">
-                            <MudDatePicker @bind-Date="_model.SourceReceiptDate" Label="Receipt Date" Required="true"
-                                MaxDate="@DateTime.Today" Format="MM/dd/yyyy" Disabled="@(_reportStatus != 0)" />
+                            <MudTextField @bind-Value="_model.Location" For="@(() => _model.Location)" Label="Location"
+                                Required="true" MaxLength="30" Disabled="@(_reportStatus != 0)" />
                         </MudItem>
                         <MudItem xs="12">
                             <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3"
@@ -126,6 +130,9 @@
                                         HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="₱"
                                         Required="true" />
                                 </MudItem>
+                                <MudItem xs="12" md="3">
+                                    <MudTextField @bind-Value="_draft.Location" Label="Location" />
+                                </MudItem>
                             </MudGrid>
                             <MudStack Row="true" Spacing="1" Class="mt-2">
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddLineItem"
@@ -139,7 +146,7 @@
                         {
                             <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-3">
                                 This report is locked (Posted). Cannot add or edit line items. @* TODO: Cancel link coming after API client regeneration *@
-                                </MudAlert>
+                            </MudAlert>
                         }
 
                         <MudTable Items="_model.LineItems" Dense="true" Hover="true" Class="mt-3">
@@ -150,6 +157,7 @@
                                 <MudTh>Qty</MudTh>
                                 <MudTh>Unit</MudTh>
                                 <MudTh align="right">Unit Cost</MudTh>
+                                <MudTh>Location</MudTh>
                                 <MudTh align="right">Total</MudTh>
                                 @if (_reportStatus == 0)
                                 {
@@ -164,13 +172,18 @@
                                 <MudTd DataLabel="Qty">@context.Quantity</MudTd>
                                 <MudTd DataLabel="Unit">@context.Unit</MudTd>
                                 <MudTd DataLabel="Unit Cost" align="right">@context.UnitCost.ToString("C2")</MudTd>
+                                <MudTd DataLabel="Location">@context.Location</MudTd>
                                 <MudTd DataLabel="Total" align="right">@(context.UnitCost *
                                                                         context.Quantity).ToString("C2")</MudTd>
                                 <MudTd align="right">
                                     @if (_reportStatus == 0)
                                     {
+                                        <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
+                                            OnClick="() => EditItem(context)" Title="Edit" Size="Size.Small" />
+                                        <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info"
+                                            OnClick="() => DuplicateItem(context)" Title="Duplicate" Size="Size.Small" />
                                         <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
-                                            OnClick="() => RemoveItem(context)" Title="Remove" />
+                                            OnClick="() => RemoveItem(context)" Title="Remove" Size="Size.Small" />
                                     }
                                     else
                                     {

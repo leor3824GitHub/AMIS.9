@@ -44,7 +44,8 @@ public sealed class CreatePpeIssuanceReportHandler(
                     DateTime.UtcNow,
                     lineItem.AcquisitionCost,
                     lineItem.AccumulatedDepreciation,
-                    lineItem.BookValue);
+                    lineItem.BookValue,
+                    lineItem.Location);
                 report.AddLineItem(item);
             }
 

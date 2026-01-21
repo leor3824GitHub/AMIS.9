@@ -36,7 +36,8 @@ public sealed class UpdatePpeReceivingReportHandler(
                 x.DateAcquired,
                 x.Quantity,
                 x.Unit,
-                x.UnitCost)).ToList();
+                x.UnitCost,
+                x.Location)).ToList();
 
             report.AddLineItems(lineItems);
 

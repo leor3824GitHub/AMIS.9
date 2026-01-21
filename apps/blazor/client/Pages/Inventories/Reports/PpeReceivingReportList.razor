@@ -48,7 +48,8 @@
                     <MudTd DataLabel="Receipt Date">@context.SourceReceiptDate.ToString("MMM dd, yyyy")</MudTd>
                     <MudTd DataLabel="Location">@context.Location</MudTd>
                     <MudTd DataLabel="Status">
-                        <MudChip T="string" Color="@GetStatusColor(context.Status)" Variant="Variant.Filled" Size="Size.Small">
+                        <MudChip T="string" Color="@GetStatusColor(context.Status)" Variant="Variant.Filled"
+                            Size="Size.Small">
                             @GetStatusText(context.Status)
                         </MudChip>
                     </MudTd>
@@ -62,6 +63,8 @@
                     <MudTd align="center">
                         <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
                             OnClick="@(() => EditReport(context.Id))" Title="Edit" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Info"
+                            OnClick="@(() => PrintReport(context.Id))" Title="Print" />
                     </MudTd>
                 </RowTemplate>
             </MudTable>
@@ -108,6 +111,11 @@
     private void EditReport(Guid id)
     {
         NavigationManager.NavigateTo($"/inventories/reports/pper/{id}");
+    }
+
+    private void PrintReport(Guid id)
+    {
+        NavigationManager.NavigateTo($"/inventories/reports/pper-print?id={id}");
     }
 
     private string GetStatusText(int status)
