@@ -32,6 +32,8 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Brand;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Category;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InventoryRegistry;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InventoryTransactionLog;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SemexRegistry;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SemexTransactionLog;
 using AMIS.Inventories.Infrastructure.Issuances.Features.Accept.v1;
 using AMIS.Inventories.Infrastructure.Issuances.Features.Reject.v1;
 using AMIS.Inventories.Infrastructure.Issuances.Features.Cancel.v1;
@@ -267,10 +269,14 @@ public static class InventoriesModule
             var suppliesAndMaterialsIssuanceGroup = app.MapGroup("supplies-materials-issuance").WithTags("supplies-materials-issuance");
             suppliesAndMaterialsIssuanceGroup.MapCreateSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapGetSuppliesAndMaterialsIssuanceReportEndpoint();
+            suppliesAndMaterialsIssuanceGroup.MapPostSuppliesAndMaterialsIssuanceReportEndpoint();
+            suppliesAndMaterialsIssuanceGroup.MapCancelSuppliesAndMaterialsIssuanceReportEndpoint();
 
             var suppliesAndMaterialsReceivingGroup = app.MapGroup("supplies-materials-receiving").WithTags("supplies-materials-receiving");
             suppliesAndMaterialsReceivingGroup.MapCreateSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapGetSuppliesAndMaterialsReceivingReportEndpoint();
+            suppliesAndMaterialsReceivingGroup.MapPostSuppliesAndMaterialsReceivingReportEndpoint();
+            suppliesAndMaterialsReceivingGroup.MapCancelSuppliesAndMaterialsReceivingReportEndpoint();
 
             var ppeIssuanceGroup = app.MapGroup("ppe-issuance").WithTags("ppe-issuance");
             ppeIssuanceGroup.MapListPpeIssuanceReportsEndpoint();
@@ -296,6 +302,14 @@ public static class InventoriesModule
             var inventoryTransactionLogGroup = app.MapGroup("inventory-transaction-logs").WithTags("inventory-transaction-logs");
             inventoryTransactionLogGroup.MapSearchInventoryTransactionLogsEndpoint();
             inventoryTransactionLogGroup.MapGetInventoryTransactionLogEndpoint();
+
+            var semexRegistryGroup = app.MapGroup("semex-registries").WithTags("semex-registries");
+            semexRegistryGroup.MapSearchSemexRegistriesEndpoint();
+            semexRegistryGroup.MapGetSemexRegistryEndpoint();
+
+            var semexTransactionLogGroup = app.MapGroup("semex-transaction-logs").WithTags("semex-transaction-logs");
+            semexTransactionLogGroup.MapSearchSemexTransactionLogsEndpoint();
+            semexTransactionLogGroup.MapGetSemexTransactionLogEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterInventoriesServices(this WebApplicationBuilder builder)
@@ -408,11 +422,17 @@ public static class InventoriesModule
         builder.Services.AddKeyedScoped<IRepository<PpeReceivingReport>, InventoriesRepository<PpeReceivingReport>>("inventories:pperr");
         builder.Services.AddKeyedScoped<IReadRepository<PpeReceivingReport>, InventoriesRepository<PpeReceivingReport>>("inventories:pperr");
 
-        // Inventory Registry & Logs
+        // Inventory Registry & Logs (PPE)
         builder.Services.AddKeyedScoped<IRepository<InventoryRegistry>, InventoriesRepository<InventoryRegistry>>("inventories:inventory-registries");
         builder.Services.AddKeyedScoped<IReadRepository<InventoryRegistry>, InventoriesRepository<InventoryRegistry>>("inventories:inventory-registries");
         builder.Services.AddKeyedScoped<IRepository<InventoryTransactionLog>, InventoriesRepository<InventoryTransactionLog>>("inventories:inventory-transaction-logs");
         builder.Services.AddKeyedScoped<IReadRepository<InventoryTransactionLog>, InventoriesRepository<InventoryTransactionLog>>("inventories:inventory-transaction-logs");
+
+        // Semex Registry & Logs (Semi-Expendable)
+        builder.Services.AddKeyedScoped<IRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex-registries");
+        builder.Services.AddKeyedScoped<IReadRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex-registries");
+        builder.Services.AddKeyedScoped<IRepository<SemexTransactionLog>, InventoriesRepository<SemexTransactionLog>>("inventories:semex-transaction-logs");
+        builder.Services.AddKeyedScoped<IReadRepository<SemexTransactionLog>, InventoriesRepository<SemexTransactionLog>>("inventories:semex-transaction-logs");
 
         return builder;
     }

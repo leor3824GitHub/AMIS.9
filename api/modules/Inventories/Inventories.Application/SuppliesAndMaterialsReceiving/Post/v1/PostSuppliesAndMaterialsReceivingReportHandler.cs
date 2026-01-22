@@ -1,0 +1,121 @@
+using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using SemexRegistryDomain = AMIS.WebApi.Inventories.Domain.SemexRegistry;
+using SemexTransactionLogDomain = AMIS.WebApi.Inventories.Domain.SemexTransactionLog;
+
+namespace AMIS.WebApi.Inventories.Application.SuppliesAndMaterialsReceiving.Post.v1;
+
+public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
+    ILogger<PostSuppliesAndMaterialsReceivingReportHandler> logger,
+    [FromKeyedServices("inventories:smrr")] IRepository<SuppliesAndMaterialsReceivingReport> repository,
+    [FromKeyedServices("inventories:semex-registries")] IRepository<SemexRegistryDomain> registryRepository,
+    [FromKeyedServices("inventories:semex-transaction-logs")] IRepository<SemexTransactionLogDomain> transactionLogRepository)
+    : IRequestHandler<PostSuppliesAndMaterialsReceivingReportCommand, PostSuppliesAndMaterialsReceivingReportResponse>
+{
+    public async Task<PostSuppliesAndMaterialsReceivingReportResponse> Handle(
+        PostSuppliesAndMaterialsReceivingReportCommand request,
+        CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        try
+        {
+            var report = await repository.GetByIdAsync(request.Id, cancellationToken).ConfigureAwait(false);
+            if (report is null)
+            {
+                throw new InvalidOperationException($"SMRR with Id {request.Id} was not found.");
+            }
+
+            var transactionLogs = new List<SemexTransactionLogDomain>();
+
+            foreach (var lineItem in report.LineItems)
+            {
+                if (string.IsNullOrWhiteSpace(lineItem.Name)
+                    && string.IsNullOrWhiteSpace(lineItem.Description)
+                    && string.IsNullOrWhiteSpace(lineItem.Location))
+                {
+                    logger.LogWarning("Skipping SMRR line item with empty name/description/location on report {SmrrNumber}", report.SmrrNumber);
+                    continue;
+                }
+
+                var quantity = (int)lineItem.Quantity;
+                if (quantity <= 0)
+                {
+                    throw new ArgumentException($"Quantity must be greater than zero for {lineItem.Name}");
+                }
+
+                // Use normalized item code for lookup
+                var normalizedCode = lineItem.Name.Trim().ToUpperInvariant();
+                
+                // Query all registries and find by item code (since there's no built-in spec)
+                var spec = new AllSemexRegistriesSpec();
+                var registries = await registryRepository.ListAsync(spec, cancellationToken).ConfigureAwait(false);
+                var registry = registries.FirstOrDefault(r => r.ItemCode == normalizedCode);
+
+                var inventoryBefore = registry?.Quantity ?? 0;
+                var statusBefore = registry?.Status ?? InventoryItemStatus.NotReceived;
+
+                if (registry is null)
+                {
+                    // Create new registry entry
+                    registry = SemexRegistryDomain.CreateFromReceiving(
+                        lineItem.Name,
+                        lineItem.Description,
+                        quantity,
+                        lineItem.Unit,
+                        lineItem.Location,
+                        lineItem.UnitCost,
+                        report.SmrrNumber);
+
+                    await registryRepository.AddAsync(registry, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    // Add to existing registry entry
+                    registry.AddQuantity(quantity, report.SmrrNumber);
+                    await registryRepository.UpdateAsync(registry, cancellationToken).ConfigureAwait(false);
+                }
+
+                var logEntry = SemexTransactionLogDomain.CreateSuccess(
+                    lineItem.Name,
+                    "SMRR",
+                    report.SmrrNumber,
+                    quantity,
+                    inventoryBefore,
+                    registry.Quantity,
+                    statusBefore,
+                    registry.Status,
+                    report.Source.Name);
+
+                transactionLogs.Add(logEntry);
+            }
+
+            // Save all changes
+            await repository.UpdateAsync(report, cancellationToken).ConfigureAwait(false);
+            await registryRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            foreach (var log in transactionLogs)
+            {
+                await transactionLogRepository.AddAsync(log, cancellationToken).ConfigureAwait(false);
+            }
+            await transactionLogRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            logger.LogInformation("SMRR {SmrrNumber} posted successfully. Semex registry and logs updated.", report.SmrrNumber);
+            return new PostSuppliesAndMaterialsReceivingReportResponse(
+                report.Id,
+                report.SmrrNumber,
+                "Posted",
+                "SMRR posted and semi-expendable inventory registry updated.");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error posting SMRR {Id}.", request.Id);
+            throw;
+        }
+    }
+}
