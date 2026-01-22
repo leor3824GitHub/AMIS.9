@@ -29,13 +29,13 @@ public sealed class GetPpeReceivingReportByIdHandler(
                 li.DateAcquired,
                 li.Quantity,
                 li.Unit,
-                li.UnitCost))
+                li.UnitCost,
+                li.Location))
             .ToList();
 
         return new GetPpeReceivingReportByIdResponse(
             report.Id,
             report.ReportNumber,
-            report.Location,
             report.Source.Name,
             report.Source.Address,
             report.ReceiptType.Value,

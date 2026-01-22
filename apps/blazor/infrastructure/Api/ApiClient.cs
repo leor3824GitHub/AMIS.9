@@ -24555,6 +24555,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("unitCost")]
         public double UnitCost { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string Location { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -24837,12 +24840,6 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("reportNumber")]
         public string ReportNumber { get; set; }
 
-        [System.Text.Json.Serialization.JsonPropertyName("location")]
-        public string Location { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("lineItems")]
-        public System.Collections.Generic.ICollection<CreatePpeReceivingLineItemRequest> LineItems { get; set; }
-
         [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
         public string SourceName { get; set; }
 
@@ -24857,6 +24854,9 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("notes")]
         public string Notes { get; set; }
+
+        [System.Text.Json.Serialization.JsonPropertyName("lineItems")]
+        public System.Collections.Generic.ICollection<CreatePpeReceivingLineItemRequest> LineItems { get; set; }
 
     }
 
@@ -24928,9 +24928,6 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("id")]
         public System.Guid Id { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("location")]
-        public string Location { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
         public string SourceName { get; set; }
@@ -25931,9 +25928,6 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("reportNumber")]
         public string ReportNumber { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("location")]
-        public string Location { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
         public string SourceName { get; set; }
@@ -27165,9 +27159,6 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceReceiptDate")]
         public System.DateTime SourceReceiptDate { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("location")]
-        public string Location { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("lineItemsCount")]
         public int LineItemsCount { get; set; }

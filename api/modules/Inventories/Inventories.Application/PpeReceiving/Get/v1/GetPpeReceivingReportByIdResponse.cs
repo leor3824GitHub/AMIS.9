@@ -6,12 +6,12 @@ public sealed record GetPpeReceivingLineItemResponse(
     DateTime DateAcquired,
     decimal Quantity,
     string Unit,
-    decimal UnitCost);
+    decimal UnitCost,
+    string Location);
 
 public sealed record GetPpeReceivingReportByIdResponse(
     Guid Id,
     string ReportNumber,
-    string Location,
     string SourceName,
     string SourceAddress,
     string ReceiptType,

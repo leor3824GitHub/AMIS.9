@@ -30,7 +30,8 @@ public sealed class PostPpeIssuanceReportHandler(
 
             foreach (var lineItem in report.LineItems)
             {
-                var quantity = (int)1; // PPE issuance is typically per item
+                // Issuance is per-item; domain line items do not carry quantity, so enforce 1
+                var quantity = 1;
                 if (quantity <= 0)
                 {
                     throw new ArgumentException($"Quantity must be greater than zero for {lineItem.PropertyCode}");
@@ -47,7 +48,7 @@ public sealed class PostPpeIssuanceReportHandler(
                         0,
                         Domain.ValueObjects.InventoryItemStatus.NotReceived,
                         $"Registry entry for property code '{lineItem.PropertyCode}' was not found.",
-                        report.Recipient.Name);
+                        report.Recipient?.Name ?? "Unknown");
 
                     await transactionLogRepository.AddAsync(failureLog, cancellationToken).ConfigureAwait(false);
                     throw new InvalidOperationException($"Cannot issue item. Registry entry for property code '{lineItem.PropertyCode}' was not found.");
@@ -70,7 +71,8 @@ public sealed class PostPpeIssuanceReportHandler(
                         registry.Quantity,
                         statusBefore,
                         registry.Status,
-                        report.Recipient.Name);
+                        report.Recipient?.Name ?? "Unknown");
+
 
                     await transactionLogRepository.AddAsync(logEntry, cancellationToken).ConfigureAwait(false);
                 }
@@ -83,7 +85,7 @@ public sealed class PostPpeIssuanceReportHandler(
                         inventoryBefore,
                         statusBefore,
                         ex.Message,
-                        report.Recipient.Name);
+                        report.Recipient?.Name ?? "Unknown");
 
                     await transactionLogRepository.AddAsync(failureLog, cancellationToken).ConfigureAwait(false);
                     throw;

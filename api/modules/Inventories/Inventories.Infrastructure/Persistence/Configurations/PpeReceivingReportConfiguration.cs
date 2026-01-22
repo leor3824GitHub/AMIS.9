@@ -14,7 +14,6 @@ public sealed class PpeReceivingReportConfiguration : IEntityTypeConfiguration<P
         builder.Property(x => x.ReportNumber).IsRequired().HasMaxLength(50);
         builder.HasIndex(x => x.ReportNumber).IsUnique();
 
-        builder.Property(x => x.Location).IsRequired().HasMaxLength(200);
         builder.Property(x => x.Notes).HasMaxLength(1000);
 
         // Source Information
@@ -39,7 +38,7 @@ public sealed class PpeReceivingReportConfiguration : IEntityTypeConfiguration<P
             lineItems.Property(li => li.Quantity).HasPrecision(18, 4);
             lineItems.Property(li => li.Unit).HasMaxLength(20);
             lineItems.Property(li => li.UnitCost).HasPrecision(18, 2);
-            lineItems.Property(li => li.Location).HasMaxLength(200);
+            lineItems.Property(li => li.Location).IsRequired().HasMaxLength(200);
         });
 
         // Audit fields

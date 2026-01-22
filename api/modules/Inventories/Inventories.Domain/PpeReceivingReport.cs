@@ -13,7 +13,6 @@ public class PpeReceivingReport : AuditableEntity, IAggregateRoot
 {
     // Header and Tracking
     public string ReportNumber { get; private set; }
-    public string Location { get; private set; }
     public PpeReportStatus Status { get; private set; } = PpeReportStatus.Draft;
 
     // Source Information
@@ -38,7 +37,6 @@ public class PpeReceivingReport : AuditableEntity, IAggregateRoot
     private PpeReceivingReport()
     {
         ReportNumber = string.Empty;
-        Location = string.Empty;
         Source = null!;
         ReceiptType = null!;
     }
@@ -48,18 +46,15 @@ public class PpeReceivingReport : AuditableEntity, IAggregateRoot
     /// </summary>
     public PpeReceivingReport(
         string reportNumber,
-        string location,
         PpeSourceInfo source,
         PpeReceiptType receiptType,
         string? notes = null)
     {
         ArgumentNullException.ThrowIfNull(reportNumber);
-        ArgumentNullException.ThrowIfNull(location);
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(receiptType);
 
         ReportNumber = reportNumber;
-        Location = location;
         Source = source;
         ReceiptType = receiptType;
         Notes = notes;
@@ -149,14 +144,12 @@ public class PpeReceivingReport : AuditableEntity, IAggregateRoot
     /// <summary>
     /// Updates report header (only allowed in Draft)
     /// </summary>
-    public void UpdateHeader(string location, PpeSourceInfo source, PpeReceiptType receiptType, string? notes)
+    public void UpdateHeader(PpeSourceInfo source, PpeReceiptType receiptType, string? notes)
     {
         EnsureDraft();
-        ArgumentNullException.ThrowIfNull(location);
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(receiptType);
 
-        Location = location;
         Source = source;
         ReceiptType = receiptType;
         Notes = notes;
@@ -210,7 +203,7 @@ public sealed record PpeReceivingLineItem(
     decimal Quantity,
     string Unit,
     decimal UnitCost,
-    string? Location = null)
+    string Location)
 {
     public decimal Amount => Quantity * UnitCost;
 }

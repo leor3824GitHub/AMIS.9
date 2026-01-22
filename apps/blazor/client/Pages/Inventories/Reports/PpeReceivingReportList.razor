@@ -34,7 +34,6 @@
                     <MudTh>Source</MudTh>
                     <MudTh>Type</MudTh>
                     <MudTh>Receipt Date</MudTh>
-                    <MudTh>Location</MudTh>
                     <MudTh>Status</MudTh>
                     <MudTh align="center">Items</MudTh>
                     <MudTh align="right">Total Amount</MudTh>
@@ -46,7 +45,6 @@
                     <MudTd DataLabel="Source">@context.SourceName</MudTd>
                     <MudTd DataLabel="Type">@context.ReceiptType</MudTd>
                     <MudTd DataLabel="Receipt Date">@context.SourceReceiptDate.ToString("MMM dd, yyyy")</MudTd>
-                    <MudTd DataLabel="Location">@context.Location</MudTd>
                     <MudTd DataLabel="Status">
                         <MudChip T="string" Color="@GetStatusColor(context.Status)" Variant="Variant.Filled"
                             Size="Size.Small">

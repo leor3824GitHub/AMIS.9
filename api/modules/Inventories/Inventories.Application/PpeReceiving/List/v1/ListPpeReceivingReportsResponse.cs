@@ -12,7 +12,6 @@ public sealed class PpeReceivingReportDto
     public string SourceName { get; set; } = string.Empty;
     public string ReceiptType { get; set; } = string.Empty;
     public DateTime SourceReceiptDate { get; set; }
-    public string Location { get; set; } = string.Empty;
     public int LineItemsCount { get; set; }
     public decimal TotalAmount { get; set; }
     public int Status { get; set; }

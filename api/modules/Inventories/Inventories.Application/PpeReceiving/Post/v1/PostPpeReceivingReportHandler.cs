@@ -31,6 +31,14 @@ public sealed class PostPpeReceivingReportHandler(
 
             foreach (var lineItem in report.LineItems)
             {
+                if (string.IsNullOrWhiteSpace(lineItem.PropertyCode)
+                    && string.IsNullOrWhiteSpace(lineItem.Description)
+                    && string.IsNullOrWhiteSpace(lineItem.Location))
+                {
+                    logger.LogWarning("Skipping PPERR line item with empty property/description/location on report {ReportNumber}", report.ReportNumber);
+                    continue;
+                }
+
                 var quantity = (int)lineItem.Quantity;
                 if (quantity <= 0)
                 {
@@ -49,7 +57,7 @@ public sealed class PostPpeReceivingReportHandler(
                         lineItem.PropertyCode,
                         lineItem.Description,
                         quantity,
-                        report.Location,
+                        lineItem.Location,
                         report.ReportNumber);
 
                     await registryRepository.AddAsync(registry, cancellationToken).ConfigureAwait(false);

@@ -4,7 +4,6 @@ namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Update.v1;
 
 public sealed record UpdatePpeReceivingReportCommand(
     Guid Id,
-    string Location,
     IReadOnlyList<UpdatePpeReceivingLineItemRequest> LineItems,
     string SourceName,
     string SourceAddress,
@@ -19,6 +18,6 @@ public sealed record UpdatePpeReceivingLineItemRequest(
     decimal Quantity,
     string Unit,
     decimal UnitCost,
-    string? Location = null);
+    string Location);
 
 public sealed record UpdatePpeReceivingReportResponse(Guid Id);

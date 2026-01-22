@@ -28,7 +28,6 @@ public sealed class ListPpeReceivingReportsHandler(
                 SourceName = x.Source.Name,
                 ReceiptType = x.ReceiptType.Value,
                 SourceReceiptDate = x.Source.ReceiptDate,
-                Location = x.Location,
                 LineItemsCount = x.LineItems.Count,
                 TotalAmount = x.GetTotalAmount(),
                 Status = (int)x.Status,

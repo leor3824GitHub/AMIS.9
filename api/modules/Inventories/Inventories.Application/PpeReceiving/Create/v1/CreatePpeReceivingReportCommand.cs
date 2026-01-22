@@ -4,7 +4,6 @@ namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Create.v1;
 
 public sealed record CreatePpeReceivingReportCommand(
     string ReportNumber,
-    string Location,
     IReadOnlyList<CreatePpeReceivingLineItemRequest> LineItems,
     string SourceName,
     string SourceAddress,
@@ -19,7 +18,7 @@ public sealed record CreatePpeReceivingLineItemRequest(
     decimal Quantity,
     string Unit,
     decimal UnitCost,
-    string? Location = null);
+    string Location);
 
 public sealed record CreatePpeReceivingReportResponse(Guid? Id);
 

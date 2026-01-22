@@ -105,6 +105,14 @@ public partial class PpeReceivingReport : ComponentBase
 
     private void AddLineItem()
     {
+        if (string.IsNullOrWhiteSpace(_draft.PropertyCode)
+            || string.IsNullOrWhiteSpace(_draft.Description)
+            || string.IsNullOrWhiteSpace(_draft.Location))
+        {
+            Snackbar.Add("Property code, description, and location are required for each line item", Severity.Warning);
+            return;
+        }
+
         // Just add the line item - validation happens when saving/posting
         _model.LineItems.Add(new PpeReceivingLineItemModel
         {
@@ -365,6 +373,12 @@ public partial class PpeReceivingReport : ComponentBase
             return;
         }
 
+        if (_model.LineItems.Any(li => string.IsNullOrWhiteSpace(li.Location)))
+        {
+            Snackbar.Add("Each line item must have a location", Severity.Warning);
+            return;
+        }
+
         if (_model.SourceReceiptDate?.Date > DateTime.Today)
         {
             Snackbar.Add("Receipt date cannot be in the future", Severity.Warning);
@@ -378,7 +392,6 @@ public partial class PpeReceivingReport : ComponentBase
                 var updateCommand = new UpdatePpeReceivingReportCommand
                 {
                     Id = _reportId.Value,
-                    Location = _model.LineItems.FirstOrDefault()?.Location ?? string.Empty,
                     SourceName = _model.SourceName,
                     SourceAddress = _model.SourceAddress,
                     ReceiptType = _model.ReceiptType,
@@ -405,7 +418,6 @@ public partial class PpeReceivingReport : ComponentBase
                 var command = new CreatePpeReceivingReportCommand
                 {
                     ReportNumber = _model.ReportNumber,
-                    Location = _model.LineItems.FirstOrDefault()?.Location ?? string.Empty,
                     SourceName = _model.SourceName,
                     SourceAddress = _model.SourceAddress,
                     ReceiptType = _model.ReceiptType,
@@ -512,7 +524,7 @@ public class PpeReceivingLineItemModel
     public DateTime? DateAcquired { get; set; } = DateTime.Today;
     [Range(0.01, double.MaxValue)]
     public double Quantity { get; set; } = 1;
-    public string Unit { get; set; } = string.Empty;
+    public string Unit { get; set; } = "pc";
     [Range(0, double.MaxValue)]
     public double UnitCost { get; set; }
     public string Location { get; set; } = string.Empty;

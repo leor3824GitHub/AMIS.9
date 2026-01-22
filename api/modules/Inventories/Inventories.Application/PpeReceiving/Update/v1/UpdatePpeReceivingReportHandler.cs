@@ -26,7 +26,7 @@ public sealed class UpdatePpeReceivingReportHandler(
             var source = new PpeSourceInfo(request.SourceName, request.SourceAddress, request.SourceReceiptDate);
             var receiptType = PpeReceiptType.FromString(request.ReceiptType);
 
-            report.UpdateHeader(request.Location, source, receiptType, request.Notes);
+            report.UpdateHeader(source, receiptType, request.Notes);
 
             report.ClearLineItems();
 

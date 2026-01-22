@@ -60,6 +60,12 @@ public class InventoryRegistry : AuditableEntity, IAggregateRoot
     /// </summary>
     public string LastTransactionReference { get; set; } = string.Empty;
 
+    /// <summary>
+    /// Optimistic concurrency token for safe updates
+    /// </summary>
+    [System.ComponentModel.DataAnnotations.Timestamp]
+    public byte[]? RowVersion { get; set; }
+
     private InventoryRegistry() { }
 
     /// <summary>
@@ -80,12 +86,17 @@ public class InventoryRegistry : AuditableEntity, IAggregateRoot
         if (quantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero", nameof(quantity));
 
+        // Normalize key fields to canonical forms to keep lookups consistent
+        var normalizedCode = propertyCode.Trim().ToUpperInvariant();
+        var normalizedDesc = description.Trim();
+        var normalizedLocation = location.Trim();
+
         return new InventoryRegistry
         {
-            PropertyCode = propertyCode,
-            Description = description,
+            PropertyCode = normalizedCode,
+            Description = normalizedDesc,
             Quantity = quantity,
-            Location = location,
+            Location = normalizedLocation,
             Status = InventoryItemStatus.InStock,
             ReceivedDate = DateTime.UtcNow,
             LastTransactionDate = DateTime.UtcNow,

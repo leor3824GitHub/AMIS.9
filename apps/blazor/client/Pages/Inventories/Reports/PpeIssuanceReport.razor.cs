@@ -40,9 +40,12 @@ public partial class PpeIssuanceReport : ComponentBase
     private string _reportStatusText = "Draft";
     private string _actionButtonText = "CREATE PPEIR";
 
-    // Registry search fields
-    private InventoryRegistryResponse? _selectedRegistryItem;
-    private List<InventoryRegistryResponse> _registryItems = new();
+    // Inventory search fields
+    private string _searchKeyword = string.Empty;
+    private List<InventoryRegistryResponse> _inventorySearchResults = new();
+    private HashSet<InventoryRegistryResponse> _selectedInventoryItems = new();
+    private bool _isLoadingInventory;
+    private bool _hasSearchedInventory;
 
     private bool CanSave => !_isReadOnly && _reportStatus == 0 && ((_reportId is null && _canCreate) || (_reportId.HasValue && _canUpdate));
     private bool CanPost => !_isReadOnly && _reportStatus == 0 && _reportId.HasValue && _canPost;
@@ -160,103 +163,101 @@ public partial class PpeIssuanceReport : ComponentBase
     private void ResetDraft()
     {
         _draft = new PpeIssuanceLineItemModel { DateAcquired = _model.IssuanceDate };
-        _selectedRegistryItem = null;
         _isEditingLineItem = false;
     }
 
-    private async Task OpenInventorySearchDialogAsync()
+    private async Task SearchInventoryAsync()
     {
-        var parameters = new DialogParameters<InventorySearchDialog>
-        {
-            { x => x.ApiClient, ApiClient },
-            { x => x.ApiVersion, ApiVersion }
-        };
+        _isLoadingInventory = true;
+        _hasSearchedInventory = true;
 
-        var dialog = await DialogService.ShowAsync<InventorySearchDialog>("Select Inventory Item", parameters);
-        var result = await dialog.Result;
-
-        if (result.Canceled)
+        try
         {
-            Snackbar.Add("Item selection cancelled", Severity.Info);
-            return;
-        }
+            var effectiveKeyword = string.IsNullOrWhiteSpace(_searchKeyword) ? null : _searchKeyword;
 
-        if (result.Data is InventoryRegistryResponse selectedItem)
-        {
-            _selectedRegistryItem = selectedItem;
-            PopulateFromRegistry();
+            var searchCommand = new SearchInventoryRegistriesCommand
+            {
+                Keyword = effectiveKeyword,
+                PageSize = 50,
+                PageNumber = 1
+            };
+
+            var result = await ApiClient.SearchInventoryRegistriesEndpointAsync(ApiVersion, searchCommand);
+            _inventorySearchResults = result?.Items?.ToList() ?? new List<InventoryRegistryResponse>();
             StateHasChanged();
         }
+        catch (Exception ex)
+        {
+            _inventorySearchResults.Clear();
+            Snackbar.Add($"Search error: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoadingInventory = false;
+        }
     }
-
-    private void PopulateFromRegistry()
+    private async Task AddSelectedItemsAsync()
     {
-        if (_selectedRegistryItem == null)
+        if (!_selectedInventoryItems.Any())
+        {
+            Snackbar.Add("No items selected", Severity.Warning);
             return;
+        }
 
-        // Populate draft from selected registry item
-        _draft.PropertyCode = _selectedRegistryItem.PropertyCode;
-        _draft.Description = _selectedRegistryItem.Description;
-        _draft.Location = _selectedRegistryItem.Location;
-        _draft.Quantity = 1; // Default quantity
-        _draft.Unit = "PC"; // Default unit for PPE
+        var addedCount = 0;
+        foreach (var item in _selectedInventoryItems)
+        {
+            // Skip if already added
+            if (_model.LineItems.Any(li => li.PropertyCode == item.PropertyCode))
+            {
+                Snackbar.Add($"{item.PropertyCode} already in line items", Severity.Warning);
+                continue;
+            }
+
+            _model.LineItems.Add(new PpeIssuanceLineItemModel
+            {
+                PropertyCode = item.PropertyCode,
+                Description = item.Description,
+                DateAcquired = _model.IssuanceDate ?? DateTime.Now,
+                Quantity = 1, // Default to 1 for PPE
+                Unit = "PC",
+                AcquisitionCost = 0d, // User can edit later if needed
+                Location = item.Location ?? string.Empty,
+            });
+            addedCount++;
+        }
+
+        if (addedCount > 0)
+        {
+            Snackbar.Add($"Added {addedCount} item(s) to line items", Severity.Success);
+            ClearSelection();
+        }
+
+        await Task.CompletedTask;
     }
 
-    private void AddLineItem()
+    private void ClearSelection()
     {
-        if (_selectedRegistryItem is null)
-        {
-            Snackbar.Add("Select an inventory item first", Severity.Warning);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
-        {
-            Snackbar.Add("Property Code is required", Severity.Warning);
-            return;
-        }
-
-        if (string.IsNullOrWhiteSpace(_draft.Description))
-        {
-            Snackbar.Add("Description is required", Severity.Warning);
-            return;
-        }
-
-        if (_draft.Quantity <= 0)
-        {
-            Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
-            return;
-        }
-
-        if (_selectedRegistryItem is not null && _draft.Quantity > _selectedRegistryItem.Quantity)
-        {
-            Snackbar.Add("Quantity exceeds available inventory", Severity.Warning);
-            return;
-        }
-
-        if (_draft.AcquisitionCost < 0)
-        {
-            Snackbar.Add("Acquisition cost cannot be negative", Severity.Warning);
-            return;
-        }
-
-        _model.LineItems.Add(new PpeIssuanceLineItemModel
-        {
-            PropertyCode = _draft.PropertyCode.Trim(),
-            Description = _draft.Description.Trim(),
-            DateAcquired = _draft.DateAcquired,
-            Quantity = _draft.Quantity,
-            Unit = _draft.Unit?.Trim() ?? string.Empty,
-            AcquisitionCost = _draft.AcquisitionCost,
-            AccumulatedDepreciation = _draft.AccumulatedDepreciation,
-            BookValue = _draft.BookValue,
-            Location = _draft.Location?.Trim() ?? string.Empty,
-        });
-
-        ResetDraft();
-        Snackbar.Add(_isEditingLineItem ? "Item updated" : "Item added", Severity.Success);
-        _isEditingLineItem = false;
+        _selectedInventoryItems.Clear();
+        _searchKeyword = string.Empty;
+        _inventorySearchResults.Clear();
+        _hasSearchedInventory = false;
     }
+
+    private Color GetStatusColor(InventoryItemStatus status)
+    {
+        return status switch
+        {
+            InventoryItemStatus._0 => Color.Warning,
+            InventoryItemStatus._1 => Color.Success,
+            InventoryItemStatus._2 => Color.Info,
+            InventoryItemStatus._3 => Color.Info,
+            InventoryItemStatus._4 => Color.Error,
+            InventoryItemStatus._5 => Color.Error,
+            _ => Color.Default
+        };
+    }
+
 
     private void CancelEdit()
     {
@@ -332,6 +333,16 @@ public partial class PpeIssuanceReport : ComponentBase
             return;
         }
 
+        // Preflight: validate that all property codes exist and are issuable
+        var preflightErrors = await PreflightValidateBeforePostAsync();
+        if (preflightErrors.Any())
+        {
+            foreach (var err in preflightErrors)
+                Snackbar.Add(err, Severity.Error);
+            Snackbar.Add("Fix the issues above before posting.", Severity.Warning);
+            return;
+        }
+
         var confirmed = await JS.InvokeAsync<bool>("confirm", "Posting will lock this report and update inventory. Continue?");
         if (!confirmed)
         {
@@ -348,6 +359,64 @@ public partial class PpeIssuanceReport : ComponentBase
         {
             Snackbar.Add(ex.Response ?? "Failed to post PPEIR", Severity.Error);
         }
+    }
+
+    private async Task<List<string>> PreflightValidateBeforePostAsync()
+    {
+        var errors = new List<string>();
+
+        // Collect distinct property codes from line items
+        var codes = _model.LineItems
+            .Select(li => li.PropertyCode?.Trim())
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToList();
+
+        if (codes.Count == 0)
+        {
+            errors.Add("Report has no valid property codes.");
+            return errors;
+        }
+
+        foreach (var code in codes)
+        {
+            try
+            {
+                var cmd = new SearchInventoryRegistriesCommand
+                {
+                    Keyword = code,
+                    PageSize = 5,
+                    PageNumber = 1
+                };
+                var result = await ApiClient.SearchInventoryRegistriesEndpointAsync(ApiVersion, cmd);
+                var match = result?.Items?.FirstOrDefault(x => string.Equals(x.PropertyCode?.Trim(), code, StringComparison.OrdinalIgnoreCase));
+                if (match is null)
+                {
+                    errors.Add($"Inventory registry not found for property code '{code}'.");
+                    continue;
+                }
+
+                // Status '_1' maps to InStock in UI mapping; treat others as non-issuable
+                var isInStock = match.Status == InventoryItemStatus._1;
+                if (!isInStock)
+                {
+                    errors.Add($"Property code '{code}' is not issuable (status: {match.Status}).");
+                    continue;
+                }
+
+                var qty = match.Quantity;
+                if (qty <= 0)
+                {
+                    errors.Add($"Insufficient inventory for '{code}'. Available: {qty}.");
+                }
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"Preflight check failed for '{code}': {ex.Message}");
+            }
+        }
+
+        return errors;
     }
 
     private async Task SubmitAsync()

@@ -22,7 +22,6 @@ public sealed class CreatePpeReceivingReportHandler(
 
             var report = new PpeReceivingReport(
                 request.ReportNumber,
-                request.Location,
                 source,
                 receiptType,
                 request.Notes);

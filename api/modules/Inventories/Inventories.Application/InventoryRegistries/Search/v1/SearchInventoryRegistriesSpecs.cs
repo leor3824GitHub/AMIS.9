@@ -10,6 +10,16 @@ public sealed class SearchInventoryRegistriesSpecs : EntitiesByPaginationFilterS
     public SearchInventoryRegistriesSpecs(SearchInventoryRegistriesCommand command)
         : base(command)
     {
+        // Apply keyword search explicitly to known fields to mirror the Blazor dialog behavior.
+        if (!string.IsNullOrWhiteSpace(command.Keyword))
+        {
+            var keyword = command.Keyword.Trim().ToLower();
+            Query.Where(x =>
+                x.PropertyCode.ToLower().Contains(keyword) ||
+                x.Description.ToLower().Contains(keyword) ||
+                x.Location.ToLower().Contains(keyword));
+        }
+
         Query
             .Where(x => x.PropertyCode == command.PropertyCode, !string.IsNullOrWhiteSpace(command.PropertyCode))
             .Where(x => x.Description.Contains(command.Description), !string.IsNullOrWhiteSpace(command.Description))

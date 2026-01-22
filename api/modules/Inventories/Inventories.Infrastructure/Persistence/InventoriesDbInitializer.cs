@@ -2,6 +2,7 @@ using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using System.Data;
+using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -88,7 +89,10 @@ internal sealed class InventoriesDbInitializer(
         // 6. Seed Inspections (10)
         await SeedInspectionsAsync(purchases, employees, cancellationToken);
         
-        // 7. Seed PPE Type Account Mappings
+        // 7. Seed Inventory Registry (sample PPE items)
+        await SeedInventoryRegistriesAsync(cancellationToken);
+
+        // 8. Seed PPE Type Account Mappings
         await SeedPPETypeAccountMappingsAsync(cancellationToken);
         
         logger.LogInformation("[{Tenant}] Comprehensive seed data generation completed", context.TenantInfo!.Identifier);
@@ -298,7 +302,7 @@ internal sealed class InventoriesDbInitializer(
                 {
                     var product = products[random.Next(products.Count)];
                     var quantity = random.Next(1, 10);
-                    var unitPrice = product.Sku * (decimal)(0.9 + random.NextDouble() * 0.2); // ±10% variance
+                    var unitPrice = product.Sku * (decimal)(0.9 + random.NextDouble() * 0.2); // ï¿½10% variance
                     
                     purchase.AddItem(product.Id, quantity, unitPrice, PurchaseStatus.Draft);
                 }
@@ -413,6 +417,61 @@ internal sealed class InventoriesDbInitializer(
         await context.PPETypeAccountMappings.AddRangeAsync(mappings, cancellationToken);
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("[{Tenant}] seeded {Count} PPE type account mappings", context.TenantInfo!.Identifier, mappings.Length);
+    }
+
+    private async Task SeedInventoryRegistriesAsync(CancellationToken cancellationToken)
+    {
+        try
+        {
+            logger.LogInformation("[{Tenant}] Checking inventory registry for existing data...", context.TenantInfo!.Identifier);
+            
+            var existingCount = await context.InventoryRegistries.CountAsync(cancellationToken);
+            logger.LogInformation("[{Tenant}] Found {Count} existing inventory registry items", context.TenantInfo!.Identifier, existingCount);
+            
+            if (existingCount > 0)
+            {
+                logger.LogInformation("[{Tenant}] inventory registry already seeded, skipping", context.TenantInfo!.Identifier);
+                return;
+            }
+
+            logger.LogInformation("[{Tenant}] Starting inventory registry seeding...", context.TenantInfo!.Identifier);
+            
+            var now = DateTime.UtcNow;
+            var baseLocation = "Central Warehouse";
+
+            var seedItems = new[]
+            {
+                new { Code = "PPE-2026-0001", Desc = "Dell OptiPlex 7090 Desktop", Qty = 5, Location = baseLocation, Report = "PPERR-2026-0001" },
+                new { Code = "PPE-2026-0002", Desc = "HP LaserJet Pro Printer", Qty = 3, Location = baseLocation, Report = "PPERR-2026-0001" },
+                new { Code = "PPE-2026-0003", Desc = "Executive Office Chair", Qty = 12, Location = "Main Office - Floor 5", Report = "PPERR-2026-0002" },
+                new { Code = "PPE-2026-0004", Desc = "Cisco Network Switch 24-Port", Qty = 4, Location = "Data Center", Report = "PPERR-2026-0003" },
+                new { Code = "PPE-2026-0005", Desc = "Samsung 27-inch Monitor", Qty = 10, Location = baseLocation, Report = "PPERR-2026-0002" },
+                new { Code = "PPE-2026-0006", Desc = "Logitech Wireless Keyboard & Mouse", Qty = 15, Location = baseLocation, Report = "PPERR-2026-0004" },
+                new { Code = "PPE-2026-0007", Desc = "APC UPS 1000VA", Qty = 6, Location = "Data Center", Report = "PPERR-2026-0003" },
+                new { Code = "PPE-2026-0008", Desc = "Office Desk Organizer Set", Qty = 25, Location = baseLocation, Report = "PPERR-2026-0005" },
+                new { Code = "PPE-2026-0009", Desc = "Whiteboard Markers Pack", Qty = 40, Location = "Supply Room", Report = "PPERR-2026-0005" },
+                new { Code = "PPE-2026-0010", Desc = "A4 Bond Paper Ream", Qty = 60, Location = "Supply Room", Report = "PPERR-2026-0005" }
+            };
+
+            logger.LogInformation("[{Tenant}] Creating {Count} inventory registry items...", context.TenantInfo!.Identifier, seedItems.Length);
+            
+            var registries = seedItems.Select(item =>
+            {
+                var registry = InventoryRegistry.CreateFromReceiving(item.Code, item.Desc, item.Qty, item.Location, item.Report);
+                registry.LastTransactionDate = now;
+                return registry;
+            }).ToList();
+
+            await context.InventoryRegistries.AddRangeAsync(registries, cancellationToken);
+            await context.SaveChangesAsync(cancellationToken);
+            
+            logger.LogInformation("[{Tenant}] Successfully seeded {Count} inventory registry items", context.TenantInfo!.Identifier, registries.Count);
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "[{Tenant}] Error seeding inventory registry: {Message}", context.TenantInfo!.Identifier, ex.Message);
+            throw;
+        }
     }
 }
 
