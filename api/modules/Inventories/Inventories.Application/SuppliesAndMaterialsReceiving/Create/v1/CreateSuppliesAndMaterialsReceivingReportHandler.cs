@@ -34,7 +34,6 @@ public sealed class CreateSuppliesAndMaterialsReceivingReportHandler(
         // Create the aggregate root
         var report = new SuppliesAndMaterialsReceivingReport(
             request.SmrrNumber,
-            request.Location,
             source,
             transactionType,
             authentication,
@@ -48,6 +47,7 @@ public sealed class CreateSuppliesAndMaterialsReceivingReportHandler(
             dto.Quantity,
             dto.Unit,
             dto.UnitCost,
+            dto.Location,
             dto.Reference)).ToList();
 
         report.AddLineItems(lineItems);

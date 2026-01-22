@@ -16,9 +16,6 @@
                             <MudTextField @bind-Value="_model.SmrrNumber" For="@(() => _model.SmrrNumber)" Label="SMRR Number" Required="true" />
                         </MudItem>
                         <MudItem xs="12" md="4">
-                            <MudTextField @bind-Value="_model.Location" For="@(() => _model.Location)" Label="Location" Required="true" />
-                        </MudItem>
-                        <MudItem xs="12" md="4">
                             <MudSelect T="string" @bind-Value="_model.TransactionType" Label="Transaction Type" Required="true">
                                 @foreach (var type in TransactionTypes)
                                 {
@@ -64,7 +61,10 @@
                                 <MudTextField @bind-Value="_draft.Name" For="@(() => _draft.Name)" Label="Item Name" Required="true" />
                             </MudItem>
                             <MudItem xs="12" md="3">
-                                <MudTextField @bind-Value="_draft.Description" Label="Description" />
+                                <MudTextField @bind-Value="_draft.Description" Label="Description" Required="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="2">
+                                <MudTextField @bind-Value="_draft.Location" Label="Location" Required="true" />
                             </MudItem>
                             <MudItem xs="12" md="2">
                                 <MudDatePicker @bind-Date="_draft.AcquisitionDate" Label="Acquisition Date" />
@@ -73,7 +73,7 @@
                                 <MudNumericField T="double" @bind-Value="_draft.Quantity" Label="Qty" Min="0" Required="true" HideSpinButtons="true" />
                             </MudItem>
                             <MudItem xs="6" md="1">
-                                <MudTextField @bind-Value="_draft.Unit" Label="Unit" />
+                                <MudTextField @bind-Value="_draft.Unit" Label="Unit" Required="true" />
                             </MudItem>
                             <MudItem xs="12" md="2">
                                 <MudNumericField T="double" @bind-Value="_draft.UnitCost" Label="Unit Cost" Min="0" HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="₱" />
@@ -91,6 +91,7 @@
                             <HeaderContent>
                                 <MudTh>Name</MudTh>
                                 <MudTh>Description</MudTh>
+                                <MudTh>Location</MudTh>
                                 <MudTh>Qty</MudTh>
                                 <MudTh>Unit</MudTh>
                                 <MudTh align="right">Unit Cost</MudTh>
@@ -101,6 +102,7 @@
                             <RowTemplate>
                                 <MudTd DataLabel="Name">@context.Name</MudTd>
                                 <MudTd DataLabel="Description">@context.Description</MudTd>
+                                <MudTd DataLabel="Location">@context.Location</MudTd>
                                 <MudTd DataLabel="Qty">@context.Quantity</MudTd>
                                 <MudTd DataLabel="Unit">@context.Unit</MudTd>
                                 <MudTd DataLabel="Unit Cost" align="right">@context.UnitCost.ToString("C2")</MudTd>

@@ -12,7 +12,6 @@ public class SuppliesAndMaterialsReceivingReport : AuditableEntity, IAggregateRo
 {
     // Header and Tracking
     public string SmrrNumber { get; private set; } // SMRR Number for tracking
-    public string Location { get; private set; } // NFA location (e.g., Quezon City office)
 
     // Source Information
     public ReceivingSourceInfo Source { get; private set; }
@@ -39,7 +38,6 @@ public class SuppliesAndMaterialsReceivingReport : AuditableEntity, IAggregateRo
     private SuppliesAndMaterialsReceivingReport()
     {
         SmrrNumber = string.Empty;
-        Location = string.Empty;
         Source = null!;
         TransactionType = null!;
         Authentication = null!;
@@ -50,7 +48,6 @@ public class SuppliesAndMaterialsReceivingReport : AuditableEntity, IAggregateRo
     /// </summary>
     public SuppliesAndMaterialsReceivingReport(
         string smrrNumber,
-        string location,
         ReceivingSourceInfo source,
         ReceivingTransactionType transactionType,
         ReceivingAuthentication authentication,
@@ -59,18 +56,13 @@ public class SuppliesAndMaterialsReceivingReport : AuditableEntity, IAggregateRo
         if (string.IsNullOrWhiteSpace(smrrNumber))
             throw new ArgumentException("SMRR number cannot be empty.", nameof(smrrNumber));
 
-        if (string.IsNullOrWhiteSpace(location))
-            throw new ArgumentException("Location cannot be empty.", nameof(location));
-
         Id = Guid.NewGuid();
         SmrrNumber = smrrNumber;
-        ArgumentNullException.ThrowIfNull(location);
         ArgumentNullException.ThrowIfNull(source);
         ArgumentNullException.ThrowIfNull(transactionType);
         ArgumentNullException.ThrowIfNull(authentication);
         
         SmrrNumber = smrrNumber;
-        Location = location;
         Source = source;
         TransactionType = transactionType;
         Authentication = authentication;

@@ -25,7 +25,6 @@ public sealed class GetSuppliesAndMaterialsReceivingReportByIdHandler(
         return new GetSuppliesAndMaterialsReceivingReportByIdResponse(
             report.Id,
             report.SmrrNumber,
-            report.Location,
             report.TransactionType.Value,
             report.GetTotalAmount(),
             report.Notes);

@@ -11,10 +11,6 @@ public sealed class CreateSuppliesAndMaterialsReceivingReportCommandValidator
             .NotEmpty().WithMessage("SMRR number is required")
             .MaximumLength(50).WithMessage("SMRR number cannot exceed 50 characters");
 
-        RuleFor(x => x.Location)
-            .NotEmpty().WithMessage("Location is required")
-            .MaximumLength(100).WithMessage("Location cannot exceed 100 characters");
-
         RuleFor(x => x.SourceName)
             .NotEmpty().WithMessage("Source name is required")
             .MaximumLength(200).WithMessage("Source name cannot exceed 200 characters");
@@ -36,6 +32,9 @@ public sealed class CreateSuppliesAndMaterialsReceivingReportCommandValidator
             .NotEmpty().WithMessage("At least one line item is required")
             .ForEach(item =>
                 item
+                    .Must(i => !string.IsNullOrWhiteSpace(i.Description)).WithMessage("Item description is required")
+                    .Must(i => !string.IsNullOrWhiteSpace(i.Location)).WithMessage("Item location is required")
+                    .Must(i => !string.IsNullOrWhiteSpace(i.Unit)).WithMessage("Item unit is required")
                     .Must(i => !string.IsNullOrWhiteSpace(i.Name)).WithMessage("Item name is required")
                     .Must(i => i.Quantity > 0).WithMessage("Item quantity must be greater than zero")
                     .Must(i => i.UnitCost >= 0).WithMessage("Unit cost cannot be negative"));

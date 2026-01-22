@@ -45,6 +45,24 @@ public partial class SuppliesAndMaterialsReceivingReport : ComponentBase
             return;
         }
 
+        if (string.IsNullOrWhiteSpace(_draft.Description))
+        {
+            Snackbar.Add("Description is required", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_draft.Location))
+        {
+            Snackbar.Add("Location is required", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_draft.Unit))
+        {
+            Snackbar.Add("Unit is required", Severity.Warning);
+            return;
+        }
+
         if (_draft.Quantity <= 0)
         {
             Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
@@ -68,6 +86,7 @@ public partial class SuppliesAndMaterialsReceivingReport : ComponentBase
             Unit = _draft.Unit?.Trim(),
             UnitCost = _draft.UnitCost,
             Reference = _draft.Reference?.Trim(),
+            Location = _draft.Location.Trim(),
         });
 
         ResetDraft();
@@ -108,7 +127,6 @@ public partial class SuppliesAndMaterialsReceivingReport : ComponentBase
         var command = new CreateSuppliesAndMaterialsReceivingReportCommand
         {
             SmrrNumber = _model.SmrrNumber,
-            Location = _model.Location,
             SourceName = _model.SourceName,
             SourceAddress = _model.SourceAddress,
             ReceivingDate = _model.ReceivingDate ?? DateTime.Today,
@@ -127,6 +145,7 @@ public partial class SuppliesAndMaterialsReceivingReport : ComponentBase
                 Unit = li.Unit,
                 UnitCost = li.UnitCost,
                 Reference = li.Reference,
+                Location = li.Location,
             }).ToList(),
         };
 
@@ -149,9 +168,6 @@ public class SmrrModel
 {
     [Required, MaxLength(50)]
     public string SmrrNumber { get; set; } = string.Empty;
-
-    [Required, MaxLength(100)]
-    public string Location { get; set; } = string.Empty;
 
     [Required, MaxLength(200)]
     public string SourceName { get; set; } = string.Empty;
@@ -185,14 +201,19 @@ public class SmrrLineItemModel
     [Required]
     public string Name { get; set; } = string.Empty;
 
+    [Required]
     public string? Description { get; set; }
+
+    [Required]
+    public string Location { get; set; } = string.Empty;
 
     public DateTime? AcquisitionDate { get; set; } = DateTime.Today;
 
     [Range(0.01, double.MaxValue)]
     public double Quantity { get; set; } = 1;
 
-    public string? Unit { get; set; }
+    [Required]
+    public string? Unit { get; set; } = "pc";
 
     [Range(0, double.MaxValue)]
     public double UnitCost { get; set; }

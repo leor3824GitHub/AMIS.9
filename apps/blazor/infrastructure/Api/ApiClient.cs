@@ -25203,6 +25203,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("reference")]
         public string Reference { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("location")]
+        public string Location { get; set; }
+
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.3.0 (NJsonSchema v11.5.2.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -25307,9 +25310,6 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("smrrNumber")]
         public string SmrrNumber { get; set; }
-
-        [System.Text.Json.Serialization.JsonPropertyName("location")]
-        public string Location { get; set; }
 
         [System.Text.Json.Serialization.JsonPropertyName("sourceName")]
         public string SourceName { get; set; }

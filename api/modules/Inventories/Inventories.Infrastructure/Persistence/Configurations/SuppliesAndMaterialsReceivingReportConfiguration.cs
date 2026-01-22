@@ -15,10 +15,6 @@ public sealed class SuppliesAndMaterialsReceivingReportConfiguration
             .IsRequired()
             .HasMaxLength(50);
 
-        builder.Property(x => x.Location)
-            .IsRequired()
-            .HasMaxLength(100);
-
         builder.OwnsOne(x => x.Source, sourceBuilder =>
         {
             sourceBuilder.Property(s => s.Name)
@@ -68,6 +64,10 @@ public sealed class SuppliesAndMaterialsReceivingReportConfiguration
 
             lineItemBuilder.Property(li => li.UnitCost)
                 .HasPrecision(18, 2)
+                .IsRequired();
+
+            lineItemBuilder.Property(li => li.Location)
+                .HasMaxLength(200)
                 .IsRequired();
         });
 

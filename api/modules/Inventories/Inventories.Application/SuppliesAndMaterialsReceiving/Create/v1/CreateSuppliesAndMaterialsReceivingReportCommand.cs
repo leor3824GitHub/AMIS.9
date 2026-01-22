@@ -4,7 +4,6 @@ namespace AMIS.WebApi.Inventories.Application.SuppliesAndMaterialsReceiving.Crea
 
 public sealed record CreateSuppliesAndMaterialsReceivingReportCommand(
     string SmrrNumber,
-    string Location,
     string SourceName,
     string SourceAddress,
     DateTime ReceivingDate,
@@ -23,6 +22,7 @@ public sealed record CreateReceivingLineItemRequest(
     decimal Quantity,
     string Unit,
     decimal UnitCost,
+    string Location,
     string? Reference = null);
 
 public sealed record CreateSuppliesAndMaterialsReceivingReportResponse(Guid? Id);

@@ -12,6 +12,7 @@ public record ReceivingLineItem
     public decimal Quantity { get; }
     public string Unit { get; }
     public decimal UnitCost { get; }
+    public string Location { get; }
     public decimal Amount => Quantity * UnitCost;
 
     public ReceivingLineItem(
@@ -21,6 +22,7 @@ public record ReceivingLineItem
         decimal quantity,
         string unit,
         decimal unitCost,
+        string location,
         string? reference = null)
     {
         if (string.IsNullOrWhiteSpace(name))
@@ -28,6 +30,9 @@ public record ReceivingLineItem
 
         if (string.IsNullOrWhiteSpace(description))
             throw new ArgumentException("Item description cannot be empty.", nameof(description));
+
+        if (string.IsNullOrWhiteSpace(location))
+            throw new ArgumentException("Item location cannot be empty.", nameof(location));
 
         if (quantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
@@ -48,6 +53,7 @@ public record ReceivingLineItem
         Quantity = quantity;
         Unit = unit;
         UnitCost = unitCost;
+        Location = location;
     }
 }
 
