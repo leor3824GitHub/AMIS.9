@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Carter;
+using AMIS.Framework.Infrastructure.Auth.Policy;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -7,14 +8,11 @@ using Microsoft.AspNetCore.Routing;
 
 namespace AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PpeIssuance;
 
-public sealed class UpdatePpeIssuanceReportEndpoint : ICarterModule
+public static class UpdatePpeIssuanceReportEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app)
+    public static RouteHandlerBuilder MapUpdatePpeIssuanceReportEndpoint(this IEndpointRouteBuilder endpoints)
     {
-        var group = app.MapGroup("api/v{version:apiVersion}/ppe-issuance")
-            .WithTags("PPE Issuance");
-
-        group.MapPut("/{id:guid}", async (Guid id, Application.PpeIssuance.Update.v1.UpdatePpeIssuanceReportCommand request, ISender mediator) =>
+        return endpoints.MapPut("/{id:guid}", async (Guid id, Application.PpeIssuance.Update.v1.UpdatePpeIssuanceReportCommand request, ISender mediator) =>
             {
                 if (id != request.Id)
                 {
@@ -30,6 +28,7 @@ public sealed class UpdatePpeIssuanceReportEndpoint : ICarterModule
             .Produces<Application.PpeIssuance.Update.v1.UpdatePpeIssuanceReportResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .MapToApiVersion(new ApiVersion(1, 0));
+            .RequirePermission("Permissions.PpeIssuance.Update")
+            .MapToApiVersion(1);
     }
 }

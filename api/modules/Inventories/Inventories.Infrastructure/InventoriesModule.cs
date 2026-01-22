@@ -276,14 +276,18 @@ public static class InventoriesModule
             ppeIssuanceGroup.MapListPpeIssuanceReportsEndpoint();
             ppeIssuanceGroup.MapCreatePpeIssuanceReportEndpoint();
             ppeIssuanceGroup.MapGetPpeIssuanceReportEndpoint();
+            ppeIssuanceGroup.MapUpdatePpeIssuanceReportEndpoint();
+            ppeIssuanceGroup.MapPostPpeIssuanceReportEndpoint();
+            ppeIssuanceGroup.MapDeletePpeIssuanceReportEndpoint();
+            ppeIssuanceGroup.MapCancelPpeIssuanceReportEndpoint();
 
             var ppeReceivingGroup = app.MapGroup("ppe-receiving").WithTags("ppe-receiving");
             ppeReceivingGroup.MapListPpeReceivingReportsEndpoint();
             ppeReceivingGroup.MapCreatePpeReceivingReportEndpoint();
             ppeReceivingGroup.MapGetPpeReceivingReportEndpoint();
-                ppeReceivingGroup.MapUpdatePpeReceivingReportEndpoint();
-                ppeReceivingGroup.MapPostPpeReceivingReportEndpoint();
-                ppeReceivingGroup.MapCancelPpeReceivingReportEndpoint();
+            ppeReceivingGroup.MapUpdatePpeReceivingReportEndpoint();
+            ppeReceivingGroup.MapPostPpeReceivingReportEndpoint();
+            ppeReceivingGroup.MapCancelPpeReceivingReportEndpoint();
 
             var inventoryRegistryGroup = app.MapGroup("inventory-registries").WithTags("inventory-registries");
             inventoryRegistryGroup.MapSearchInventoryRegistriesEndpoint();

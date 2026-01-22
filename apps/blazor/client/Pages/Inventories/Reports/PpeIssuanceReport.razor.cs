@@ -1,8 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 using AMIS.Blazor.Infrastructure.Api;
+using AMIS.Blazor.Infrastructure.Auth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
 using MudBlazor;
+using Shared.Authorization;
 
 #pragma warning disable CA1515 // Type can be internal
 #pragma warning disable CA2227 // Collection property should be read-only
@@ -13,12 +17,21 @@ public partial class PpeIssuanceReport : ComponentBase
 {
     private const string ApiVersion = "1";
 
+    [CascadingParameter] public Task<AuthenticationState> AuthState { get; set; } = default!;
+    [Inject] public IAuthorizationService AuthService { get; set; } = default!;
     [Inject] public IApiClient ApiClient { get; set; } = default!;
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
     [Inject] public IJSRuntime JS { get; set; } = default!;
     [Inject] public NavigationManager NavigationManager { get; set; } = default!;
 
-    private MudForm? _form;
+    private bool _canCreate;
+    private bool _canUpdate;
+    private bool _canDelete;
+    private bool _canPost;
+    private bool _isReadOnly;
+    private bool _isPrintDialogOpen;
+    private bool _isEditingLineItem;
+
     private PpeIssuanceModel _model = new();
     private PpeIssuanceLineItemModel _draft = new();
     private Guid? _createdId;
@@ -26,13 +39,45 @@ public partial class PpeIssuanceReport : ComponentBase
     private int _reportStatus = 0; // 0 = Draft, 1 = Posted
     private string _reportStatusText = "Draft";
     private string _actionButtonText = "CREATE PPEIR";
-    private bool _isPrintDialogOpen;
+
+    // Registry search fields
+    private InventoryRegistryResponse? _selectedRegistryItem;
+    private List<InventoryRegistryResponse> _registryItems = new();
+
+    private bool CanSave => !_isReadOnly && _reportStatus == 0 && ((_reportId is null && _canCreate) || (_reportId.HasValue && _canUpdate));
+    private bool CanPost => !_isReadOnly && _reportStatus == 0 && _reportId.HasValue && _canPost;
 
     private static readonly string[] IssuanceTypes = ["Sale", "Transfer to CO", "Transfer to RO", "Transfer to PO", "Donation", "Dumping", "Destruction", "Others"];
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        Reset();
+        var user = (await AuthState).User;
+        _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.PpeIssuance);
+        _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.PpeIssuance);
+        _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.PpeIssuance);
+        _canPost = await AuthService.HasPermissionAsync(user, FshActions.Post, FshResources.PpeIssuance);
+
+        // Check for readonly query parameter
+        var uri = new Uri(NavigationManager.Uri);
+        var query = uri.Query;
+        _isReadOnly = query.Contains("readonly=true", StringComparison.OrdinalIgnoreCase);
+        var shouldPrint = query.Contains("print=true", StringComparison.OrdinalIgnoreCase);
+
+        if (!string.IsNullOrEmpty(ReportId) && Guid.TryParse(ReportId, out var id))
+        {
+            await LoadReportAsync(id);
+
+            // Auto-open print dialog if requested
+            if (shouldPrint && _model.LineItems.Count > 0)
+            {
+                _isPrintDialogOpen = true;
+                StateHasChanged();
+            }
+        }
+        else
+        {
+            Reset();
+        }
     }
 
     private async Task LoadReportAsync(Guid id)
@@ -93,6 +138,10 @@ public partial class PpeIssuanceReport : ComponentBase
     {
         _model = new PpeIssuanceModel();
         _draft = new PpeIssuanceLineItemModel { DateAcquired = _model.IssuanceDate };
+        _reportId = null;
+        _reportStatus = 0;
+        _reportStatusText = "Draft";
+        _actionButtonText = "CREATE PPEIR";
         _createdId = null;
         StateHasChanged();
     }
@@ -111,10 +160,56 @@ public partial class PpeIssuanceReport : ComponentBase
     private void ResetDraft()
     {
         _draft = new PpeIssuanceLineItemModel { DateAcquired = _model.IssuanceDate };
+        _selectedRegistryItem = null;
+        _isEditingLineItem = false;
+    }
+
+    private async Task OpenInventorySearchDialogAsync()
+    {
+        var parameters = new DialogParameters<InventorySearchDialog>
+        {
+            { x => x.ApiClient, ApiClient },
+            { x => x.ApiVersion, ApiVersion }
+        };
+
+        var dialog = await DialogService.ShowAsync<InventorySearchDialog>("Select Inventory Item", parameters);
+        var result = await dialog.Result;
+
+        if (result.Canceled)
+        {
+            Snackbar.Add("Item selection cancelled", Severity.Info);
+            return;
+        }
+
+        if (result.Data is InventoryRegistryResponse selectedItem)
+        {
+            _selectedRegistryItem = selectedItem;
+            PopulateFromRegistry();
+            StateHasChanged();
+        }
+    }
+
+    private void PopulateFromRegistry()
+    {
+        if (_selectedRegistryItem == null)
+            return;
+
+        // Populate draft from selected registry item
+        _draft.PropertyCode = _selectedRegistryItem.PropertyCode;
+        _draft.Description = _selectedRegistryItem.Description;
+        _draft.Location = _selectedRegistryItem.Location;
+        _draft.Quantity = 1; // Default quantity
+        _draft.Unit = "PC"; // Default unit for PPE
     }
 
     private void AddLineItem()
     {
+        if (_selectedRegistryItem is null)
+        {
+            Snackbar.Add("Select an inventory item first", Severity.Warning);
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
         {
             Snackbar.Add("Property Code is required", Severity.Warning);
@@ -130,6 +225,12 @@ public partial class PpeIssuanceReport : ComponentBase
         if (_draft.Quantity <= 0)
         {
             Snackbar.Add("Quantity must be greater than zero", Severity.Warning);
+            return;
+        }
+
+        if (_selectedRegistryItem is not null && _draft.Quantity > _selectedRegistryItem.Quantity)
+        {
+            Snackbar.Add("Quantity exceeds available inventory", Severity.Warning);
             return;
         }
 
@@ -153,6 +254,15 @@ public partial class PpeIssuanceReport : ComponentBase
         });
 
         ResetDraft();
+        Snackbar.Add(_isEditingLineItem ? "Item updated" : "Item added", Severity.Success);
+        _isEditingLineItem = false;
+    }
+
+    private void CancelEdit()
+    {
+        _reportId = null;
+        Reset();
+        NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
     }
 
     private void RemoveItem(PpeIssuanceLineItemModel item)
@@ -175,7 +285,8 @@ public partial class PpeIssuanceReport : ComponentBase
             Location = item.Location,
         };
         _model.LineItems.Remove(item);
-        Snackbar.Add("Editing item - modify and click Add Item to save changes", Severity.Info);
+        _isEditingLineItem = true;
+        Snackbar.Add("Editing item - modify and click Save Item to save changes", Severity.Info);
     }
 
     private void DuplicateItem(PpeIssuanceLineItemModel item)
@@ -195,149 +306,52 @@ public partial class PpeIssuanceReport : ComponentBase
         Snackbar.Add("Item duplicated", Severity.Success);
     }
 
-    private async Task PostReportAsync()
+    private async Task PostAsync()
     {
-        // TODO: Uncomment after API client regeneration
-        /*
-        if (!_reportId.HasValue)
+        if (!CanPost)
         {
-            Snackbar.Add("Save the report first before posting", Severity.Warning);
+            Snackbar.Add("Not authorized to post this report", Severity.Warning);
             return;
         }
 
-        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to post this report? Once posted, it cannot be edited.");
-        if (!confirmed) return;
-
-        try
-        {
-            var postCommand = new PostPpeIssuanceReportCommand { Id = _reportId.Value };
-            await ApiClient.PostPpeIssuanceReportEndpointAsync(ApiVersion, postCommand);
-            
-            _reportStatus = 1;
-            _reportStatusText = "Posted";
-            _actionButtonText = "Posted";
-            Snackbar.Add("PPE Issuance Report posted successfully. Inventory has been updated.", Severity.Success);
-            StateHasChanged();
-        }
-        catch (ApiException ex)
-        {
-            Snackbar.Add(ex.Response ?? "Failed to post report", Severity.Error);
-        }
-        */
-    }
-
-    private async Task CancelReportAsync()
-    {
-        // TODO: Uncomment after API client regeneration
-        /*
         if (!_reportId.HasValue)
         {
-            Snackbar.Add("No report to cancel", Severity.Warning);
-            return;
-        }
-
-        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to cancel this posted report? This will reverse all inventory changes.");
-        if (!confirmed) return;
-
-        try
-        {
-            var cancelCommand = new CancelPpeIssuanceReportCommand { Id = _reportId.Value };
-            await ApiClient.CancelPpeIssuanceReportEndpointAsync(ApiVersion, cancelCommand);
-            
-            _reportStatus = 0;
-            _reportStatusText = "Draft";
-            _actionButtonText = "Update PPEIR";
-            Snackbar.Add("PPE Issuance Report cancelled. Inventory changes reversed.", Severity.Success);
-            StateHasChanged();
-        }
-        catch (ApiException ex)
-        {
-            Snackbar.Add(ex.Response ?? "Failed to cancel report", Severity.Error);
-        }
-        */
-    }
-
-    private async Task DeleteReportAsync()
-    {
-        // TODO: Uncomment after API client regeneration
-        /*
-        if (!_reportId.HasValue)
-        {
-            Snackbar.Add("No report to delete", Severity.Warning);
+            Snackbar.Add("Save the report before posting", Severity.Warning);
             return;
         }
 
         if (_reportStatus != 0)
         {
-            Snackbar.Add("Only Draft reports can be deleted. Cancel the posted report first.", Severity.Warning);
+            Snackbar.Add("Report is already posted", Severity.Info);
             return;
         }
 
-        var confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete this report? This action cannot be undone.");
-        if (!confirmed) return;
+        if (_model.LineItems.Count == 0)
+        {
+            Snackbar.Add("Add at least one line item before posting", Severity.Warning);
+            return;
+        }
+
+        var confirmed = await JS.InvokeAsync<bool>("confirm", "Posting will lock this report and update inventory. Continue?");
+        if (!confirmed)
+        {
+            return;
+        }
 
         try
         {
-            await ApiClient.DeletePpeIssuanceReportEndpointAsync(ApiVersion, _reportId.Value);
-            Snackbar.Add("PPE Issuance Report deleted", Severity.Success);
-            NavigationManager.NavigateTo("/inventories/reports/ppeir");
+            await ApiClient.PostPpeIssuanceReportEndpointAsync(ApiVersion, _reportId.Value);
+            Snackbar.Add("PPE Issuance Report posted", Severity.Success);
+            await LoadReportAsync(_reportId.Value);
         }
         catch (ApiException ex)
         {
-            Snackbar.Add(ex.Response ?? "Failed to delete report", Severity.Error);
-        }
-        */
-    }
-
-    // TODO: Uncomment after API client regeneration with Get and Update endpoints
-    /*
-    private async Task LoadReportAsync(Guid reportId)
-    {
-        try
-        {
-            var response = await ApiClient.GetPpeIssuanceReportByIdEndpointAsync(ApiVersion, reportId);
-            _reportId = response.Id;
-            _reportStatus = response.Status;
-            _reportStatusText = response.Status == 0 ? "Draft" : "Posted";
-            _actionButtonText = response.Status == 0 ? "Update PPEIR" : "Posted";
-
-            _model = new PpeIssuanceModel
-            {
-                ReportNumber = response.ReportNumber,
-                RecipientName = response.RecipientName,
-                RecipientAddress = response.RecipientAddress,
-                IssuanceType = response.IssuanceType,
-                IssuanceDate = response.IssuanceDate,
-                Notes = response.Notes,
-                LineItems = response.LineItems?.Select(li => new PpeIssuanceLineItemModel
-                {
-                    PropertyCode = li.PropertyCode,
-                    Description = li.Description,
-                    DateAcquired = li.DateAcquired,
-                    Quantity = li.Quantity,
-                    Unit = li.Unit,
-                    AcquisitionCost = li.AcquisitionCost,
-                    AccumulatedDepreciation = li.AccumulatedDepreciation,
-                    BookValue = li.BookValue,
-                }).ToList() ?? new()
-            };
-
-            StateHasChanged();
-        }
-        catch (ApiException ex)
-        {
-            Snackbar.Add(ex.Response ?? "Failed to load report", Severity.Error);
+            Snackbar.Add(ex.Response ?? "Failed to post PPEIR", Severity.Error);
         }
     }
-    */
 
     private async Task SubmitAsync()
     {
-        if (_form is null)
-        {
-            return;
-        }
-
         // Guard against editing Posted reports
         if (_reportStatus != 0)
         {
@@ -345,10 +359,34 @@ public partial class PpeIssuanceReport : ComponentBase
             return;
         }
 
-        await _form.Validate();
-        if (!_form.IsValid)
+        // Manual required-field checks now that MudForm is removed
+        if (string.IsNullOrWhiteSpace(_model.ReportNumber))
         {
-            Snackbar.Add("Fix report details before submitting.", Severity.Warning);
+            Snackbar.Add("Report Number is required", Severity.Warning);
+            return;
+        }
+
+        if (!_model.IssuanceDate.HasValue)
+        {
+            Snackbar.Add("Issuance Date is required", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_model.IssuanceType))
+        {
+            Snackbar.Add("Issuance Type is required", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_model.RecipientName))
+        {
+            Snackbar.Add("Recipient Name is required", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_model.RecipientAddress))
+        {
+            Snackbar.Add("Recipient Address is required", Severity.Warning);
             return;
         }
 
@@ -356,34 +394,6 @@ public partial class PpeIssuanceReport : ComponentBase
         {
             Snackbar.Add("Add at least one line item", Severity.Warning);
             return;
-        }
-
-        // Validate all line items
-        foreach (var item in _model.LineItems)
-        {
-            if (string.IsNullOrWhiteSpace(item.PropertyCode))
-            {
-                Snackbar.Add("All line items must have a Property Code", Severity.Warning);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(item.Description))
-            {
-                Snackbar.Add("All line items must have a Description", Severity.Warning);
-                return;
-            }
-
-            if (item.Quantity <= 0)
-            {
-                Snackbar.Add("All line items must have a quantity greater than zero", Severity.Warning);
-                return;
-            }
-
-            if (item.AcquisitionCost < 0)
-            {
-                Snackbar.Add("Acquisition cost cannot be negative", Severity.Warning);
-                return;
-            }
         }
 
         if (_model.IssuanceDate?.Date > DateTime.Today)
@@ -394,33 +404,65 @@ public partial class PpeIssuanceReport : ComponentBase
 
         try
         {
-            // Create new report (Update endpoint pending API client regeneration)
-            var command = new CreatePpeIssuanceReportCommand
+            if (_reportId.HasValue)
             {
-                ReportNumber = _model.ReportNumber,
-                RecipientName = _model.RecipientName,
-                RecipientAddress = _model.RecipientAddress,
-                IssuanceType = _model.IssuanceType,
-                IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
-                Notes = _model.Notes,
-                LineItems = _model.LineItems.Select(li => new CreatePpeIssuanceLineItemRequest
+                var updateCommand = new UpdatePpeIssuanceReportCommand
                 {
-                    PropertyCode = li.PropertyCode,
-                    Description = li.Description,
-                    DateAcquired = li.DateAcquired ?? _model.IssuanceDate ?? DateTime.Today,
-                    Quantity = li.Quantity,
-                    Unit = li.Unit,
-                    AcquisitionCost = li.AcquisitionCost,
-                    AccumulatedDepreciation = li.AccumulatedDepreciation,
-                    BookValue = li.BookValue,
-                    Location = li.Location,
-                }).ToList(),
-            };
+                    Id = _reportId.Value,
+                    RecipientName = _model.RecipientName,
+                    RecipientAddress = _model.RecipientAddress,
+                    IssuanceType = _model.IssuanceType,
+                    IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
+                    Notes = _model.Notes,
+                    LineItems = _model.LineItems.Select(li => new UpdatePpeIssuanceLineItemRequest
+                    {
+                        PropertyCode = li.PropertyCode,
+                        Description = li.Description,
+                        DateAcquired = li.DateAcquired ?? _model.IssuanceDate ?? DateTime.Today,
+                        Quantity = li.Quantity,
+                        Unit = li.Unit,
+                        AcquisitionCost = li.AcquisitionCost,
+                        AccumulatedDepreciation = li.AccumulatedDepreciation,
+                        BookValue = li.BookValue,
+                        Location = li.Location,
+                    }).ToList(),
+                };
 
-            var response = await ApiClient.CreatePpeIssuanceReportEndpointAsync(ApiVersion, command);
-            _reportId = response.Id;
-            Snackbar.Add("PPE Issuance Report created", Severity.Success);
-            NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
+                await ApiClient.UpdatePpeIssuanceReportEndpointAsync(ApiVersion, _reportId.Value, updateCommand);
+                Snackbar.Add("PPE Issuance Report updated", Severity.Success);
+                await LoadReportAsync(_reportId.Value);
+            }
+            else
+            {
+                var command = new CreatePpeIssuanceReportCommand
+                {
+                    ReportNumber = _model.ReportNumber,
+                    RecipientName = _model.RecipientName,
+                    RecipientAddress = _model.RecipientAddress,
+                    IssuanceType = _model.IssuanceType,
+                    IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
+                    Notes = _model.Notes,
+                    LineItems = _model.LineItems.Select(li => new CreatePpeIssuanceLineItemRequest
+                    {
+                        PropertyCode = li.PropertyCode,
+                        Description = li.Description,
+                        DateAcquired = li.DateAcquired ?? _model.IssuanceDate ?? DateTime.Today,
+                        Quantity = li.Quantity,
+                        Unit = li.Unit,
+                        AcquisitionCost = li.AcquisitionCost,
+                        AccumulatedDepreciation = li.AccumulatedDepreciation,
+                        BookValue = li.BookValue,
+                        Location = li.Location,
+                    }).ToList(),
+                };
+
+                var response = await ApiClient.CreatePpeIssuanceReportEndpointAsync(ApiVersion, command);
+                _reportId = response.Id;
+                _createdId = response.Id;
+                _actionButtonText = "UPDATE PPEIR";
+                Snackbar.Add("PPE Issuance Report created", Severity.Success);
+                NavigationManager.NavigateTo("/inventories/reports/ppeir-list");
+            }
         }
         catch (ApiException ex)
         {
@@ -449,8 +491,7 @@ public partial class PpeIssuanceReport : ComponentBase
         try
         {
             await JS.InvokeVoidAsync("window.print");
-            await Task.Delay(1000);
-            _isPrintDialogOpen = false;
+            ClosePrintDialog();
         }
         catch (Exception ex)
         {

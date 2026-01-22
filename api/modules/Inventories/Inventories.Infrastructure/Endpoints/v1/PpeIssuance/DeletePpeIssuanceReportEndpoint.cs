@@ -1,5 +1,6 @@
 using Asp.Versioning;
 using Carter;
+using AMIS.Framework.Infrastructure.Auth.Policy;
 using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -7,14 +8,11 @@ using Microsoft.AspNetCore.Routing;
 
 namespace AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PpeIssuance;
 
-public sealed class DeletePpeIssuanceReportEndpoint : ICarterModule
+public static class DeletePpeIssuanceReportEndpoint
 {
-    public void AddRoutes(IEndpointRouteBuilder app)
+    public static RouteHandlerBuilder MapDeletePpeIssuanceReportEndpoint(this IEndpointRouteBuilder endpoints)
     {
-        var group = app.MapGroup("api/v{version:apiVersion}/ppe-issuance")
-            .WithTags("PPE Issuance");
-
-        group.MapDelete("/{id:guid}", async (Guid id, ISender mediator) =>
+        return endpoints.MapDelete("/{id:guid}", async (Guid id, ISender mediator) =>
             {
                 var command = new Application.PpeIssuance.Delete.v1.DeletePpeIssuanceReportCommand(id);
                 var response = await mediator.Send(command);
@@ -26,6 +24,7 @@ public sealed class DeletePpeIssuanceReportEndpoint : ICarterModule
             .Produces<Application.PpeIssuance.Delete.v1.DeletePpeIssuanceReportResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .MapToApiVersion(new ApiVersion(1, 0));
+            .RequirePermission("Permissions.PpeIssuance.Delete")
+            .MapToApiVersion(1);
     }
 }

@@ -151,6 +151,7 @@ public static class FshPermissions
         new("Create PpeIssuance", FshActions.Create, FshResources.PpeIssuance),
         new("Update PpeIssuance", FshActions.Update, FshResources.PpeIssuance),
         new("Delete PpeIssuance", FshActions.Delete, FshResources.PpeIssuance),
+        new("Post PpeIssuance", FshActions.Post, FshResources.PpeIssuance),
 
         //ppe receiving reports (PPER)
         new("View PpeReceiving", FshActions.View, FshResources.PpeReceiving, IsBasic: true),

@@ -12,6 +12,7 @@ public sealed class SearchInventoryRegistriesSpecs : EntitiesByPaginationFilterS
     {
         Query
             .Where(x => x.PropertyCode == command.PropertyCode, !string.IsNullOrWhiteSpace(command.PropertyCode))
+            .Where(x => x.Description.Contains(command.Description), !string.IsNullOrWhiteSpace(command.Description))
             .Where(x => x.Status == command.Status, command.Status.HasValue)
             .Where(x => x.Location == command.Location, !string.IsNullOrWhiteSpace(command.Location))
             .OrderByDescending(x => x.LastTransactionDate);

@@ -1,0 +1,207 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+@using Microsoft.AspNetCore.Components.Web
+@using MudBlazor.Services
+
+<MudDialog>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudTextField @bind-Value="_searchKeyword" Label="Search by Property Code or Description"
+                Placeholder="Type to search..." Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search"
+                FullWidth="true" OnInput="@(async (ChangeEventArgs e) => await SearchAsync())" OnKeyUp="HandleKeyUp" />
+
+            @if (_isLoading)
+            {
+                <MudProgressLinear Indeterminate="true" />
+            }
+
+            <MudTable Items="_searchResults" Dense="true" Hover="true" FixedHeader="true" Height="400px"
+                Loading="_isLoading">
+                <HeaderContent>
+                    <MudTh>Property Code</MudTh>
+                    <MudTh>Description</MudTh>
+                    <MudTh>Location</MudTh>
+                    <MudTh align="right">Available Qty</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh align="center">Action</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="Property Code">
+                        <strong>@context.PropertyCode</strong>
+                    </MudTd>
+                    <MudTd DataLabel="Description">@context.Description</MudTd>
+                    <MudTd DataLabel="Location">@context.Location</MudTd>
+                    <MudTd DataLabel="Available Qty" align="right">
+                        <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined">@context.Quantity</MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">@context.Status
+                        </MudChip>
+                    </MudTd>
+                    <MudTd align="center">
+                        <MudIconButton Icon="@Icons.Material.Filled.Check" Color="Color.Success"
+                            OnClick="@(() => SelectItem(context))" Title="Select" Size="Size.Small" />
+                    </MudTd>
+                </RowTemplate>
+                <NoRecordsContent>
+                    @if (_hasSearched && !string.IsNullOrWhiteSpace(_searchKeyword))
+                    {
+                        <MudText>No items found matching "@_searchKeyword"</MudText>
+                    }
+                    else if (_hasSearched)
+                    {
+                        <MudText>No inventory items available</MudText>
+                    }
+                </NoRecordsContent>
+            </MudTable>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] public IMudDialogInstance MudDialog { get; set; } = default!;
+    [Parameter] public IApiClient ApiClient { get; set; } = default!;
+    [Parameter] public string ApiVersion { get; set; } = "1";
+
+    private string _searchKeyword = string.Empty;
+    private List<InventoryRegistryResponse> _searchResults = new();
+    private bool _isLoading;
+    private bool _hasSearched = false;
+    private CancellationTokenSource _searchCancellationTokenSource = new();
+    private Task _searchDebounceTask = Task.CompletedTask;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Load all inventory items on dialog open (no debounce)
+        await LoadAllAsync();
+    }
+
+    private async Task HandleKeyUp(KeyboardEventArgs e)
+    {
+        // Keep the Enter key for manual search if needed
+        if (e.Key == "Enter")
+        {
+            // Search is already happening via OnInput, so just focus
+        }
+    }
+
+    private async Task SearchAsync()
+    {
+        // Cancel previous search if still running
+        _searchCancellationTokenSource.Cancel();
+        _searchCancellationTokenSource = new();
+
+        // Debounce: wait 300ms before executing search to avoid excessive API calls
+        try
+        {
+            await Task.Delay(300, _searchCancellationTokenSource.Token).ConfigureAwait(false);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        _isLoading = true;
+        _hasSearched = true;
+
+        try
+        {
+            // Send null keyword to fetch all items when the search box is empty.
+            var effectiveKeyword = string.IsNullOrWhiteSpace(_searchKeyword) ? null : _searchKeyword;
+
+            var searchCommand = new SearchInventoryRegistriesCommand
+            {
+                Keyword = effectiveKeyword,
+                PageSize = 100, // Load more items for better browsing
+                PageNumber = 1
+            };
+
+            var result = await ApiClient.SearchInventoryRegistriesEndpointAsync(ApiVersion, searchCommand);
+            _searchResults = result?.Items?.ToList() ?? new List<InventoryRegistryResponse>();
+            StateHasChanged();
+        }
+        catch (OperationCanceledException)
+        {
+            // Search was cancelled, don't update results
+            return;
+        }
+        catch (Exception ex)
+        {
+            _searchResults.Clear();
+            Console.WriteLine($"Search error: {ex.Message}");
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private async Task LoadAllAsync()
+    {
+        _isLoading = true;
+
+        try
+        {
+            if (ApiClient == null)
+            {
+                Console.WriteLine("ApiClient is null");
+                _searchResults.Clear();
+                return;
+            }
+
+            Console.WriteLine($"Calling SearchInventoryRegistriesEndpointAsync with version: {ApiVersion}");
+
+            var searchCommand = new SearchInventoryRegistriesCommand
+            {
+                Keyword = null, // null returns full registry
+                PageSize = 100,
+                PageNumber = 1
+            };
+
+            var result = await ApiClient.SearchInventoryRegistriesEndpointAsync(ApiVersion, searchCommand);
+            Console.WriteLine($"API returned {result?.Items?.Count ?? 0} items");
+
+            _searchResults = result?.Items?.ToList() ?? new List<InventoryRegistryResponse>();
+            _hasSearched = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading inventory: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            _searchResults.Clear();
+            _hasSearched = true;
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void SelectItem(InventoryRegistryResponse item)
+    {
+        MudDialog.Close(DialogResult.Ok(item));
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+
+    private Color GetStatusColor(InventoryItemStatus status)
+    {
+        return status switch
+        {
+            InventoryItemStatus._0 => Color.Warning, // NotReceived
+            InventoryItemStatus._1 => Color.Success, // InStock
+            InventoryItemStatus._2 => Color.Info, // Issued
+            InventoryItemStatus._3 => Color.Info, // InTransit
+            InventoryItemStatus._4 => Color.Error, // Damaged
+            InventoryItemStatus._5 => Color.Error, // Lost
+            _ => Color.Default
+        };
+    }
+}
