@@ -1603,6 +1603,68 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// List Supplies and Materials Receiving Reports
+        /// </summary>
+        /// <remarks>
+        /// Retrieves all Supplies and Materials Receiving Reports (SMRR).
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<ListSuppliesAndMaterialsReceivingReportsResponse> ListSuppliesAndMaterialsReceivingReportsEndpointAsync(string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Create Supplies and Materials Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Creates a new Supplies and Materials Receiving Report (SMRR) for tracking supplies and materials receipt.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<CreateSuppliesAndMaterialsReceivingReportResponse> CreateSuppliesAndMaterialsReceivingReportEndpointAsync(string version, CreateSuppliesAndMaterialsReceivingReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Get Supplies and Materials Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Retrieves a specific Supplies and Materials Receiving Report (SMRR) by ID.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetSuppliesAndMaterialsReceivingReportByIdResponse> GetSuppliesAndMaterialsReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Post a Supplies and Materials Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Posts a draft SMRR, making it immutable and updating semex registry/logs.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <param name="id">The Supplies and Materials Receiving Report ID</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<PostSuppliesAndMaterialsReceivingReportResponse> PostSuppliesAndMaterialsReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Cancel a Supplies and Materials Receiving Report
+        /// </summary>
+        /// <remarks>
+        /// Cancels a posted SMRR, reversing the inventory changes.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <param name="id">The Supplies and Materials Receiving Report ID</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<CancelSuppliesAndMaterialsReceivingReportResponse> CancelSuppliesAndMaterialsReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// create procurement plan (PPMP)
         /// </summary>
         /// <remarks>

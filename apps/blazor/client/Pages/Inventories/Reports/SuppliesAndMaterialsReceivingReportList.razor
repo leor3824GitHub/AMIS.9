@@ -1,0 +1,178 @@
+@page "/inventories/reports/smrr-list"
+@using AMIS.Blazor.Infrastructure.Api
+@using AMIS.Blazor.Client.Components
+@using MudBlazor
+@inject NavigationManager NavigationManager
+
+<PageHeader Title="SMRR List" Header="Supplies & Materials Receiving Reports" SubHeader="View and manage Supplies & Materials Receiving Reports" />
+
+<MudPaper Class="pa-4">
+    <MudStack Spacing="3">
+        <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateNewReport"
+                StartIcon="@Icons.Material.Filled.Add">New Report</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadReports"
+                StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
+        </MudStack>
+
+        @if (_isLoading)
+        {
+            <MudProgressCircular Indeterminate="true" />
+        }
+        else if (_reports == null || _reports.Count == 0)
+        {
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                No Supplies & Materials Receiving Reports found. <MudLink OnClick="CreateNewReport" style="cursor: pointer;">
+                    Create one now</MudLink>
+            </MudAlert>
+        }
+        else
+        {
+            <MudTable Items="@_reports" Dense="true" Hover="true" Striped="true" Bordered="true">
+                <HeaderContent>
+                    <MudTh>SMRR Number</MudTh>
+                    <MudTh>Source</MudTh>
+                    <MudTh>Type</MudTh>
+                    <MudTh>Receiving Date</MudTh>
+                    <MudTh>Status</MudTh>
+                    <MudTh align="center">Items</MudTh>
+                    <MudTh align="right">Total Amount</MudTh>
+                    <MudTh>Created Date</MudTh>
+                    <MudTh align="center">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd DataLabel="SMRR Number">@context.SmrrNumber</MudTd>
+                    <MudTd DataLabel="Source">@context.SourceName</MudTd>
+                    <MudTd DataLabel="Type">@context.TransactionType</MudTd>
+                    <MudTd DataLabel="Receiving Date">@context.ReceivingDate.ToString("MMM dd, yyyy")</MudTd>
+                    <MudTd DataLabel="Status">
+                        <MudChip T="string" Color="@GetStatusColor(context.Status)" Variant="Variant.Filled"
+                            Size="Size.Small">
+                            @GetStatusText(context.Status)
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Items" align="center">
+                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined" Size="Size.Small">
+                            @context.LineItemsCount
+                        </MudChip>
+                    </MudTd>
+                    <MudTd DataLabel="Total Amount" align="right">@context.TotalAmount.ToString("N2")</MudTd>
+                    <MudTd DataLabel="Created Date">@context.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</MudTd>
+                    <MudTd align="center">
+                        <MudIconButton Icon="@Icons.Material.Filled.Visibility" Color="Color.Info"
+                            OnClick="@(() => ViewDetails(context.Id))" Title="View Details" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Info"
+                            OnClick="@(() => PrintReport(context.Id))" Title="Print" />
+                        @if (context.Status == 0)
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Lock" Color="Color.Warning"
+                                OnClick="@(() => PostReport(context.Id))" Title="Post" />
+                        }
+                        else
+                        {
+                            <MudIconButton Icon="@Icons.Material.Filled.Undo" Color="Color.Error"
+                                OnClick="@(() => CancelReport(context.Id))" Title="Cancel & Reverse" />
+                        }
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    private const string ApiVersion = "1";
+    [Inject] public IApiClient ApiClient { get; set; } = default!;
+    [Inject] public ISnackbar Snackbar { get; set; } = default!;
+
+    private List<SuppliesAndMaterialsReceivingReportDto> _reports = [];
+    private bool _isLoading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadReports();
+    }
+
+    private async Task LoadReports()
+    {
+        _isLoading = true;
+        try
+        {
+            var response = await ApiClient.ListSuppliesAndMaterialsReceivingReportsEndpointAsync(ApiVersion);
+            _reports = response.Reports?.ToList() ?? [];
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading reports: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private void CreateNewReport()
+    {
+        NavigationManager.NavigateTo("/inventories/reports/smrr");
+    }
+
+    private void ViewDetails(Guid id)
+    {
+        NavigationManager.NavigateTo($"/inventories/reports/smrr/{id}?readonly=true");
+    }
+
+    private void PrintReport(Guid id)
+    {
+        NavigationManager.NavigateTo($"/inventories/reports/smrr/{id}?readonly=true&print=true");
+    }
+
+    private async Task PostReport(Guid id)
+    {
+        try
+        {
+            await ApiClient.PostSuppliesAndMaterialsReceivingReportEndpointAsync(ApiVersion, id);
+            Snackbar.Add("Supplies & Materials Receiving Report posted successfully", Severity.Success);
+            await LoadReports();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error posting report: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task CancelReport(Guid id)
+    {
+        try
+        {
+            await ApiClient.CancelSuppliesAndMaterialsReceivingReportEndpointAsync(ApiVersion, id);
+            Snackbar.Add("Supplies & Materials Receiving Report cancelled successfully", Severity.Success);
+            await LoadReports();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error cancelling report: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private string GetStatusText(int status)
+    {
+        return status switch
+        {
+            0 => "Draft",
+            1 => "Posted",
+            2 => "Cancelled",
+            _ => "Unknown"
+        };
+    }
+
+    private Color GetStatusColor(int status)
+    {
+        return status switch
+        {
+            0 => Color.Warning,
+            1 => Color.Success,
+            2 => Color.Error,
+            _ => Color.Default
+        };
+    }
+}

@@ -273,6 +273,7 @@ public static class InventoriesModule
             suppliesAndMaterialsIssuanceGroup.MapCancelSuppliesAndMaterialsIssuanceReportEndpoint();
 
             var suppliesAndMaterialsReceivingGroup = app.MapGroup("supplies-materials-receiving").WithTags("supplies-materials-receiving");
+            suppliesAndMaterialsReceivingGroup.MapListSuppliesAndMaterialsReceivingReportsEndpoint();
             suppliesAndMaterialsReceivingGroup.MapCreateSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapGetSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapPostSuppliesAndMaterialsReceivingReportEndpoint();

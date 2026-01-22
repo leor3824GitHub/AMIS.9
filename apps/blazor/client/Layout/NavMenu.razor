@@ -86,6 +86,11 @@
             <MudNavLink Href="/inventories/reports/pper-list" Icon="@Icons.Material.Filled.Inbox" Class="fsh-nav-child">
                 PPE Receiving Report</MudNavLink>
         }
+        @if (_canViewPpeReceivingReports)
+        {
+            <MudNavLink Href="/inventories/reports/smrr-list" Icon="@Icons.Material.Filled.MoveToInbox" Class="fsh-nav-child">
+                Supplies & Materials Receiving</MudNavLink>
+        }
         @if (_canViewInventories)
         {
             <MudNavLink Href="/inventories/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">
