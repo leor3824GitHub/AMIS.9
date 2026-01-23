@@ -34,7 +34,8 @@ public sealed class GetPpeIssuanceReportByIdHandler(
             li.DateAcquired,
             li.AcquisitionCost,
             li.AccumulatedDepreciation,
-            li.BookValue)).ToList();
+            li.BookValue,
+            li.Location)).ToList();
 
         logger.LogInformation(
             "Successfully retrieved PPE Issuance Report with ID: {Id}, Report Number: {ReportNumber}",

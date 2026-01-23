@@ -8,7 +8,8 @@ public sealed record PpeIssuanceLineItemResponse(
     DateTime? DateAcquired,
     decimal AcquisitionCost,
     decimal? AccumulatedDepreciation,
-    decimal? BookValue);
+    decimal? BookValue,
+    string? Location);
 
 public sealed record GetPpeIssuanceReportByIdResponse(
     Guid Id,

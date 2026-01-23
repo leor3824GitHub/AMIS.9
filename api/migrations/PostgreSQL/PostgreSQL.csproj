@@ -4,6 +4,11 @@
     <AssemblyName>AMIS.WebApi.Migrations.PostgreSQL</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="Procurement\**" />
+    <EmbeddedResource Remove="Procurement\**" />
+    <None Remove="Procurement\**" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
   </ItemGroup>
   <ItemGroup>
@@ -14,7 +19,6 @@
   <ItemGroup>
     <Folder Include="Inventories\" />
     <Folder Include="Identity\" />
-    <Folder Include="Procurement\" />
     <Folder Include="Tenant\" />
     <Folder Include="Todo\" />
   </ItemGroup>

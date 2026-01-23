@@ -40,12 +40,6 @@ public sealed class PpeReceivingReportConfiguration : IEntityTypeConfiguration<P
             lineItems.Property(li => li.UnitCost).HasPrecision(18, 2);
             lineItems.Property(li => li.Location).IsRequired().HasMaxLength(200);
         });
-
-        // Audit fields
-        builder.Property(x => x.Created).HasDefaultValueSql("GETUTCDATE()");
-        builder.Property(x => x.CreatedBy).HasMaxLength(200);
-        builder.Property(x => x.LastModified).HasDefaultValueSql("GETUTCDATE()");
-        builder.Property(x => x.LastModifiedBy).HasMaxLength(200);
     }
 }
 

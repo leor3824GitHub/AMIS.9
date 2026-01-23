@@ -125,7 +125,6 @@ public partial class PpeIssuanceReport : ComponentBase
                         AcquisitionCost = item.AcquisitionCost,
                         AccumulatedDepreciation = item.AccumulatedDepreciation,
                         BookValue = item.BookValue,
-                        Location = item.Location,
                     });
                 }
             }
@@ -493,7 +492,6 @@ public partial class PpeIssuanceReport : ComponentBase
                         AcquisitionCost = li.AcquisitionCost,
                         AccumulatedDepreciation = li.AccumulatedDepreciation,
                         BookValue = li.BookValue,
-                        Location = li.Location,
                     }).ToList(),
                 };
 
@@ -521,7 +519,6 @@ public partial class PpeIssuanceReport : ComponentBase
                         AcquisitionCost = li.AcquisitionCost,
                         AccumulatedDepreciation = li.AccumulatedDepreciation,
                         BookValue = li.BookValue,
-                        Location = li.Location,
                     }).ToList(),
                 };
 

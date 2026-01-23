@@ -39,7 +39,8 @@ public sealed class UpdatePpeIssuanceReportHandler(
                     lineItem.DateAcquired ?? DateTime.UtcNow,
                     lineItem.AcquisitionCost,
                     lineItem.AccumulatedDepreciation,
-                    lineItem.BookValue);
+                    lineItem.BookValue,
+                    lineItem.Location);
                 report.AddLineItem(item);
             }
 

@@ -16,9 +16,10 @@ public sealed record UpdatePpeIssuanceLineItemRequest(
     string Description,
     decimal Quantity,
     string Unit,
-    DateTime? DateAcquired = null,
-    decimal AcquisitionCost = 0,
-    decimal? AccumulatedDepreciation = null,
-    decimal? BookValue = null);
+    DateTime? DateAcquired,
+    decimal AcquisitionCost,
+    decimal? AccumulatedDepreciation,
+    decimal? BookValue,
+    string? Location);
 
 public sealed record UpdatePpeIssuanceReportResponse(Guid Id);

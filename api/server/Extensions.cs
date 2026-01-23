@@ -9,7 +9,7 @@ using System.Text.Json.Serialization;
 
 namespace AMIS.WebApi.Host;
 
-public static class Extensions
+internal static class Extensions
 {
     public static WebApplicationBuilder RegisterModules(this WebApplicationBuilder builder)
     {

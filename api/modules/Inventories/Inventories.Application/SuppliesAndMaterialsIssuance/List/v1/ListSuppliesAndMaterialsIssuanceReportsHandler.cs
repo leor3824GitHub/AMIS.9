@@ -1,5 +1,5 @@
 using Ardalis.Specification;
-using AMIS.Framework.Core.Persistence.Repository;
+using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,12 +26,12 @@ public sealed class ListSuppliesAndMaterialsIssuanceReportsHandler : IRequestHan
         var dtos = reports.Select(r => new SuppliesAndMaterialsIssuanceReportDto(
             r.Id,
             r.SmirNumber,
-            r.IssuedTo.Name,
-            r.TransactionType.Type,
-            r.IssuedTo.IssuanceDate,
+            r.Recipient.Name,
+            r.IssuanceReason.Value,
+            r.TransactionDate,
             r.LineItems.Count,
             r.LineItems.Sum(li => li.Quantity * li.UnitCost),
-            r.Status,
+            0, // Status - placeholder
             r.Created
         )).ToList();
 

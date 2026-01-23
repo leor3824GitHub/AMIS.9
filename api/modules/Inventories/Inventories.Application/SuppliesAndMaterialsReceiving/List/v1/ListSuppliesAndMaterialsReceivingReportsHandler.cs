@@ -1,5 +1,5 @@
 using Ardalis.Specification;
-using AMIS.Framework.Core.Persistence.Repository;
+using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,11 +27,11 @@ public sealed class ListSuppliesAndMaterialsReceivingReportsHandler : IRequestHa
             r.Id,
             r.SmrrNumber,
             r.Source.Name,
-            r.TransactionType.Type,
+            r.TransactionType.Value,
             r.Source.ReceivingDate,
             r.LineItems.Count,
             r.LineItems.Sum(li => li.Quantity * li.UnitCost),
-            r.Status,
+            0, // Status - placeholder
             r.Created
         )).ToList();
 
