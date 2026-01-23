@@ -91,6 +91,11 @@
             <MudNavLink Href="/inventories/reports/smrr-list" Icon="@Icons.Material.Filled.MoveToInbox" Class="fsh-nav-child">
                 Supplies & Materials Receiving</MudNavLink>
         }
+        @if (_canViewPpeReceivingReports)
+        {
+            <MudNavLink Href="/inventories/reports/smir-list" Icon="@Icons.Material.Filled.SendToMobile" Class="fsh-nav-child">
+                Supplies & Materials Issuance</MudNavLink>
+        }
         @if (_canViewInventories)
         {
             <MudNavLink Href="/inventories/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">

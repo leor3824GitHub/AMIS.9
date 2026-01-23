@@ -267,6 +267,7 @@ public static class InventoriesModule
             physicalAssetGroup.MapGetStockLevelsEndpoint();
 
             var suppliesAndMaterialsIssuanceGroup = app.MapGroup("supplies-materials-issuance").WithTags("supplies-materials-issuance");
+            suppliesAndMaterialsIssuanceGroup.MapListSuppliesAndMaterialsIssuanceReportsEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapCreateSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapGetSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapPostSuppliesAndMaterialsIssuanceReportEndpoint();

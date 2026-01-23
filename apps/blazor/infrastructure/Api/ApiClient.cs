@@ -1615,6 +1615,18 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
+        /// List Supplies and Materials Issuance Reports
+        /// </summary>
+        /// <remarks>
+        /// Retrieves all Supplies and Materials Issuance Reports (SMIR) from inventory.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<ListSuppliesAndMaterialsIssuanceReportsResponse> ListSuppliesAndMaterialsIssuanceReportsEndpointAsync(string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
         /// Create Supplies and Materials Receiving Report
         /// </summary>
         /// <remarks>
@@ -1662,6 +1674,69 @@ namespace AMIS.Blazor.Infrastructure.Api
         /// <returns>OK</returns>
         /// <exception cref="ApiException">A server side error occurred.</exception>
         System.Threading.Tasks.Task<CancelSuppliesAndMaterialsReceivingReportResponse> CancelSuppliesAndMaterialsReceivingReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// List Supplies and Materials Issuance Reports
+        /// </summary>
+        /// <remarks>
+        /// Retrieves all Supplies and Materials Issuance Reports (SMIR) from inventory.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<ListSuppliesAndMaterialsIssuanceReportsResponse> ListSuppliesAndMaterialsIssuanceReportsEndpointAsync(string version, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Create Supplies and Materials Issuance Report
+        /// </summary>
+        /// <remarks>
+        /// Creates a new Supplies and Materials Issuance Report (SMIR) for tracking supplies and materials issuance.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <returns>Created</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<CreateSuppliesAndMaterialsIssuanceReportResponse> CreateSuppliesAndMaterialsIssuanceReportEndpointAsync(string version, CreateSuppliesAndMaterialsIssuanceReportCommand body, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Get Supplies and Materials Issuance Report
+        /// </summary>
+        /// <remarks>
+        /// Gets a specific Supplies and Materials Issuance Report (SMIR) by ID.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <param name="id">The Supplies and Materials Issuance Report ID</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<GetSuppliesAndMaterialsIssuanceReportResponse> GetSuppliesAndMaterialsIssuanceReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Post Supplies and Materials Issuance Report
+        /// </summary>
+        /// <remarks>
+        /// Posts a draft SMIR, applying inventory changes.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <param name="id">The Supplies and Materials Issuance Report ID</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<PostSuppliesAndMaterialsIssuanceReportResponse> PostSuppliesAndMaterialsIssuanceReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
+
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <summary>
+        /// Cancel Supplies and Materials Issuance Report
+        /// </summary>
+        /// <remarks>
+        /// Cancels a posted SMIR, reversing the inventory changes.
+        /// </remarks>
+        /// <param name="version">The requested API version</param>
+        /// <param name="id">The Supplies and Materials Issuance Report ID</param>
+        /// <returns>OK</returns>
+        /// <exception cref="ApiException">A server side error occurred.</exception>
+        System.Threading.Tasks.Task<CancelSuppliesAndMaterialsIssuanceReportResponse> CancelSuppliesAndMaterialsIssuanceReportEndpointAsync(string version, System.Guid id, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken));
 
         /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <summary>
