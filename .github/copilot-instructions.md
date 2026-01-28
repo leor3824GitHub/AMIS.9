@@ -125,6 +125,100 @@ InventoryRegistry/SemexRegistry (Qty deducted)
 
 ---
 
+**PAR/ICS Monitoring**
+
+**Purpose:** Track custody and movement of `PhysicalAsset` instances when issued via PAR (Property Acknowledgment Receipt) or ICS (Inventory Custodian Slip).
+
+**Entities to add/maintain**
+
+**AssetAssignmentHistory**
+```csharp
+public class AssetAssignmentHistory : Entity
+{
+    public Guid PhysicalAssetId { get; set; }
+    public Guid CustodianId { get; set; }
+    public string DocumentNumber { get; set; }  // PAR or ICS #
+    public string DocumentType { get; set; }    // "PAR" | "ICS"
+    public DateTime AssignedDate { get; set; }
+    public DateTime? ReturnedDate { get; set; }
+    public string Status { get; set; }          // Active, Returned, Transferred, Lost, Damaged
+    public string? Remarks { get; set; }
+}
+```
+
+**CustodianResponsibility**
+```csharp
+public class CustodianResponsibility : AuditableEntity, IAggregateRoot
+{
+    public Guid CustodianId { get; set; }
+    public string CustodianName { get; set; }
+    private readonly List<CustodyItem> _items = new();
+    public IReadOnlyCollection<CustodyItem> CustodyItems => _items.AsReadOnly();
+}
+public record CustodyItem(Guid PhysicalAssetId, string PropertyCode, string DocumentNumber, DateTime ReceivedDate, string Status);
+```
+
+**AssetMovementLog**
+```csharp
+public class AssetMovementLog : Entity
+{
+    public Guid PhysicalAssetId { get; set; }
+    public string PropertyCode { get; set; }
+    public Guid? FromCustodianId { get; set; }
+    public Guid? ToCustodianId { get; set; }
+    public string DocumentNumber { get; set; } // PAR/ICS
+    public string MovementType { get; set; }   // Transfer, Return, Issuance
+    public DateTime MovementDate { get; set; }
+    public string? Remarks { get; set; }
+}
+```
+
+**AssetConditionLog**
+```csharp
+public class AssetConditionLog : Entity
+{
+    public Guid PhysicalAssetId { get; set; }
+    public string PreviousCondition { get; set; }
+    public string CurrentCondition { get; set; }
+    public string? Reason { get; set; }
+    public string? ParIcsReference { get; set; }
+    public DateTime LoggedDate { get; set; }
+}
+```
+
+**InventoryRegistry enhancements**
+- Add `CurrentCustodianId`, `LastTransactionType`, `LastTransactionReference` to reflect PAR/ICS activity.
+
+**Usage:** Create `AssetAssignmentHistory`, append `CustodyItem` to `CustodianResponsibility`, and log `AssetMovementLog` & `AssetConditionLog` on PAR/ICS workflows.
+
+**Key Queries for Monitoring**
+
+```csharp
+// 1. Who currently has PropertyCode "XXX"?
+var custodian = await dbContext.CustodianResponsibilities
+    .Where(c => c.CustodyItems.Any(i => i.PropertyCode == "XXX" && i.Status == "Active"))
+    .FirstOrDefaultAsync();
+
+// 2. All properties currently held by a specific employee
+var properties = await dbContext.CustodianResponsibilities
+    .Where(c => c.CustodianId == employeeId)
+    .SelectMany(c => c.CustodyItems)
+    .Where(i => i.Status == "Active")
+    .ToListAsync();
+
+// 3. Asset movement history for an asset
+var movements = await dbContext.AssetMovementLogs
+    .Where(m => m.PhysicalAssetId == assetId)
+    .OrderByDescending(m => m.MovementDate)
+    .ToListAsync();
+
+// 4. Condition audit trail for an asset
+var conditions = await dbContext.AssetConditionLogs
+    .Where(c => c.PhysicalAssetId == assetId)
+    .OrderByDescending(c => c.LoggedDate)
+    .ToListAsync();
+```
+
 ## SYSTEM WORKFLOW
 I. Asset User's Request 
 1. Purchase Request; Action - Internal user identifies a need and creates a formal Purchase Request (PR).
