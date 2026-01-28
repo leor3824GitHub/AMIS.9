@@ -31,7 +31,101 @@ Features use CQRS with MediatR in `Features/[Operation]/v[N]/` structure:
 - `[Operation]Response.cs` - Output model
 
 Example: `Todo/Features/Create/v1/CreateTodoCommand.cs`
-## SYSTEM WORKflow
+## Inventory Module Domain Architecture
+
+### Asset Data Model (Inventory Module Entities)
+
+The Inventory module follows a **lean, single-source-of-truth** design pattern:
+
+#### **PhysicalAsset (Master Record - Aggregate Root)**
+- Single source of truth for all asset attributes
+- Contains complete lifecycle data: creation, classification, depreciation, assignment history
+- Properties: PropertyCode, ProductId, Description, AcquisitionCost, AcquisitionDate, SerialNumber, ModelNumber, Location, Condition, UnitOfMeasure, EstimatedUsefulLife, CurrentClassification, PPEType, AccumulatedDepreciation, QRCodeData, PropertyNumber, CurrentCustodianId
+- Navigation: Product, AssignmentHistory, ReclassificationHistory
+- **DO NOT duplicate PhysicalAsset attributes in other entities**
+
+#### **InventoryRegistry & SemexRegistry (Operational Snapshots)**
+- Track real-time inventory quantities and status
+- Updated transactionally by receiving/issuance reports
+- Separate entities for PPE (InventoryRegistry) vs Semi-Expendable (SemexRegistry)
+- Key fields: PropertyCode/ItemCode, Quantity, Status, Location, LastTransactionType, LastTransactionReference
+- Optional FK to PhysicalAsset for data integrity validation (not required for queries)
+
+#### **Receiving Report Line Items (PPERR & SMRR)**
+Minimal design - only capture transaction data. **NO asset attribute duplication** - all attributes stay in PhysicalAsset or SemexRegistry:
+
+**PpeReceivingLineItem:**
+```csharp
+public sealed record PpeReceivingLineItem(
+    string PropertyCode,
+    decimal Quantity,
+    string Unit,
+    decimal UnitCost,
+    string Location,
+    string? SupplierName = null,
+    string? DeliveryReference = null,
+    Guid? PhysicalAssetId = null);
+```
+
+**ReceivingLineItem (SMRR):**
+```csharp
+public record ReceivingLineItem(
+    string ItemCode,
+    decimal Quantity,
+    string Unit,
+    decimal UnitCost,
+    string Location,
+    string? SupplierName = null,
+    string? DeliveryReference = null,
+    Guid? SemexRegistryId = null);
+```
+
+#### **Issuance Report Line Items (PPEIR & SMIR)**
+Track what was transferred, not asset state. **NO asset detail duplication** - all attributes stay in PhysicalAsset:
+
+**PpeIssuanceLineItem:**
+```csharp
+public sealed record PpeIssuanceLineItem(
+    string PropertyCode,
+    int QuantityIssued = 1,
+    Guid? RecipientId = null,
+    string DocumentType = "PAR",
+    Guid? PhysicalAssetId = null);
+```
+
+**IssuanceLineItem (SMIR):**
+```csharp
+public record IssuanceLineItem(
+    string ItemCode,
+    int QuantityIssued,
+    Guid RecipientId,
+    string DocumentType = "ICS",
+    Guid? SemexRegistryId = null);
+```
+
+### Key Domain Principles
+1. **Single Source of Truth**: Asset details live ONLY in PhysicalAsset
+2. **No Data Duplication**: Line items reference assets, not duplicate their attributes
+3. **Referential Integrity**: Optional FKs validate relationships without hard coupling
+4. **Audit Trail**: PropertyCode links all transactions to the master asset record
+5. **Query-Time Enrichment**: UI/APIs populate asset details from PhysicalAsset when needed
+
+### Data Flow
+```
+PhysicalAsset (Created from PO)
+    ↓
+PPERR/SMRR (Receiving)
+    ↓
+InventoryRegistry/SemexRegistry (Updated with Qty)
+    ↓
+PPEIR/SMIR (Issuance)
+    ↓
+InventoryRegistry/SemexRegistry (Qty deducted)
+```
+
+---
+
+## SYSTEM WORKFLOW
 I. Asset User's Request 
 1. Purchase Request; Action - Internal user identifies a need and creates a formal Purchase Request (PR).
 2. PR Approval; Action - The PR is reviewed and approved by the designated authority based on organizational policies.
@@ -42,10 +136,13 @@ III. Asset Receiving
 1. Receiving Items; Action - Supply officer receives and requests inspection of delivered items.
 2. Inspection; Action - the inspector verifies the quality and quantity of received items. 
 3. Acceptance; Action - Upon successful inspection, the supply officer, items are formally accepted into inventory.
+   - **Triggers PPERR Creation**: PhysicalAsset created → InventoryRegistry/SemexRegistry updated
 IV. Asset Tagging and Recording 
 1. Asset Tagging; Action - Each accepted asset is tagged with a unique identifier or propertycode for tracking and recorded in the Asset Management Information System (AMIS) for inventory management.
+   - PropertyCode serves as universal identifier across PhysicalAsset, InventoryRegistry, and all reports
 V. Asset Utilization and Maintenance 
 1. Asset Assignment; Action - Assets are assigned to users or departments as needed, with records updated in AMIS.
+   - **Triggers PPEIR/SMIR Creation**: Line items reference PropertyCode/ItemCode, not asset attributes
 2. Maintenance Scheduling; Action - Regular maintenance schedules are created and tracked in AMIS to ensure asset longevity and performance.
 
 ## Development Workflows
