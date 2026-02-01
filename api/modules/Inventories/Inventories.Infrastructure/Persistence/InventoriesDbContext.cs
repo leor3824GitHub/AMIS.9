@@ -53,6 +53,11 @@ public sealed class InventoriesDbContext : FshDbContext
     public DbSet<AssetConditionConfiguration> AssetConditionConfigurations { get; set; } = null!;
     public DbSet<PPETypeDefinition> PPETypeDefinitions { get; set; } = null!;
     public DbSet<UnitOfMeasure> UnitsOfMeasure { get; set; } = null!;
+    public DbSet<PpeCategoryCode> PpeCategoryCodes { get; set; } = null!;
+    public DbSet<PpeTypeCode> PpeTypeCodes { get; set; } = null!;
+    public DbSet<NfaOfficeCode> NfaOfficeCodes { get; set; } = null!;
+    public DbSet<PpeItemCode> PpeItemCodes { get; set; } = null!;
+    public DbSet<PropertyCodeSequence> PropertyCodeSequences { get; set; } = null!;
 
     // Procurement Planning (PPMP)
     public DbSet<ProcurementPlanHeader> ProcurementPlans { get; set; } = null!;
@@ -78,6 +83,9 @@ public sealed class InventoriesDbContext : FshDbContext
     // PPE Issuance/Receiving Reports (NFA Philippines)
     public DbSet<PpeIssuanceReport> PpeIssuanceReports { get; set; } = null!;
     public DbSet<PpeReceivingReport> PpeReceivingReports { get; set; } = null!;
+
+    // Property Accountability Receipt (PAR)
+    public DbSet<PropertyAcknowledgementReceipt> PropertyAcknowledgementReceipts { get; set; } = null!;
 
     // Inventory Registry & Audit
     public DbSet<InventoryRegistry> InventoryRegistries { get; set; } = null!;

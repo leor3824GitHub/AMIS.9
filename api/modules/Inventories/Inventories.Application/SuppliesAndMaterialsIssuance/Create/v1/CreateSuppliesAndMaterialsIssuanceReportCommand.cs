@@ -21,6 +21,7 @@ public sealed record CreateSuppliesAndMaterialsIssuanceReportCommand(
     string? Notes = null) : IRequest<CreateSuppliesAndMaterialsIssuanceReportResponse>;
 
 public sealed record CreateIssuanceLineItemRequest(
+    string PropertyCode,
     string Name,
     string Description,
     DateTime AcquisitionDate,

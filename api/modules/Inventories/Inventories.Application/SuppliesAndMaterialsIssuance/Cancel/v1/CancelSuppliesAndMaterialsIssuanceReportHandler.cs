@@ -3,8 +3,10 @@ using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using AMIS.WebApi.Inventories.Application.SuppliesAndMaterialsIssuance.Post.v1;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shared.Authorization;
 using SemexRegistryDomain = AMIS.WebApi.Inventories.Domain.SemexRegistry;
 using SemexTransactionLogDomain = AMIS.WebApi.Inventories.Domain.SemexTransactionLog;
 
@@ -14,6 +16,7 @@ public sealed class CancelSuppliesAndMaterialsIssuanceReportHandler(
     [FromKeyedServices("inventories:smir")] IRepository<SuppliesAndMaterialsIssuanceReport> repository,
     [FromKeyedServices("inventories:semex-registries")] IRepository<SemexRegistryDomain> registryRepository,
     [FromKeyedServices("inventories:semex-transaction-logs")] IRepository<SemexTransactionLogDomain> transactionLogRepository,
+    IAuthorizationService authorizationService,
     ILogger<CancelSuppliesAndMaterialsIssuanceReportHandler> logger)
     : IRequestHandler<CancelSuppliesAndMaterialsIssuanceReportCommand, CancelSuppliesAndMaterialsIssuanceReportResponse>
 {
@@ -22,6 +25,18 @@ public sealed class CancelSuppliesAndMaterialsIssuanceReportHandler(
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+
+        // Authorization check: Only users with Cancel permission can cancel reports
+        var authResult = await authorizationService.AuthorizeAsync(
+            null,
+            $"{FshResources.SuppliesAndMaterialsIssuance}.{FshActions.Cancel}");
+        
+        if (!authResult.Succeeded)
+        {
+            logger.LogWarning("Unauthorized cancellation attempt for SMIR {Id}", request.Id);
+            throw new UnauthorizedAccessException(
+                "You do not have permission to cancel Supplies and Materials Issuance reports. Only accounting personnel can perform this action.");
+        }
 
         try
         {
@@ -36,7 +51,7 @@ public sealed class CancelSuppliesAndMaterialsIssuanceReportHandler(
 
             foreach (var lineItem in report.LineItems)
             {
-                var normalizedCode = lineItem.Name.Trim().ToUpperInvariant();
+                var normalizedCode = lineItem.PropertyCode.Trim().ToUpperInvariant();
                 var registry = registries.FirstOrDefault(r => r.ItemCode == normalizedCode);
 
                 if (registry is not null)
@@ -53,7 +68,7 @@ public sealed class CancelSuppliesAndMaterialsIssuanceReportHandler(
 
                         // Create reversal log
                         var reversalLog = SemexTransactionLogDomain.CreateSuccess(
-                            lineItem.Name,
+                            lineItem.PropertyCode,
                             "SMIR",
                             report.SmirNumber,
                             quantity,
@@ -67,7 +82,7 @@ public sealed class CancelSuppliesAndMaterialsIssuanceReportHandler(
                     catch (Exception ex)
                     {
                         var failureLog = SemexTransactionLogDomain.CreateFailure(
-                            lineItem.Name,
+                            lineItem.PropertyCode,
                             "SMIR",
                             report.SmirNumber,
                             quantityBefore,
@@ -75,14 +90,14 @@ public sealed class CancelSuppliesAndMaterialsIssuanceReportHandler(
                             $"Reversal failed: {ex.Message}");
 
                         transactionLogs.Add(failureLog);
-                        logger.LogWarning("Failed to reverse SMIR {SmirNumber} for item {ItemCode}: {Error}",
-                            report.SmirNumber, lineItem.Name, ex.Message);
+                        logger.LogWarning("Failed to reverse SMIR {SmirNumber} for property code {PropertyCode}: {Error}",
+                            report.SmirNumber, lineItem.PropertyCode, ex.Message);
                     }
                 }
                 else
                 {
                     var failureLog = SemexTransactionLogDomain.CreateFailure(
-                        lineItem.Name,
+                        lineItem.PropertyCode,
                         "SMIR",
                         report.SmirNumber,
                         0,
@@ -90,8 +105,8 @@ public sealed class CancelSuppliesAndMaterialsIssuanceReportHandler(
                         $"Registry entry not found for reversal of SMIR {report.SmirNumber}");
 
                     transactionLogs.Add(failureLog);
-                    logger.LogWarning("Registry entry not found for item {ItemName} during SMIR {Id} cancellation",
-                        lineItem.Name, request.Id);
+                    logger.LogWarning("Registry entry not found for property code {PropertyCode} during SMIR {Id} cancellation",
+                        lineItem.PropertyCode, request.Id);
                 }
             }
 

@@ -48,7 +48,10 @@ public sealed class CreateSuppliesAndMaterialsReceivingReportHandler(
             dto.Unit,
             dto.UnitCost,
             dto.Location,
-            dto.Reference)).ToList();
+            dto.Reference,
+            dto.ClassCode,
+            dto.CategoryCode,
+            dto.ItemCode)).ToList();
 
         report.AddLineItems(lineItems);
 

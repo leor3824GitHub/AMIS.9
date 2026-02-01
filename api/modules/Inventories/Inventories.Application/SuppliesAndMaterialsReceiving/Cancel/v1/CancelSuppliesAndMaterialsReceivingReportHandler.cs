@@ -3,8 +3,10 @@ using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using AMIS.WebApi.Inventories.Application.SuppliesAndMaterialsReceiving.Post.v1;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shared.Authorization;
 using SemexRegistryDomain = AMIS.WebApi.Inventories.Domain.SemexRegistry;
 using SemexTransactionLogDomain = AMIS.WebApi.Inventories.Domain.SemexTransactionLog;
 
@@ -14,6 +16,7 @@ public sealed class CancelSuppliesAndMaterialsReceivingReportHandler(
     [FromKeyedServices("inventories:smrr")] IRepository<SuppliesAndMaterialsReceivingReport> repository,
     [FromKeyedServices("inventories:semex-registries")] IRepository<SemexRegistryDomain> registryRepository,
     [FromKeyedServices("inventories:semex-transaction-logs")] IRepository<SemexTransactionLogDomain> transactionLogRepository,
+    IAuthorizationService authorizationService,
     ILogger<CancelSuppliesAndMaterialsReceivingReportHandler> logger)
     : IRequestHandler<CancelSuppliesAndMaterialsReceivingReportCommand, CancelSuppliesAndMaterialsReceivingReportResponse>
 {
@@ -22,6 +25,18 @@ public sealed class CancelSuppliesAndMaterialsReceivingReportHandler(
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+
+        // Authorization check: Only users with Cancel permission can cancel reports
+        var authResult = await authorizationService.AuthorizeAsync(
+            null,
+            $"{FshResources.SuppliesAndMaterialsReceiving}.{FshActions.Cancel}");
+        
+        if (!authResult.Succeeded)
+        {
+            logger.LogWarning("Unauthorized cancellation attempt for SMRR {Id}", request.Id);
+            throw new UnauthorizedAccessException(
+                "You do not have permission to cancel Supplies and Materials Receiving reports. Only accounting personnel can perform this action.");
+        }
 
         try
         {

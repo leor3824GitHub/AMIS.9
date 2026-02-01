@@ -35,38 +35,37 @@ public sealed class PostSuppliesAndMaterialsIssuanceReportHandler(
 
             foreach (var lineItem in report.LineItems)
             {
-                if (string.IsNullOrWhiteSpace(lineItem.Name)
-                    && string.IsNullOrWhiteSpace(lineItem.Description))
+                if (string.IsNullOrWhiteSpace(lineItem.PropertyCode))
                 {
-                    logger.LogWarning("Skipping SMIR line item with empty name/description on report {SmirNumber}", report.SmirNumber);
+                    logger.LogWarning("Skipping SMIR line item with empty property code on report {SmirNumber}", report.SmirNumber);
                     continue;
                 }
 
                 var quantity = (int)lineItem.Quantity;
                 if (quantity <= 0)
                 {
-                    throw new ArgumentException($"Quantity must be greater than zero for {lineItem.Name}");
+                    throw new ArgumentException($"Quantity must be greater than zero for {lineItem.PropertyCode} - {lineItem.Name}");
                 }
 
-                // Use normalized item code for lookup
-                var normalizedCode = lineItem.Name.Trim().ToUpperInvariant();
+                // Use property code for registry lookup
+                var normalizedCode = lineItem.PropertyCode.Trim().ToUpperInvariant();
                 var registry = registries.FirstOrDefault(r => r.ItemCode == normalizedCode);
 
                 if (registry is null)
                 {
                     var failureLog = SemexTransactionLogDomain.CreateFailure(
-                        lineItem.Name,
+                        lineItem.PropertyCode,
                         "SMIR",
                         report.SmirNumber,
                         0,
                         InventoryItemStatus.NotReceived,
-                        $"Registry entry for item '{lineItem.Name}' was not found.",
+                        $"Registry entry for property code '{lineItem.PropertyCode}' was not found.",
                         report.Recipient?.Name ?? "Unknown");
 
                     transactionLogs.Add(failureLog);
-                    logger.LogWarning("Registry entry not found for item {ItemName} during SMIR {Id} posting",
-                        lineItem.Name, request.Id);
-                    throw new InvalidOperationException($"Cannot issue item. Registry entry for item '{lineItem.Name}' was not found.");
+                    logger.LogWarning("Registry entry not found for property code {PropertyCode} during SMIR {Id} posting",
+                        lineItem.PropertyCode, request.Id);
+                    throw new InvalidOperationException($"Cannot issue item. Registry entry for property code '{lineItem.PropertyCode}' was not found.");
                 }
 
                 var inventoryBefore = registry.Quantity;

@@ -11,10 +11,11 @@ namespace AMIS.WebApi.Inventories.Application.Acceptances.Services;
 /// </summary>
 public static class AcceptanceAssetFactory
 {
-    public static IReadOnlyCollection<PhysicalAsset> CreateAssets(
+    public static async Task<IReadOnlyCollection<PhysicalAsset>> CreateAssetsAsync(
         Acceptance acceptance,
         IAssetPropertyCodeGenerator codeGenerator,
-        IAssetClassificationResolver classificationResolver)
+        IAssetClassificationResolver classificationResolver,
+        CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(acceptance);
         if (!acceptance.IsPosted) throw new InvalidOperationException("Acceptance must be posted before creating assets.");
@@ -31,29 +32,53 @@ public static class AcceptanceAssetFactory
             if (!purchaseItem.ProductId.HasValue)
                 throw new InvalidOperationException("Purchase item must have an associated product to create an asset.");
 
-            var propertyCode = codeGenerator.Generate(acceptanceItem);
             var classification = classificationResolver.ResolveClassification(purchaseItem);
             var ppeType = classificationResolver.ResolvePpeType(purchaseItem);
             var estimatedUsefulLife = classificationResolver.ResolveEstimatedUsefulLifeMonths(purchaseItem);
             var description = classificationResolver.ResolveDescription(purchaseItem);
             var unitOfMeasure = classificationResolver.ResolveUnitOfMeasure(purchaseItem);
 
-            var asset = PhysicalAsset.Create(
-                classification,
-                propertyCode,
-                purchaseItem.ProductId.Value,
-                description,
-                purchaseItem.UnitPrice * acceptanceItem.QtyAccepted,
-                acceptance.AcceptanceDate,
-                estimatedUsefulLife,
-                acceptanceItem.QtyAccepted,
-                unitOfMeasure,
-                serialNumber: null,
-                modelNumber: null,
-                location: null,
-                ppeType: ppeType);
+            if (classification == PropertyClassification.PropertyPlantEquipment)
+            {
+                for (var i = 0; i < acceptanceItem.QtyAccepted; i++)
+                {
+                    var propertyCode = await codeGenerator.GenerateAsync(acceptanceItem, cancellationToken).ConfigureAwait(false);
+                    var asset = PhysicalAsset.Create(
+                        classification,
+                        propertyCode,
+                        purchaseItem.ProductId.Value,
+                        description,
+                        purchaseItem.UnitPrice,
+                        acceptance.AcceptanceDate,
+                        estimatedUsefulLife,
+                        quantity: 1,
+                        unitOfMeasure: unitOfMeasure,
+                        serialNumber: null,
+                        modelNumber: null,
+                        ppeType: ppeType);
 
-            assets.Add(asset);
+                    assets.Add(asset);
+                }
+            }
+            else
+            {
+                var propertyCode = await codeGenerator.GenerateAsync(acceptanceItem, cancellationToken).ConfigureAwait(false);
+                var asset = PhysicalAsset.Create(
+                    classification,
+                    propertyCode,
+                    purchaseItem.ProductId.Value,
+                    description,
+                    purchaseItem.UnitPrice * acceptanceItem.QtyAccepted,
+                    acceptance.AcceptanceDate,
+                    estimatedUsefulLife,
+                    acceptanceItem.QtyAccepted,
+                    unitOfMeasure,
+                    serialNumber: null,
+                    modelNumber: null,
+                    ppeType: ppeType);
+
+                assets.Add(asset);
+            }
         }
 
         return assets;

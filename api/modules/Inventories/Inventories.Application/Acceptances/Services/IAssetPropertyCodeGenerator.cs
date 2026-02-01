@@ -1,9 +1,11 @@
 using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Application.PropertyCodes;
 
 namespace AMIS.WebApi.Inventories.Application.Acceptances.Services;
 
 public interface IAssetPropertyCodeGenerator
 {
-    string Generate(AcceptanceItem item);
+    Task<string> GenerateAsync(AcceptanceItem item, CancellationToken cancellationToken = default);
+    Task<string> GenerateAsync(CoaPropertyCodeRequest request, CancellationToken cancellationToken = default);
 }
 

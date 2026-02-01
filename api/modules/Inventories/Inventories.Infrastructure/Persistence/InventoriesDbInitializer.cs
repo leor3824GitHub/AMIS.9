@@ -1,6 +1,7 @@
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.ValueObjects;
+using AMIS.WebApi.Inventories.Infrastructure.Persistence.Data;
 using System.Data;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
@@ -70,6 +71,9 @@ internal sealed class InventoriesDbInitializer(
     public async Task SeedAsync(CancellationToken cancellationToken)
     {
         logger.LogInformation("[{Tenant}] Starting comprehensive seed data generation", context.TenantInfo!.Identifier);
+
+        await NfaOfficeCodeSeeder.SeedDefaultsAsync(context, logger, cancellationToken);
+        await PpeCodeSeeder.SeedDefaultsAsync(context, logger, cancellationToken);
 
         // 1. Seed Categories (10)
         var categories = await SeedCategoriesAsync(cancellationToken);

@@ -26,7 +26,10 @@ public sealed class SearchPhysicalAssetsSpecs : Specification<PhysicalAsset, Phy
             p.UnitOfMeasure,
             p.SerialNumber,
             p.ModelNumber,
-            p.Location,
+            p.AssignmentHistory
+                .OrderByDescending(h => h.AssignmentDate)
+                .Select(h => h.Location)
+                .FirstOrDefault(),
             p.PPEType,
             p.AccumulatedDepreciation,
             p.BookValue,

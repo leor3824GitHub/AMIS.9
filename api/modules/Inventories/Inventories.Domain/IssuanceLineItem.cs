@@ -5,6 +5,7 @@ namespace AMIS.WebApi.Inventories.Domain;
 /// </summary>
 public record IssuanceLineItem
 {
+    public string PropertyCode { get; }
     public string Name { get; }
     public string Description { get; }
     public DateTime AcquisitionDate { get; }
@@ -14,6 +15,7 @@ public record IssuanceLineItem
     public decimal Amount => Quantity * UnitCost;
 
     public IssuanceLineItem(
+        string propertyCode,
         string name,
         string description,
         DateTime acquisitionDate,
@@ -39,6 +41,7 @@ public record IssuanceLineItem
         if (acquisitionDate > DateTime.UtcNow)
             throw new ArgumentException("Acquisition date cannot be in the future.", nameof(acquisitionDate));
 
+        PropertyCode = propertyCode;
         Name = name;
         Description = description;
         AcquisitionDate = acquisitionDate;

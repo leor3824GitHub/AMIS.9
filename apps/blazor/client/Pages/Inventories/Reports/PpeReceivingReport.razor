@@ -114,6 +114,15 @@
                                     <MudTextField @bind-Value="_draft.PropertyCode" For="@(() => _draft.PropertyCode)"
                                         Label="Property Code"  />
                                 </MudItem>
+                                <MudItem xs="6" md="1">
+                                    <MudTextField @bind-Value="_draft.ClassCode" Label="Class" MaxLength="2" />
+                                </MudItem>
+                                <MudItem xs="6" md="1">
+                                    <MudTextField @bind-Value="_draft.CategoryCode" Label="Category" MaxLength="2" />
+                                </MudItem>
+                                <MudItem xs="6" md="1">
+                                    <MudTextField @bind-Value="_draft.ItemCode" Label="Item" MaxLength="3" />
+                                </MudItem>
                                 <MudItem xs="12" md="3">
                                     <MudTextField @bind-Value="_draft.Description" For="@(() => _draft.Description)"
                                         Label="Description"  />
@@ -159,6 +168,9 @@
                         <MudTable Items="_model.LineItems" Dense="true" Hover="true" Class="mt-3">
                             <HeaderContent>
                                 <MudTh>Property Code</MudTh>
+                                <MudTh>Class</MudTh>
+                                <MudTh>Category</MudTh>
+                                <MudTh>Item</MudTh>
                                 <MudTh>Description</MudTh>
                                 <MudTh>Date Acquired</MudTh>
                                 <MudTh>Qty</MudTh>
@@ -173,6 +185,9 @@
                             </HeaderContent>
                             <RowTemplate>
                                 <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
+                                <MudTd DataLabel="Class">@context.ClassCode</MudTd>
+                                <MudTd DataLabel="Category">@context.CategoryCode</MudTd>
+                                <MudTd DataLabel="Item">@context.ItemCode</MudTd>
                                 <MudTd DataLabel="Description">@context.Description</MudTd>
                                 <MudTd DataLabel="Date Acquired">@(context.DateAcquired?.ToShortDateString() ?? "N/A")
                                 </MudTd>

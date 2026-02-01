@@ -5,4 +5,5 @@ public sealed record CreateTenantCommand(string Id,
     string Name,
     string? ConnectionString,
     string AdminEmail,
-    string? Issuer) : IRequest<CreateTenantResponse>;
+    string? Issuer,
+    string? NfaOfficeCode) : IRequest<CreateTenantResponse>;

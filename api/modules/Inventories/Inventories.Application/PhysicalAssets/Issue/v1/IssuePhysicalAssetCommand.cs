@@ -12,6 +12,7 @@ public record IssuePhysicalAssetCommand : IRequest<IssuePhysicalAssetResponse>
     public string EmployeeName { get; init; } = string.Empty;
     public string DocumentNumber { get; init; } = string.Empty;
     public int? QuantityIssued { get; init; }
+    public string? Location { get; init; }
 }
 
 /// <summary>

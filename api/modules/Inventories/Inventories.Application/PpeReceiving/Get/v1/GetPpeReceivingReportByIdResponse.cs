@@ -7,7 +7,10 @@ public sealed record GetPpeReceivingLineItemResponse(
     decimal Quantity,
     string Unit,
     decimal UnitCost,
-    string Location);
+    string Location,
+    string? ClassCode,
+    string? CategoryCode,
+    string? ItemCode);
 
 public sealed record GetPpeReceivingReportByIdResponse(
     Guid Id,

@@ -31,7 +31,7 @@ public sealed class GetPhysicalAssetHandler(
             physicalAsset.UnitOfMeasure,
             physicalAsset.SerialNumber,
             physicalAsset.ModelNumber,
-            physicalAsset.Location,
+            physicalAsset.CurrentAssignment?.Location,
             physicalAsset.PPEType,
             physicalAsset.AccumulatedDepreciation,
             physicalAsset.BookValue,

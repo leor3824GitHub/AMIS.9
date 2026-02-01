@@ -22,6 +22,7 @@ public class AssetAssignmentHistory : AuditableEntity
     public string AssignmentType { get; private set; } = default!; // Initial, Transfer, Return
     public int Quantity { get; private set; } // For semi-expendable quantity tracking
     public PropertyClassification AssetClassification { get; private set; }
+    public string? Location { get; private set; } // Assignment location
     public string? Reason { get; private set; } // For transfers/returns
     public string? Remarks { get; private set; }
     public Guid? TransferredToEmployeeId { get; private set; } // If transferred
@@ -51,6 +52,7 @@ public class AssetAssignmentHistory : AuditableEntity
         int quantity,
         PropertyClassification assetClassification,
         string assignmentType,
+        string? location = null,
         string? reason = null)
     {
         Id = id;
@@ -64,6 +66,7 @@ public class AssetAssignmentHistory : AuditableEntity
         Quantity = quantity;
         AssetClassification = assetClassification;
         AssignmentType = assignmentType;
+        Location = location;
         Reason = reason;
         Status = "Active";
     }
@@ -80,7 +83,8 @@ public class AssetAssignmentHistory : AuditableEntity
         DocumentType documentType,
         DateTime assignmentDate,
         int quantity,
-        PropertyClassification assetClassification)
+        PropertyClassification assetClassification,
+        string? location = null)
     {
         return new AssetAssignmentHistory(
             Guid.NewGuid(),
@@ -93,7 +97,8 @@ public class AssetAssignmentHistory : AuditableEntity
             assignmentDate,
             quantity,
             assetClassification,
-            "Initial");
+                "Initial",
+                location);
     }
 
     /// <summary>
@@ -111,7 +116,8 @@ public class AssetAssignmentHistory : AuditableEntity
         DateTime transferDate,
         int quantity,
         PropertyClassification assetClassification,
-        string reason)
+        string reason,
+        string? location = null)
     {
         var history = new AssetAssignmentHistory(
             Guid.NewGuid(),
@@ -125,6 +131,7 @@ public class AssetAssignmentHistory : AuditableEntity
             quantity,
             assetClassification,
             "Transfer",
+            location,
             reason);
 
         history.TransferredToEmployeeId = toEmployeeId;

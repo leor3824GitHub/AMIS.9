@@ -41,14 +41,15 @@ public sealed class InventoryRegistryConfiguration : IEntityTypeConfiguration<In
 
     private static void SeedTestData(EntityTypeBuilder<InventoryRegistry> builder)
     {
-        var now = DateTimeOffset.UtcNow;
+        // Use static timestamp instead of DateTimeOffset.UtcNow to prevent model changes on each build
+        var seedTimestamp = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
         var seedData = new[]
         {
-            CreateSeedItem(Guid.NewGuid(), "234", "Desktop Computer", 10, "IT Office - Room 101", "PPERR-001", now),
-            CreateSeedItem(Guid.NewGuid(), "235", "Laptop Computer", 5, "IT Office - Room 102", "PPERR-001", now),
-            CreateSeedItem(Guid.NewGuid(), "236", "Printer", 3, "IT Office - Room 103", "PPERR-001", now),
-            CreateSeedItem(Guid.NewGuid(), "237", "Office Chair", 20, "Main Office", "PPERR-002", now),
-            CreateSeedItem(Guid.NewGuid(), "238", "Desk Lamp", 15, "Main Office", "PPERR-002", now),
+            CreateSeedItem(Guid.Parse("10000000-0000-0000-0000-000000000001"), "234", "Desktop Computer", 10, "IT Office - Room 101", "PPERR-001", seedTimestamp),
+            CreateSeedItem(Guid.Parse("10000000-0000-0000-0000-000000000002"), "235", "Laptop Computer", 5, "IT Office - Room 102", "PPERR-001", seedTimestamp),
+            CreateSeedItem(Guid.Parse("10000000-0000-0000-0000-000000000003"), "236", "Printer", 3, "IT Office - Room 103", "PPERR-001", seedTimestamp),
+            CreateSeedItem(Guid.Parse("10000000-0000-0000-0000-000000000004"), "237", "Office Chair", 20, "Main Office", "PPERR-002", seedTimestamp),
+            CreateSeedItem(Guid.Parse("10000000-0000-0000-0000-000000000005"), "238", "Desk Lamp", 15, "Main Office", "PPERR-002", seedTimestamp),
         };
 
         builder.HasData(seedData);

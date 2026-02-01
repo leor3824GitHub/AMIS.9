@@ -203,7 +203,10 @@ public sealed record PpeReceivingLineItem(
     decimal Quantity,
     string Unit,
     decimal UnitCost,
-    string Location)
+    string Location,
+    string? ClassCode = null,
+    string? CategoryCode = null,
+    string? ItemCode = null)
 {
     public decimal Amount => Quantity * UnitCost;
 }

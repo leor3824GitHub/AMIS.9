@@ -8,6 +8,9 @@
     <Compile Remove="Purchases\Update\v1\PurchaseItemUpdateDto.cs" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\..\..\framework\Core\Core.csproj" />
     <ProjectReference Include="..\Inventories.Domain\Inventories.Domain.csproj" />
   </ItemGroup>

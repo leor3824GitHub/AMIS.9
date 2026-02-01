@@ -23,7 +23,10 @@ public sealed record CreateReceivingLineItemRequest(
     string Unit,
     decimal UnitCost,
     string Location,
-    string? Reference = null);
+    string? Reference = null,
+    string? ClassCode = null,
+    string? CategoryCode = null,
+    string? ItemCode = null);
 
 public sealed record CreateSuppliesAndMaterialsReceivingReportResponse(Guid? Id);
 

@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Shared.Authorization;
 
 namespace AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PpeReceiving;
 
@@ -28,7 +29,7 @@ public static class UpdatePpeReceivingReportEndpoint
             .Produces<Application.PpeReceiving.Update.v1.UpdatePpeReceivingReportResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequirePermission("Permissions.PpeReceiving.Update")
+            .RequirePermission($"{FshResources.PpeReceiving}.{FshActions.Update}")
             .MapToApiVersion(1);
     }
 }

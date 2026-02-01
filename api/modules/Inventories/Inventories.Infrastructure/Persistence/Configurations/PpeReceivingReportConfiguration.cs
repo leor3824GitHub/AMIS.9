@@ -39,6 +39,9 @@ public sealed class PpeReceivingReportConfiguration : IEntityTypeConfiguration<P
             lineItems.Property(li => li.Unit).HasMaxLength(20);
             lineItems.Property(li => li.UnitCost).HasPrecision(18, 2);
             lineItems.Property(li => li.Location).IsRequired().HasMaxLength(200);
+            lineItems.Property(li => li.ClassCode).HasMaxLength(2);
+            lineItems.Property(li => li.CategoryCode).HasMaxLength(2);
+            lineItems.Property(li => li.ItemCode).HasMaxLength(3);
         });
     }
 }

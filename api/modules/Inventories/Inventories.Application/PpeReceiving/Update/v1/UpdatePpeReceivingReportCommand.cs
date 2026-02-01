@@ -18,6 +18,9 @@ public sealed record UpdatePpeReceivingLineItemRequest(
     decimal Quantity,
     string Unit,
     decimal UnitCost,
-    string Location);
+    string Location,
+    string? ClassCode = null,
+    string? CategoryCode = null,
+    string? ItemCode = null);
 
 public sealed record UpdatePpeReceivingReportResponse(Guid Id);

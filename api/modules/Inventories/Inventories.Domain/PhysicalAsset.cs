@@ -26,7 +26,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     // Physical Attributes
     public string? SerialNumber { get; private set; }
     public string? ModelNumber { get; private set; }
-    public string? Location { get; private set; }
     public string Condition { get; private set; } = AssetCondition.Good.Value;
 
     // Quantity (for Semi-Expendable batch tracking)
@@ -85,7 +84,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         string unitOfMeasure,
         string? serialNumber,
         string? modelNumber,
-        string? location,
         string? ppeType,
         PropertyClassification classification)
     {
@@ -100,7 +98,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         UnitOfMeasure = unitOfMeasure;
         SerialNumber = serialNumber;
         ModelNumber = modelNumber;
-        Location = location;
         PPEType = ppeType;
         CurrentClassification = classification;
         AccumulatedDepreciation = 0;
@@ -120,7 +117,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         string unitOfMeasure = "piece",
         string? serialNumber = null,
         string? modelNumber = null,
-        string? location = null,
         string? ppeType = null)
     {
         ValidateCreate(propertyCode, description, acquisitionCost, quantity, estimatedUsefulLife, unitOfMeasure, classification, ppeType);
@@ -137,7 +133,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             unitOfMeasure,
             serialNumber,
             modelNumber,
-            location,
             ppeType,
             classification);
     }
@@ -234,7 +229,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         Guid employeeId,
         string employeeName,
         string documentNumber,
-        int? quantityIssued = null)
+        int? quantityIssued = null,
+        string? location = null)
     {
         ValidateIssue(employeeId, employeeName, documentNumber);
 
@@ -272,7 +268,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             docType,
             assignmentDate,
             quantityIssued ?? 1,
-            classification);
+            classification,
+            location);
 
         AssignmentHistory.Add(history);
 
@@ -418,6 +415,23 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             PhysicalAsset = this,
             CustodianId = employeeId,
             AssignmentDate = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
+    /// Clears the current custodian assignment.
+    /// </summary>
+    public void ClearCustodian()
+    {
+        if (IsDisposed)
+            throw new InvalidOperationException("Cannot clear custodian of disposed asset.");
+
+        CurrentCustodianId = null;
+
+        QueueDomainEvent(new PhysicalAssetCustodianCleared
+        {
+            PhysicalAsset = this,
+            ClearedDate = DateTime.UtcNow
         });
     }
 

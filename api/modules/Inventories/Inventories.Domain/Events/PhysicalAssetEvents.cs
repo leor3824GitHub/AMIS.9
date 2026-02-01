@@ -64,3 +64,9 @@ public record PhysicalAssetAssignedToCustodian : DomainEvent
     public DateTime AssignmentDate { get; init; }
 }
 
+public record PhysicalAssetCustodianCleared : DomainEvent
+{
+    public PhysicalAsset PhysicalAsset { get; init; } = default!;
+    public DateTime ClearedDate { get; init; }
+}
+

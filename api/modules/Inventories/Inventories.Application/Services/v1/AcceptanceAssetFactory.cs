@@ -54,7 +54,6 @@ public static class AcceptanceAssetFactory
                 unitOfMeasure,
                 serialNumber: null,
                 modelNumber: null,
-                location: null,
                 ppeType: ppeType);
 
             assets.Add(asset);

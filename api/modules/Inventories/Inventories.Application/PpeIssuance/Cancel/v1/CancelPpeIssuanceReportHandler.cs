@@ -1,8 +1,10 @@
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Application.InventoryRegistries.Specs;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shared.Authorization;
 
 namespace AMIS.WebApi.Inventories.Application.PpeIssuance.Cancel.v1;
 
@@ -10,10 +12,22 @@ public sealed class CancelPpeIssuanceReportHandler(
     [FromKeyedServices("inventories:ppeir")] IRepository<Domain.PpeIssuanceReport> repository,
     [FromKeyedServices("inventories:inventory-registries")] IRepository<Domain.InventoryRegistry> registryRepository,
     [FromKeyedServices("inventories:inventory-transaction-logs")] IRepository<Domain.InventoryTransactionLog> transactionLogRepository,
+    IAuthorizationService authorizationService,
     ILogger<CancelPpeIssuanceReportHandler> logger) : IRequestHandler<CancelPpeIssuanceReportCommand, CancelPpeIssuanceReportResponse>
 {
     public async Task<CancelPpeIssuanceReportResponse> Handle(CancelPpeIssuanceReportCommand request, CancellationToken cancellationToken)
     {
+        // Authorization check: Only users with Cancel permission can cancel reports
+        var authResult = await authorizationService.AuthorizeAsync(
+            null,
+            $"{FshResources.PpeIssuance}.{FshActions.Cancel}");
+        
+        if (!authResult.Succeeded)
+        {
+            logger.LogWarning("Unauthorized cancellation attempt for PPEIR {Id}", request.Id);
+            throw new UnauthorizedAccessException(
+                "You do not have permission to cancel PPE Issuance reports. Only accounting personnel can perform this action.");
+        }
         var report = await repository.GetByIdAsync(request.Id, cancellationToken);
         if (report is null)
         {

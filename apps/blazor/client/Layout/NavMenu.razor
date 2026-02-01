@@ -66,7 +66,7 @@
             <MudNavLink Href="/inventories/asset-issuance" Icon="@Icons.Material.Filled.QrCode2" Class="fsh-nav-child">
                 Asset Issuance (PAR/ICS)</MudNavLink>
         }
-        @if (_canViewSmir)
+        <!-- @if (_canViewSmir)
         {
             <MudNavLink Href="/inventories/reports/smir" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">
                 SMIR</MudNavLink>
@@ -75,7 +75,7 @@
         {
             <MudNavLink Href="/inventories/reports/smrr" Icon="@Icons.Material.Filled.ReceiptLong" Class="fsh-nav-child">
                 SMRR</MudNavLink>
-        }
+        } -->
         @if (_canViewPpeIssuanceReports)
         {
             <MudNavLink Href="/inventories/reports/ppeir-list" Icon="@Icons.Material.Filled.Send" Class="fsh-nav-child">
@@ -86,12 +86,17 @@
             <MudNavLink Href="/inventories/reports/pper-list" Icon="@Icons.Material.Filled.Inbox" Class="fsh-nav-child">
                 PPE Receiving Report</MudNavLink>
         }
-        @if (_canViewPpeReceivingReports)
+        @if (_canViewPropertyAcknowledgementReceipt)
+        {
+            <MudNavLink Href="/inventories/reports/par-list" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">
+                Property Acknowledgement Receipt (PAR)</MudNavLink>
+        }
+        @if (_canViewSmrr)
         {
             <MudNavLink Href="/inventories/reports/smrr-list" Icon="@Icons.Material.Filled.MoveToInbox" Class="fsh-nav-child">
                 Supplies & Materials Receiving</MudNavLink>
         }
-        @if (_canViewPpeReceivingReports)
+        @if (_canViewSmir)
         {
             <MudNavLink Href="/inventories/reports/smir-list" Icon="@Icons.Material.Filled.SendToMobile" Class="fsh-nav-child">
                 Supplies & Materials Issuance</MudNavLink>

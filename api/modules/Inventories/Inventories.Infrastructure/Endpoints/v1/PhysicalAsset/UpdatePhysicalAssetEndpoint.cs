@@ -25,7 +25,7 @@ public static class UpdatePhysicalAssetEndpoint
         ISender mediator,
         CancellationToken cancellationToken = default)
     {
-        var updateCommand = new UpdatePhysicalAssetCommand(id, command.Location, command.Condition, command.CurrentCustodianId);
+        var updateCommand = new UpdatePhysicalAssetCommand(id, command.Condition, command.CurrentCustodianId);
         var response = await mediator.Send(updateCommand, cancellationToken);
         return Results.Ok(response);
     }

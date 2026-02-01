@@ -21,7 +21,7 @@ public sealed class IssuePhysicalAssetHandler(
         var asset = await repository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
 
-        var history = asset.Issue(request.EmployeeId, request.EmployeeName, request.DocumentNumber, request.QuantityIssued);
+        var history = asset.Issue(request.EmployeeId, request.EmployeeName, request.DocumentNumber, request.QuantityIssued, request.Location);
         await repository.UpdateAsync(asset, cancellationToken);
 
         logger.LogInformation(

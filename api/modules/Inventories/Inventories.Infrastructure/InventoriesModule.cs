@@ -5,6 +5,7 @@ using AMIS.WebApi.Inventories.Infrastructure.Persistence;
 using AMIS.WebApi.Inventories.Infrastructure.Persistence.Repositories;
 using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Application.Acceptances.Services;
+using AMIS.WebApi.Inventories.Application.PropertyCodes;
 using AMIS.WebApi.Inventories.Domain.Services;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Canvass;
@@ -266,10 +267,14 @@ public static class InventoriesModule
             physicalAssetGroup.MapExportPhysicalAssetsEndpoint();
             physicalAssetGroup.MapGetStockLevelsEndpoint();
 
+            var assetManagementGroup = app.MapGroup("asset-management").WithTags("asset-management");
+            assetManagementGroup.MapReclassifyAssetsEndpoint();
+
             var suppliesAndMaterialsIssuanceGroup = app.MapGroup("supplies-materials-issuance").WithTags("supplies-materials-issuance");
             suppliesAndMaterialsIssuanceGroup.MapListSuppliesAndMaterialsIssuanceReportsEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapCreateSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapGetSuppliesAndMaterialsIssuanceReportEndpoint();
+            suppliesAndMaterialsIssuanceGroup.MapUpdateSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapPostSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapCancelSuppliesAndMaterialsIssuanceReportEndpoint();
 
@@ -277,6 +282,7 @@ public static class InventoriesModule
             suppliesAndMaterialsReceivingGroup.MapListSuppliesAndMaterialsReceivingReportsEndpoint();
             suppliesAndMaterialsReceivingGroup.MapCreateSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapGetSuppliesAndMaterialsReceivingReportEndpoint();
+            suppliesAndMaterialsReceivingGroup.MapUpdateSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapPostSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapCancelSuppliesAndMaterialsReceivingReportEndpoint();
 
@@ -312,6 +318,15 @@ public static class InventoriesModule
             var semexTransactionLogGroup = app.MapGroup("semex-transaction-logs").WithTags("semex-transaction-logs");
             semexTransactionLogGroup.MapSearchSemexTransactionLogsEndpoint();
             semexTransactionLogGroup.MapGetSemexTransactionLogEndpoint();
+
+            var parGroup = app.MapGroup("property-accountability-receipt").WithTags("property-accountability-receipt");
+            parGroup.MapListPARsEndpoint();
+            parGroup.MapCreatePAREndpoint();
+            parGroup.MapGetPAREndpoint();
+            parGroup.MapUpdatePAREndpoint();
+            parGroup.MapPostPAREndpoint();
+            parGroup.MapCancelPAREndpoint();
+            parGroup.MapReturnPAREndpoint();
         }
     }
     public static WebApplicationBuilder RegisterInventoriesServices(this WebApplicationBuilder builder)
@@ -319,6 +334,7 @@ public static class InventoriesModule
         ArgumentNullException.ThrowIfNull(builder);
         builder.Services.BindDbContext<InventoriesDbContext>();
         builder.Services.AddScoped<IDbInitializer, InventoriesDbInitializer>();
+        builder.Services.Configure<CoaPropertyCodeOptions>(builder.Configuration.GetSection("Inventories:PropertyCodes"));
         builder.Services.AddKeyedScoped<IRepository<Product>, InventoriesRepository<Product>>("inventories:products");
         builder.Services.AddKeyedScoped<IReadRepository<Product>, InventoriesRepository<Product>>("inventories:products");
         builder.Services.AddKeyedScoped<IRepository<Brand>, InventoriesRepository<Brand>>("inventories:brands");
@@ -380,8 +396,19 @@ public static class InventoriesModule
         builder.Services.AddKeyedScoped<IRepository<AssetClassificationRule>, InventoriesRepository<AssetClassificationRule>>("inventories:classificationRules");
         builder.Services.AddKeyedScoped<IReadRepository<AssetClassificationRule>, InventoriesRepository<AssetClassificationRule>>("inventories:classificationRules");
 
+        builder.Services.AddKeyedScoped<IRepository<PpeCategoryCode>, InventoriesRepository<PpeCategoryCode>>("inventories:ppeCategoryCodes");
+        builder.Services.AddKeyedScoped<IReadRepository<PpeCategoryCode>, InventoriesRepository<PpeCategoryCode>>("inventories:ppeCategoryCodes");
+        builder.Services.AddKeyedScoped<IRepository<PpeTypeCode>, InventoriesRepository<PpeTypeCode>>("inventories:ppeTypeCodes");
+        builder.Services.AddKeyedScoped<IReadRepository<PpeTypeCode>, InventoriesRepository<PpeTypeCode>>("inventories:ppeTypeCodes");
+        builder.Services.AddKeyedScoped<IRepository<PpeItemCode>, InventoriesRepository<PpeItemCode>>("inventories:ppeItemCodes");
+        builder.Services.AddKeyedScoped<IReadRepository<PpeItemCode>, InventoriesRepository<PpeItemCode>>("inventories:ppeItemCodes");
+        builder.Services.AddKeyedScoped<IRepository<NfaOfficeCode>, InventoriesRepository<NfaOfficeCode>>("inventories:nfaOfficeCodes");
+        builder.Services.AddKeyedScoped<IReadRepository<NfaOfficeCode>, InventoriesRepository<NfaOfficeCode>>("inventories:nfaOfficeCodes");
+        builder.Services.AddKeyedScoped<IRepository<PropertyCodeSequence>, InventoriesRepository<PropertyCodeSequence>>("inventories:propertyCodeSequences");
+        builder.Services.AddKeyedScoped<IReadRepository<PropertyCodeSequence>, InventoriesRepository<PropertyCodeSequence>>("inventories:propertyCodeSequences");
+
         // Asset creation strategies (override in composition root if needed)
-        builder.Services.AddScoped<IAssetPropertyCodeGenerator, DefaultAssetPropertyCodeGenerator>();
+        builder.Services.AddScoped<IAssetPropertyCodeGenerator, CoaPropertyCodeGenerator>();
         builder.Services.AddScoped<IAssetClassificationResolver, DefaultAssetClassificationResolver>();
 
         // Procurement Planning (PPMP)
@@ -435,6 +462,10 @@ public static class InventoriesModule
         builder.Services.AddKeyedScoped<IReadRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex-registries");
         builder.Services.AddKeyedScoped<IRepository<SemexTransactionLog>, InventoriesRepository<SemexTransactionLog>>("inventories:semex-transaction-logs");
         builder.Services.AddKeyedScoped<IReadRepository<SemexTransactionLog>, InventoriesRepository<SemexTransactionLog>>("inventories:semex-transaction-logs");
+
+        // Property Accountability Receipt (PAR)
+        builder.Services.AddKeyedScoped<IRepository<PropertyAcknowledgementReceipt>, InventoriesRepository<PropertyAcknowledgementReceipt>>("inventories:par");
+        builder.Services.AddKeyedScoped<IReadRepository<PropertyAcknowledgementReceipt>, InventoriesRepository<PropertyAcknowledgementReceipt>>("inventories:par");
 
         return builder;
     }

@@ -18,13 +18,6 @@ public sealed class UpdatePhysicalAssetHandler(
         var physicalAsset = await repository.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
 
-        // Update location if provided
-        if (!string.IsNullOrWhiteSpace(request.Location))
-        {
-            physicalAsset.GetType().GetProperty(nameof(PhysicalAsset.Location))?
-                .SetValue(physicalAsset, request.Location);
-        }
-
         // Update condition if provided
         if (!string.IsNullOrWhiteSpace(request.Condition))
         {
@@ -43,7 +36,7 @@ public sealed class UpdatePhysicalAssetHandler(
 
         return new UpdatePhysicalAssetResponse(
             physicalAsset.Id,
-            physicalAsset.Location,
+            physicalAsset.CurrentAssignment?.Location,
             physicalAsset.Condition,
             physicalAsset.CurrentCustodianId);
     }

@@ -5,6 +5,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Shared.Authorization;
 
 namespace AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PpeReceiving;
 
@@ -24,7 +25,7 @@ public static class CancelPpeReceivingReportEndpoint
             .Produces<Application.PpeReceiving.Cancel.v1.CancelPpeReceivingReportResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequirePermission("Permissions.PpeReceiving.Delete")
+            .RequirePermission($"{FshResources.PpeReceiving}.{FshActions.Cancel}")
             .MapToApiVersion(1);
     }
 }

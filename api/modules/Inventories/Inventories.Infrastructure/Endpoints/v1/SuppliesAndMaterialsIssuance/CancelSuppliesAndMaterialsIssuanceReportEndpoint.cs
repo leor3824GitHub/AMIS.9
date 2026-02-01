@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;
+using Shared.Authorization;
 
 namespace AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsIssuance;
 
@@ -23,7 +24,7 @@ public static class CancelSuppliesAndMaterialsIssuanceReportEndpoint
             .WithDescription("Cancels a SMIR and reverses semi-expendable inventory changes with transaction logs")
             .Produces<CancelSuppliesAndMaterialsIssuanceReportResponse>()
             .Produces(404)
-            .RequirePermission("Permissions.Inventories.Cancel")
+            .RequirePermission($"{FshResources.SuppliesAndMaterialsIssuance}.{FshActions.Cancel}")
             .MapToApiVersion(1);
     }
 }

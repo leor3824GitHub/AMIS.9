@@ -43,6 +43,10 @@ public sealed class SuppliesAndMaterialsIssuanceReportConfiguration
             lineItemBuilder.WithOwner().HasForeignKey("SuppliesAndMaterialsIssuanceReportId");
             lineItemBuilder.HasKey("Id");
 
+            lineItemBuilder.Property(li => li.PropertyCode)
+                .HasMaxLength(50)
+                .IsRequired();
+
             lineItemBuilder.Property(li => li.Name)
                 .HasMaxLength(200)
                 .IsRequired();

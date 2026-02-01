@@ -1,4 +1,6 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Inventories.Application.Acceptances.Services;
+using AMIS.WebApi.Inventories.Application.PropertyCodes;
 using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using MediatR;
@@ -13,7 +15,11 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
     ILogger<PostSuppliesAndMaterialsReceivingReportHandler> logger,
     [FromKeyedServices("inventories:smrr")] IRepository<SuppliesAndMaterialsReceivingReport> repository,
     [FromKeyedServices("inventories:semex-registries")] IRepository<SemexRegistryDomain> registryRepository,
-    [FromKeyedServices("inventories:semex-transaction-logs")] IRepository<SemexTransactionLogDomain> transactionLogRepository)
+    [FromKeyedServices("inventories:semex-transaction-logs")] IRepository<SemexTransactionLogDomain> transactionLogRepository,
+    [FromKeyedServices("inventories:physicalassets")] IRepository<PhysicalAsset> assetRepository,
+    [FromKeyedServices("inventories:products")] IRepository<Product> productRepository,
+    [FromKeyedServices("inventories:classificationRules")] IReadRepository<AssetClassificationRule> classificationRuleRepository,
+    IAssetPropertyCodeGenerator propertyCodeGenerator)
     : IRequestHandler<PostSuppliesAndMaterialsReceivingReportCommand, PostSuppliesAndMaterialsReceivingReportResponse>
 {
     public async Task<PostSuppliesAndMaterialsReceivingReportResponse> Handle(
@@ -31,6 +37,7 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
             }
 
             var transactionLogs = new List<SemexTransactionLogDomain>();
+            var classificationRules = await classificationRuleRepository.ListAsync(new ActiveClassificationRulesSpec(), cancellationToken).ConfigureAwait(false);
 
             foreach (var lineItem in report.LineItems)
             {
@@ -92,6 +99,54 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
                     report.Source.Name);
 
                 transactionLogs.Add(logEntry);
+
+                var classification = ResolveClassification(classificationRules, lineItem.UnitCost, lineItem.AcquisitionDate);
+                if (classification == PropertyClassification.SemiExpendable)
+                {
+                    var productName = string.IsNullOrWhiteSpace(lineItem.Name) ? "Semi-Expendable Item" : lineItem.Name.Trim();
+                    var product = await productRepository.FirstOrDefaultAsync(new ProductByNameSpec(productName), cancellationToken).ConfigureAwait(false);
+                    if (product is null)
+                    {
+                        product = Product.Create(
+                            name: productName,
+                            description: lineItem.Description,
+                            sku: lineItem.UnitCost,
+                            unit: lineItem.Unit,
+                            imagePath: null,
+                            categoryId: null,
+                            classification: PropertyClassification.SemiExpendable,
+                            estimatedUsefulLife: 12);
+
+                        await productRepository.AddAsync(product, cancellationToken).ConfigureAwait(false);
+                    }
+
+                    var propertyCode = await propertyCodeGenerator.GenerateAsync(
+                        new CoaPropertyCodeRequest(
+                            lineItem.AcquisitionDate,
+                            PropertyClassification.SemiExpendable,
+                            officeCode: null,
+                            classCode: lineItem.ClassCode,
+                            categoryCode: lineItem.CategoryCode,
+                            itemCode: lineItem.ItemCode,
+                            sequenceSuffix: "0"),
+                        cancellationToken).ConfigureAwait(false);
+
+                    var asset = PhysicalAsset.Create(
+                        PropertyClassification.SemiExpendable,
+                        propertyCode,
+                        product.Id,
+                        lineItem.Description,
+                        lineItem.UnitCost * quantity,
+                        lineItem.AcquisitionDate,
+                        estimatedUsefulLife: 12,
+                        quantity: quantity,
+                        unitOfMeasure: lineItem.Unit,
+                        serialNumber: null,
+                        modelNumber: null,
+                        ppeType: null);
+
+                    await assetRepository.AddAsync(asset, cancellationToken).ConfigureAwait(false);
+                }
             }
 
             // Save all changes
@@ -103,6 +158,8 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
                 await transactionLogRepository.AddAsync(log, cancellationToken).ConfigureAwait(false);
             }
             await transactionLogRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await assetRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await productRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             logger.LogInformation("SMRR {SmrrNumber} posted successfully. Semex registry and logs updated.", report.SmrrNumber);
@@ -117,5 +174,29 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
             logger.LogError(ex, "Error posting SMRR {Id}.", request.Id);
             throw;
         }
+    }
+
+    private static PropertyClassification ResolveClassification(
+        IReadOnlyCollection<AssetClassificationRule> rules,
+        decimal unitCost,
+        DateTime acquisitionDate)
+    {
+        var applicableRule = rules
+            .Where(r => r.IsEffectiveOn(acquisitionDate) && r.AppliesToAsset(unitCost))
+            .OrderByDescending(r => r.Priority)
+            .FirstOrDefault();
+
+        return applicableRule?.Classification ?? PropertyClassification.Consumable;
+    }
+
+    private sealed class ActiveClassificationRulesSpec : Ardalis.Specification.Specification<AssetClassificationRule>
+    {
+        public ActiveClassificationRulesSpec() => Query.Where(r => r.IsActive);
+    }
+
+    private sealed class ProductByNameSpec : Ardalis.Specification.Specification<Product>
+    {
+        public ProductByNameSpec(string name)
+            => Query.Where(p => p.Name.ToLower() == name.ToLower());
     }
 }

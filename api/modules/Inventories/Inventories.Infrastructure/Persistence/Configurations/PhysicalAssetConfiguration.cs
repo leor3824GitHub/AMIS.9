@@ -30,7 +30,6 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
         // Physical attributes
         builder.Property(x => x.SerialNumber).HasMaxLength(100);
         builder.Property(x => x.ModelNumber).HasMaxLength(100);
-        builder.Property(x => x.Location).HasMaxLength(200);
         builder.Property(x => x.Condition)
             .IsRequired()
             .HasMaxLength(50);

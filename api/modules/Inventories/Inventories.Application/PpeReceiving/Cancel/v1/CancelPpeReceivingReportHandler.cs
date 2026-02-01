@@ -1,17 +1,33 @@
 using AMIS.Framework.Core.Persistence;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shared.Authorization;
 
 namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Cancel.v1;
 
 public sealed class CancelPpeReceivingReportHandler(
     [FromKeyedServices("inventories:pperr")] IRepository<Domain.PpeReceivingReport> repository,
+    [FromKeyedServices("inventories:inventory-registries")] IRepository<Domain.InventoryRegistry> registryRepository,
     [FromKeyedServices("inventories:inventory-transaction-logs")] IRepository<Domain.InventoryTransactionLog> transactionLogRepository,
+    IAuthorizationService authorizationService,
     ILogger<CancelPpeReceivingReportHandler> logger) : IRequestHandler<CancelPpeReceivingReportCommand, CancelPpeReceivingReportResponse>
 {
     public async Task<CancelPpeReceivingReportResponse> Handle(CancelPpeReceivingReportCommand request, CancellationToken cancellationToken)
     {
+        // Authorization check: Only users with Cancel permission can cancel reports
+        var authResult = await authorizationService.AuthorizeAsync(
+            null,
+            $"{FshResources.PpeReceiving}.{FshActions.Cancel}");
+        
+        if (!authResult.Succeeded)
+        {
+            logger.LogWarning("Unauthorized cancellation attempt for PPERR {Id}", request.Id);
+            throw new UnauthorizedAccessException(
+                "You do not have permission to cancel PPE Receiving reports. Only accounting personnel can perform this action.");
+        }
+
         var report = await repository.GetByIdAsync(request.Id, cancellationToken);
         if (report is null)
         {

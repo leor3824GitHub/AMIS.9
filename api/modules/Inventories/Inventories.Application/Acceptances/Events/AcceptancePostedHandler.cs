@@ -51,10 +51,11 @@ public sealed class AcceptancePostedHandler : INotificationHandler<AcceptancePos
 
         try
         {
-            var assets = AcceptanceAssetFactory.CreateAssets(
+            var assets = await AcceptanceAssetFactory.CreateAssetsAsync(
                 acceptance,
                 _codeGenerator,
-                _classificationResolver);
+                _classificationResolver,
+                cancellationToken).ConfigureAwait(false);
 
             var supplyOfficer = await _employeeRepo.GetByIdAsync(acceptance.SupplyOfficerId, cancellationToken);
 

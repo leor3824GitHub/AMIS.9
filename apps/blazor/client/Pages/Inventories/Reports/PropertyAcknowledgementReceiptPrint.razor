@@ -1,0 +1,281 @@
+@page "/inventories/reports/par-print/{ReportId}"
+@using AMIS.Blazor.Infrastructure.Api
+
+<PageTitle>Print PAR - @_parNumber</PageTitle>
+
+<style>
+    @@media print {
+        .no-print { display: none !important; }
+        body { background: white; }
+        .print-container { margin: 0; padding: 20px; }
+    }
+
+    .print-container {
+        max-width: 8.5in;
+        margin: 0 auto;
+        background: white;
+        padding: 40px;
+    }
+
+    .header-section {
+        text-align: center;
+        margin-bottom: 30px;
+        border-bottom: 2px solid black;
+        padding-bottom: 20px;
+    }
+
+    .par-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+    }
+
+    .par-table th, .par-table td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+
+    .par-table th {
+        background-color: #f0f0f0;
+        font-weight: bold;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: 150px 1fr;
+        gap: 10px;
+        margin: 15px 0;
+    }
+
+    .info-label {
+        font-weight: bold;
+    }
+
+    .signature-section {
+        margin-top: 40px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 30px;
+    }
+
+    .signature-block {
+        text-align: center;
+    }
+
+    .signature-line {
+        border-top: 1px solid black;
+        margin-top: 60px;
+        padding-top: 5px;
+    }
+</style>
+
+<div class="no-print mb-4">
+    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Print" StartIcon="@Icons.Material.Filled.Print">
+        Print
+    </MudButton>
+    <MudButton Variant="Variant.Outlined" Color="Color.Default" Href="@($"/inventories/reports/par/{ReportId}")" Class="ml-2">
+        Back to PAR
+    </MudButton>
+</div>
+
+@if (_loading)
+{
+    <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+}
+else if (_par != null)
+{
+    <div class="print-container">
+        <div class="header-section">
+            <h3>Republic of the Philippines</h3>
+            <h4>[Your Agency Name]</h4>
+            <h2>PROPERTY ACKNOWLEDGEMENT RECEIPT (PAR)</h2>
+            <p><strong>PAR No.: @_par.PARNumber</strong></p>
+        </div>
+
+        <div class="info-grid">
+            <div class="info-label">Employee:</div>
+            <div>@_par.EmployeeName</div>
+
+            <div class="info-label">Department:</div>
+            <div>@_par.Department</div>
+
+            <div class="info-label">Position:</div>
+            <div>@_par.Position</div>
+
+            <div class="info-label">Date of Issuance:</div>
+            <div>@_par.IssuanceDate.ToString("MMMM dd, yyyy")</div>
+
+            @if (!string.IsNullOrWhiteSpace(_par.IssuancePurpose))
+            {
+                <div class="info-label">Purpose:</div>
+                <div>@_par.IssuancePurpose</div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(_par.IssuanceLocation))
+            {
+                <div class="info-label">Location:</div>
+                <div>@_par.IssuanceLocation</div>
+            }
+        </div>
+
+        <table class="par-table">
+            <thead>
+                <tr>
+                    <th style="width: 5%;">No.</th>
+                    <th style="width: 15%;">Property Code</th>
+                    <th style="width: 30%;">Description</th>
+                    <th style="width: 15%;">Date Acquired</th>
+                    <th style="width: 15%;">Cost</th>
+                    <th style="width: 10%;">Condition</th>
+                    <th style="width: 10%;">Remarks</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (_par.LineItems != null)
+                {
+                    @for (int i = 0; i < _par.LineItems.Count; i++)
+                    {
+                        var item = _par.LineItems[i];
+                        <tr>
+                            <td>@(i + 1)</td>
+                            <td>@item.PropertyCode</td>
+                            <td>@item.Description</td>
+                            <td>@item.DateAcquired.ToString("MM/dd/yyyy")</td>
+                            <td style="text-align: right;">@item.AcquisitionCost.ToString("N2")</td>
+                            <td>@item.Condition</td>
+                            <td>@item.Remarks</td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+
+        @if (!string.IsNullOrWhiteSpace(_par.Notes))
+        {
+            <div style="margin-top: 20px;">
+                <strong>Notes:</strong>
+                <p>@_par.Notes</p>
+            </div>
+        }
+
+        <div class="signature-section">
+            <div class="signature-block">
+                <div><strong>Issued By:</strong></div>
+                <div class="signature-line">
+                    <div>@(_par.IssuedByName ?? "_______________________")</div>
+                    <div>Supply Officer</div>
+                    @if (_par.IssuedByDate.HasValue)
+                    {
+                        <div>@_par.IssuedByDate.Value.ToString("MM/dd/yyyy")</div>
+                    }
+                </div>
+            </div>
+
+            <div class="signature-block">
+                <div><strong>Received By:</strong></div>
+                <div class="signature-line">
+                    <div>@(_par.ReceivedByName ?? "_______________________")</div>
+                    <div>@_par.Position</div>
+                    @if (_par.ReceivedByDate.HasValue)
+                    {
+                        <div>@_par.ReceivedByDate.Value.ToString("MM/dd/yyyy")</div>
+                    }
+                </div>
+            </div>
+
+            <div class="signature-block">
+                <div><strong>Approved By:</strong></div>
+                <div class="signature-line">
+                    <div>@(_par.ApprovedByName ?? "_______________________")</div>
+                    <div>Head of Agency</div>
+                    @if (_par.ApprovedByDate.HasValue)
+                    {
+                        <div>@_par.ApprovedByDate.Value.ToString("MM/dd/yyyy")</div>
+                    }
+                </div>
+            </div>
+        </div>
+
+        <div style="margin-top: 40px; font-size: 0.9em; color: #666;">
+            <p><strong>Certification:</strong></p>
+            <p style="text-align: justify;">
+                I hereby acknowledge receipt of the property/equipment listed above in good condition 
+                and serviceable state. I agree to be held accountable for the said property/equipment 
+                and shall be responsible for the care and custody thereof. I understand that I shall 
+                be liable for its money value in case of loss, damage or destruction due to my fault 
+                or negligence.
+            </p>
+        </div>
+
+        @if (_par.Status == PARStatus.Returned && !string.IsNullOrWhiteSpace(_par.ReturnNotes))
+        {
+            <div style="margin-top: 30px; border-top: 2px solid black; padding-top: 20px;">
+                <h4>RETURN INFORMATION</h4>
+                <div class="info-grid">
+                    <div class="info-label">Return Date:</div>
+                    <div>@(_par.ReturnDate?.ToString("MMMM dd, yyyy"))</div>
+
+                    <div class="info-label">Return Notes:</div>
+                    <div>@_par.ReturnNotes</div>
+                </div>
+            </div>
+        }
+
+        @if (_par.Status == PARStatus.Cancelled)
+        {
+            <div style="margin-top: 30px; border: 2px solid red; padding: 10px; text-align: center;">
+                <h3 style="color: red;">CANCELLED</h3>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <MudAlert Severity="Severity.Error">PAR not found</MudAlert>
+}
+
+@code {
+    [Parameter] public string? ReportId { get; set; }
+    [Inject] private IApiClient ApiClient { get; set; } = default!;
+    [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    private PARDetailsDto? _par;
+    private string _parNumber = "";
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(ReportId) && Guid.TryParse(ReportId, out var id))
+        {
+            await LoadPARAsync(id);
+        }
+        else
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task LoadPARAsync(Guid id)
+    {
+        try
+        {
+            _par = await ApiClient.GetPARByIdAsync(id);
+            _parNumber = _par.PARNumber;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error loading PAR: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task Print()
+    {
+        await JSRuntime.InvokeVoidAsync("window.print");
+    }
+}

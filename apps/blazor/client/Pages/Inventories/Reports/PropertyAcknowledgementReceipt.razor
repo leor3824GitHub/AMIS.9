@@ -1,0 +1,219 @@
+@page "/inventories/reports/par"
+@page "/inventories/reports/par/{ReportId}"
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@using System.ComponentModel.DataAnnotations
+
+<PageHeader Title="Property Acknowledgement Receipt (PAR)" Header="Property Acknowledgement Receipt" SubHeader="Assign PPE to custodians" />
+
+@code {
+    [Parameter]
+    public string? ReportId { get; set; }
+}
+
+<MudPaper Class="report-shell pa-4">
+    <MudStack Spacing="3">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="flex-1">
+                Property Acknowledgement Receipt (PAR) for PPE custodian assignment and accountability.
+                @if (_isReadOnly)
+                {
+                    <strong> - View Only Mode</strong>
+                }
+            </MudAlert>
+            <MudChip T="string" Variant="Variant.Outlined" Color="@(_reportStatus == 0 ? Color.Warning : Color.Success)"
+                Icon="@(_reportStatus == 0 ? Icons.Material.Filled.Edit : Icons.Material.Filled.Lock)">
+                @_reportStatusText
+            </MudChip>
+        </MudStack>
+
+        <MudStack Row="true" Spacing="1">
+            @if (!_isReadOnly)
+            {
+                @if (_reportStatus == 0)
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitAsync" Disabled="@(!CanSave)"
+                        StartIcon="@Icons.Material.Filled.Save">@_actionButtonText</MudButton>
+                    @if (CanPost)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="PostAsync"
+                            StartIcon="@Icons.Material.Filled.Lock">Post &amp; Assign</MudButton>
+                    }
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetWithConfirmation"
+                        StartIcon="@Icons.Material.Filled.Refresh">Reset</MudButton>
+                    @if (_reportId.HasValue)
+                    {
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => CancelEdit())"
+                            StartIcon="@Icons.Material.Filled.Close">Cancel Edit</MudButton>
+                    }
+                }
+                else if (_reportStatus == 1) // Posted
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="ReturnAsync"
+                        StartIcon="@Icons.Material.Filled.Undo">Return Items</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="CancelPARAsync"
+                        StartIcon="@Icons.Material.Filled.Cancel">Cancel PAR</MudButton>
+                }
+            }
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="@(() => PrintAsync())"
+                StartIcon="@Icons.Material.Filled.Print">Print</MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(() => GoToList())"
+                StartIcon="@Icons.Material.Filled.ArrowBack">Back to List</MudButton>
+        </MudStack>
+
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+            <MudTabPanel Text="PAR Details" Icon="@Icons.Material.Filled.Description">
+                <MudGrid GutterSize="2">
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="_model.PARNumber" For="@(() => _model.PARNumber)"
+                            Label="PAR Number" Required="true" MaxLength="20"
+                            Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudDatePicker @bind-Date="_model.IssuanceDate" Label="Issuance Date" Required="true"
+                            MaxDate="@DateTime.Today" Format="MM/dd/yyyy"
+                            Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="_model.Position" For="@(() => _model.Position)"
+                            Label="Position" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudAutocomplete T="EmployeeDto" @bind-Value="_selectedEmployee" Label="Employee/Custodian" Required="true"
+                            SearchFunc="@SearchEmployees" ToStringFunc="@(e => e?.Name ?? "")"
+                            Disabled="@(_reportStatus != 0 || _isReadOnly)"
+                            ValueChanged="@OnEmployeeSelected" Clearable="true">
+                            <ItemTemplate Context="employee">
+                                <MudText>@employee.Name</MudText>
+                                <MudText Typo="Typo.caption">@employee.Department</MudText>
+                            </ItemTemplate>
+                        </MudAutocomplete>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_model.Department" For="@(() => _model.Department)"
+                            Label="Department" Required="true" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_model.IssuancePurpose" For="@(() => _model.IssuancePurpose)"
+                            Label="Issuance Purpose" Lines="2" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_model.IssuanceLocation" For="@(() => _model.IssuanceLocation)"
+                            Label="Issuance Location" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_model.Notes" For="@(() => _model.Notes)"
+                            Label="Notes" Lines="3" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <MudTabPanel Text="PPE Line Items" Icon="@Icons.Material.Filled.List">
+                <MudStack Spacing="2">
+                    @if (_reportStatus == 0 && !_isReadOnly)
+                    {
+                        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddLineItem"
+                                StartIcon="@Icons.Material.Filled.Add">Add PPE Item</MudButton>
+                            <MudText Typo="Typo.body2" Color="Color.Info">
+                                Total Items: @_model.LineItems.Count | Total Value: @_model.LineItems.Sum(x => x.AcquisitionCost).ToString("C")
+                            </MudText>
+                        </MudStack>
+                    }
+
+                    <MudTable Items="@_model.LineItems" Dense="true" Hover="true" Striped="true" Elevation="0">
+                        <HeaderContent>
+                            <MudTh>Property Code</MudTh>
+                            <MudTh>Description</MudTh>
+                            <MudTh>Date Acquired</MudTh>
+                            <MudTh>Acquisition Cost</MudTh>
+                            <MudTh>Condition</MudTh>
+                            <MudTh>Remarks</MudTh>
+                            @if (_reportStatus == 0 && !_isReadOnly)
+                            {
+                                <MudTh>Actions</MudTh>
+                            }
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
+                            <MudTd DataLabel="Description">@context.Description</MudTd>
+                            <MudTd DataLabel="Date Acquired">@context.DateAcquired.ToString("MM/dd/yyyy")</MudTd>
+                            <MudTd DataLabel="Acquisition Cost">@context.AcquisitionCost.ToString("C")</MudTd>
+                            <MudTd DataLabel="Condition">@context.Condition</MudTd>
+                            <MudTd DataLabel="Remarks">@context.Remarks</MudTd>
+                            @if (_reportStatus == 0 && !_isReadOnly)
+                            {
+                                <MudTd>
+                                    <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
+                                        OnClick="@(() => EditLineItem(context))" />
+                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                        OnClick="@(() => RemoveLineItem(context))" />
+                                </MudTd>
+                            }
+                        </RowTemplate>
+                    </MudTable>
+                </MudStack>
+            </MudTabPanel>
+
+            @if (_reportStatus > 0)
+            {
+                <MudTabPanel Text="Signatures" Icon="@Icons.Material.Filled.Draw">
+                    <MudGrid GutterSize="2">
+                        <MudItem xs="12" md="4">
+                            <MudTextField Value="@_model.IssuedByName" Label="Issued By" ReadOnly="true" />
+                            <MudTextField Value="@_model.IssuedByDate?.ToString("MM/dd/yyyy")" Label="Date Issued" ReadOnly="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField Value="@_model.ReceivedByName" Label="Received By" ReadOnly="true" />
+                            <MudTextField Value="@_model.ReceivedByDate?.ToString("MM/dd/yyyy")" Label="Date Received" ReadOnly="true" />
+                        </MudItem>
+                        <MudItem xs="12" md="4">
+                            <MudTextField Value="@_model.ApprovedByName" Label="Approved By" ReadOnly="true" />
+                            <MudTextField Value="@_model.ApprovedByDate?.ToString("MM/dd/yyyy")" Label="Date Approved" ReadOnly="true" />
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
+            }
+        </MudTabs>
+    </MudStack>
+</MudPaper>
+
+@if (_showLineItemDialog)
+{
+    <MudDialog @bind-Visible="_showLineItemDialog" Options="@_dialogOptions">
+        <TitleContent>
+            <MudText Typo="Typo.h6">@(_editingLineItem != null ? "Edit" : "Add") PPE Line Item</MudText>
+        </TitleContent>
+        <DialogContent>
+            <MudGrid GutterSize="2">
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_currentLineItem.PropertyCode" Label="Property Code" Required="true" MaxLength="50" />
+                </MudItem>
+                <MudItem xs="12">
+                    <MudTextField @bind-Value="_currentLineItem.Description" Label="Description" Required="true" Lines="2" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudDatePicker @bind-Date="_currentLineItem.DateAcquired" Label="Date Acquired" Required="true"
+                        MaxDate="@DateTime.Today" Format="MM/dd/yyyy" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudNumericField @bind-Value="_currentLineItem.AcquisitionCost" Label="Acquisition Cost" Required="true"
+                        Format="C" Min="0" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_currentLineItem.Condition" Label="Condition" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="_currentLineItem.Remarks" Label="Remarks" />
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelLineItemEdit">Cancel</MudButton>
+            <MudButton Color="Color.Primary" OnClick="SaveLineItem">Save</MudButton>
+        </DialogActions>
+    </MudDialog>
+}

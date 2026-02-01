@@ -72,6 +72,9 @@
                             <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">@_model.LineItems.Count item(s)</MudChip>
                         </MudStack>
                         <MudGrid GutterSize="2" Class="mt-2">
+                            <MudItem xs="12" md="2">
+                                <MudTextField @bind-Value="_draft.PropertyCode" For="@(() => _draft.PropertyCode)" Label="Property Code" Required="true" />
+                            </MudItem>
                             <MudItem xs="12" md="3">
                                 <MudTextField @bind-Value="_draft.Name" For="@(() => _draft.Name)" Label="Item Name" Required="true" />
                             </MudItem>
@@ -98,6 +101,7 @@
 
                         <MudTable Items="_model.LineItems" Dense="true" Hover="true" Class="mt-3">
                             <HeaderContent>
+                                <MudTh>Property Code</MudTh>
                                 <MudTh>Name</MudTh>
                                 <MudTh>Description</MudTh>
                                 <MudTh>Qty</MudTh>
@@ -107,6 +111,7 @@
                                 <MudTh></MudTh>
                             </HeaderContent>
                             <RowTemplate>
+                                <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
                                 <MudTd DataLabel="Name">@context.Name</MudTd>
                                 <MudTd DataLabel="Description">@context.Description</MudTd>
                                 <MudTd DataLabel="Qty">@context.Quantity</MudTd>

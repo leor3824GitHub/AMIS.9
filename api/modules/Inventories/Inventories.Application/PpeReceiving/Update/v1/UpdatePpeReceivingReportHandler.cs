@@ -1,19 +1,34 @@
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Domain;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shared.Authorization;
 
 namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Update.v1;
 
 public sealed class UpdatePpeReceivingReportHandler(
     ILogger<UpdatePpeReceivingReportHandler> logger,
-    [FromKeyedServices("inventories:pperr")] IRepository<PpeReceivingReport> repository)
+    [FromKeyedServices("inventories:pperr")] IRepository<PpeReceivingReport> repository,
+    IAuthorizationService authorizationService)
     : IRequestHandler<UpdatePpeReceivingReportCommand, UpdatePpeReceivingReportResponse>
 {
     public async Task<UpdatePpeReceivingReportResponse> Handle(UpdatePpeReceivingReportCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
+
+        // Authorization check: Only users with Update permission can update reports
+        var authResult = await authorizationService.AuthorizeAsync(
+            null,
+            $"{FshResources.PpeReceiving}.{FshActions.Update}");
+        
+        if (!authResult.Succeeded)
+        {
+            logger.LogWarning("Unauthorized update attempt for PPERR {Id}", request.Id);
+            throw new UnauthorizedAccessException(
+                "You do not have permission to update PPE Receiving reports. Only accounting personnel can perform this action.");
+        }
 
         try
         {
@@ -21,6 +36,23 @@ public sealed class UpdatePpeReceivingReportHandler(
             if (report is null)
             {
                 throw new InvalidOperationException($"PPE Receiving Report with Id {request.Id} was not found.");
+            }
+
+            // Ensure report is in Draft status before allowing updates
+            if (report.Status == PpeReportStatus.Cancelled)
+            {
+                logger.LogWarning("Update attempt for cancelled PPERR {Id}", request.Id);
+                throw new InvalidOperationException(
+                    $"PPE Receiving Report with Id {request.Id} cannot be updated. Reports in Cancelled status cannot be modified.");
+            }
+
+            // If the report is Posted, only Accounting personnel can update it for data integrity
+            // Supply officers can update Draft reports, but Posted reports are protected
+            if (report.Status == PpeReportStatus.Posted)
+            {
+                logger.LogWarning("Posted PPERR {Id} update attempt - only accounting personnel can update posted reports", request.Id);
+                throw new InvalidOperationException(
+                    $"PPE Receiving Report with Id {request.Id} is already Posted. Only Accounting personnel can modify posted reports for data integrity purposes. If changes are necessary, please contact your Accounting department.");
             }
 
             var source = new PpeSourceInfo(request.SourceName, request.SourceAddress, request.SourceReceiptDate);
@@ -37,7 +69,10 @@ public sealed class UpdatePpeReceivingReportHandler(
                 x.Quantity,
                 x.Unit,
                 x.UnitCost,
-                x.Location)).ToList();
+                x.Location,
+                x.ClassCode,
+                x.CategoryCode,
+                x.ItemCode)).ToList();
 
             report.AddLineItems(lineItems);
 

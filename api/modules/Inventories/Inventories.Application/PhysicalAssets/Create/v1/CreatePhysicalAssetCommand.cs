@@ -15,7 +15,6 @@ public sealed record CreatePhysicalAssetCommand(
     string UnitOfMeasure = "piece",
     string? SerialNumber = null,
     string? ModelNumber = null,
-    string? Location = null,
     string? PPEType = null) : IRequest<CreatePhysicalAssetResponse>;
 
 public sealed record CreatePhysicalAssetResponse(

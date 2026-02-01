@@ -1,0 +1,70 @@
+@using AMIS.Blazor.Infrastructure.Api
+
+<MudDialog>
+    <DialogContent>
+        <MudText Typo="Typo.h6" Class="mb-4">Return PAR Items: @PARNumber</MudText>
+        
+        <MudTextField @bind-Value="_returnDate" 
+                      Label="Return Date" 
+                      InputType="InputType.Date"
+                      Variant="Variant.Outlined" 
+                      Class="mb-4"
+                      Required="true" />
+
+        <MudTextField @bind-Value="_returnNotes" 
+                      Label="Return Notes" 
+                      Variant="Variant.Outlined"
+                      Lines="3"
+                      Class="mb-4" />
+
+        <MudText Typo="Typo.body2" Color="Color.Warning">
+            This will mark all items in this PAR as returned and update the custodian records.
+        </MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="Submit" Disabled="@(!CanSubmit)">
+            Return Items
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [Inject] private IApiClient ApiClient { get; set; } = default!;
+    [Inject] private ISnackbar Snackbar { get; set; } = default!;
+
+    [Parameter] public Guid PARId { get; set; }
+    [Parameter] public string PARNumber { get; set; } = "";
+
+    private string _returnDate = DateTime.Today.ToString("yyyy-MM-dd");
+    private string? _returnNotes;
+
+    private bool CanSubmit => !string.IsNullOrWhiteSpace(_returnDate);
+
+    private async Task Submit()
+    {
+        try
+        {
+            var request = new ReturnPARCommand
+            {
+                Id = PARId,
+                ReturnDate = DateTimeOffset.Parse(_returnDate),
+                ReturnNotes = _returnNotes
+            };
+
+            await ApiClient.ReturnPARAsync(request);
+            Snackbar.Add("PAR items returned successfully", Severity.Success);
+            MudDialog.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Error returning PAR items: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog.Cancel();
+    }
+}

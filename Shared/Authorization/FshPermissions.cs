@@ -1,4 +1,4 @@
-﻿using System.Collections.ObjectModel;
+using System.Collections.ObjectModel;
 
 namespace Shared.Authorization;
 
@@ -137,6 +137,7 @@ public static class FshPermissions
         new("Create SuppliesAndMaterialsIssuance", FshActions.Create, FshResources.SuppliesAndMaterialsIssuance),
         new("Update SuppliesAndMaterialsIssuance", FshActions.Update, FshResources.SuppliesAndMaterialsIssuance),
         new("Delete SuppliesAndMaterialsIssuance", FshActions.Delete, FshResources.SuppliesAndMaterialsIssuance),
+        new("Cancel SuppliesAndMaterialsIssuance", FshActions.Cancel, FshResources.SuppliesAndMaterialsIssuance),
 
         //supplies and materials receiving reports (SMRR)
         new("View SuppliesAndMaterialsReceiving", FshActions.View, FshResources.SuppliesAndMaterialsReceiving, IsBasic: true),
@@ -144,6 +145,7 @@ public static class FshPermissions
         new("Create SuppliesAndMaterialsReceiving", FshActions.Create, FshResources.SuppliesAndMaterialsReceiving),
         new("Update SuppliesAndMaterialsReceiving", FshActions.Update, FshResources.SuppliesAndMaterialsReceiving),
         new("Delete SuppliesAndMaterialsReceiving", FshActions.Delete, FshResources.SuppliesAndMaterialsReceiving),
+        new("Cancel SuppliesAndMaterialsReceiving", FshActions.Cancel, FshResources.SuppliesAndMaterialsReceiving),
 
         //ppe issuance reports (PPEIR)
         new("View PpeIssuance", FshActions.View, FshResources.PpeIssuance, IsBasic: true),
@@ -152,6 +154,7 @@ public static class FshPermissions
         new("Update PpeIssuance", FshActions.Update, FshResources.PpeIssuance),
         new("Delete PpeIssuance", FshActions.Delete, FshResources.PpeIssuance),
         new("Post PpeIssuance", FshActions.Post, FshResources.PpeIssuance),
+        new("Cancel PpeIssuance", FshActions.Cancel, FshResources.PpeIssuance),
 
         //ppe receiving reports (PPER)
         new("View PpeReceiving", FshActions.View, FshResources.PpeReceiving, IsBasic: true),
@@ -160,6 +163,7 @@ public static class FshPermissions
         new("Update PpeReceiving", FshActions.Update, FshResources.PpeReceiving),
         new("Post PpeReceiving", FshActions.Post, FshResources.PpeReceiving),
         new("Delete PpeReceiving", FshActions.Delete, FshResources.PpeReceiving),
+        new("Cancel PpeReceiving", FshActions.Cancel, FshResources.PpeReceiving),
 
         //inventorytransactions
         new("View InventoryTransactions", FshActions.View, FshResources.InventoryTransactions, IsBasic: true),

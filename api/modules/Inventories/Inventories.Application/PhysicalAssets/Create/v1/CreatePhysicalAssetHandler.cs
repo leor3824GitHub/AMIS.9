@@ -27,7 +27,6 @@ public sealed class CreatePhysicalAssetHandler(
             request.UnitOfMeasure,
             request.SerialNumber,
             request.ModelNumber,
-            request.Location,
             request.PPEType);
 
         await repository.AddAsync(physicalAsset, cancellationToken);

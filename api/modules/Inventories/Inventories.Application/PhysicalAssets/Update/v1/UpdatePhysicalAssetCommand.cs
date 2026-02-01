@@ -4,7 +4,6 @@ namespace AMIS.WebApi.Inventories.Application.PhysicalAssets.Update.v1;
 
 public sealed record UpdatePhysicalAssetCommand(
     Guid Id,
-    string? Location = null,
     string? Condition = null,
     Guid? CurrentCustodianId = null) : IRequest<UpdatePhysicalAssetResponse>;
 

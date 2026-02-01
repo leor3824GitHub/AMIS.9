@@ -30,6 +30,7 @@ public partial class NavMenu
     private bool _canViewSmrr;
     private bool _canViewPpeIssuanceReports;
     private bool _canViewPpeReceivingReports;
+    private bool _canViewPropertyAcknowledgementReceipt;
     private bool _canViewCategories;
     private bool _canViewSuppliers;
     private bool _canViewEmployees;
@@ -63,6 +64,7 @@ public partial class NavMenu
         _canViewSmrr = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.SuppliesAndMaterialsReceiving);
         _canViewPpeIssuanceReports = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PpeIssuance);
         _canViewPpeReceivingReports = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PpeReceiving);
+        _canViewPropertyAcknowledgementReceipt = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PropertyAcknowledgementReceipt);
         _canViewCategories = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Categories);
         _canViewSuppliers = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Suppliers);
         _canViewEmployees = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Employees);

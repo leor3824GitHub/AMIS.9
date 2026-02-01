@@ -1,7 +1,6 @@
 @page "/inventories/reports/pper-list"
 @using AMIS.Blazor.Infrastructure.Api
-@using AMIS.Blazor.Client.Components
-@using MudBlazor
+@inject IAuthorizationService AuthService
 @inject NavigationManager NavigationManager
 
 <PageHeader Title="PPERR List" Header="PPE Receiving Reports" SubHeader="View and manage PPE Receiving Reports" />
@@ -10,7 +9,7 @@
     <MudStack Spacing="3">
         <MudStack Row="true" Spacing="2" Justify="Justify.FlexEnd">
             <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="CreateNewReport"
-                StartIcon="@Icons.Material.Filled.Add">New Report</MudButton>
+                StartIcon="@Icons.Material.Filled.Add" Disabled="!_canCreate">New Report</MudButton>
             <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="LoadReports"
                 StartIcon="@Icons.Material.Filled.Refresh">Refresh</MudButton>
         </MudStack>
@@ -64,14 +63,14 @@
                         @if (context.Status == 0)
                         {
                             <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary"
-                                OnClick="@(() => EditReport(context.Id))" Title="Edit" />
+                                OnClick="@(() => EditReport(context.Id))" Title="Edit" Disabled="!_canUpdate" />
                         }
                         <MudIconButton Icon="@Icons.Material.Filled.Print" Color="Color.Info"
                             OnClick="@(() => PrintReport(context.Id))" Title="Print" />
                         @if (context.Status == 0)
                         {
                             <MudIconButton Icon="@Icons.Material.Filled.Lock" Color="Color.Warning"
-                                OnClick="@(() => PostReport(context.Id))" Title="Post" />
+                                OnClick="@(() => PostReport(context.Id))" Title="Post" Disabled="!_canPost" />
                         }
                     </MudTd>
                 </RowTemplate>
@@ -84,12 +83,20 @@
     private const string ApiVersion = "1";
     [Inject] public IApiClient ApiClient { get; set; } = default!;
     [Inject] public ISnackbar Snackbar { get; set; } = default!;
+    [CascadingParameter] private Task<AuthenticationState> AuthState { get; set; } = default!;
 
     private List<PpeReceivingReportDto> _reports = [];
     private bool _isLoading;
+    private bool _canCreate;
+    private bool _canUpdate;
+    private bool _canPost;
 
     protected override async Task OnInitializedAsync()
     {
+        var user = (await AuthState).User;
+        _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.PpeReceiving);
+        _canUpdate = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.PpeReceiving);
+        _canPost = await AuthService.HasPermissionAsync(user, FshActions.Post, FshResources.PpeReceiving);
         await LoadReports();
     }
 

@@ -28,8 +28,8 @@ public sealed class GetStockLevelsHandler(
             .ToDictionary(g => g.Key, g => g.Count());
 
         var byLocation = assets
-            .Where(a => !a.IsDisposed && !string.IsNullOrEmpty(a.Location))
-            .GroupBy(a => a.Location!)
+            .Where(a => !a.IsDisposed && !string.IsNullOrEmpty(a.CurrentAssignment?.Location))
+            .GroupBy(a => a.CurrentAssignment!.Location!)
             .ToDictionary(g => g.Key, g => g.Count());
 
         return new GetStockLevelsResponse(

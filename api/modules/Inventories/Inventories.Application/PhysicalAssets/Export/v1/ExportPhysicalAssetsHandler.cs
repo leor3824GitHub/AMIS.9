@@ -16,6 +16,14 @@ public sealed class ExportPhysicalAssetsHandler(
         var spec = new ExportPhysicalAssetsSpec(request);
         var assets = await repository.ListAsync(spec, cancellationToken);
 
+        if (!string.IsNullOrWhiteSpace(request.Location))
+        {
+            assets = assets
+                .Where(a => !string.IsNullOrWhiteSpace(a.CurrentAssignment?.Location) &&
+                            a.CurrentAssignment!.Location!.Contains(request.Location, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+
         var csv = GenerateCsv(assets);
         var fileName = $"PhysicalAssets_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
 
@@ -29,7 +37,7 @@ public sealed class ExportPhysicalAssetsHandler(
 
         foreach (var asset in assets)
         {
-            sb.AppendLine($"{asset.PropertyCode},{EscapeCsv(asset.Description)},{asset.CurrentClassification},{asset.AcquisitionCost},{asset.AcquisitionDate:yyyy-MM-dd},{EscapeCsv(asset.Location)},{asset.Condition},{asset.Quantity},{asset.BookValue},{asset.IsDisposed},{asset.CurrentCustodianId}");
+            sb.AppendLine($"{asset.PropertyCode},{EscapeCsv(asset.Description)},{asset.CurrentClassification},{asset.AcquisitionCost},{asset.AcquisitionDate:yyyy-MM-dd},{EscapeCsv(asset.CurrentAssignment?.Location)},{asset.Condition},{asset.Quantity},{asset.BookValue},{asset.IsDisposed},{asset.CurrentCustodianId}");
         }
 
         return Encoding.UTF8.GetBytes(sb.ToString());
@@ -53,11 +61,6 @@ public sealed class ExportPhysicalAssetsSpec : Specification<PhysicalAsset>
         if (!string.IsNullOrWhiteSpace(request.Classification))
         {
             Query.Where(p => p.CurrentClassification.ToString() == request.Classification);
-        }
-
-        if (!string.IsNullOrWhiteSpace(request.Location))
-        {
-            Query.Where(p => p.Location != null && p.Location.Contains(request.Location));
         }
 
         if (!string.IsNullOrWhiteSpace(request.Condition))

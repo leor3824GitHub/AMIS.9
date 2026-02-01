@@ -30,7 +30,10 @@ public sealed class GetPpeReceivingReportByIdHandler(
                 li.Quantity,
                 li.Unit,
                 li.UnitCost,
-                li.Location))
+                li.Location,
+                li.ClassCode,
+                li.CategoryCode,
+                li.ItemCode))
             .ToList();
 
         return new GetPpeReceivingReportByIdResponse(

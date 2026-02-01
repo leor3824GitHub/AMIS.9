@@ -105,11 +105,10 @@ public partial class PpeReceivingReport : ComponentBase
 
     private void AddLineItem()
     {
-        if (string.IsNullOrWhiteSpace(_draft.PropertyCode)
-            || string.IsNullOrWhiteSpace(_draft.Description)
+        if (string.IsNullOrWhiteSpace(_draft.Description)
             || string.IsNullOrWhiteSpace(_draft.Location))
         {
-            Snackbar.Add("Property code, description, and location are required for each line item", Severity.Warning);
+            Snackbar.Add("Description and location are required for each line item", Severity.Warning);
             return;
         }
 
@@ -123,6 +122,9 @@ public partial class PpeReceivingReport : ComponentBase
             Unit = _draft.Unit?.Trim() ?? string.Empty,
             UnitCost = _draft.UnitCost,
             Location = _draft.Location?.Trim() ?? string.Empty,
+            ClassCode = _draft.ClassCode?.Trim(),
+            CategoryCode = _draft.CategoryCode?.Trim(),
+            ItemCode = _draft.ItemCode?.Trim(),
         });
 
         ResetDraft();
@@ -144,6 +146,9 @@ public partial class PpeReceivingReport : ComponentBase
             Unit = item.Unit,
             UnitCost = item.UnitCost,
             Location = item.Location,
+            ClassCode = item.ClassCode,
+            CategoryCode = item.CategoryCode,
+            ItemCode = item.ItemCode,
         };
         _model.LineItems.Remove(item);
         _isEditingLineItem = true;
@@ -161,6 +166,9 @@ public partial class PpeReceivingReport : ComponentBase
             Unit = item.Unit,
             UnitCost = item.UnitCost,
             Location = item.Location,
+            ClassCode = item.ClassCode,
+            CategoryCode = item.CategoryCode,
+            ItemCode = item.ItemCode,
         });
         Snackbar.Add("Item duplicated", Severity.Success);
     }
@@ -333,6 +341,9 @@ public partial class PpeReceivingReport : ComponentBase
                     Unit = li.Unit,
                     UnitCost = li.UnitCost,
                     Location = li.Location,
+                    ClassCode = li.ClassCode,
+                    CategoryCode = li.CategoryCode,
+                    ItemCode = li.ItemCode,
                 }).ToList() ?? new()
             };
 
@@ -406,6 +417,9 @@ public partial class PpeReceivingReport : ComponentBase
                         Unit = li.Unit,
                         UnitCost = li.UnitCost,
                         Location = li.Location,
+                        ClassCode = li.ClassCode,
+                        CategoryCode = li.CategoryCode,
+                        ItemCode = li.ItemCode,
                     }).ToList(),
                 };
 
@@ -432,6 +446,9 @@ public partial class PpeReceivingReport : ComponentBase
                         Unit = li.Unit,
                         UnitCost = li.UnitCost,
                         Location = li.Location,
+                        ClassCode = li.ClassCode,
+                        CategoryCode = li.CategoryCode,
+                        ItemCode = li.ItemCode,
                     }).ToList(),
                 };
 
@@ -528,5 +545,8 @@ public class PpeReceivingLineItemModel
     [Range(0, double.MaxValue)]
     public double UnitCost { get; set; }
     public string Location { get; set; } = string.Empty;
+    public string? ClassCode { get; set; }
+    public string? CategoryCode { get; set; }
+    public string? ItemCode { get; set; }
 }
 #endregion

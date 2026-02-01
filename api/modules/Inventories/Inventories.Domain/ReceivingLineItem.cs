@@ -13,6 +13,9 @@ public record ReceivingLineItem
     public string Unit { get; }
     public decimal UnitCost { get; }
     public string Location { get; }
+    public string? ClassCode { get; }
+    public string? CategoryCode { get; }
+    public string? ItemCode { get; }
     public decimal Amount => Quantity * UnitCost;
 
     public ReceivingLineItem(
@@ -23,7 +26,10 @@ public record ReceivingLineItem
         string unit,
         decimal unitCost,
         string location,
-        string? reference = null)
+        string? reference = null,
+        string? classCode = null,
+        string? categoryCode = null,
+        string? itemCode = null)
     {
         if (string.IsNullOrWhiteSpace(name))
             throw new ArgumentException("Item name cannot be empty.", nameof(name));
@@ -54,6 +60,9 @@ public record ReceivingLineItem
         Unit = unit;
         UnitCost = unitCost;
         Location = location;
+        ClassCode = classCode;
+        CategoryCode = categoryCode;
+        ItemCode = itemCode;
     }
 }
 

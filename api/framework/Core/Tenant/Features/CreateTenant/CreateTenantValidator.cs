@@ -26,5 +26,8 @@ public class CreateTenantValidator : AbstractValidator<CreateTenantCommand>
         RuleFor(t => t.AdminEmail).Cascade(CascadeMode.Stop)
             .NotEmpty()
             .EmailAddress();
+
+        RuleFor(t => t.NfaOfficeCode).Cascade(CascadeMode.Stop)
+            .MaximumLength(10);
     }
 }

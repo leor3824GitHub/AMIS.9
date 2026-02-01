@@ -39,6 +39,12 @@ public partial class SuppliesAndMaterialsIssuanceReport : ComponentBase
 
     private void AddLineItem()
     {
+        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
+        {
+            Snackbar.Add("Property code is required", Severity.Warning);
+            return;
+        }
+
         if (string.IsNullOrWhiteSpace(_draft.Name))
         {
             Snackbar.Add("Item name is required", Severity.Warning);
@@ -59,6 +65,7 @@ public partial class SuppliesAndMaterialsIssuanceReport : ComponentBase
 
         _model.LineItems.Add(new SmirLineItemModel
         {
+            PropertyCode = _draft.PropertyCode.Trim(),
             Name = _draft.Name.Trim(),
             Description = _draft.Description?.Trim(),
             AcquisitionDate = _draft.AcquisitionDate,
@@ -121,6 +128,7 @@ public partial class SuppliesAndMaterialsIssuanceReport : ComponentBase
             Notes = _model.Notes,
             LineItems = _model.LineItems.Select(li => new CreateIssuanceLineItemRequest
             {
+                PropertyCode = li.PropertyCode,
                 Name = li.Name,
                 Description = li.Description,
                 AcquisitionDate = li.AcquisitionDate ?? _model.TransactionDate ?? DateTime.Today,
@@ -189,6 +197,9 @@ public class SmirModel
 
 public class SmirLineItemModel
 {
+    [Required, MaxLength(50)]
+    public string PropertyCode { get; set; } = string.Empty;
+
     [Required]
     public string Name { get; set; } = string.Empty;
 

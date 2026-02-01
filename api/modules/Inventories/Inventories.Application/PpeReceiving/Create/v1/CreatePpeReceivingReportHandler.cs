@@ -33,7 +33,10 @@ public sealed class CreatePpeReceivingReportHandler(
                 x.Quantity,
                 x.Unit,
                 x.UnitCost,
-                x.Location)).ToList();
+                x.Location,
+                x.ClassCode,
+                x.CategoryCode,
+                x.ItemCode)).ToList();
 
             report.AddLineItems(lineItems);
 

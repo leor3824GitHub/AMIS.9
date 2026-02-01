@@ -1,4 +1,5 @@
 using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Application.PropertyCodes;
 
 namespace AMIS.WebApi.Inventories.Application.Acceptances.Services;
 
@@ -8,10 +9,16 @@ namespace AMIS.WebApi.Inventories.Application.Acceptances.Services;
 /// </summary>
 public sealed class DefaultAssetPropertyCodeGenerator : IAssetPropertyCodeGenerator
 {
-    public string Generate(AcceptanceItem item)
+    public Task<string> GenerateAsync(AcceptanceItem item, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(item);
-        return $"ASSET-{item.AcceptanceId:N}-{item.PurchaseItemId:N}".ToUpperInvariant();
+        return Task.FromResult($"ASSET-{item.AcceptanceId:N}-{item.PurchaseItemId:N}".ToUpperInvariant());
+    }
+
+    public Task<string> GenerateAsync(CoaPropertyCodeRequest request, CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+        return Task.FromResult($"ASSET-{request.AcquisitionDate:yyyyMMdd}-{Guid.NewGuid():N}".ToUpperInvariant());
     }
 }
 

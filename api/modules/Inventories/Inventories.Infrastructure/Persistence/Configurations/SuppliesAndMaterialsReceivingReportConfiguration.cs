@@ -69,6 +69,15 @@ public sealed class SuppliesAndMaterialsReceivingReportConfiguration
             lineItemBuilder.Property(li => li.Location)
                 .HasMaxLength(200)
                 .IsRequired();
+
+            lineItemBuilder.Property(li => li.ClassCode)
+                .HasMaxLength(2);
+
+            lineItemBuilder.Property(li => li.CategoryCode)
+                .HasMaxLength(2);
+
+            lineItemBuilder.Property(li => li.ItemCode)
+                .HasMaxLength(3);
         });
 
         builder.OwnsOne(x => x.Authentication, authBuilder =>

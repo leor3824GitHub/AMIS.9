@@ -10,6 +10,9 @@ public class AssetAssignmentHistoryConfiguration : IEntityTypeConfiguration<Asse
     {
         builder.ToTable("AssetAssignmentHistories");
 
+        builder.Property(a => a.Location)
+            .HasMaxLength(200);
+
         builder.HasOne(a => a.Asset)
             .WithMany(a => a.AssignmentHistory)
             .HasForeignKey(a => a.AssetId)

@@ -46,6 +46,7 @@ public sealed class CreateSuppliesAndMaterialsIssuanceReportHandler(
 
         // Add line items
         var lineItems = request.LineItems.Select(dto => new IssuanceLineItem(
+            dto.PropertyCode,
             dto.Name,
             dto.Description,
             dto.AcquisitionDate,
