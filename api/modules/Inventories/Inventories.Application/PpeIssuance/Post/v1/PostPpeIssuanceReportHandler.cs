@@ -1,6 +1,9 @@
+using System;
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Application.InventoryRegistries.Specs;
+using AMIS.WebApi.Inventories.Application.PropertyAcknowledgementReceipt.Specs;
 using AMIS.WebApi.Inventories.Domain;
+using Ardalis.Specification;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,7 +14,9 @@ public sealed class PostPpeIssuanceReportHandler(
     ILogger<PostPpeIssuanceReportHandler> logger,
     [FromKeyedServices("inventories:ppeir")] IRepository<PpeIssuanceReport> issuanceRepository,
     [FromKeyedServices("inventories:inventory-registries")] IRepository<InventoryRegistry> registryRepository,
-    [FromKeyedServices("inventories:inventory-transaction-logs")] IRepository<InventoryTransactionLog> transactionLogRepository)
+    [FromKeyedServices("inventories:inventory-transaction-logs")] IRepository<InventoryTransactionLog> transactionLogRepository,
+    [FromKeyedServices("inventories:physicalassets")] IRepository<PhysicalAsset> assetRepository,
+    [FromKeyedServices("inventories:employees")] IRepository<Employee> employeeRepository)
     : IRequestHandler<PostPpeIssuanceReportCommand, PostPpeIssuanceReportResponse>
 {
     public async Task<PostPpeIssuanceReportResponse> Handle(PostPpeIssuanceReportCommand request, CancellationToken cancellationToken)
@@ -27,6 +32,12 @@ public sealed class PostPpeIssuanceReportHandler(
             }
 
             report.Post();
+
+            var employee = await ResolveRecipientEmployeeAsync(report.Recipient?.Name, cancellationToken).ConfigureAwait(false);
+            if (employee == null)
+            {
+                logger.LogWarning("PPEIR {ReportNumber} has no resolvable recipient employee. Asset assignment history will be skipped.", report.ReportNumber);
+            }
 
             foreach (var lineItem in report.LineItems)
             {
@@ -75,6 +86,21 @@ public sealed class PostPpeIssuanceReportHandler(
 
 
                     await transactionLogRepository.AddAsync(logEntry, cancellationToken).ConfigureAwait(false);
+
+                    if (employee != null)
+                    {
+                        var assetSpec = new AssetByPropertyCodeSpec(lineItem.PropertyCode);
+                        var asset = await assetRepository.FirstOrDefaultAsync(assetSpec, cancellationToken).ConfigureAwait(false);
+                        if (asset == null)
+                        {
+                            logger.LogWarning("PhysicalAsset not found for PropertyCode {PropertyCode} during PPEIR {ReportNumber} posting", lineItem.PropertyCode, report.ReportNumber);
+                        }
+                        else
+                        {
+                            asset.Issue(employee.Id, employee.Name, report.ReportNumber, quantityIssued: quantity, location: lineItem.Location, emitEvent: false);
+                            await assetRepository.UpdateAsync(asset, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -95,6 +121,8 @@ public sealed class PostPpeIssuanceReportHandler(
             await issuanceRepository.UpdateAsync(report, cancellationToken).ConfigureAwait(false);
             await registryRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await transactionLogRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await assetRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await employeeRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await issuanceRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             logger.LogInformation("PPE Issuance Report {ReportNumber} posted successfully. Registry and logs updated.", report.ReportNumber);
@@ -105,5 +133,30 @@ public sealed class PostPpeIssuanceReportHandler(
             logger.LogError(ex, "Error posting PPE Issuance Report {Id}.", request.Id);
             throw;
         }
+    }
+
+    private async Task<Employee?> ResolveRecipientEmployeeAsync(string? recipientName, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(recipientName))
+        {
+            return null;
+        }
+
+        var normalizedName = recipientName.Trim();
+        var employee = await employeeRepository.FirstOrDefaultAsync(new EmployeeByNameSpec(normalizedName), cancellationToken).ConfigureAwait(false);
+        if (employee != null)
+        {
+            return employee;
+        }
+
+        employee = Employee.Create(normalizedName, "Unknown", "N/A", userId: null);
+        await employeeRepository.AddAsync(employee, cancellationToken).ConfigureAwait(false);
+        return employee;
+    }
+
+    private sealed class EmployeeByNameSpec : Specification<Employee>
+    {
+        public EmployeeByNameSpec(string name)
+            => Query.Where(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
     }
 }

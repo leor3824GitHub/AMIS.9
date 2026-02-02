@@ -230,7 +230,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         string employeeName,
         string documentNumber,
         int? quantityIssued = null,
-        string? location = null)
+        string? location = null,
+        bool emitEvent = true)
     {
         ValidateIssue(employeeId, employeeName, documentNumber);
 
@@ -273,14 +274,17 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
         AssignmentHistory.Add(history);
 
-        QueueDomainEvent(new PhysicalAssetIssued
+        if (emitEvent)
         {
-            PhysicalAsset = this,
-            EmployeeId = employeeId,
-            DocumentNumber = documentNumber,
-            DocumentType = docType,
-            Quantity = quantityIssued ?? 1
-        });
+            QueueDomainEvent(new PhysicalAssetIssued
+            {
+                PhysicalAsset = this,
+                EmployeeId = employeeId,
+                DocumentNumber = documentNumber,
+                DocumentType = docType,
+                Quantity = quantityIssued ?? 1
+            });
+        }
 
         return history;
     }

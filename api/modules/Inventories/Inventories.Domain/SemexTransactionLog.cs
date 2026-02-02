@@ -70,6 +70,12 @@ public class SemexTransactionLog : AuditableEntity, IAggregateRoot
     /// </summary>
     public DateTime TransactionDate { get; private set; }
 
+    /// <summary>
+    /// Correlation ID to link related transactions across reports
+    /// Enables tracing of an asset lifecycle: Receive → Assign → Return
+    /// </summary>
+    public string? CorrelationId { get; private set; }
+
     private SemexTransactionLog() { }
 
     /// <summary>
@@ -84,7 +90,8 @@ public class SemexTransactionLog : AuditableEntity, IAggregateRoot
         int inventoryAfter,
         InventoryItemStatus statusBefore,
         InventoryItemStatus statusAfter,
-        string? initiatedBy = null)
+        string? initiatedBy = null,
+        string? correlationId = null)
     {
         ArgumentNullException.ThrowIfNull(itemCode);
         ArgumentNullException.ThrowIfNull(transactionType);
@@ -103,6 +110,7 @@ public class SemexTransactionLog : AuditableEntity, IAggregateRoot
             Success = true,
             ErrorMessage = null,
             InitiatedBy = initiatedBy,
+            CorrelationId = correlationId,
             TransactionDate = DateTime.UtcNow
         };
     }
@@ -117,7 +125,8 @@ public class SemexTransactionLog : AuditableEntity, IAggregateRoot
         int inventoryBefore,
         InventoryItemStatus statusBefore,
         string errorMessage,
-        string? initiatedBy = null)
+        string? initiatedBy = null,
+        string? correlationId = null)
     {
         ArgumentNullException.ThrowIfNull(itemCode);
         ArgumentNullException.ThrowIfNull(transactionType);
@@ -137,6 +146,7 @@ public class SemexTransactionLog : AuditableEntity, IAggregateRoot
             Success = false,
             ErrorMessage = errorMessage,
             InitiatedBy = initiatedBy,
+            CorrelationId = correlationId,
             TransactionDate = DateTime.UtcNow
         };
     }

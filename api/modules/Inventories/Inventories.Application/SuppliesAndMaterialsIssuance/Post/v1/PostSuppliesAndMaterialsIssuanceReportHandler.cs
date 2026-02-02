@@ -1,6 +1,9 @@
+using System;
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Inventories.Application.PropertyAcknowledgementReceipt.Specs;
 using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.ValueObjects;
+using Ardalis.Specification;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,7 +16,9 @@ public sealed class PostSuppliesAndMaterialsIssuanceReportHandler(
     ILogger<PostSuppliesAndMaterialsIssuanceReportHandler> logger,
     [FromKeyedServices("inventories:smir")] IRepository<SuppliesAndMaterialsIssuanceReport> repository,
     [FromKeyedServices("inventories:semex-registries")] IRepository<SemexRegistryDomain> registryRepository,
-    [FromKeyedServices("inventories:semex-transaction-logs")] IRepository<SemexTransactionLogDomain> transactionLogRepository)
+    [FromKeyedServices("inventories:semex-transaction-logs")] IRepository<SemexTransactionLogDomain> transactionLogRepository,
+    [FromKeyedServices("inventories:physicalassets")] IRepository<PhysicalAsset> assetRepository,
+    [FromKeyedServices("inventories:employees")] IRepository<Employee> employeeRepository)
     : IRequestHandler<PostSuppliesAndMaterialsIssuanceReportCommand, PostSuppliesAndMaterialsIssuanceReportResponse>
 {
     public async Task<PostSuppliesAndMaterialsIssuanceReportResponse> Handle(
@@ -32,6 +37,11 @@ public sealed class PostSuppliesAndMaterialsIssuanceReportHandler(
 
             var transactionLogs = new List<SemexTransactionLogDomain>();
             var registries = await registryRepository.ListAsync(new AllSemexRegistriesSpec(), cancellationToken).ConfigureAwait(false);
+            var employee = await ResolveRecipientEmployeeAsync(report.Recipient?.Name, cancellationToken).ConfigureAwait(false);
+            if (employee == null)
+            {
+                logger.LogWarning("SMIR {SmirNumber} has no resolvable recipient employee. Asset assignment history will be skipped.", report.SmirNumber);
+            }
 
             foreach (var lineItem in report.LineItems)
             {
@@ -88,6 +98,21 @@ public sealed class PostSuppliesAndMaterialsIssuanceReportHandler(
                         report.Recipient?.Name ?? "Unknown");
 
                     transactionLogs.Add(logEntry);
+
+                    if (employee != null)
+                    {
+                        var assetSpec = new AssetByPropertyCodeSpec(lineItem.PropertyCode);
+                        var asset = await assetRepository.FirstOrDefaultAsync(assetSpec, cancellationToken).ConfigureAwait(false);
+                        if (asset == null)
+                        {
+                            logger.LogWarning("PhysicalAsset not found for PropertyCode {PropertyCode} during SMIR {SmirNumber} posting", lineItem.PropertyCode, report.SmirNumber);
+                        }
+                        else
+                        {
+                            asset.Issue(employee.Id, employee.Name, report.SmirNumber, quantityIssued: quantity, emitEvent: false);
+                            await assetRepository.UpdateAsync(asset, cancellationToken).ConfigureAwait(false);
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -116,6 +141,8 @@ public sealed class PostSuppliesAndMaterialsIssuanceReportHandler(
                 await transactionLogRepository.AddAsync(log, cancellationToken).ConfigureAwait(false);
             }
             await transactionLogRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await assetRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+            await employeeRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
             await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             logger.LogInformation("SMIR {SmirNumber} posted successfully. Semex registry and logs updated.", report.SmirNumber);
@@ -130,5 +157,30 @@ public sealed class PostSuppliesAndMaterialsIssuanceReportHandler(
             logger.LogError(ex, "Error posting SMIR {Id}.", request.Id);
             throw;
         }
+    }
+
+    private async Task<Employee?> ResolveRecipientEmployeeAsync(string? recipientName, CancellationToken cancellationToken)
+    {
+        if (string.IsNullOrWhiteSpace(recipientName))
+        {
+            return null;
+        }
+
+        var normalizedName = recipientName.Trim();
+        var employee = await employeeRepository.FirstOrDefaultAsync(new EmployeeByNameSpec(normalizedName), cancellationToken).ConfigureAwait(false);
+        if (employee != null)
+        {
+            return employee;
+        }
+
+        employee = Employee.Create(normalizedName, "Unknown", "N/A", userId: null);
+        await employeeRepository.AddAsync(employee, cancellationToken).ConfigureAwait(false);
+        return employee;
+    }
+
+    private sealed class EmployeeByNameSpec : Specification<Employee>
+    {
+        public EmployeeByNameSpec(string name)
+            => Query.Where(e => string.Equals(e.Name, name, StringComparison.OrdinalIgnoreCase));
     }
 }

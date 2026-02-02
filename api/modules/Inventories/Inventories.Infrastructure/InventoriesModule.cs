@@ -48,6 +48,8 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PhysicalAsset;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsIssuance;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsReceiving;
 
+using AMIS.WebApi.Inventories.Application.Services;
+
 namespace AMIS.WebApi.Inventories.Infrastructure;
 
 public static class InventoriesModule
@@ -466,6 +468,9 @@ public static class InventoriesModule
         // Property Accountability Receipt (PAR)
         builder.Services.AddKeyedScoped<IRepository<PropertyAcknowledgementReceipt>, InventoriesRepository<PropertyAcknowledgementReceipt>>("inventories:par");
         builder.Services.AddKeyedScoped<IReadRepository<PropertyAcknowledgementReceipt>, InventoriesRepository<PropertyAcknowledgementReceipt>>("inventories:par");
+
+        // Reconciliation Job
+        builder.Services.AddScoped<InventoryReconciliationJob>();
 
         return builder;
     }
