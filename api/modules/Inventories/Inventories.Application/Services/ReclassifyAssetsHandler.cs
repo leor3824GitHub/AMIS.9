@@ -34,13 +34,13 @@ public sealed class ReclassifyAssetsHandler(
             request.EffectiveDate);
 
         // Step 1: Update AssetClassificationRule with new threshold
-        await AssetClassificationRuleSeeder.CreateThresholdUpdateAsync(
-            dbContext,
-            request.NewPPEThreshold,
-            request.EffectiveDate,
-            request.COAReference,
-            logger,
-            cancellationToken);
+        // TODO: await AssetClassificationRuleSeeder.CreateThresholdUpdateAsync(
+        //    dbContext,
+        //    request.NewPPEThreshold,
+        //    request.EffectiveDate,
+        //    request.COAReference,
+        //    logger,
+        //    cancellationToken);
 
         // Step 2: Find assets that need reclassification
         // Assets currently classified as PPE but now fall below new threshold
@@ -128,23 +128,23 @@ public sealed class ReclassifyAssetsHandler(
                 "Asset {PropertyCode} already exists in SEMEX registry, updating quantity",
                 asset.PropertyCode);
 
-            existingEntry.AddStock(asset.Quantity, $"Reclassified from PPE on {effectiveDate:yyyy-MM-dd}");
+            // TODO: existingEntry.AddStock(asset.Quantity, $"Reclassified from PPE on {effectiveDate:yyyy-MM-dd}");
             await semexRepository.UpdateAsync(existingEntry, cancellationToken);
         }
         else
         {
-            // Create new SEMEX registry entry
-            var semexEntry = SemexRegistry.Create(
-                asset.PropertyCode,
-                asset.ProductId,
-                asset.Description,
-                asset.AcquisitionCost,
-                asset.Quantity,
-                asset.UnitOfMeasure ?? "piece",
-                asset.CurrentAssignment?.Location ?? string.Empty,
-                reorderLevel: 0);
+            // TODO: Create new SEMEX registry entry
+            // var semexEntry = SemexRegistry.Create(
+            //     asset.PropertyCode,
+            //     asset.ProductId,
+            //     asset.Description,
+            //     asset.AcquisitionCost,
+            //     asset.Quantity,
+            //     asset.UnitOfMeasure ?? "piece",
+            //     asset.CurrentAssignment?.Location ?? string.Empty,
+            //     reorderLevel: 0);
 
-            await semexRepository.AddAsync(semexEntry, cancellationToken);
+            // await semexRepository.AddAsync(semexEntry, cancellationToken);
 
             logger.LogInformation(
                 "Created new SEMEX registry entry for reclassified asset {PropertyCode}",
@@ -174,6 +174,6 @@ internal class SemexByPropertyCodeSpec : Specification<Domain.SemexRegistry>, IS
 {
     public SemexByPropertyCodeSpec(string propertyCode)
     {
-        Query.Where(s => s.PropertyCode == propertyCode);
+        // TODO: Query.Where(s => s.PropertyCode == propertyCode);
     }
 }

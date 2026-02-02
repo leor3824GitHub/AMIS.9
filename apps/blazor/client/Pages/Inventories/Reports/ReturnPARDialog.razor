@@ -1,4 +1,6 @@
 @using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+@using MudBlazor.Services
 
 <MudDialog>
     <DialogContent>
@@ -22,15 +24,15 @@
         </MudText>
     </DialogContent>
     <DialogActions>
-        <MudButton OnClick="Cancel">Cancel</MudButton>
-        <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="Submit" Disabled="@(!CanSubmit)">
+        <MudButton OnClick="@Cancel">Cancel</MudButton>
+        <MudButton Color="Color.Warning" Variant="Variant.Filled" OnClick="@Submit" Disabled="@(!CanSubmit)">
             Return Items
         </MudButton>
     </DialogActions>
 </MudDialog>
 
 @code {
-    [CascadingParameter] MudDialogInstance MudDialog { get; set; } = default!;
+    [CascadingParameter] dynamic MudDialog { get; set; } = default!;
     [Inject] private IApiClient ApiClient { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
@@ -46,16 +48,21 @@
     {
         try
         {
-            var request = new ReturnPARCommand
-            {
-                Id = PARId,
-                ReturnDate = DateTimeOffset.Parse(_returnDate),
-                ReturnNotes = _returnNotes
-            };
+            // Get current user ID from auth state - for now using empty guid as placeholder
+            // When integrated with auth service, replace with actual user ID
+            var currentUserId = Guid.Empty; // TODO: Get from AuthenticationState
+            var currentUserName = "Current User"; // TODO: Get from AuthenticationState
+
+            var request = new ReturnPARCommand(
+                Id: PARId,
+                ReturnDate: DateTime.Parse(_returnDate),
+                ReceivedByEmployeeId: currentUserId,
+                ReceivedByEmployeeName: currentUserName,
+                ReturnRemarks: _returnNotes);
 
             await ApiClient.ReturnPARAsync(request);
             Snackbar.Add("PAR items returned successfully", Severity.Success);
-            MudDialog.Close(DialogResult.Ok(true));
+            await MudDialog.CloseAsync(DialogResult.Ok(true));
         }
         catch (Exception ex)
         {
@@ -63,8 +70,8 @@
         }
     }
 
-    private void Cancel()
+    private async Task Cancel()
     {
-        MudDialog.Cancel();
+        await MudDialog.CancelAsync();
     }
 }

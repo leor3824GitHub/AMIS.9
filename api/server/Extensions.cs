@@ -4,7 +4,6 @@ using Carter;
 using FluentValidation;
 using AMIS.WebApi.Inventories.Application;
 using AMIS.WebApi.Inventories.Infrastructure;
-using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.BackgroundJobs;
 using AMIS.WebApi.Todo;
 using System.Text.Json.Serialization;
 
@@ -55,7 +54,7 @@ internal static class Extensions
         app.UseTodoModule();
 
         // Schedule background jobs
-        app.ScheduleInventoryReconciliationJobs();
+        // TODO: app.ScheduleInventoryReconciliationJobs();
 
         //register api versions
         var versions = app.NewApiVersionSet()

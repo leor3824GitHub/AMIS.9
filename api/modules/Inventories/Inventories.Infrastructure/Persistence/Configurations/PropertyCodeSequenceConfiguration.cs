@@ -13,10 +13,6 @@ public class PropertyCodeSequenceConfiguration : IEntityTypeConfiguration<Proper
 
         builder.HasKey(e => e.Id);
 
-        builder.Property(e => e.TenantId)
-            .IsRequired()
-            .HasMaxLength(64);
-
         builder.Property(e => e.YearKey)
             .IsRequired();
 
@@ -42,7 +38,7 @@ public class PropertyCodeSequenceConfiguration : IEntityTypeConfiguration<Proper
         builder.Property(e => e.ResetAnnually)
             .IsRequired();
 
-        builder.HasIndex(e => new { e.TenantId, e.YearKey, e.OfficeCode, e.ClassCode, e.CategoryCode, e.ItemCode })
+        builder.HasIndex(e => new { e.YearKey, e.OfficeCode, e.ClassCode, e.CategoryCode, e.ItemCode })
             .IsUnique();
     }
 }

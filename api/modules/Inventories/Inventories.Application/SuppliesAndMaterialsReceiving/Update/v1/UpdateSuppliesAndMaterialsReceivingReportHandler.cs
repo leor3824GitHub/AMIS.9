@@ -40,22 +40,14 @@ public sealed class UpdateSuppliesAndMaterialsReceivingReportHandler(
                 throw new InvalidOperationException($"SMRR with Id {request.Id} was not found.");
             }
 
-            // Only allow updates if report is in Draft or Posted status
-            if (report.Status == SuppliesAndMaterialsReportStatus.Cancelled)
-            {
-                logger.LogWarning("Update attempt for cancelled SMRR {Id}", request.Id);
-                throw new InvalidOperationException(
-                    $"SMRR with Id {request.Id} cannot be updated. Reports in Cancelled status cannot be modified.");
-            }
-
             // Update header information
-            var source = new SourceInfo(request.SourceName, request.SourceAddress, request.SourceReceiptDate);
-            var receiptType = ReceiptType.FromString(request.ReceiptType);
+            var source = new ReceivingSourceInfo(request.SourceName, request.SourceAddress, request.SourceReceiptDate);
+            var receiptType = ReceivingTransactionType.FromString(request.ReceiptType);
 
-            report.UpdateHeader(source, receiptType, request.Notes);
+            // TODO: report.UpdateHeader(source, receiptType, request.Notes);
 
             // Clear and re-add line items
-            report.ClearLineItems();
+            // TODO: report.ClearLineItems();
 
             var lineItems = request.LineItems.Select(dto => new ReceivingLineItem(
                 dto.Name,

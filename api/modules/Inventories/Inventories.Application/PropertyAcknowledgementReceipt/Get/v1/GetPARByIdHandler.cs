@@ -57,8 +57,8 @@ public sealed class GetPARByIdHandler(
             ApprovedByDate = par.ApprovedByDate,
             Notes = par.Notes,
             TotalAcquisitionCost = par.GetTotalAcquisitionCost(),
-            CreatedAt = par.Created,
-            LastModifiedAt = par.LastModified
+            CreatedAt = par.Created.DateTime,
+            LastModifiedAt = par.LastModified.DateTime
         };
 
         logger.LogInformation("Successfully retrieved PAR {PARNumber}", par.PARNumber);

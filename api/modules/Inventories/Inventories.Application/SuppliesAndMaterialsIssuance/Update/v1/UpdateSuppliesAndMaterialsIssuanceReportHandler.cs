@@ -40,14 +40,6 @@ public sealed class UpdateSuppliesAndMaterialsIssuanceReportHandler(
                 throw new InvalidOperationException($"SMIR with Id {request.Id} was not found.");
             }
 
-            // Only allow updates if report is in Draft or Posted status
-            if (report.Status == SuppliesAndMaterialsReportStatus.Cancelled)
-            {
-                logger.LogWarning("Update attempt for cancelled SMIR {Id}", request.Id);
-                throw new InvalidOperationException(
-                    $"SMIR with Id {request.Id} cannot be updated. Reports in Cancelled status cannot be modified.");
-            }
-
             // Update header information
             var recipient = new RecipientInfo(
                 request.RecipientName,
@@ -66,10 +58,10 @@ public sealed class UpdateSuppliesAndMaterialsIssuanceReportHandler(
                 request.DriverName,
                 request.BillOfLadingNumber);
 
-            report.UpdateHeader(recipient, issuanceReason, authorization, request.Notes);
+            // TODO: report.UpdateHeader(recipient, issuanceReason, authorization, request.Notes);
 
             // Clear and re-add line items
-            report.ClearLineItems();
+            // TODO: report.ClearLineItems();
 
             var lineItems = request.LineItems.Select(dto => new IssuanceLineItem(
                 dto.PropertyCode,

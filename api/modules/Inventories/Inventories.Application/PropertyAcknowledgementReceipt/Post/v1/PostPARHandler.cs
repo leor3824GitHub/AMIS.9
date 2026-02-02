@@ -81,7 +81,7 @@ public sealed class PostPARHandler(
                 par.Id,
                 par.PARNumber,
                 par.Status.ToString(),
-                par.LastModified);
+                par.LastModified.DateTime);
         }
         catch (Exception ex)
         {

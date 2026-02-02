@@ -8,8 +8,6 @@ public partial class PropertyAcknowledgementReceiptList
 {
     [Inject] private IApiClient ApiClient { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
-    [Inject] private IDialogService DialogService { get; set; } = default!;
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     private MudTable<PARListItemDto>? _table;
     private string? _searchString;
@@ -17,7 +15,7 @@ public partial class PropertyAcknowledgementReceiptList
     private DateRange? _dateRange;
     private bool _loading;
 
-    private async Task<TableData<PARListItemDto>> LoadDataAsync(TableState state)
+    private async Task<TableData<PARListItemDto>> LoadDataAsync(TableState state, CancellationToken cancellationToken)
     {
         _loading = true;
         try
@@ -28,12 +26,13 @@ public partial class PropertyAcknowledgementReceiptList
                 _dateRange?.Start,
                 _dateRange?.End,
                 state.Page + 1,
-                state.PageSize);
+                state.PageSize,
+                cancellationToken);
 
             return new TableData<PARListItemDto>
             {
-                Items = response.Data ?? Array.Empty<PARListItemDto>(),
-                TotalItems = response.TotalCount
+                Items = response?.Data ?? Array.Empty<PARListItemDto>(),
+                TotalItems = response?.TotalCount ?? 0
             };
         }
         catch (Exception ex)
@@ -55,14 +54,14 @@ public partial class PropertyAcknowledgementReceiptList
         _table?.ReloadServerData();
     }
 
-    private Color GetStatusColor(PARStatus status)
+    private Color GetStatusColor(string status)
     {
-        return status switch
+        return status?.ToLower() switch
         {
-            PARStatus.Draft => Color.Default,
-            PARStatus.Posted => Color.Success,
-            PARStatus.Returned => Color.Warning,
-            PARStatus.Cancelled => Color.Error,
+            "draft" => Color.Default,
+            "posted" => Color.Success,
+            "returned" => Color.Warning,
+            "cancelled" => Color.Error,
             _ => Color.Default
         };
     }

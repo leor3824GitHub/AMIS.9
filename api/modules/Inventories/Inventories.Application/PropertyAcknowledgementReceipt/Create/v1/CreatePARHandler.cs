@@ -46,7 +46,10 @@ public sealed class CreatePARHandler(
             await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
             logger.LogInformation("PAR {PARNumber} created as Draft.", request.PARNumber);
-            return new CreatePARResponse(par.Id, par.PARNumber, par.Created);
+            return new CreatePARResponse(
+                par.Id,
+                par.PARNumber,
+                par.Created.DateTime);
         }
         catch (Exception ex)
         {

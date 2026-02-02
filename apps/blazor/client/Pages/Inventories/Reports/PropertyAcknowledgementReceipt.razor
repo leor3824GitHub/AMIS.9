@@ -70,7 +70,7 @@
                             Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                     </MudItem>
                     <MudItem xs="12" md="4">
-                        <MudDatePicker @bind-Date="_model.IssuanceDate" Label="Issuance Date" Required="true"
+                        <MudDatePicker @bind-Value="_model.IssuanceDate" Label="Issuance Date" Required="true"
                             MaxDate="@DateTime.Today" Format="MM/dd/yyyy"
                             Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                     </MudItem>
@@ -83,7 +83,7 @@
                         <MudAutocomplete T="EmployeeDto" @bind-Value="_selectedEmployee" Label="Employee/Custodian" Required="true"
                             SearchFunc="@SearchEmployees" ToStringFunc="@(e => e?.Name ?? "")"
                             Disabled="@(_reportStatus != 0 || _isReadOnly)"
-                            ValueChanged="@OnEmployeeSelected" Clearable="true">
+                            Clearable="true">
                             <ItemTemplate Context="employee">
                                 <MudText>@employee.Name</MudText>
                                 <MudText Typo="Typo.caption">@employee.Department</MudText>
@@ -196,7 +196,7 @@
                     <MudTextField @bind-Value="_currentLineItem.Description" Label="Description" Required="true" Lines="2" />
                 </MudItem>
                 <MudItem xs="12" md="6">
-                    <MudDatePicker @bind-Date="_currentLineItem.DateAcquired" Label="Date Acquired" Required="true"
+                    <MudDatePicker @bind-Value="_currentLineItem.DateAcquired" Label="Date Acquired" Required="true"
                         MaxDate="@DateTime.Today" Format="MM/dd/yyyy" />
                 </MudItem>
                 <MudItem xs="12" md="6">

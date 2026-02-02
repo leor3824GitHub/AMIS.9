@@ -75,6 +75,6 @@ public sealed class UpdatePARHandler(
         await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
         logger.LogInformation("PAR {PARNumber} updated successfully", par.PARNumber);
-        return new UpdatePARResponse(par.Id, par.PARNumber, par.LastModified);
+        return new UpdatePARResponse(par.Id, par.PARNumber, par.LastModified.DateTime);
     }
 }

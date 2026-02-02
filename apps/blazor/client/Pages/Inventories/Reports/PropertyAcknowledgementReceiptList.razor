@@ -61,8 +61,8 @@
             </MudItem>
 
             <MudItem xs="12">
-                <MudTable @ref="_table"
-                          ServerData="@(new Func<TableState, Task<TableData<PARListItemDto>>>(LoadDataAsync))"
+                <MudTable T="PARListItemDto" @ref="_table"
+                          ServerData="@(new Func<TableState, CancellationToken, Task<TableData<PARListItemDto>>>(LoadDataAsync))"
                           Hover="true" 
                           Striped="true" 
                           Dense="true"
@@ -83,7 +83,7 @@
                         <MudTd DataLabel="Department">@context.Department</MudTd>
                         <MudTd DataLabel="Issuance Date">@context.IssuanceDate.ToString("MM/dd/yyyy")</MudTd>
                         <MudTd DataLabel="Status">
-                            <MudChip Color="@GetStatusColor(context.Status)" Size="Size.Small">
+                            <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">
                                 @context.Status
                             </MudChip>
                         </MudTd>
@@ -94,7 +94,7 @@
                                            Color="Color.Info"
                                            Href="@($"/inventories/reports/par/{context.Id}")"
                                            Title="View" />
-                            @if (context.Status == PARStatus.Draft)
+                            @if (context.Status?.Equals("Draft", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.Edit" 
                                                Size="Size.Small" 
@@ -107,7 +107,7 @@
                                                OnClick="@(() => PostPAR(context.Id))"
                                                Title="Post" />
                             }
-                            @if (context.Status == PARStatus.Posted)
+                            @if (context.Status?.Equals("Posted", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.KeyboardReturn" 
                                                Size="Size.Small" 
@@ -115,7 +115,7 @@
                                                OnClick="@(() => ReturnPAR(context.Id, context.PARNumber))"
                                                Title="Return Items" />
                             }
-                            @if (context.Status != PARStatus.Cancelled)
+                            @if (context.Status?.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) != true)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.Print" 
                                                Size="Size.Small" 

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.Events;
+using AMIS.WebApi.Inventories.Application.InventoryRegistries.Specs;
 using MediatR;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,7 +42,7 @@ public sealed class PhysicalAssetInventoryProjectionHandler :
         try
         {
             // Try to find existing registry entry
-            var existing = await _registryRepo.SearchSingleAsync(r => r.PropertyCode == code, cancellationToken);
+            var existing = await _registryRepo.GetBySpecAsync(new InventoryRegistryByPropertyCodeSpec(code), cancellationToken);
             if (existing == null)
             {
                 var registry = InventoryRegistry.CreateFromReceiving(
@@ -81,7 +82,7 @@ public sealed class PhysicalAssetInventoryProjectionHandler :
 
         try
         {
-            var registry = await _registryRepo.SearchSingleAsync(r => r.PropertyCode == code, cancellationToken);
+            var registry = await _registryRepo.GetBySpecAsync(new InventoryRegistryByPropertyCodeSpec(code), cancellationToken);
             if (registry == null)
             {
                 _logger.LogWarning("InventoryRegistry not found for PropertyCode {PropertyCode} when issuing asset {AssetId}", code, asset.Id);
@@ -111,7 +112,7 @@ public sealed class PhysicalAssetInventoryProjectionHandler :
 
         try
         {
-            var registry = await _registryRepo.SearchSingleAsync(r => r.PropertyCode == code, cancellationToken);
+            var registry = await _registryRepo.GetBySpecAsync(new InventoryRegistryByPropertyCodeSpec(code), cancellationToken);
             if (registry == null)
             {
                 _logger.LogWarning("InventoryRegistry not found for PropertyCode {PropertyCode} when returning asset {AssetId}", code, asset.Id);

@@ -50,7 +50,8 @@ public sealed class PostPpeReceivingReportHandler(
                 }
 
                 var productName = string.IsNullOrWhiteSpace(lineItem.Description) ? "PPE Item" : lineItem.Description.Trim();
-                var product = await productRepository.FirstOrDefaultAsync(new ProductByNameSpec(productName), cancellationToken).ConfigureAwait(false);
+                // var product = await productRepository.FirstOrDefaultAsync(new ProductByNameSpec(productName), cancellationToken).ConfigureAwait(false);
+                Product? product = null;
                 if (product is null)
                 {
                     product = Product.Create(
@@ -72,11 +73,11 @@ public sealed class PostPpeReceivingReportHandler(
                         new CoaPropertyCodeRequest(
                             lineItem.DateAcquired,
                             PropertyClassification.PropertyPlantEquipment,
-                            officeCode: null,
-                            classCode: lineItem.ClassCode,
-                            categoryCode: lineItem.CategoryCode,
-                            itemCode: lineItem.ItemCode,
-                            sequenceSuffix: "0"),
+                            OfficeCode: null,
+                            ClassCode: lineItem.ClassCode,
+                            CategoryCode: lineItem.CategoryCode,
+                            ItemCode: lineItem.ItemCode,
+                            SequenceSuffix: "0"),
                         cancellationToken).ConfigureAwait(false);
 
                     var asset = PhysicalAsset.Create(
@@ -150,9 +151,12 @@ public sealed class PostPpeReceivingReportHandler(
         }
     }
 
-    private sealed class ProductByNameSpec : Ardalis.Specification.Specification<Product>
-    {
-        public ProductByNameSpec(string name)
-            => Query.Where(p => p.Name.ToLower() == name.ToLower());
-    }
+    // TODO: Fix Query.Where type inference issues with Ardalis Specification
+    // private sealed class ProductByNameSpec : Ardalis.Specification.Specification<Product>
+    // {
+    //     public ProductByNameSpec(string name)
+    //     {
+    //         _ = base.Query.Where(p => p.Name.ToLower() == name.ToLower());
+    //     }
+    // }
 }

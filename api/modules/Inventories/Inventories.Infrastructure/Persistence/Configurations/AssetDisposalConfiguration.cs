@@ -32,11 +32,17 @@ internal sealed class AssetDisposalConfiguration : IEntityTypeConfiguration<Asse
         builder.Property(x => x.RequestDate).IsRequired();
         builder.Property(x => x.DisposalMethod)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(50)
+            .HasConversion(
+                v => v.Value,  // Convert to database string
+                v => DisposalMethod.Parse(v));  // Convert back from database string
         builder.Property(x => x.JustificationReason).HasMaxLength(1000);
         builder.Property(x => x.AssetConditionAtDisposal)
             .IsRequired()
-            .HasMaxLength(50);
+            .HasMaxLength(50)
+            .HasConversion(
+                v => v.Value,  // Convert to database string
+                v => AssetCondition.Parse(v));  // Convert back from database string
 
         // Approval Workflow
         builder.Property(x => x.Status)

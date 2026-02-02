@@ -8,8 +8,6 @@ public partial class PropertyAcknowledgementReceipt
 {
     [Inject] private IApiClient ApiClient { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
-    [Inject] private IDialogService DialogService { get; set; } = default!;
-    [Inject] private NavigationManager Navigation { get; set; } = default!;
 
     private Guid? _reportId;
     private PARModel _model = new();

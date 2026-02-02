@@ -270,13 +270,13 @@ public static class InventoriesModule
             physicalAssetGroup.MapGetStockLevelsEndpoint();
 
             var assetManagementGroup = app.MapGroup("asset-management").WithTags("asset-management");
-            assetManagementGroup.MapReclassifyAssetsEndpoint();
+            // assetManagementGroup.MapReclassifyAssetsEndpoint();
 
             var suppliesAndMaterialsIssuanceGroup = app.MapGroup("supplies-materials-issuance").WithTags("supplies-materials-issuance");
             suppliesAndMaterialsIssuanceGroup.MapListSuppliesAndMaterialsIssuanceReportsEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapCreateSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapGetSuppliesAndMaterialsIssuanceReportEndpoint();
-            suppliesAndMaterialsIssuanceGroup.MapUpdateSuppliesAndMaterialsIssuanceReportEndpoint();
+            // suppliesAndMaterialsIssuanceGroup.MapUpdateSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapPostSuppliesAndMaterialsIssuanceReportEndpoint();
             suppliesAndMaterialsIssuanceGroup.MapCancelSuppliesAndMaterialsIssuanceReportEndpoint();
 
@@ -284,7 +284,7 @@ public static class InventoriesModule
             suppliesAndMaterialsReceivingGroup.MapListSuppliesAndMaterialsReceivingReportsEndpoint();
             suppliesAndMaterialsReceivingGroup.MapCreateSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapGetSuppliesAndMaterialsReceivingReportEndpoint();
-            suppliesAndMaterialsReceivingGroup.MapUpdateSuppliesAndMaterialsReceivingReportEndpoint();
+            // suppliesAndMaterialsReceivingGroup.MapUpdateSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapPostSuppliesAndMaterialsReceivingReportEndpoint();
             suppliesAndMaterialsReceivingGroup.MapCancelSuppliesAndMaterialsReceivingReportEndpoint();
 
@@ -322,13 +322,13 @@ public static class InventoriesModule
             semexTransactionLogGroup.MapGetSemexTransactionLogEndpoint();
 
             var parGroup = app.MapGroup("property-accountability-receipt").WithTags("property-accountability-receipt");
-            parGroup.MapListPARsEndpoint();
-            parGroup.MapCreatePAREndpoint();
-            parGroup.MapGetPAREndpoint();
-            parGroup.MapUpdatePAREndpoint();
-            parGroup.MapPostPAREndpoint();
-            parGroup.MapCancelPAREndpoint();
-            parGroup.MapReturnPAREndpoint();
+            // parGroup.MapListPARsEndpoint();
+            // parGroup.MapCreatePAREndpoint();
+            // parGroup.MapGetPAREndpoint();
+            // parGroup.MapUpdatePAREndpoint();
+            // parGroup.MapPostPAREndpoint();
+            // parGroup.MapCancelPAREndpoint();
+            // parGroup.MapReturnPAREndpoint();
         }
     }
     public static WebApplicationBuilder RegisterInventoriesServices(this WebApplicationBuilder builder)
@@ -374,6 +374,13 @@ public static class InventoriesModule
 
         builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:physicalassets");
         builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:physicalassets");
+
+        // Also add with dashed key and "assets" key for handlers that use it
+        builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:physical-assets");
+        builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:physical-assets");
+        
+        builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:assets");
+        builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:assets");
 
         builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, InventoriesRepository<InspectionRequest>>("inventories:inspectionRequests");
         builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, InventoriesRepository<InspectionRequest>>("inventories:inspectionRequests");
@@ -462,12 +469,21 @@ public static class InventoriesModule
         // Semex Registry & Logs (Semi-Expendable)
         builder.Services.AddKeyedScoped<IRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex-registries");
         builder.Services.AddKeyedScoped<IReadRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex-registries");
+        
+        // Also add with "semex" key for compatibility
+        builder.Services.AddKeyedScoped<IRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex");
+        builder.Services.AddKeyedScoped<IReadRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex");
+        
         builder.Services.AddKeyedScoped<IRepository<SemexTransactionLog>, InventoriesRepository<SemexTransactionLog>>("inventories:semex-transaction-logs");
         builder.Services.AddKeyedScoped<IReadRepository<SemexTransactionLog>, InventoriesRepository<SemexTransactionLog>>("inventories:semex-transaction-logs");
 
         // Property Accountability Receipt (PAR)
         builder.Services.AddKeyedScoped<IRepository<PropertyAcknowledgementReceipt>, InventoriesRepository<PropertyAcknowledgementReceipt>>("inventories:par");
         builder.Services.AddKeyedScoped<IReadRepository<PropertyAcknowledgementReceipt>, InventoriesRepository<PropertyAcknowledgementReceipt>>("inventories:par");
+
+        // Asset Disposal
+        builder.Services.AddKeyedScoped<IRepository<AssetDisposal>, InventoriesRepository<AssetDisposal>>("inventories:disposals");
+        builder.Services.AddKeyedScoped<IReadRepository<AssetDisposal>, InventoriesRepository<AssetDisposal>>("inventories:disposals");
 
         // Reconciliation Job
         builder.Services.AddScoped<InventoryReconciliationJob>();

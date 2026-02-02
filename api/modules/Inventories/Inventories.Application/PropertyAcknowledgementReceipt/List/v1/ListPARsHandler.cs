@@ -32,7 +32,7 @@ public sealed class ListPARsHandler(
                 LineItemsCount = x.GetLineItemsCount(),
                 TotalAcquisitionCost = x.GetTotalAcquisitionCost(),
                 ReturnDate = x.ReturnDate,
-                CreatedAt = x.Created
+                CreatedAt = x.Created.DateTime
             })
             .ToList();
 

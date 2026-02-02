@@ -1,5 +1,6 @@
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
