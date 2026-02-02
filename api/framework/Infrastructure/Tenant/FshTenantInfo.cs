@@ -10,7 +10,7 @@ public sealed class FshTenantInfo : IFshTenantInfo
     {
     }
 
-    public FshTenantInfo(string id, string name, string? connectionString, string adminEmail, string? issuer = null, string? nfaOfficeCode = null)
+    public FshTenantInfo(string id, string name, string? connectionString, string adminEmail, string? issuer = null)
     {
         Id = id;
         Identifier = id;
@@ -19,7 +19,6 @@ public sealed class FshTenantInfo : IFshTenantInfo
         AdminEmail = adminEmail;
         IsActive = true;
         Issuer = issuer;
-        NfaOfficeCode = nfaOfficeCode;
 
         // Add Default 1 Month Validity for all new tenants. Something like a DEMO period for tenants.
         ValidUpto = DateTime.UtcNow.AddMonths(1);
@@ -34,7 +33,6 @@ public sealed class FshTenantInfo : IFshTenantInfo
     public bool IsActive { get; set; }
     public DateTime ValidUpto { get; set; }
     public string? Issuer { get; set; }
-    public string? NfaOfficeCode { get; set; }
 
     public void AddValidity(int months) =>
         ValidUpto = ValidUpto.AddMonths(months);
@@ -67,5 +65,4 @@ public sealed class FshTenantInfo : IFshTenantInfo
     string? ITenantInfo.Identifier { get => Identifier; set => Identifier = value ?? throw new InvalidOperationException("Identifier can't be null."); }
     string? ITenantInfo.Name { get => Name; set => Name = value ?? throw new InvalidOperationException("Name can't be null."); }
     string? IFshTenantInfo.ConnectionString { get => ConnectionString; set => ConnectionString = value ?? throw new InvalidOperationException("ConnectionString can't be null."); }
-    string? IFshTenantInfo.NfaOfficeCode { get => NfaOfficeCode; set => NfaOfficeCode = value; }
 }

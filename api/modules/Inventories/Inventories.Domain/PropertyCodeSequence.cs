@@ -5,12 +5,12 @@ namespace AMIS.WebApi.Inventories.Domain;
 
 /// <summary>
 /// Tracks sequence numbers for COA-compliant property code generation.
+/// OfficeCode serves as the tenant identifier (each office is a unique tenant).
 /// </summary>
 public sealed class PropertyCodeSequence : AuditableEntity, IAggregateRoot
 {
-    public string TenantId { get; private set; } = default!;
     public int YearKey { get; private set; } // 0 if not resetting annually
-    public string OfficeCode { get; private set; } = default!;
+    public string OfficeCode { get; private set; } = default!; // Unique tenant identifier (office code)
     public string ClassCode { get; private set; } = default!;
     public string CategoryCode { get; private set; } = default!;
     public string ItemCode { get; private set; } = default!;
@@ -20,7 +20,6 @@ public sealed class PropertyCodeSequence : AuditableEntity, IAggregateRoot
     private PropertyCodeSequence() { }
 
     private PropertyCodeSequence(
-        string tenantId,
         int yearKey,
         string officeCode,
         string classCode,
@@ -30,7 +29,6 @@ public sealed class PropertyCodeSequence : AuditableEntity, IAggregateRoot
         bool resetAnnually)
     {
         Id = Guid.NewGuid();
-        TenantId = tenantId;
         YearKey = yearKey;
         OfficeCode = officeCode;
         ClassCode = classCode;
@@ -41,7 +39,6 @@ public sealed class PropertyCodeSequence : AuditableEntity, IAggregateRoot
     }
 
     public static PropertyCodeSequence Create(
-        string tenantId,
         int yearKey,
         string officeCode,
         string classCode,
@@ -49,8 +46,8 @@ public sealed class PropertyCodeSequence : AuditableEntity, IAggregateRoot
         string itemCode,
         bool resetAnnually)
     {
-        Validate(tenantId, officeCode, classCode, categoryCode, itemCode);
-        return new PropertyCodeSequence(tenantId, yearKey, officeCode, classCode, categoryCode, itemCode, 0, resetAnnually);
+        Validate(officeCode, classCode, categoryCode, itemCode);
+        return new PropertyCodeSequence(yearKey, officeCode, classCode, categoryCode, itemCode, 0, resetAnnually);
     }
 
     public int Increment()
@@ -59,10 +56,8 @@ public sealed class PropertyCodeSequence : AuditableEntity, IAggregateRoot
         return LastSequence;
     }
 
-    private static void Validate(string tenantId, string officeCode, string classCode, string categoryCode, string itemCode)
+    private static void Validate(string officeCode, string classCode, string categoryCode, string itemCode)
     {
-        if (string.IsNullOrWhiteSpace(tenantId))
-            throw new ArgumentException("TenantId is required.", nameof(tenantId));
         if (string.IsNullOrWhiteSpace(officeCode))
             throw new ArgumentException("Office code is required.", nameof(officeCode));
         if (string.IsNullOrWhiteSpace(classCode))

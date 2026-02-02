@@ -1,11 +1,10 @@
 using AMIS.Framework.Core.Identity.Users.Abstractions;
 using AMIS.Framework.Core.Persistence;
-using AMIS.Framework.Infrastructure.Tenant;
 using AMIS.WebApi.Inventories.Application.Acceptances.Services;
 using AMIS.WebApi.Inventories.Application.Employees.Search.v1;
 using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.ValueObjects;
-using Finbuckle.MultiTenant.Abstractions;
+using Ardalis.Specification;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -14,10 +13,10 @@ namespace AMIS.WebApi.Inventories.Application.PropertyCodes;
 /// <summary>
 /// COA/DBM-compliant property code generator.
 /// Format: {Year}-{Agency}-{Office}-{Class}-{Category}-{Item}-{Sequence.Decimal}
+/// OfficeCode serves as the tenant identifier (each office is a unique tenant).
 /// </summary>
 public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
 {
-    private readonly IMultiTenantContextAccessor<FshTenantInfo> _tenantAccessor;
     private readonly ICurrentUser _currentUser;
     private readonly IReadRepository<Employee> _employeeRepo;
     private readonly IReadRepository<PpeCategoryCode> _classRepo;
@@ -27,7 +26,6 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
     private readonly CoaPropertyCodeOptions _options;
 
     public CoaPropertyCodeGenerator(
-        IMultiTenantContextAccessor<FshTenantInfo> tenantAccessor,
         ICurrentUser currentUser,
         [FromKeyedServices("inventories:employees")] IReadRepository<Employee> employeeRepo,
         [FromKeyedServices("inventories:ppeCategoryCodes")] IReadRepository<PpeCategoryCode> classRepo,
@@ -36,7 +34,6 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
         [FromKeyedServices("inventories:propertyCodeSequences")] IRepository<PropertyCodeSequence> sequenceRepo,
         IOptions<CoaPropertyCodeOptions> options)
     {
-        _tenantAccessor = tenantAccessor ?? throw new ArgumentNullException(nameof(tenantAccessor));
         _currentUser = currentUser ?? throw new ArgumentNullException(nameof(currentUser));
         _employeeRepo = employeeRepo ?? throw new ArgumentNullException(nameof(employeeRepo));
         _classRepo = classRepo ?? throw new ArgumentNullException(nameof(classRepo));
@@ -58,11 +55,11 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
         var request = new CoaPropertyCodeRequest(
             acquisitionDate,
             classification,
-            officeCode: null,
-            classCode: null,
-            categoryCode: null,
-            itemCode: null,
-            sequenceSuffix: "0");
+            OfficeCode: null,
+            ClassCode: null,
+            CategoryCode: null,
+            ItemCode: null,
+            SequenceSuffix: "0");
 
         return GenerateAsync(request, cancellationToken);
     }
@@ -81,7 +78,6 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
 
         var yearKey = _options.ResetSequenceAnnually ? year : 0;
         var sequence = await NextSequenceAsync(
-            tenantId: GetTenantId(),
             yearKey: yearKey,
             officeCode: officeCode,
             classCode: classCode,
@@ -94,8 +90,6 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
 
         return $"{year}-{agency}-{officeCode}-{classCode}-{categoryCode}-{itemCode}-{seq}.{suffix}";
     }
-
-    private string GetTenantId() => _tenantAccessor.MultiTenantContext?.TenantInfo?.Id ?? "default";
 
     private async Task<string> ResolveOfficeCodeAsync(string? officeCode, CancellationToken cancellationToken)
     {
@@ -111,12 +105,6 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
             {
                 return employee!.ResponsibilityCode.Trim();
             }
-        }
-
-        var tenantOffice = _tenantAccessor.MultiTenantContext?.TenantInfo?.NfaOfficeCode;
-        if (!string.IsNullOrWhiteSpace(tenantOffice))
-        {
-            return tenantOffice.Trim();
         }
 
         return _options.DefaultOfficeCode;
@@ -165,7 +153,6 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
     }
 
     private async Task<int> NextSequenceAsync(
-        string tenantId,
         int yearKey,
         string officeCode,
         string classCode,
@@ -173,12 +160,12 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
         string itemCode,
         CancellationToken cancellationToken)
     {
-        var spec = new PropertyCodeSequenceByKeySpec(tenantId, yearKey, officeCode, classCode, categoryCode, itemCode);
+        var spec = new PropertyCodeSequenceByKeySpec(yearKey, officeCode, classCode, categoryCode, itemCode);
         var sequence = await _sequenceRepo.FirstOrDefaultAsync(spec, cancellationToken).ConfigureAwait(false);
 
         if (sequence is null)
         {
-            sequence = PropertyCodeSequence.Create(tenantId, yearKey, officeCode, classCode, categoryCode, itemCode, _options.ResetSequenceAnnually);
+            sequence = PropertyCodeSequence.Create(yearKey, officeCode, classCode, categoryCode, itemCode, _options.ResetSequenceAnnually);
             await _sequenceRepo.AddAsync(sequence, cancellationToken).ConfigureAwait(false);
         }
 
@@ -208,14 +195,12 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
     private sealed class PropertyCodeSequenceByKeySpec : Ardalis.Specification.Specification<PropertyCodeSequence>
     {
         public PropertyCodeSequenceByKeySpec(
-            string tenantId,
             int yearKey,
             string officeCode,
             string classCode,
             string categoryCode,
             string itemCode) =>
-            Query.Where(x => x.TenantId == tenantId
-                && x.YearKey == yearKey
+            Query.Where(x => x.YearKey == yearKey
                 && x.OfficeCode == officeCode
                 && x.ClassCode == classCode
                 && x.CategoryCode == categoryCode

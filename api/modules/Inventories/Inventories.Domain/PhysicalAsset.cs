@@ -69,6 +69,10 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         = new List<AssetAssignmentHistory>();
     public virtual ICollection<AssetReclassificationHistory> ReclassificationHistory { get; private set; }
         = new List<AssetReclassificationHistory>();
+    public virtual ICollection<AssetDisposal> Disposals { get; private set; }
+        = new List<AssetDisposal>();
+    public virtual ICollection<AssetMaintenance> MaintenanceHistory { get; private set; }
+        = new List<AssetMaintenance>();
 
     private PhysicalAsset() { }
 
