@@ -34,6 +34,7 @@ public sealed class CreatePpeReceivingReportHandler(
                 x.Unit,
                 x.UnitCost,
                 x.Location,
+                x.PpeType,
                 x.ClassCode,
                 x.CategoryCode,
                 x.ItemCode)).ToList();

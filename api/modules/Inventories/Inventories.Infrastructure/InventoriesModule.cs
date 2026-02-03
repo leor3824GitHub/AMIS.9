@@ -47,6 +47,7 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.JournalEntryVoucher;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PhysicalAsset;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsIssuance;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsReceiving;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PropertyAcknowledgementReceipt;
 
 using AMIS.WebApi.Inventories.Application.Services;
 
@@ -322,13 +323,13 @@ public static class InventoriesModule
             semexTransactionLogGroup.MapGetSemexTransactionLogEndpoint();
 
             var parGroup = app.MapGroup("property-accountability-receipt").WithTags("property-accountability-receipt");
-            // parGroup.MapListPARsEndpoint();
-            // parGroup.MapCreatePAREndpoint();
-            // parGroup.MapGetPAREndpoint();
-            // parGroup.MapUpdatePAREndpoint();
-            // parGroup.MapPostPAREndpoint();
-            // parGroup.MapCancelPAREndpoint();
-            // parGroup.MapReturnPAREndpoint();
+            parGroup.MapListPARsEndpoint();
+            parGroup.MapCreatePAREndpoint();
+            parGroup.MapGetPAREndpoint();
+            parGroup.MapUpdatePAREndpoint();
+            parGroup.MapPostPAREndpoint();
+            parGroup.MapCancelPAREndpoint();
+            parGroup.MapReturnPAREndpoint();
         }
     }
     public static WebApplicationBuilder RegisterInventoriesServices(this WebApplicationBuilder builder)
@@ -378,7 +379,7 @@ public static class InventoriesModule
         // Also add with dashed key and "assets" key for handlers that use it
         builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:physical-assets");
         builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:physical-assets");
-        
+
         builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:assets");
         builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:assets");
 
@@ -469,11 +470,11 @@ public static class InventoriesModule
         // Semex Registry & Logs (Semi-Expendable)
         builder.Services.AddKeyedScoped<IRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex-registries");
         builder.Services.AddKeyedScoped<IReadRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex-registries");
-        
+
         // Also add with "semex" key for compatibility
         builder.Services.AddKeyedScoped<IRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex");
         builder.Services.AddKeyedScoped<IReadRepository<SemexRegistry>, InventoriesRepository<SemexRegistry>>("inventories:semex");
-        
+
         builder.Services.AddKeyedScoped<IRepository<SemexTransactionLog>, InventoriesRepository<SemexTransactionLog>>("inventories:semex-transaction-logs");
         builder.Services.AddKeyedScoped<IReadRepository<SemexTransactionLog>, InventoriesRepository<SemexTransactionLog>>("inventories:semex-transaction-logs");
 

@@ -8,6 +8,12 @@ public static class PpeCodeSeeder
 {
     public static async Task SeedDefaultsAsync(InventoriesDbContext context, ILogger logger, CancellationToken cancellationToken = default)
     {
+        if (!await PpeCategoryCodeTableExistsAsync(context, cancellationToken))
+        {
+            logger.LogWarning("Skipping PPE category code seed because table {Table} does not exist.", "inventories.PPECategoryCodes");
+            return;
+        }
+
         if (await context.PpeCategoryCodes.AnyAsync(cancellationToken))
         {
             logger.LogInformation("PPE category codes already exist. Skipping seed.");
@@ -67,5 +73,29 @@ public static class PpeCodeSeeder
         await context.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Seeded {CategoryCount} PPE categories and {TypeCount} PPE types.", categories.Count, typeCodes.Count);
+    }
+
+    private static async Task<bool> PpeCategoryCodeTableExistsAsync(InventoriesDbContext context, CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'inventories'
+                  AND table_name = 'PPECategoryCodes'
+            );
+            """;
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+        {
+            await connection.OpenAsync(cancellationToken);
+        }
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = sql;
+
+        var result = await command.ExecuteScalarAsync(cancellationToken);
+        return result is true;
     }
 }

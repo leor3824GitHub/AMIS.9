@@ -41,7 +41,6 @@ public partial class Tenants
                 new(tenant => tenant.Id, "Id"),
                 new(tenant => tenant.Name, "Name"),
                 new(tenant => tenant.AdminEmail, "Admin Email"),
-                new(tenant => tenant.NfaOfficeCode, "Office Code"),
                 new(tenant => tenant.ValidUpto.ToString("MMM dd, yyyy"), "Valid Upto"),
                 new(tenant => tenant.IsActive, "Active", Type: typeof(bool))
             },

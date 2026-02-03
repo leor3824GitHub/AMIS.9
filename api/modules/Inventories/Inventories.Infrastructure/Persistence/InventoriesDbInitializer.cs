@@ -4,6 +4,7 @@ using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using AMIS.WebApi.Inventories.Infrastructure.Persistence.Data;
 using System.Data;
 using System.Linq;
+using System.Security.Cryptography;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -72,33 +73,40 @@ internal sealed class InventoriesDbInitializer(
     {
         logger.LogInformation("[{Tenant}] Starting comprehensive seed data generation", context.TenantInfo!.Identifier);
 
+        if (!await TableExistsAsync("inventories", "NfaOfficeCodes", cancellationToken) ||
+            !await TableExistsAsync("inventories", "PPECategoryCodes", cancellationToken))
+        {
+            logger.LogWarning("[{Tenant}] Skipping inventories seed because required tables are missing.", context.TenantInfo!.Identifier);
+            return;
+        }
+
         await NfaOfficeCodeSeeder.SeedDefaultsAsync(context, logger, cancellationToken);
         await PpeCodeSeeder.SeedDefaultsAsync(context, logger, cancellationToken);
 
         // 1. Seed Categories (10)
         var categories = await SeedCategoriesAsync(cancellationToken);
-        
+
         // 2. Seed Suppliers (10)
         var suppliers = await SeedSuppliersAsync(cancellationToken);
-        
+
         // 3. Seed Employees (10)
         var employees = await SeedEmployeesAsync(cancellationToken);
-        
+
         // 4. Seed Products (10)
         var products = await SeedProductsAsync(categories, cancellationToken);
-        
+
         // 5. Seed Purchases with Items (10)
         var purchases = await SeedPurchasesAsync(suppliers, products, cancellationToken);
-        
+
         // 6. Seed Inspections (10)
         await SeedInspectionsAsync(purchases, employees, cancellationToken);
-        
+
         // 7. Seed Inventory Registry (sample PPE items)
         await SeedInventoryRegistriesAsync(cancellationToken);
 
         // 8. Seed PPE Type Account Mappings
         await SeedPPETypeAccountMappingsAsync(cancellationToken);
-        
+
         logger.LogInformation("[{Tenant}] Comprehensive seed data generation completed", context.TenantInfo!.Identifier);
     }
 
@@ -119,7 +127,7 @@ internal sealed class InventoriesDbInitializer(
         };
 
         var seededCategories = new List<Category>();
-        
+
         foreach (var (name, description) in categoryNames)
         {
             if (await context.Categories.FirstOrDefaultAsync(c => c.Name == name, cancellationToken) is null)
@@ -134,14 +142,14 @@ internal sealed class InventoriesDbInitializer(
                 if (existing != null) seededCategories.Add(existing);
             }
         }
-        
+
         await context.SaveChangesAsync(cancellationToken);
-        
+
         // Refresh with persisted IDs
         seededCategories = await context.Categories
             .Where(c => categoryNames.Select(cn => cn.Item1).Contains(c.Name))
             .ToListAsync(cancellationToken);
-        
+
         logger.LogInformation("[{Tenant}] Seeded {Count} categories", context.TenantInfo!.Identifier, seededCategories.Count);
         return seededCategories;
     }
@@ -163,7 +171,7 @@ internal sealed class InventoriesDbInitializer(
         };
 
         var suppliers = new List<Supplier>();
-        
+
         foreach (var (name, address, tin, taxClass, contact, email) in supplierData)
         {
             if (await context.Suppliers.FirstOrDefaultAsync(s => s.Name == name, cancellationToken) is null)
@@ -178,13 +186,13 @@ internal sealed class InventoriesDbInitializer(
                 if (existing != null) suppliers.Add(existing);
             }
         }
-        
+
         await context.SaveChangesAsync(cancellationToken);
-        
+
         suppliers = await context.Suppliers
             .Where(s => supplierData.Select(sd => sd.Item1).Contains(s.Name))
             .ToListAsync(cancellationToken);
-        
+
         logger.LogInformation("[{Tenant}] Seeded {Count} suppliers", context.TenantInfo!.Identifier, suppliers.Count);
         return suppliers;
     }
@@ -206,7 +214,7 @@ internal sealed class InventoriesDbInitializer(
         };
 
         var employees = new List<Employee>();
-        
+
         foreach (var (name, designation, respCode) in employeeData)
         {
             if (await context.Employees.FirstOrDefaultAsync(e => e.ResponsibilityCode == respCode, cancellationToken) is null)
@@ -221,13 +229,13 @@ internal sealed class InventoriesDbInitializer(
                 if (existing != null) employees.Add(existing);
             }
         }
-        
+
         await context.SaveChangesAsync(cancellationToken);
-        
+
         employees = await context.Employees
             .Where(e => employeeData.Select(ed => ed.Item3).Contains(e.ResponsibilityCode))
             .ToListAsync(cancellationToken);
-        
+
         logger.LogInformation("[{Tenant}] Seeded {Count} employees", context.TenantInfo!.Identifier, employees.Count);
         return employees;
     }
@@ -250,11 +258,11 @@ internal sealed class InventoriesDbInitializer(
 
         var products = new List<Product>();
         var categoryCount = categories.Count;
-        
+
         for (int i = 0; i < productData.Length; i++)
         {
             var (name, description, price, unit, classification, usefulLife) = productData[i];
-            
+
             if (await context.Products.FirstOrDefaultAsync(p => p.Name == name, cancellationToken) is null)
             {
                 var categoryId = categoryCount > 0 ? categories[i % categoryCount].Id : (Guid?)null;
@@ -268,13 +276,13 @@ internal sealed class InventoriesDbInitializer(
                 if (existing != null) products.Add(existing);
             }
         }
-        
+
         await context.SaveChangesAsync(cancellationToken);
-        
+
         products = await context.Products
             .Where(p => productData.Select(pd => pd.Item1).Contains(p.Name))
             .ToListAsync(cancellationToken);
-        
+
         logger.LogInformation("[{Tenant}] Seeded {Count} products", context.TenantInfo!.Identifier, products.Count);
         return products;
     }
@@ -282,92 +290,98 @@ internal sealed class InventoriesDbInitializer(
     private async Task<List<Purchase>> SeedPurchasesAsync(List<Supplier> suppliers, List<Product> products, CancellationToken cancellationToken)
     {
         var purchases = new List<Purchase>();
-        var random = new Random(42); // Fixed seed for reproducibility
-        
+
         for (int i = 1; i <= 10; i++)
         {
             var refNumber = $"PO-2026-{i:D4}";
-            
+
             if (await context.Purchases.FirstOrDefaultAsync(p => p.ReferenceNumber == refNumber, cancellationToken) is null)
             {
-                var supplier = suppliers[random.Next(suppliers.Count)];
-                var purchaseDate = DateTime.UtcNow.AddDays(-random.Next(1, 90));
-                
+                var supplier = suppliers[NextInt(0, suppliers.Count)];
+                var purchaseDate = DateTime.UtcNow.AddDays(-NextInt(1, 90));
+
                 var purchase = Purchase.Create(
                     supplier.Id,
                     purchaseDate,
                     refNumber,
                     $"Purchase order for office supplies and equipment - Batch {i}",
                     "Main Office, Manila");
-                
+
                 // Add 2-4 random items to each purchase
-                var itemCount = random.Next(2, 5);
+                var itemCount = NextInt(2, 5);
                 for (int j = 0; j < itemCount; j++)
                 {
-                    var product = products[random.Next(products.Count)];
-                    var quantity = random.Next(1, 10);
-                    var unitPrice = product.Sku * (decimal)(0.9 + random.NextDouble() * 0.2); // �10% variance
-                    
+                    var product = products[NextInt(0, products.Count)];
+                    var quantity = NextInt(1, 10);
+                    var unitPrice = product.Sku * (decimal)(0.9 + NextDouble() * 0.2); // �10% variance
+
                     purchase.AddItem(product.Id, quantity, unitPrice, PurchaseStatus.Draft);
                 }
-                
+
                 await context.Purchases.AddAsync(purchase, cancellationToken);
                 purchases.Add(purchase);
             }
         }
-        
+
         await context.SaveChangesAsync(cancellationToken);
-        
+
         // Reload with items
         purchases = await context.Purchases
             .Include(p => p.Items)
             .Where(p => p.ReferenceNumber!.StartsWith("PO-2026-"))
             .ToListAsync(cancellationToken);
-        
+
         logger.LogInformation("[{Tenant}] Seeded {Count} purchases with items", context.TenantInfo!.Identifier, purchases.Count);
         return purchases;
     }
 
     private async Task SeedInspectionsAsync(List<Purchase> purchases, List<Employee> employees, CancellationToken cancellationToken)
     {
-        var random = new Random(42);
         var inspectionCount = 0;
-        
+
         // Create inspections for first 10 purchases
         foreach (var purchase in purchases.Take(10))
         {
             if (purchase.Items.Count == 0) continue;
-            
+
             // Check if inspection already exists
             var existingInspection = await context.Inspections
                 .FirstOrDefaultAsync(i => i.PurchaseId == purchase.Id, cancellationToken);
-            
+
             if (existingInspection is null)
             {
-                var inspector = employees[random.Next(employees.Count)];
-                var inspectedDate = purchase.PurchaseDate!.Value.AddDays(random.Next(3, 15));
-                
+                var inspector = employees[NextInt(0, employees.Count)];
+                var inspectedDate = purchase.PurchaseDate!.Value.AddDays(NextInt(3, 15));
+
                 var inspection = Inspection.Create(
                     purchase.Id,
                     inspector.Id,
                     inspectedDate,
                     $"Inspection for PO {purchase.ReferenceNumber}",
                     null);
-                
+
                 // Add inspection items for each purchase item
                 foreach (var purchaseItem in purchase.Items)
                 {
                     var qtyInspected = purchaseItem.Qty;
-                    var passRate = random.NextDouble();
+                    var passRate = NextDouble();
                     var qtyPassed = passRate > 0.8 ? qtyInspected : (int)(qtyInspected * passRate);
                     var qtyFailed = qtyInspected - qtyPassed;
-                    
-                    InspectionItemStatus? status = qtyFailed == 0 
-                        ? InspectionItemStatus.Passed 
-                        : qtyPassed > 0 
-                            ? InspectionItemStatus.AcceptedWithDeviation 
-                            : InspectionItemStatus.Failed;
-                    
+
+                    InspectionItemStatus? status;
+                    if (qtyFailed == 0)
+                    {
+                        status = InspectionItemStatus.Passed;
+                    }
+                    else if (qtyPassed > 0)
+                    {
+                        status = InspectionItemStatus.AcceptedWithDeviation;
+                    }
+                    else
+                    {
+                        status = InspectionItemStatus.Failed;
+                    }
+
                     var inspectionItem = InspectionItem.Create(
                         inspection.Id,
                         purchaseItem.Id,
@@ -376,21 +390,21 @@ internal sealed class InventoriesDbInitializer(
                         qtyFailed,
                         qtyFailed > 0 ? $"Minor defects found in {qtyFailed} units" : "All units passed inspection",
                         status);
-                    
+
                     inspection.AddItem(inspectionItem);
                 }
-                
+
                 // Finalize inspection if all passed
                 if (inspection.Items.All(i => i.InspectionItemStatus == InspectionItemStatus.Passed))
                 {
                     inspection.Approve();
                 }
-                
+
                 await context.Inspections.AddAsync(inspection, cancellationToken);
                 inspectionCount++;
             }
         }
-        
+
         await context.SaveChangesAsync(cancellationToken);
         logger.LogInformation("[{Tenant}] Seeded {Count} inspections with items", context.TenantInfo!.Identifier, inspectionCount);
     }
@@ -428,10 +442,10 @@ internal sealed class InventoriesDbInitializer(
         try
         {
             logger.LogInformation("[{Tenant}] Checking inventory registry for existing data...", context.TenantInfo!.Identifier);
-            
+
             var existingCount = await context.InventoryRegistries.CountAsync(cancellationToken);
             logger.LogInformation("[{Tenant}] Found {Count} existing inventory registry items", context.TenantInfo!.Identifier, existingCount);
-            
+
             if (existingCount > 0)
             {
                 logger.LogInformation("[{Tenant}] inventory registry already seeded, skipping", context.TenantInfo!.Identifier);
@@ -439,7 +453,7 @@ internal sealed class InventoriesDbInitializer(
             }
 
             logger.LogInformation("[{Tenant}] Starting inventory registry seeding...", context.TenantInfo!.Identifier);
-            
+
             var now = DateTime.UtcNow;
             var baseLocation = "Central Warehouse";
 
@@ -458,7 +472,7 @@ internal sealed class InventoriesDbInitializer(
             };
 
             logger.LogInformation("[{Tenant}] Creating {Count} inventory registry items...", context.TenantInfo!.Identifier, seedItems.Length);
-            
+
             var registries = seedItems.Select(item =>
             {
                 var registry = InventoryRegistry.CreateFromReceiving(item.Code, item.Desc, item.Qty, item.Location, item.Report);
@@ -468,14 +482,23 @@ internal sealed class InventoriesDbInitializer(
 
             await context.InventoryRegistries.AddRangeAsync(registries, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
-            
+
             logger.LogInformation("[{Tenant}] Successfully seeded {Count} inventory registry items", context.TenantInfo!.Identifier, registries.Count);
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "[{Tenant}] Error seeding inventory registry: {Message}", context.TenantInfo!.Identifier, ex.Message);
-            throw;
+            throw new InvalidOperationException("Failed to seed inventory registry data.", ex);
         }
+    }
+
+    private static int NextInt(int minInclusive, int maxExclusive) =>
+        RandomNumberGenerator.GetInt32(minInclusive, maxExclusive);
+
+    private static double NextDouble()
+    {
+        var value = RandomNumberGenerator.GetInt32(0, int.MaxValue);
+        return value / (double)int.MaxValue;
     }
 }
 

@@ -21,10 +21,6 @@
             <MudTextField T="string" For="@(() => context.RequestModel.AdminEmail)" @bind-Value="context.RequestModel.AdminEmail"
                 Label="Admin Email" />
         </MudItem>
-        <MudItem xs="12" md="6">
-            <MudTextField T="string" For="@(() => context.RequestModel.NfaOfficeCode)" @bind-Value="context.RequestModel.NfaOfficeCode"
-                Label="Office Code" />
-        </MudItem>
     </EditFormContent>
     <ExtraActions>
         @if(_canUpgrade)

@@ -23,7 +23,7 @@ public sealed class UpdatePpeReceivingReportHandler(
         var authResult = await authorizationService.AuthorizeAsync(
             null,
             $"{FshResources.PpeReceiving}.{FshActions.Update}");
-        
+
         if (!authResult.Succeeded)
         {
             logger.LogWarning("Unauthorized update attempt for PPERR {Id}", request.Id);
@@ -71,6 +71,7 @@ public sealed class UpdatePpeReceivingReportHandler(
                 x.Unit,
                 x.UnitCost,
                 x.Location,
+                x.PpeType,
                 x.ClassCode,
                 x.CategoryCode,
                 x.ItemCode)).ToList();

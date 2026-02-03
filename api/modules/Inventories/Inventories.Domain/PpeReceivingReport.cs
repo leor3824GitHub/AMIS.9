@@ -112,6 +112,11 @@ public class PpeReceivingReport : AuditableEntity, IAggregateRoot
     /// </summary>
     public void Post()
     {
+        if (Status == PpeReportStatus.Posted)
+        {
+            throw new InvalidOperationException($"Report {ReportNumber} is already posted. Cannot post again.");
+        }
+
         EnsureDraft();
         if (_lineItems.Count == 0)
         {
@@ -204,6 +209,7 @@ public sealed record PpeReceivingLineItem(
     string Unit,
     decimal UnitCost,
     string Location,
+    string? PpeType = null,
     string? ClassCode = null,
     string? CategoryCode = null,
     string? ItemCode = null)

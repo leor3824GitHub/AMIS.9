@@ -28,6 +28,7 @@ public sealed class TokenService : ITokenService
     private readonly IMultiTenantContextAccessor<FshTenantInfo>? _multiTenantContextAccessor;
     private readonly JwtOptions _jwtOptions;
     private readonly IPublisher _publisher;
+
     public TokenService(IOptions<JwtOptions> jwtOptions, UserManager<FshUser> userManager, IMultiTenantContextAccessor<FshTenantInfo>? multiTenantContextAccessor, IPublisher publisher)
     {
         _jwtOptions = jwtOptions.Value;
@@ -76,29 +77,74 @@ public sealed class TokenService : ITokenService
 
     public async Task<TokenResponse> RefreshTokenAsync(RefreshTokenCommand request, string ipAddress, CancellationToken cancellationToken)
     {
-        var userPrincipal = GetPrincipalFromExpiredToken(request.Token);
-        var userId = _userManager.GetUserId(userPrincipal)!;
-        var user = await _userManager.FindByIdAsync(userId);
-        if (user is null)
+        try
         {
-            throw new UnauthorizedException();
-        }
+            var userPrincipal = GetPrincipalFromExpiredToken(request.Token);
+            var userId = _userManager.GetUserId(userPrincipal);
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                throw new UnauthorizedException("Invalid token - no user ID found");
+            }
 
-        if (user.RefreshToken != request.RefreshToken || user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user is null)
+            {
+                // Try to get tenant from token to provide better diagnostics
+                var tenantFromToken = userPrincipal.FindFirst(FshClaims.Tenant)?.Value ?? "unknown";
+                throw new UnauthorizedException($"User not found (ID: {userId}, Tenant: {tenantFromToken})");
+            }
+
+            // Validate refresh token: must exist, match the sent token, and not be expired
+            if (string.IsNullOrWhiteSpace(user.RefreshToken))
+            {
+                throw new UnauthorizedException("No refresh token stored for user");
+            }
+
+            if (user.RefreshToken != request.RefreshToken)
+            {
+                throw new UnauthorizedException("Refresh token mismatch");
+            }
+
+            if (user.RefreshTokenExpiryTime <= DateTime.UtcNow)
+            {
+                throw new UnauthorizedException("Refresh token expired");
+            }
+
+            return await GenerateTokensAndUpdateUser(user, ipAddress);
+        }
+        catch (SecurityTokenException ex)
         {
-            throw new UnauthorizedException("Invalid Refresh Token");
+            throw new UnauthorizedException($"Invalid token format: {ex.Message}");
         }
-
-        return await GenerateTokensAndUpdateUser(user, ipAddress);
     }
     private async Task<TokenResponse> GenerateTokensAndUpdateUser(FshUser user, string ipAddress)
     {
         string token = GenerateJwt(user, ipAddress);
+        string refreshToken = GenerateRefreshToken();
+        var expiryTime = DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationInDays);
 
-        user.RefreshToken = GenerateRefreshToken();
-        user.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationInDays);
+        // Update user with new refresh token
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiryTime = expiryTime;
 
-        await _userManager.UpdateAsync(user);
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            var errors = string.Join(", ", updateResult.Errors.Select(e => e.Description));
+            throw new UnauthorizedException($"Failed to update user: {errors}");
+        }
+
+        // Verify the user can be found after update
+        var verifyUser = await _userManager.FindByIdAsync(user.Id);
+        if (verifyUser is null)
+        {
+            throw new UnauthorizedException($"User cannot be found after token generation (ID: {user.Id})");
+        }
+
+        if (string.IsNullOrWhiteSpace(verifyUser.RefreshToken))
+        {
+            throw new UnauthorizedException($"Refresh token was not persisted (ID: {user.Id})");
+        }
 
         await _publisher.Publish(new AuditPublishedEvent(new()
         {
@@ -118,7 +164,7 @@ public sealed class TokenService : ITokenService
             user.UserName,
             user.Email));
 
-        return new TokenResponse(token, user.RefreshToken, user.RefreshTokenExpiryTime);
+        return new TokenResponse(token, refreshToken, expiryTime);
     }
 
     private string GenerateJwt(FshUser user, string ipAddress) =>

@@ -165,6 +165,15 @@ public static class FshPermissions
         new("Delete PpeReceiving", FshActions.Delete, FshResources.PpeReceiving),
         new("Cancel PpeReceiving", FshActions.Cancel, FshResources.PpeReceiving),
 
+        //property acknowledgement receipt (PAR)
+        new("View PropertyAcknowledgementReceipt", FshActions.View, FshResources.PropertyAcknowledgementReceipt, IsBasic: true),
+        new("Search PropertyAcknowledgementReceipt", FshActions.Search, FshResources.PropertyAcknowledgementReceipt, IsBasic: true),
+        new("Create PropertyAcknowledgementReceipt", FshActions.Create, FshResources.PropertyAcknowledgementReceipt),
+        new("Update PropertyAcknowledgementReceipt", FshActions.Update, FshResources.PropertyAcknowledgementReceipt),
+        new("Post PropertyAcknowledgementReceipt", FshActions.Post, FshResources.PropertyAcknowledgementReceipt),
+        new("Cancel PropertyAcknowledgementReceipt", FshActions.Cancel, FshResources.PropertyAcknowledgementReceipt),
+        new("Return PropertyAcknowledgementReceipt", FshActions.Return, FshResources.PropertyAcknowledgementReceipt),
+
         //inventorytransactions
         new("View InventoryTransactions", FshActions.View, FshResources.InventoryTransactions, IsBasic: true),
         new("Search InventoryTransactions", FshActions.Search, FshResources.InventoryTransactions, IsBasic: true),

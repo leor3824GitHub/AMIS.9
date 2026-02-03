@@ -1,3 +1,4 @@
+using System.Data;
 using AMIS.WebApi.Inventories.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -8,6 +9,12 @@ public static class NfaOfficeCodeSeeder
 {
     public static async Task SeedDefaultsAsync(InventoriesDbContext context, ILogger logger, CancellationToken cancellationToken = default)
     {
+        if (!await NfaOfficeCodeTableExistsAsync(context, cancellationToken))
+        {
+            logger.LogWarning("Skipping NFA office code seed because table {Table} does not exist.", "inventories.NfaOfficeCodes");
+            return;
+        }
+
         if (await context.NfaOfficeCodes.AnyAsync(cancellationToken))
         {
             logger.LogInformation("NFA office codes already exist. Skipping seed.");
@@ -34,5 +41,29 @@ public static class NfaOfficeCodeSeeder
         await context.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation("Seeded {Count} NFA office codes.", codes.Count);
+    }
+
+    private static async Task<bool> NfaOfficeCodeTableExistsAsync(InventoriesDbContext context, CancellationToken cancellationToken)
+    {
+        const string sql = """
+            SELECT EXISTS (
+                SELECT 1
+                FROM information_schema.tables
+                WHERE table_schema = 'inventories'
+                  AND table_name = 'NfaOfficeCodes'
+            );
+            """;
+
+        var connection = context.Database.GetDbConnection();
+        if (connection.State != ConnectionState.Open)
+        {
+            await connection.OpenAsync(cancellationToken);
+        }
+
+        await using var command = connection.CreateCommand();
+        command.CommandText = sql;
+
+        var result = await command.ExecuteScalarAsync(cancellationToken);
+        return result is true;
     }
 }

@@ -21,7 +21,7 @@ public partial class PropertyAcknowledgementReceipt
     private PARLineItemModel? _editingLineItem;
     private DialogOptions _dialogOptions = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
 
-    private bool CanSave => !string.IsNullOrWhiteSpace(_model.PARNumber) 
+    private bool CanSave => !string.IsNullOrWhiteSpace(_model.PARNumber)
         && !string.IsNullOrWhiteSpace(_model.EmployeeName)
         && !string.IsNullOrWhiteSpace(_model.Department)
         && _model.IssuanceDate.HasValue;
@@ -97,7 +97,13 @@ public partial class PropertyAcknowledgementReceipt
         try
         {
             var response = await ApiClient.SearchEmployeesAsync(searchText, 1, 20, cancellationToken);
-            return response.Data ?? Array.Empty<EmployeeDto>();
+            return response.Items?.Select(employee => new EmployeeDto
+            {
+                Id = employee.Id ?? Guid.Empty,
+                Name = employee.Name ?? string.Empty,
+                Department = employee.ResponsibilityCode,
+                Position = employee.Designation
+            }) ?? Enumerable.Empty<EmployeeDto>();
         }
         catch
         {

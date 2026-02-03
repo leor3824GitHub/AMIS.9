@@ -92,7 +92,7 @@ public sealed class PostPpeReceivingReportHandler(
                         unitOfMeasure: lineItem.Unit,
                         serialNumber: null,
                         modelNumber: null,
-                        ppeType: null);
+                        ppeType: lineItem.PpeType ?? "General");
 
                     await assetRepository.AddAsync(asset, cancellationToken).ConfigureAwait(false);
 

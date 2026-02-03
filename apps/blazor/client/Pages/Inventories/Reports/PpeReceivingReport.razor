@@ -32,8 +32,8 @@
             {
                 @if (_reportStatus == 0)
                 {
-                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitAsync"
-                        Disabled="@(!CanSave)" StartIcon="@Icons.Material.Filled.Save">@_actionButtonText</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitAsync" Disabled="@(!CanSave)"
+                        StartIcon="@Icons.Material.Filled.Save">@_actionButtonText</MudButton>
                     @if (CanPost)
                     {
                         <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="PostAsync"
@@ -68,11 +68,13 @@
                     <MudGrid GutterSize="2">
                         <MudItem xs="12" md="4">
                             <MudTextField @bind-Value="_model.ReportNumber" For="@(() => _model.ReportNumber)"
-                                Label="Report Number" Required="true" MaxLength="10" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                                Label="Report Number" Required="true" MaxLength="10"
+                                Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                         </MudItem>
                         <MudItem xs="12" md="4">
                             <MudDatePicker @bind-Date="_model.SourceReceiptDate" Label="Receipt Date" Required="true"
-                                MaxDate="@DateTime.Today" Format="MM/dd/yyyy" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                                MaxDate="@DateTime.Today" Format="MM/dd/yyyy"
+                                Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                         </MudItem>
                         <MudItem xs="12" md="4">
                             <MudSelect T="string" @bind-Value="_model.ReceiptType" Label="Receipt Type" Required="true"
@@ -89,7 +91,8 @@
                         </MudItem>
                         <MudItem xs="12" md="6">
                             <MudTextField @bind-Value="_model.SourceAddress" For="@(() => _model.SourceAddress)"
-                                Label="Source Address" Required="true" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                                Label="Source Address" Required="true"
+                                Disabled="@(_reportStatus != 0 || _isReadOnly)" />
                         </MudItem>
                         <MudItem xs="12">
                             <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3"
@@ -112,45 +115,33 @@
                             <MudGrid GutterSize="2" Class="mt-2">
                                 <MudItem xs="12" md="3">
                                     <MudTextField @bind-Value="_draft.PropertyCode" For="@(() => _draft.PropertyCode)"
-                                        Label="Property Code"  />
+                                        Label="Property Code" />
                                 </MudItem>
-                                <MudItem xs="6" md="1">
-                                    <MudTextField @bind-Value="_draft.ClassCode" Label="Class" MaxLength="2" />
-                                </MudItem>
-                                <MudItem xs="6" md="1">
-                                    <MudTextField @bind-Value="_draft.CategoryCode" Label="Category" MaxLength="2" />
-                                </MudItem>
-                                <MudItem xs="6" md="1">
-                                    <MudTextField @bind-Value="_draft.ItemCode" Label="Item" MaxLength="3" />
-                                </MudItem>
-                                <MudItem xs="12" md="3">
+                                <MudItem xs="12" md="4">
                                     <MudTextField @bind-Value="_draft.Description" For="@(() => _draft.Description)"
-                                        Label="Description"  />
+                                        Label="Description" />
                                 </MudItem>
                                 <MudItem xs="12" md="2">
                                     <MudDatePicker @bind-Date="_draft.DateAcquired" Label="Date Acquired" />
                                 </MudItem>
                                 <MudItem xs="6" md="1">
                                     <MudNumericField T="double" @bind-Value="_draft.Quantity" Label="Qty" Min="0"
-                                         HideSpinButtons="true" />
+                                        HideSpinButtons="true" />
                                 </MudItem>
                                 <MudItem xs="6" md="1">
-                                    <MudTextField @bind-Value="_draft.Unit" For="@(() => _draft.Unit)" Label="Unit"
-                                         />
+                                    <MudTextField @bind-Value="_draft.Unit" For="@(() => _draft.Unit)" Label="Unit" />
                                 </MudItem>
                                 <MudItem xs="12" md="2">
                                     <MudNumericField T="double" @bind-Value="_draft.UnitCost" Label="Unit Cost" Min="0"
-                                        HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="₱"
-                                         />
+                                        HideSpinButtons="true" Adornment="Adornment.Start" AdornmentText="₱" />
                                 </MudItem>
                                 <MudItem xs="12" md="3">
-                                    <MudTextField @bind-Value="_draft.Location" Label="Location" 
-                                        MaxLength="30" />
+                                    <MudTextField @bind-Value="_draft.Location" Label="Location" MaxLength="30" />
                                 </MudItem>
                             </MudGrid>
                             <MudStack Row="true" Spacing="1" Class="mt-2">
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddLineItem"
-                                    StartIcon="@(_isEditingLineItem ? Icons.Material.Filled.Save : Icons.Material.Filled.Add)" 
+                                    StartIcon="@(_isEditingLineItem ? Icons.Material.Filled.Save : Icons.Material.Filled.Add)"
                                     Disabled="_model.LineItems.Count >= 25">
                                     @(_isEditingLineItem ? "Save Item" : "Add Item")
                                 </MudButton>
@@ -168,9 +159,6 @@
                         <MudTable Items="_model.LineItems" Dense="true" Hover="true" Class="mt-3">
                             <HeaderContent>
                                 <MudTh>Property Code</MudTh>
-                                <MudTh>Class</MudTh>
-                                <MudTh>Category</MudTh>
-                                <MudTh>Item</MudTh>
                                 <MudTh>Description</MudTh>
                                 <MudTh>Date Acquired</MudTh>
                                 <MudTh>Qty</MudTh>
@@ -185,9 +173,6 @@
                             </HeaderContent>
                             <RowTemplate>
                                 <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
-                                <MudTd DataLabel="Class">@context.ClassCode</MudTd>
-                                <MudTd DataLabel="Category">@context.CategoryCode</MudTd>
-                                <MudTd DataLabel="Item">@context.ItemCode</MudTd>
                                 <MudTd DataLabel="Description">@context.Description</MudTd>
                                 <MudTd DataLabel="Date Acquired">@(context.DateAcquired?.ToShortDateString() ?? "N/A")
                                 </MudTd>
@@ -216,6 +201,16 @@
                                     }
                                 </MudTd>
                             </RowTemplate>
+                            <FooterContent>
+                                <MudTd colspan="7" Style="text-align:right; font-weight:bold;">Grand Total:</MudTd>
+                                <MudTd align="right" Style="font-weight:bold; font-size:1.1em;">
+                                    @(_model.LineItems.Sum(x => x.UnitCost * x.Quantity).ToString("C2"))
+                                </MudTd>
+                                @if (_reportStatus == 0)
+                                {
+                                    <MudTd></MudTd>
+                                }
+                            </FooterContent>
                         </MudTable>
                     </MudPaper>
                 </MudTabPanel>

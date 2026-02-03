@@ -19,6 +19,7 @@ public sealed record CreatePpeReceivingLineItemRequest(
     string Unit,
     decimal UnitCost,
     string Location,
+    string? PpeType = null,
     string? ClassCode = null,
     string? CategoryCode = null,
     string? ItemCode = null);

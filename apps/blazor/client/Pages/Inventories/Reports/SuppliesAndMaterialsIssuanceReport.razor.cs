@@ -128,7 +128,6 @@ public partial class SuppliesAndMaterialsIssuanceReport : ComponentBase
             Notes = _model.Notes,
             LineItems = _model.LineItems.Select(li => new CreateIssuanceLineItemRequest
             {
-                PropertyCode = li.PropertyCode,
                 Name = li.Name,
                 Description = li.Description,
                 AcquisitionDate = li.AcquisitionDate ?? _model.TransactionDate ?? DateTime.Today,
