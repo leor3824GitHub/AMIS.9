@@ -52,6 +52,14 @@ public static class FshPermissions
         new("Delete Categories", FshActions.Delete, FshResources.Categories),
         new("Export Categories", FshActions.Export, FshResources.Categories),
 
+        //nfa office codes
+        new("View NfaOfficeCodes", FshActions.View, FshResources.NfaOfficeCodes, IsBasic: true),
+        new("Search NfaOfficeCodes", FshActions.Search, FshResources.NfaOfficeCodes, IsBasic: true),
+
+        //ppe category codes
+        new("View PpeCategoryCodes", FshActions.View, FshResources.PpeCategoryCodes, IsBasic: true),
+        new("Search PpeCategoryCodes", FshActions.Search, FshResources.PpeCategoryCodes, IsBasic: true),
+
         //inventories
         new("View Inventories", FshActions.View, FshResources.Inventories, IsBasic: true),
         new("Search Inventories", FshActions.Search, FshResources.Inventories, IsBasic: true),

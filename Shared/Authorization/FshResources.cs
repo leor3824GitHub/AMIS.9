@@ -12,6 +12,8 @@ public static class FshResources
     public const string Products = nameof(Products);
     public const string Brands = nameof(Brands);
     public const string Categories = nameof(Categories);
+    public const string NfaOfficeCodes = nameof(NfaOfficeCodes);
+    public const string PpeCategoryCodes = nameof(PpeCategoryCodes);
     public const string Inventories = nameof(Inventories);
     public const string Suppliers = nameof(Suppliers);
     public const string Purchases = nameof(Purchases);

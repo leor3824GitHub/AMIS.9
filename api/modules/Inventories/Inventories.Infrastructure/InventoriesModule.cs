@@ -33,6 +33,8 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Brand;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Category;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InventoryRegistry;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InventoryTransactionLog;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.NfaOfficeCode;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PpeCategoryCode;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SemexRegistry;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SemexTransactionLog;
 using AMIS.Inventories.Infrastructure.Issuances.Features.Accept.v1;
@@ -305,6 +307,14 @@ public static class InventoriesModule
             ppeReceivingGroup.MapUpdatePpeReceivingReportEndpoint();
             ppeReceivingGroup.MapPostPpeReceivingReportEndpoint();
             ppeReceivingGroup.MapCancelPpeReceivingReportEndpoint();
+
+            var nfaOfficeCodeGroup = app.MapGroup("nfa-office-codes").WithTags("nfa-office-codes");
+            nfaOfficeCodeGroup.MapSearchNfaOfficeCodesEndpoint();
+            nfaOfficeCodeGroup.MapGetNfaOfficeCodeEndpoint();
+
+            var ppeCategoryCodeGroup = app.MapGroup("ppe-category-codes").WithTags("ppe-category-codes");
+            ppeCategoryCodeGroup.MapSearchPpeCategoryCodesEndpoint();
+            ppeCategoryCodeGroup.MapGetPpeCategoryCodeEndpoint();
 
             var inventoryRegistryGroup = app.MapGroup("inventory-registries").WithTags("inventory-registries");
             inventoryRegistryGroup.MapSearchInventoryRegistriesEndpoint();

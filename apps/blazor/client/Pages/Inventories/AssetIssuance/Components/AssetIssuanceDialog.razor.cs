@@ -23,9 +23,9 @@ public partial class AssetIssuanceDialog
     [Inject]
     private ISnackbar? Snackbar { get; set; }
 
-    private IDialogReference? _dialog;
     private MudStepper? _stepper;
     private MudDataGrid<InventoryItemForIssuance>? _inventoryGrid;
+    private bool _visible;
 
     private bool _isEditMode;
     private Guid? _editingIssuanceId;
@@ -45,12 +45,9 @@ public partial class AssetIssuanceDialog
     {
         ResetDialog();
         _isEditMode = false;
-        _dialog = await DialogService.ShowAsync<MudDialog>("Create Asset Issuance", new DialogOptions 
-        { 
-            MaxWidth = MaxWidth.Large, 
-            FullWidth = true,
-            CloseButton = false
-        });
+        _visible = true;
+        StateHasChanged();
+        await Task.CompletedTask;
     }
 
     public async Task OpenEditDialog(Guid issuanceId)
@@ -58,12 +55,8 @@ public partial class AssetIssuanceDialog
         ResetDialog();
         _isEditMode = true;
         _editingIssuanceId = issuanceId;
-        _dialog = await DialogService.ShowAsync<MudDialog>("Edit Issuance Items", new DialogOptions 
-        { 
-            MaxWidth = MaxWidth.Large, 
-            FullWidth = true,
-            CloseButton = false
-        });
+        _visible = true;
+        StateHasChanged();
         await LoadIssuanceForEditing(issuanceId);
     }
 
@@ -190,7 +183,8 @@ public partial class AssetIssuanceDialog
 
     private void CloseCustodianStep()
     {
-        _dialog?.Close(DialogResult.Cancel());
+        _visible = false;
+        StateHasChanged();
     }
 
     private async Task ConfirmIssuance()
@@ -213,7 +207,8 @@ public partial class AssetIssuanceDialog
             await ApiClient.CreateIssuanceEndpointAsync("1", command);
 
             Snackbar?.Add($"Asset issuance created successfully! ({_documentType} generated)", Severity.Success);
-            _dialog?.Close(DialogResult.Ok(true));
+            _visible = false;
+            StateHasChanged();
             await OnCreateSuccess.InvokeAsync();
         }
         catch (Exception ex)

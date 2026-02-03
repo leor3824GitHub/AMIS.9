@@ -1,11 +1,12 @@
 @using AMIS.Blazor.Infrastructure.Api
 @using MudBlazor
 
-<MudDialog>
+<MudDialog @bind-IsVisible="_visible" Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseButton = false })">
+    <TitleContent>
+        <MudText Typo="Typo.h6">@(_isEditMode ? "Edit Issuance Items" : "Create New Asset Issuance")</MudText>
+    </TitleContent>
     <DialogContent>
         <MudStack Spacing="3">
-            <MudText Typo="Typo.h6" Color="Color.Primary">@(_isEditMode ? "Edit Issuance Items" : "Create New Asset Issuance")</MudText>
-            
             <!-- Step Indicator -->
             <MudStepper @ref="_stepper" DisableStepNavigation="true" ActiveIndex="@_currentStep">
                 <!-- Step 1: Select Custodian -->
