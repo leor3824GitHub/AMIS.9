@@ -141,12 +141,15 @@
                             </MudGrid>
                             <MudStack Row="true" Spacing="1" Class="mt-2">
                                 <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="AddLineItem"
-                                    StartIcon="@(_isEditingLineItem ? Icons.Material.Filled.Save : Icons.Material.Filled.Add)"
+                                    StartIcon="@(_isEditingLineItem? Icons.Material.Filled.Save : Icons.Material.Filled.Add)"
                                     Disabled="_model.LineItems.Count >= 25">
                                     @(_isEditingLineItem ? "Save Item" : "Add Item")
                                 </MudButton>
                                 <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetDraft"
                                     StartIcon="@Icons.Material.Filled.Refresh">Clear Draft</MudButton>
+                                <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="OpenLoadInventoryDialog"
+                                    StartIcon="@Icons.Material.Filled.AddBox" Disabled="_model.LineItems.Count >= 25">Load
+                                    from Physical Assets</MudButton>
                             </MudStack>
                         }
                         else
@@ -236,5 +239,63 @@
         <MudButton OnClick="PrintDocument" Variant="Variant.Filled" Color="Color.Primary"
             StartIcon="@Icons.Material.Filled.Print">Print Now</MudButton>
         <MudButton OnClick="ClosePrintDialog" Variant="Variant.Text" Color="Color.Secondary">Close</MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- Load Inventory Dialog -->
+<MudDialog @bind-Visible="_isLoadInventoryDialogOpen"
+    Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseOnEscapeKey = true })">
+    <DialogContent>
+        <MudText Typo="Typo.h6">Load from Physical Assets</MudText>
+        <MudText Typo="Typo.body2" Class="mb-3">
+            Select physical assets to add as line items to this report.
+        </MudText>
+
+        <MudStack Spacing="2">
+            <MudText Typo="Typo.subtitle2">Available Physical Assets</MudText>
+            <MudTextField @bind-Value="_physicalAssetSearch"
+                Placeholder="Search by property code, description, unit, or location" Variant="Variant.Outlined"
+                Dense="true" Immediate="true" Adornment="Adornment.Start"
+                AdornmentIcon="@Icons.Material.Filled.Search" />
+            @if (_isLoadingInventory)
+            {
+                <MudProgressLinear Indeterminate="true" />
+                <MudText Typo="Typo.body2">Loading physical assets...</MudText>
+            }
+            else if (_physicalAssets != null && FilteredPhysicalAssets.Any())
+            {
+                <MudTable Items="FilteredPhysicalAssets" Dense="true" Hover="true">
+                    <HeaderContent>
+                        <MudTh>Property Code</MudTh>
+                        <MudTh>Description</MudTh>
+                        <MudTh>Qty</MudTh>
+                        <MudTh>Unit</MudTh>
+                        <MudTh align="right">Unit Cost</MudTh>
+                        <MudTh>Location</MudTh>
+                        <MudTh></MudTh>
+                    </HeaderContent>
+                    <RowTemplate>
+                        <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
+                        <MudTd DataLabel="Description">@context.Description</MudTd>
+                        <MudTd DataLabel="Qty">@context.Quantity</MudTd>
+                        <MudTd DataLabel="Unit">@context.UnitOfMeasure</MudTd>
+                        <MudTd DataLabel="Unit Cost" align="right">@(context.AcquisitionCost).ToString("C2")</MudTd>
+                        <MudTd DataLabel="Location">@context.Location</MudTd>
+                        <MudTd align="right">
+                            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                                OnClick="() => SelectPhysicalAsset(context)" StartIcon="@Icons.Material.Filled.Add">Add
+                            </MudButton>
+                        </MudTd>
+                    </RowTemplate>
+                </MudTable>
+            }
+            else if (!_isLoadingInventory)
+            {
+                <MudAlert Severity="Severity.Info">No physical assets match your search.</MudAlert>
+            }
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseLoadInventoryDialog" Variant="Variant.Text" Color="Color.Secondary">Close</MudButton>
     </DialogActions>
 </MudDialog>

@@ -13,6 +13,12 @@ using Shared.Authorization;
 
 namespace AMIS.Blazor.Client.Pages.Inventories.Reports;
 
+public enum SelectionMode
+{
+    Search,
+    List
+}
+
 public partial class PpeIssuanceReport : ComponentBase
 {
     private const string ApiVersion = "1";
@@ -46,6 +52,7 @@ public partial class PpeIssuanceReport : ComponentBase
     private HashSet<InventoryRegistryResponse> _selectedInventoryItems = new();
     private bool _isLoadingInventory;
     private bool _hasSearchedInventory;
+    private SelectionMode _selectionMode = SelectionMode.Search;
 
     private bool CanSave => !_isReadOnly && _reportStatus == 0 && ((_reportId is null && _canCreate) || (_reportId.HasValue && _canUpdate));
     private bool CanPost => !_isReadOnly && _reportStatus == 0 && _reportId.HasValue && _canPost;
@@ -241,6 +248,55 @@ public partial class PpeIssuanceReport : ComponentBase
         _searchKeyword = string.Empty;
         _inventorySearchResults.Clear();
         _hasSearchedInventory = false;
+    }
+
+    private void SetSelectionMode(SelectionMode mode)
+    {
+        if (_selectionMode != mode)
+        {
+            _selectionMode = mode;
+            ClearSelection();
+            StateHasChanged();
+        }
+    }
+
+    private async Task LoadAllInventoryAsync()
+    {
+        _isLoadingInventory = true;
+        _hasSearchedInventory = true;
+
+        try
+        {
+            var searchCommand = new SearchInventoryRegistriesCommand
+            {
+                Keyword = null, // No keyword = get all
+                PageSize = 1000, // Get more items for selection
+                PageNumber = 1
+            };
+
+            var result = await ApiClient.SearchInventoryRegistriesEndpointAsync(ApiVersion, searchCommand);
+            _inventorySearchResults = result?.Items?.ToList() ?? new List<InventoryRegistryResponse>();
+
+            if (_inventorySearchResults.Count > 0)
+            {
+                Snackbar.Add($"Loaded {_inventorySearchResults.Count} inventory items", Severity.Success);
+            }
+            else
+            {
+                Snackbar.Add("No inventory items available", Severity.Warning);
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            _inventorySearchResults.Clear();
+            Snackbar.Add($"Error loading inventory: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _isLoadingInventory = false;
+        }
     }
 
     private Color GetStatusColor(InventoryItemStatus status)

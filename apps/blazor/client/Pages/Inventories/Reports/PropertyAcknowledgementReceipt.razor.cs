@@ -12,14 +12,12 @@ public partial class PropertyAcknowledgementReceipt
     private Guid? _reportId;
     private PARModel _model = new();
     private EmployeeDto? _selectedEmployee;
-    private int _reportStatus = 0; // 0=Draft, 1=Posted, 2=Returned, 3=Cancelled
     private string _reportStatusText = "Draft";
+    private int _reportStatus = 0;
     private bool _isReadOnly;
     private string _actionButtonText = "Save Draft";
-    private bool _showLineItemDialog;
     private PARLineItemModel _currentLineItem = new();
     private PARLineItemModel? _editingLineItem;
-    private DialogOptions _dialogOptions = new() { MaxWidth = MaxWidth.Medium, FullWidth = true };
 
     private bool CanSave => !string.IsNullOrWhiteSpace(_model.PARNumber)
         && !string.IsNullOrWhiteSpace(_model.EmployeeName)
@@ -48,35 +46,35 @@ public partial class PropertyAcknowledgementReceipt
         {
             var response = await ApiClient.GetPARByIdAsync(id);
             _reportId = response.Id;
-            _model.PARNumber = response.PARNumber;
+            _model.PARNumber = response.ParNumber;
             _model.EmployeeId = response.EmployeeId;
             _model.EmployeeName = response.EmployeeName;
             _model.Department = response.Department;
             _model.Position = response.Position;
-            _model.IssuanceDate = response.IssuanceDate.DateTime;
+            _model.IssuanceDate = response.IssuanceDate;
             _model.IssuancePurpose = response.IssuancePurpose;
             _model.IssuanceLocation = response.IssuanceLocation;
             _model.Notes = response.Notes;
             _model.IssuedByName = response.IssuedByName;
-            _model.IssuedByDate = response.IssuedByDate?.DateTime;
+            _model.IssuedByDate = response.IssuedByDate;
             _model.ReceivedByName = response.ReceivedByName;
-            _model.ReceivedByDate = response.ReceivedByDate?.DateTime;
+            _model.ReceivedByDate = response.ReceivedByDate;
             _model.ApprovedByName = response.ApprovedByName;
-            _model.ApprovedByDate = response.ApprovedByDate?.DateTime;
+            _model.ApprovedByDate = response.ApprovedByDate;
 
             _model.LineItems = response.LineItems?.Select(x => new PARLineItemModel
             {
                 PropertyCode = x.PropertyCode,
                 Description = x.Description,
-                DateAcquired = x.DateAcquired.DateTime,
-                AcquisitionCost = x.AcquisitionCost,
+                DateAcquired = x.DateAcquired,
+                AcquisitionCost = (decimal)x.AcquisitionCost,
                 Condition = x.Condition,
                 Remarks = x.Remarks
             }).ToList() ?? new();
 
-            _reportStatus = (int)response.Status;
-            _reportStatusText = response.Status.ToString();
-            _actionButtonText = _reportStatus == 0 ? "Update" : "View";
+            _reportStatusText = response.Status ?? "Unknown";
+            _reportStatus = response.Status == "Draft" ? 0 : 1;
+            _actionButtonText = response.Status == "Draft" ? "Update" : "View";
         }
         catch (Exception ex)
         {
@@ -96,8 +94,8 @@ public partial class PropertyAcknowledgementReceipt
 
         try
         {
-            var response = await ApiClient.SearchEmployeesAsync(searchText, 1, 20, cancellationToken);
-            return response.Items?.Select(employee => new EmployeeDto
+            var response = await ApiClient.SearchEmployeesAsync(searchText);
+            return response?.Select(employee => new EmployeeDto
             {
                 Id = employee.Id ?? Guid.Empty,
                 Name = employee.Name ?? string.Empty,
@@ -130,7 +128,6 @@ public partial class PropertyAcknowledgementReceipt
             AcquisitionCost = 0
         };
         _editingLineItem = null;
-        _showLineItemDialog = true;
     }
 
     private void EditLineItem(PARLineItemModel item)
@@ -145,11 +142,17 @@ public partial class PropertyAcknowledgementReceipt
             Condition = item.Condition,
             Remarks = item.Remarks
         };
-        _showLineItemDialog = true;
     }
 
     private void SaveLineItem()
     {
+        if (string.IsNullOrWhiteSpace(_currentLineItem.PropertyCode) ||
+            string.IsNullOrWhiteSpace(_currentLineItem.Description))
+        {
+            Snackbar.Add("Property Code and Description are required", Severity.Warning);
+            return;
+        }
+
         if (_editingLineItem != null)
         {
             _editingLineItem.PropertyCode = _currentLineItem.PropertyCode;
@@ -161,49 +164,61 @@ public partial class PropertyAcknowledgementReceipt
         }
         else
         {
-            _model.LineItems.Add(_currentLineItem);
+            _model.LineItems.Add(new PARLineItemModel
+            {
+                PropertyCode = _currentLineItem.PropertyCode,
+                Description = _currentLineItem.Description,
+                DateAcquired = _currentLineItem.DateAcquired,
+                AcquisitionCost = _currentLineItem.AcquisitionCost,
+                Condition = _currentLineItem.Condition,
+                Remarks = _currentLineItem.Remarks
+            });
         }
-        _showLineItemDialog = false;
+
+        Snackbar.Add(_editingLineItem != null ? "Item updated" : "Item added", Severity.Success);
+        CancelLineItemEdit();
     }
 
     private void CancelLineItemEdit()
     {
-        _showLineItemDialog = false;
+        _currentLineItem = new PARLineItemModel { DateAcquired = DateTime.Today, AcquisitionCost = 0 };
+        _editingLineItem = null;
     }
 
     private void RemoveLineItem(PARLineItemModel item)
     {
         _model.LineItems.Remove(item);
+        Snackbar.Add("Item removed", Severity.Info);
     }
 
     private async Task SubmitAsync()
     {
         try
         {
-            var lineItems = _model.LineItems.Select(x => new CreatePARLineItemRequest
-            {
-                PropertyCode = x.PropertyCode,
-                Description = x.Description,
-                DateAcquired = new DateTimeOffset(x.DateAcquired),
-                AcquisitionCost = x.AcquisitionCost,
-                Condition = x.Condition,
-                Remarks = x.Remarks
-            }).ToList();
-
             if (_reportId.HasValue)
             {
+                var updateLineItems = _model.LineItems.Select(x => new UpdatePARLineItemRequest
+                {
+                    PropertyCode = x.PropertyCode,
+                    Description = x.Description,
+                    DateAcquired = x.DateAcquired,
+                    AcquisitionCost = (double)x.AcquisitionCost,
+                    Condition = x.Condition,
+                    Remarks = x.Remarks
+                }).ToList();
+
                 var updateRequest = new UpdatePARCommand
                 {
                     Id = _reportId.Value,
                     EmployeeId = _model.EmployeeId,
                     EmployeeName = _model.EmployeeName,
                     Department = _model.Department,
-                    IssuanceDate = new DateTimeOffset(_model.IssuanceDate ?? DateTime.Today),
+                    IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
                     Position = _model.Position,
                     IssuancePurpose = _model.IssuancePurpose,
                     IssuanceLocation = _model.IssuanceLocation,
                     Notes = _model.Notes,
-                    LineItems = lineItems
+                    LineItems = updateLineItems
                 };
 
                 await ApiClient.UpdatePARAsync(_reportId.Value, updateRequest);
@@ -211,18 +226,28 @@ public partial class PropertyAcknowledgementReceipt
             }
             else
             {
+                var createLineItems = _model.LineItems.Select(x => new CreatePARLineItemRequest
+                {
+                    PropertyCode = x.PropertyCode,
+                    Description = x.Description,
+                    DateAcquired = x.DateAcquired,
+                    AcquisitionCost = (double)x.AcquisitionCost,
+                    Condition = x.Condition,
+                    Remarks = x.Remarks
+                }).ToList();
+
                 var createRequest = new CreatePARCommand
                 {
-                    PARNumber = _model.PARNumber,
+                    ParNumber = _model.PARNumber,
                     EmployeeId = _model.EmployeeId,
                     EmployeeName = _model.EmployeeName,
                     Department = _model.Department,
-                    IssuanceDate = new DateTimeOffset(_model.IssuanceDate ?? DateTime.Today),
+                    IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
                     Position = _model.Position,
                     IssuancePurpose = _model.IssuancePurpose,
                     IssuanceLocation = _model.IssuanceLocation,
                     Notes = _model.Notes,
-                    LineItems = lineItems
+                    LineItems = createLineItems
                 };
 
                 var response = await ApiClient.CreatePARAsync(createRequest);
@@ -248,7 +273,7 @@ public partial class PropertyAcknowledgementReceipt
         {
             try
             {
-                await ApiClient.PostPARAsync(new PostPARCommand { Id = _reportId.Value });
+                await ApiClient.PostPARAsync(_reportId.Value);
                 Snackbar.Add("PAR posted and items assigned successfully", Severity.Success);
                 await LoadReportAsync(_reportId.Value);
             }
@@ -287,7 +312,7 @@ public partial class PropertyAcknowledgementReceipt
         {
             try
             {
-                await ApiClient.CancelPARAsync(new CancelPARCommand { Id = _reportId.Value });
+                await ApiClient.CancelPARAsync(_reportId.Value);
                 Snackbar.Add("PAR cancelled successfully", Severity.Success);
                 await LoadReportAsync(_reportId.Value);
             }

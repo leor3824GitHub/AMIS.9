@@ -21,7 +21,7 @@ public static class CancelPAREndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(CancelPAREndpoint))
-            .WithSummary("Cancel a Property Accountability Receipt")
+            .WithSummary("Cancel a Property Acknowledgement Receipt")
             .WithDescription("Cancels a posted PAR, unassigning assets from the custodian. Only Accounting personnel can cancel PARs.")
             .Produces<CancelPARResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)

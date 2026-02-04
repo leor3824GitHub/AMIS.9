@@ -25,7 +25,7 @@ public static class ReturnPAREndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(ReturnPAREndpoint))
-            .WithSummary("Return a Property Accountability Receipt")
+            .WithSummary("Return a Property Acknowledgement Receipt")
             .WithDescription("Processes the return of assets from a custodian, unassigning the assets.")
             .Produces<ReturnPARResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)

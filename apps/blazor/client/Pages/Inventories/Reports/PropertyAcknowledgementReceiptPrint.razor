@@ -5,9 +5,18 @@
 
 <style>
     @@media print {
-        .no-print { display: none !important; }
-        body { background: white; }
-        .print-container { margin: 0; padding: 20px; }
+        .no-print {
+            display: none !important;
+        }
+
+        body {
+            background: white;
+        }
+
+        .print-container {
+            margin: 0;
+            padding: 20px;
+        }
     }
 
     .print-container {
@@ -30,7 +39,8 @@
         margin: 20px 0;
     }
 
-    .par-table th, .par-table td {
+    .par-table th,
+    .par-table td {
         border: 1px solid black;
         padding: 8px;
         text-align: left;
@@ -74,7 +84,8 @@
     <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="Print" StartIcon="@Icons.Material.Filled.Print">
         Print
     </MudButton>
-    <MudButton Variant="Variant.Outlined" Color="Color.Default" Href="@($"/inventories/reports/par/{ReportId}")" Class="ml-2">
+    <MudButton Variant="Variant.Outlined" Color="Color.Default" Href="@($"/inventories/reports/par/{ReportId}")"
+        Class="ml-2">
         Back to PAR
     </MudButton>
 </div>
@@ -90,7 +101,7 @@ else if (_par != null)
             <h3>Republic of the Philippines</h3>
             <h4>[Your Agency Name]</h4>
             <h2>PROPERTY ACKNOWLEDGEMENT RECEIPT (PAR)</h2>
-            <p><strong>PAR No.: @_par.PARNumber</strong></p>
+            <p><strong>PAR No.: @_par.ParNumber</strong></p>
         </div>
 
         <div class="info-grid">
@@ -134,11 +145,12 @@ else if (_par != null)
             <tbody>
                 @if (_par.LineItems != null)
                 {
-                    @for (int i = 0; i < _par.LineItems.Count; i++)
+                    int index = 0;
+                    @foreach (var item in _par.LineItems)
                     {
-                        var item = _par.LineItems[i];
+                        index++;
                         <tr>
-                            <td>@(i + 1)</td>
+                            <td>@index</td>
                             <td>@item.PropertyCode</td>
                             <td>@item.Description</td>
                             <td>@item.DateAcquired.ToString("MM/dd/yyyy")</td>
@@ -200,15 +212,15 @@ else if (_par != null)
         <div style="margin-top: 40px; font-size: 0.9em; color: #666;">
             <p><strong>Certification:</strong></p>
             <p style="text-align: justify;">
-                I hereby acknowledge receipt of the property/equipment listed above in good condition 
-                and serviceable state. I agree to be held accountable for the said property/equipment 
-                and shall be responsible for the care and custody thereof. I understand that I shall 
-                be liable for its money value in case of loss, damage or destruction due to my fault 
+                I hereby acknowledge receipt of the property/equipment listed above in good condition
+                and serviceable state. I agree to be held accountable for the said property/equipment
+                and shall be responsible for the care and custody thereof. I understand that I shall
+                be liable for its money value in case of loss, damage or destruction due to my fault
                 or negligence.
             </p>
         </div>
 
-        @if (_par.Status == PARStatus.Returned && !string.IsNullOrWhiteSpace(_par.ReturnNotes))
+        @if (_par.Status == "Returned" && !string.IsNullOrWhiteSpace(_par.ReturnRemarks))
         {
             <div style="margin-top: 30px; border-top: 2px solid black; padding-top: 20px;">
                 <h4>RETURN INFORMATION</h4>
@@ -216,13 +228,13 @@ else if (_par != null)
                     <div class="info-label">Return Date:</div>
                     <div>@(_par.ReturnDate?.ToString("MMMM dd, yyyy"))</div>
 
-                    <div class="info-label">Return Notes:</div>
-                    <div>@_par.ReturnNotes</div>
+                    <div class="info-label">Return Remarks:</div>
+                    <div>@_par.ReturnRemarks</div>
                 </div>
             </div>
         }
 
-        @if (_par.Status == PARStatus.Cancelled)
+        @if (_par.Status == "Cancelled")
         {
             <div style="margin-top: 30px; border: 2px solid red; padding: 10px; text-align: center;">
                 <h3 style="color: red;">CANCELLED</h3>
@@ -241,7 +253,7 @@ else
     [Inject] private IJSRuntime JSRuntime { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
-    private PARDetailsDto? _par;
+    private GetPARByIdResponse? _par;
     private string _parNumber = "";
     private bool _loading = true;
 
@@ -261,8 +273,8 @@ else
     {
         try
         {
-            _par = await ApiClient.GetPARByIdAsync(id);
-            _parNumber = _par.PARNumber;
+            _par = await ApiClient.GetPAREndpointAsync("1.0", id);
+            _parNumber = _par?.ParNumber ?? "";
         }
         catch (Exception ex)
         {

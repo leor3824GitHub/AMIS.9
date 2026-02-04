@@ -1,0 +1,52 @@
+@page "/inventories/physical-assets"
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<PageHeader Title="Physical Assets" Header="Physical Assets" SubHeader="Browse physical asset inventory" />
+
+<MudPaper Class="pa-4">
+    @if (!_canView)
+    {
+        <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+            You do not have permission to view physical assets.
+        </MudAlert>
+    }
+    else
+    {
+        <MudStack Row="true" Spacing="2" Class="mb-4">
+            <MudTextField @bind-Value="_searchString"
+                Placeholder="Search by property code, description, unit, or location..." Adornment="Adornment.Start"
+                AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" DebounceInterval="300"
+                OnKeyUp="@(async _ => await OnSearch(_searchString))" Variant="Variant.Outlined" />
+            <MudSpacer />
+            <MudButton Color="Color.Info" Variant="Variant.Outlined" StartIcon="@Icons.Material.Filled.Refresh"
+                OnClick="Reload">Refresh</MudButton>
+        </MudStack>
+
+        <MudDataGrid T="PhysicalAssetResponse" @ref="_table" ServerData="ServerReload" Loading="_loading" Dense="true"
+            Hover="true" Bordered="true" Striped="true">
+            <Columns>
+                <PropertyColumn Property="x => x.PropertyCode" Title="Property Code" />
+                <PropertyColumn Property="x => x.Description" Title="Description" />
+                <TemplateColumn Title="Acquired" Sortable="false">
+                    <CellTemplate>
+                        <MudText Typo="Typo.body2">@context.Item.AcquisitionDate.ToShortDateString()</MudText>
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Cost" Sortable="false">
+                    <CellTemplate>
+                        <MudText Typo="Typo.body2">@context.Item.AcquisitionCost.ToString("C2")</MudText>
+                    </CellTemplate>
+                </TemplateColumn>
+                <PropertyColumn Property="x => x.Quantity" Title="Qty" />
+                <PropertyColumn Property="x => x.UnitOfMeasure" Title="Unit" />
+                <PropertyColumn Property="x => x.Location" Title="Location" />
+                <PropertyColumn Property="x => x.Classification" Title="Class" />
+                <PropertyColumn Property="x => x.PpeType" Title="PPE Type" />
+                <PropertyColumn Property="x => x.SerialNumber" Title="Serial" />
+                <PropertyColumn Property="x => x.ModelNumber" Title="Model" />
+            </Columns>
+        </MudDataGrid>
+    }
+</MudPaper>

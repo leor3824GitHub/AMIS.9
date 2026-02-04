@@ -1,6 +1,5 @@
 @page "/inventories/reports/par-list"
 @using AMIS.Blazor.Infrastructure.Api
-@attribute [Authorize(Policy = "View PropertyAcknowledgementReceipt")]
 
 <PageTitle>Property Acknowledgement Receipt (PAR) List</PageTitle>
 
@@ -24,12 +23,12 @@
             </MudItem>
 
             <MudItem xs="12" sm="6" md="3">
-                <MudSelect @bind-Value="_statusFilter" Label="Status" Variant="Variant.Outlined" T="int?" Clearable
+                <MudSelect @bind-Value="_statusFilter" Label="Status" Variant="Variant.Outlined" T="string" Clearable
                     OnClearButtonClick="@(() => { _statusFilter = null; _table?.ReloadServerData(); })">
-                    <MudSelectItem Value="@((int?)0)">Draft</MudSelectItem>
-                    <MudSelectItem Value="@((int?)1)">Posted</MudSelectItem>
-                    <MudSelectItem Value="@((int?)2)">Returned</MudSelectItem>
-                    <MudSelectItem Value="@((int?)3)">Cancelled</MudSelectItem>
+                    <MudSelectItem Value="@("Draft")">Draft</MudSelectItem>
+                    <MudSelectItem Value="@("Posted")">Posted</MudSelectItem>
+                    <MudSelectItem Value="@("Returned")">Returned</MudSelectItem>
+                    <MudSelectItem Value="@("Cancelled")">Cancelled</MudSelectItem>
                 </MudSelect>
             </MudItem>
 
@@ -45,8 +44,8 @@
             </MudItem>
 
             <MudItem xs="12">
-                <MudTable T="PARListItemDto" @ref="_table"
-                    ServerData="@(new Func<TableState, CancellationToken, Task<TableData<PARListItemDto>>>(LoadDataAsync))"
+                <MudTable T="PARDto" @ref="_table"
+                    ServerData="@(new Func<TableState, CancellationToken, Task<TableData<PARDto>>>(LoadDataAsync))"
                     Hover="true" Striped="true" Dense="true" Loading="@_loading" LoadingProgressColor="Color.Primary">
                     <HeaderContent>
                         <MudTh>PAR Number</MudTh>
@@ -58,7 +57,7 @@
                         <MudTh>Actions</MudTh>
                     </HeaderContent>
                     <RowTemplate>
-                        <MudTd DataLabel="PAR Number">@context.PARNumber</MudTd>
+                        <MudTd DataLabel="PAR Number">@context.ParNumber</MudTd>
                         <MudTd DataLabel="Employee">@context.EmployeeName</MudTd>
                         <MudTd DataLabel="Department">@context.Department</MudTd>
                         <MudTd DataLabel="Issuance Date">@context.IssuanceDate.ToString("MM/dd/yyyy")</MudTd>
@@ -67,7 +66,7 @@
                                 @context.Status
                             </MudChip>
                         </MudTd>
-                        <MudTd DataLabel="Items Count">@context.ItemsCount</MudTd>
+                        <MudTd DataLabel="Items Count">@context.LineItemsCount</MudTd>
                         <MudTd DataLabel="Actions">
                             <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Info"
                                 Href="@($"/inventories/reports/par/{context.Id}")" Title="View" />
@@ -81,7 +80,7 @@
                             @if (context.Status?.Equals("Posted", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.KeyboardReturn" Size="Size.Small"
-                                    Color="Color.Warning" OnClick="@(() => ReturnPAR(context.Id, context.PARNumber))"
+                                    Color="Color.Warning" OnClick="@(() => ReturnPAR(context.Id, context.ParNumber))"
                                     Title="Return Items" />
                             }
                             @if (context.Status?.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) != true)

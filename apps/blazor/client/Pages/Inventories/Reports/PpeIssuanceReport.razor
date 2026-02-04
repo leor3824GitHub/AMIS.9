@@ -115,12 +115,47 @@
                     @if (_reportStatus == 0)
                     {
                         <MudPaper Class="pa-3 mt-3" Outlined="true">
-                            <MudText Typo="Typo.h6" Class="mb-2">Add Items from Inventory</MudText>
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                <MudText Typo="Typo.h6">Add Items from Inventory</MudText>
+                                <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
+                                    <MudButton OnClick="@(() => SetSelectionMode(SelectionMode.Search))" 
+                                        Variant="@(_selectionMode == SelectionMode.Search ? Variant.Filled : Variant.Outlined)"
+                                        StartIcon="@Icons.Material.Filled.Search">
+                                        Search
+                                    </MudButton>
+                                    <MudButton OnClick="@(() => SetSelectionMode(SelectionMode.List))" 
+                                        Variant="@(_selectionMode == SelectionMode.List ? Variant.Filled : Variant.Outlined)"
+                                        StartIcon="@Icons.Material.Filled.List">
+                                        Select from List
+                                    </MudButton>
+                                </MudButtonGroup>
+                            </MudStack>
+
                             <MudStack Spacing="2">
-                                <MudTextField @bind-Value="_searchKeyword" Label="Search by Property Code or Description"
-                                    Placeholder="Type to search..." Adornment="Adornment.End" 
-                                    AdornmentIcon="@Icons.Material.Filled.Search" FullWidth="true" 
-                                    Immediate="true" DebounceInterval="300" OnDebounceIntervalElapsed="SearchInventoryAsync" />
+                                @if (_selectionMode == SelectionMode.Search)
+                                {
+                                    <MudTextField @bind-Value="_searchKeyword" Label="Search by Property Code or Description"
+                                        Placeholder="Type to search..." Adornment="Adornment.End" 
+                                        AdornmentIcon="@Icons.Material.Filled.Search" FullWidth="true" 
+                                        Immediate="true" DebounceInterval="300" OnDebounceIntervalElapsed="SearchInventoryAsync" />
+                                }
+                                else
+                                {
+                                    <MudStack Row="true" Spacing="2">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Info" 
+                                            OnClick="LoadAllInventoryAsync"
+                                            StartIcon="@Icons.Material.Filled.Refresh"
+                                            Disabled="_isLoadingInventory">
+                                            Load All Inventory
+                                        </MudButton>
+                                        @if (_inventorySearchResults.Count > 0)
+                                        {
+                                            <MudText Typo="Typo.body2" Class="align-self-center">
+                                                Showing @_inventorySearchResults.Count item(s)
+                                            </MudText>
+                                        }
+                                    </MudStack>
+                                }
 
                                 @if (_isLoadingInventory)
                                 {
@@ -170,13 +205,20 @@
                                 else if (_hasSearchedInventory && !_isLoadingInventory)
                                 {
                                     <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
-                                        @if (string.IsNullOrWhiteSpace(_searchKeyword))
+                                        @if (_selectionMode == SelectionMode.Search)
                                         {
-                                            <text>No inventory items available. Start typing to search.</text>
+                                            @if (string.IsNullOrWhiteSpace(_searchKeyword))
+                                            {
+                                                <text>Start typing to search for inventory items.</text>
+                                            }
+                                            else
+                                            {
+                                                <text>No items found matching "@_searchKeyword"</text>
+                                            }
                                         }
                                         else
                                         {
-                                            <text>No items found matching "@_searchKeyword"</text>
+                                            <text>Click "Load All Inventory" to view available items.</text>
                                         }
                                     </MudAlert>
                                 }

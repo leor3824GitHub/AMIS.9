@@ -23,12 +23,14 @@
         }
         @if (_canViewPurchases)
         {
-            <MudNavLink Href="/inventories/purchases" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">Purchases
+            <MudNavLink Href="/inventories/purchases" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">
+                Purchases
             </MudNavLink>
         }
         @if (_canViewPurchaseRequests)
         {
-            <MudNavLink Href="/inventories/purchaserequests" Icon="@Icons.Material.Filled.Description" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/purchaserequests" Icon="@Icons.Material.Filled.Description"
+                Class="fsh-nav-child">
                 Purchase Requests</MudNavLink>
         }
         @if (_canViewCanvasses)
@@ -38,7 +40,8 @@
         }
         @if (_canViewProcurementPlans)
         {
-            <MudNavLink Href="/inventories/procurementplans" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">PPMP
+            <MudNavLink Href="/inventories/procurementplans" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">
+                PPMP
             </MudNavLink>
         }
         @if (_canViewAnnualProcurementPlans)
@@ -48,7 +51,8 @@
         }
         @if (_canViewInspectionRequests)
         {
-            <MudNavLink Href="/inventories/inspectionrequests" Icon="@Icons.Material.Filled.ShoppingCart" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/inspectionrequests" Icon="@Icons.Material.Filled.ShoppingCart"
+                Class="fsh-nav-child">
                 Inspection Request</MudNavLink>
         }
         @if (_canViewInspections)
@@ -68,14 +72,15 @@
         }
         <!-- @if (_canViewSmir)
         {
-            <MudNavLink Href="/inventories/reports/smir" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">
-                SMIR</MudNavLink>
+                <MudNavLink Href="/inventories/reports/smir" Icon="@Icons.Material.Filled.Assignment" Class="fsh-nav-child">
+                    SMIR</MudNavLink>
         }
         @if (_canViewSmrr)
         {
-            <MudNavLink Href="/inventories/reports/smrr" Icon="@Icons.Material.Filled.ReceiptLong" Class="fsh-nav-child">
-                SMRR</MudNavLink>
-        } -->
+                <MudNavLink Href="/inventories/reports/smrr" Icon="@Icons.Material.Filled.ReceiptLong" Class="fsh-nav-child">
+                    SMRR</MudNavLink>
+        }
+ -->
         @if (_canViewPpeIssuanceReports)
         {
             <MudNavLink Href="/inventories/reports/ppeir-list" Icon="@Icons.Material.Filled.Send" Class="fsh-nav-child">
@@ -93,12 +98,14 @@
         }
         @if (_canViewSmrr)
         {
-            <MudNavLink Href="/inventories/reports/smrr-list" Icon="@Icons.Material.Filled.MoveToInbox" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/reports/smrr-list" Icon="@Icons.Material.Filled.MoveToInbox"
+                Class="fsh-nav-child">
                 Supplies & Materials Receiving</MudNavLink>
         }
         @if (_canViewSmir)
         {
-            <MudNavLink Href="/inventories/reports/smir-list" Icon="@Icons.Material.Filled.SendToMobile" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/reports/smir-list" Icon="@Icons.Material.Filled.SendToMobile"
+                Class="fsh-nav-child">
                 Supplies & Materials Issuance</MudNavLink>
         }
         @if (_canViewInventories)
@@ -106,9 +113,15 @@
             <MudNavLink Href="/inventories/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">
                 Inventories</MudNavLink>
         }
+        @if (_canViewPhysicalAssets)
+        {
+            <MudNavLink Href="/inventories/physical-assets" Icon="@Icons.Material.Filled.Domain" Class="fsh-nav-child">
+                Physical Assets</MudNavLink>
+        }
         @if (_canViewAcceptances)
         {
-            <MudNavLink Href="/inventories/acceptances" Icon="@Icons.Material.Filled.AssignmentTurnedIn" Class="fsh-nav-child">
+            <MudNavLink Href="/inventories/acceptances" Icon="@Icons.Material.Filled.AssignmentTurnedIn"
+                Class="fsh-nav-child">
                 Acceptances</MudNavLink>
         }
         @if (_canViewCategories)
@@ -128,7 +141,7 @@
         }
     </MudNavGroup>
     <MudNavLink Href="/todos" Icon="@Icons.Material.Filled.Checklist" Class="fsh-nav-child">Todos</MudNavLink>
-    
+
     @if (CanViewAccountingGroup)
     {
         <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Accounting</MudText>
@@ -143,22 +156,24 @@
                 Journal Entry Vouchers</MudNavLink>
         }
     }
-    
+
     @if (CanViewMyAccountabilityGroup)
     {
         <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">My Accountability</MudText>
         @if (_canViewAssetRequisitions)
         {
-            <MudNavLink Href="/my-accountability/pending-actions" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.PendingActions" Class="fsh-nav-child">
+            <MudNavLink Href="/my-accountability/pending-actions" Match="NavLinkMatch.Prefix"
+                Icon="@Icons.Material.Filled.PendingActions" Class="fsh-nav-child">
                 Pending Actions</MudNavLink>
         }
         @if (_canViewPhysicalAssets)
         {
-            <MudNavLink Href="/my-accountability/my-assets" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox" Class="fsh-nav-child">
+            <MudNavLink Href="/my-accountability/my-assets" Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.AccountBox"
+                Class="fsh-nav-child">
                 My Assets</MudNavLink>
         }
     }
-    
+
     @if (CanViewAdministrationGroup)
     {
         <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Administration</MudText>

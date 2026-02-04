@@ -21,7 +21,7 @@ public static class PostPAREndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(PostPAREndpoint))
-            .WithSummary("Post a Property Accountability Receipt")
+            .WithSummary("Post a Property Acknowledgement Receipt")
             .WithDescription("Posts a draft PAR, assigning assets to the custodian.")
             .Produces<PostPARResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)

@@ -18,8 +18,8 @@ public static class GetPAREndpoint
             return Results.Ok(response);
         })
         .WithName(nameof(GetPAREndpoint))
-        .WithSummary("Get Property Accountability Receipt")
-        .WithDescription("Retrieves a specific Property Accountability Receipt by ID.")
+        .WithSummary("Get Property Acknowledgement Receipt")
+        .WithDescription("Retrieves a specific Property Acknowledgement Receipt by ID.")
         .Produces<GetPARByIdResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status404NotFound)
         .ProducesProblem(StatusCodes.Status500InternalServerError)

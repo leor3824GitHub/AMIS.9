@@ -9,36 +9,62 @@ public partial class PropertyAcknowledgementReceiptList
     [Inject] private IApiClient ApiClient { get; set; } = default!;
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
 
-    private MudTable<PARListItemDto>? _table;
+    private MudTable<PARDto>? _table;
     private string? _searchString;
-    private int? _statusFilter;
+    private string? _statusFilter;
     private DateRange? _dateRange;
     private bool _loading;
 
-    private async Task<TableData<PARListItemDto>> LoadDataAsync(TableState state, CancellationToken cancellationToken)
+    private async Task<TableData<PARDto>> LoadDataAsync(TableState state, CancellationToken cancellationToken)
     {
         _loading = true;
         try
         {
-            var response = await ApiClient.GetPARListAsync(
-                _searchString,
-                _statusFilter,
-                _dateRange?.Start,
-                _dateRange?.End,
-                state.Page + 1,
-                state.PageSize,
-                cancellationToken);
+            var response = await ApiClient.GetPARListAsync();
 
-            return new TableData<PARListItemDto>
+            // Client-side filtering (since the API endpoint doesn't support server-side filtering)
+            var filtered = response?.PaRs ?? new List<PARDto>();
+
+            if (!string.IsNullOrEmpty(_searchString))
             {
-                Items = response?.Data ?? Array.Empty<PARListItemDto>(),
-                TotalItems = response?.TotalCount ?? 0
+                filtered = filtered.Where(p =>
+                    p.ParNumber?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true ||
+                    p.EmployeeName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true
+                ).ToList();
+            }
+
+            if (!string.IsNullOrEmpty(_statusFilter))
+            {
+                filtered = filtered.Where(p => p.Status == _statusFilter).ToList();
+            }
+
+            if (_dateRange?.Start.HasValue == true || _dateRange?.End.HasValue == true)
+            {
+                filtered = filtered.Where(p =>
+                    (!_dateRange.Start.HasValue || p.IssuanceDate >= _dateRange.Start.Value) &&
+                    (!_dateRange.End.HasValue || p.IssuanceDate <= _dateRange.End.Value)
+                ).ToList();
+            }
+
+            // Sort by date descending by default
+            var sorted = filtered.OrderByDescending(p => p.IssuanceDate).ToList();
+
+            // Pagination
+            var paginated = sorted
+                .Skip(state.Page * state.PageSize)
+                .Take(state.PageSize)
+                .ToList();
+
+            return new TableData<PARDto>
+            {
+                Items = paginated,
+                TotalItems = sorted.Count
             };
         }
         catch (Exception ex)
         {
             Snackbar.Add($"Error loading PAR list: {ex.Message}", Severity.Error);
-            return new TableData<PARListItemDto> { Items = Array.Empty<PARListItemDto>(), TotalItems = 0 };
+            return new TableData<PARDto> { Items = Array.Empty<PARDto>(), TotalItems = 0 };
         }
         finally
         {
@@ -77,7 +103,7 @@ public partial class PropertyAcknowledgementReceiptList
         {
             try
             {
-                await ApiClient.PostPARAsync(new PostPARCommand { Id = id });
+                await ApiClient.PostPARAsync(id);
                 Snackbar.Add("PAR posted successfully", Severity.Success);
                 await _table!.ReloadServerData();
             }

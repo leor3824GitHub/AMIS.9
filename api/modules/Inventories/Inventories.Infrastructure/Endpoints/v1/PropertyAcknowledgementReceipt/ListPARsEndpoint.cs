@@ -18,8 +18,8 @@ public static class ListPARsEndpoint
             return Results.Ok(response);
         })
         .WithName(nameof(ListPARsEndpoint))
-        .WithSummary("List Property Accountability Receipts")
-        .WithDescription("Retrieves all Property Accountability Receipts (PARs).")
+        .WithSummary("List Property Acknowledgement Receipts")
+        .WithDescription("Retrieves all Property Acknowledgement Receipts (PARs).")
         .Produces<ListPARsResponse>(StatusCodes.Status200OK)
         .ProducesProblem(StatusCodes.Status500InternalServerError)
         .RequirePermission("Permissions.PropertyAcknowledgementReceipt.View")

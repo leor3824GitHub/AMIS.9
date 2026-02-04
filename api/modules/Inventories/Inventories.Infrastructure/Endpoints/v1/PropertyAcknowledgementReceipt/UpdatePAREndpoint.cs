@@ -25,7 +25,7 @@ public static class UpdatePAREndpoint
                 return Results.Ok(response);
             })
             .WithName(nameof(UpdatePAREndpoint))
-            .WithSummary("Update a Property Accountability Receipt (Draft only)")
+            .WithSummary("Update a Property Acknowledgement Receipt (Draft only)")
             .WithDescription("Updates header and line items of a PAR in Draft status.")
             .Produces<UpdatePARResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)

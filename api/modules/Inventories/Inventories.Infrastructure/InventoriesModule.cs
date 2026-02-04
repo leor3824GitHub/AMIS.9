@@ -332,7 +332,7 @@ public static class InventoriesModule
             semexTransactionLogGroup.MapSearchSemexTransactionLogsEndpoint();
             semexTransactionLogGroup.MapGetSemexTransactionLogEndpoint();
 
-            var parGroup = app.MapGroup("property-accountability-receipt").WithTags("property-accountability-receipt");
+            var parGroup = app.MapGroup("property-acknowledgement-receipt").WithTags("property-acknowledgement-receipt");
             parGroup.MapListPARsEndpoint();
             parGroup.MapCreatePAREndpoint();
             parGroup.MapGetPAREndpoint();

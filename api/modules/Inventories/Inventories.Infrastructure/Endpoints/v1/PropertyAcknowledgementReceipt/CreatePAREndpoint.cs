@@ -18,8 +18,8 @@ public static class CreatePAREndpoint
             return Results.CreatedAtRoute(nameof(GetPAREndpoint), new { id = response.Id }, response);
         })
         .WithName(nameof(CreatePAREndpoint))
-        .WithSummary("Create Property Accountability Receipt")
-        .WithDescription("Creates a new Property Accountability Receipt (PAR) for assigning PPE to individual custodians/employees.")
+        .WithSummary("Create Property Acknowledgement Receipt")
+        .WithDescription("Creates a new Property Acknowledgement Receipt (PAR) for assigning PPE to individual custodians/employees.")
         .Produces<CreatePARResponse>(StatusCodes.Status201Created)
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status500InternalServerError)

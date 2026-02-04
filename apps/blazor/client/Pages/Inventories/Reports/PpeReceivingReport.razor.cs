@@ -28,6 +28,9 @@ public partial class PpeReceivingReport : ComponentBase
     private bool _isReadOnly;
     private bool _isPrintDialogOpen;
     private bool _isEditingLineItem;
+    private bool _isLoadInventoryDialogOpen;
+    private bool _isLoadingInventory;
+    private string _physicalAssetSearch = string.Empty;
 
     private MudForm? _form;
     private PpeReceivingModel _model = new();
@@ -37,6 +40,16 @@ public partial class PpeReceivingReport : ComponentBase
     private int _reportStatus = 0; // 0 = Draft, 1 = Posted
     private string _reportStatusText = "Draft";
     private string _actionButtonText = "Create PPER";
+    private List<PhysicalAssetResponse>? _physicalAssets;
+
+    private IEnumerable<PhysicalAssetResponse> FilteredPhysicalAssets =>
+        string.IsNullOrWhiteSpace(_physicalAssetSearch)
+            ? _physicalAssets ?? Enumerable.Empty<PhysicalAssetResponse>()
+            : (_physicalAssets ?? Enumerable.Empty<PhysicalAssetResponse>()).Where(asset =>
+                (!string.IsNullOrWhiteSpace(asset.PropertyCode) && asset.PropertyCode.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(asset.Description) && asset.Description.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(asset.Location) && asset.Location.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(asset.UnitOfMeasure) && asset.UnitOfMeasure.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase)));
 
     private bool CanSave => !_isReadOnly && _reportStatus == 0 && ((_reportId is null && _canCreate) || (_reportId.HasValue && _canUpdate));
     private bool CanPost => !_isReadOnly && _reportStatus == 0 && _reportId.HasValue && _canPost;
@@ -187,6 +200,56 @@ public partial class PpeReceivingReport : ComponentBase
         _isPrintDialogOpen = false;
     }
 
+    private async Task OpenLoadInventoryDialog()
+    {
+        _isLoadInventoryDialogOpen = true;
+        await LoadPhysicalAssets();
+    }
+
+    private void CloseLoadInventoryDialog()
+    {
+        _isLoadInventoryDialogOpen = false;
+        _physicalAssets = null;
+    }
+
+    private async Task LoadPhysicalAssets()
+    {
+        try
+        {
+            _isLoadingInventory = true;
+            var command = new SearchPhysicalAssetsCommand { PageNumber = 1, PageSize = 100 };
+            var response = await ApiClient.SearchPhysicalAssetsEndpointAsync(ApiVersion, command);
+            _physicalAssets = response?.Items?.ToList() ?? new List<PhysicalAssetResponse>();
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add($"Failed to load physical assets: {ex.Message}", Severity.Error);
+            _physicalAssets = new List<PhysicalAssetResponse>();
+        }
+        finally
+        {
+            _isLoadingInventory = false;
+        }
+    }
+
+    private void SelectPhysicalAsset(PhysicalAssetResponse asset)
+    {
+        // Add the selected physical asset to the line items
+        _model.LineItems.Add(new PpeReceivingLineItemModel
+        {
+            PropertyCode = asset.PropertyCode ?? "",
+            Description = asset.Description ?? "",
+            DateAcquired = asset.AcquisitionDate,
+            Quantity = asset.Quantity,
+            Unit = asset.UnitOfMeasure ?? "",
+            UnitCost = asset.AcquisitionCost,
+            Location = asset.Location ?? ""
+        });
+
+        Snackbar.Add($"Added: {asset.Description ?? asset.PropertyCode}", Severity.Success);
+        StateHasChanged();
+    }
+
     private async Task PrintDocument()
     {
         try
@@ -222,7 +285,7 @@ public partial class PpeReceivingReport : ComponentBase
         {
             var postCommand = new PostPpeReceivingReportCommand { Id = _reportId.Value };
             await ApiClient.PostPpeReceivingReportEndpointAsync(ApiVersion, postCommand);
-            
+
             _reportStatus = 1;
             _reportStatusText = "Posted";
             _actionButtonText = "Posted";
@@ -253,7 +316,7 @@ public partial class PpeReceivingReport : ComponentBase
         {
             var cancelCommand = new CancelPpeReceivingReportCommand { Id = _reportId.Value };
             await ApiClient.CancelPpeReceivingReportEndpointAsync(ApiVersion, cancelCommand);
-            
+
             _reportStatus = 0;
             _reportStatusText = "Draft";
             _actionButtonText = "Update PPER";
