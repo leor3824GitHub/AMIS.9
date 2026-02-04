@@ -94,6 +94,15 @@ public sealed class PostPpeReceivingReportHandler(
                         modelNumber: null,
                         ppeType: lineItem.PpeType ?? "General");
 
+                    // Create initial assignment with location from PPERR line item
+                    asset.Issue(
+                        employeeId: Guid.Empty,
+                        employeeName: report.Source.Name ?? "System",
+                        documentNumber: report.ReportNumber,
+                        quantityIssued: null,
+                        location: lineItem.Location,
+                        emitEvent: false);
+
                     await assetRepository.AddAsync(asset, cancellationToken).ConfigureAwait(false);
 
                     var registrySpec = new InventoryRegistryByPropertyCodeSpec(propertyCode);
