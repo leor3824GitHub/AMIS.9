@@ -365,3 +365,5 @@ FodyWeavers.xsd
 /.gitignore
 =======
 >>>>>>> origin/jan1626
+api/server/appsettings.Development.json
+api/server/appsettings.json

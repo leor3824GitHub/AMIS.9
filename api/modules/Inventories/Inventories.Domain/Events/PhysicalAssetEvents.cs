@@ -25,15 +25,6 @@ public record PhysicalAssetReturned : DomainEvent
     public int QuantityReturned { get; init; }
 }
 
-public record PhysicalAssetReclassified : DomainEvent
-{
-    public PhysicalAsset PhysicalAsset { get; init; } = default!;
-    public PropertyClassification OldClassification { get; init; }
-    public PropertyClassification NewClassification { get; init; }
-    public string Reason { get; init; } = default!;
-    public DateTime EffectiveDate { get; init; }
-}
-
 public record PhysicalAssetDepreciated : DomainEvent
 {
     public PhysicalAsset PhysicalAsset { get; init; } = default!;
@@ -53,7 +44,6 @@ public record PhysicalAssetConditionUpdated : DomainEvent
 public record PhysicalAssetQRCodeGenerated : DomainEvent
 {
     public PhysicalAsset PhysicalAsset { get; init; } = default!;
-    public string PropertyNumber { get; init; } = default!;
     public DateTime GeneratedDate { get; init; }
 }
 

@@ -6,7 +6,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
+namespace AMIS.WebApi.Migrations.PostgreSQL.Migrations
 {
     /// <inheritdoc />
     public partial class InitialInventories : Migration
@@ -216,6 +216,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     ErrorMessage = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     InitiatedBy = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: true),
                     TransactionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CorrelationId = table.Column<string>(type: "text", nullable: true),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -261,6 +262,55 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 });
 
             migrationBuilder.CreateTable(
+                name: "NfaOfficeCodes",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    OfficeName = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    ParentOfficeCode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
+                    SortOrder = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_NfaOfficeCodes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PPECategoryCodes",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    AccountCode = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    SortOrder = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    COAReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PPECategoryCodes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PpeIssuanceReport",
                 schema: "inventories",
                 columns: table => new
@@ -288,6 +338,32 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PpeIssuanceReport", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PPEItemCodes",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    ClassCode = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    CategoryCode = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    Code = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    SortOrder = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    COAReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PPEItemCodes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -433,6 +509,70 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 });
 
             migrationBuilder.CreateTable(
+                name: "PropertyAcknowledgementReceipt",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PARNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EmployeeName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Department = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: false),
+                    Position = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    IssuanceDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    IssuancePurpose = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    IssuanceLocation = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    ReturnDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ReturnRemarks = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    ReceivedByEmployeeId = table.Column<Guid>(type: "uuid", nullable: true),
+                    ReceivedByEmployeeName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    IssuedByName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    IssuedByDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ReceivedByName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    ReceivedByDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ApprovedByName = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
+                    ApprovedByDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Notes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    LineItems = table.Column<string>(type: "jsonb", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PropertyAcknowledgementReceipt", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PropertyCodeSequences",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    YearKey = table.Column<int>(type: "integer", nullable: false),
+                    OfficeCode = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    ClassCode = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    CategoryCode = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    ItemCode = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: false),
+                    LastSequence = table.Column<int>(type: "integer", nullable: false),
+                    ResetAnnually = table.Column<bool>(type: "boolean", nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PropertyCodeSequences", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "RcaAccountCodes",
                 schema: "inventories",
                 columns: table => new
@@ -503,6 +643,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     ErrorMessage = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     InitiatedBy = table.Column<string>(type: "character varying(255)", maxLength: 255, nullable: true),
                     TransactionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    CorrelationId = table.Column<string>(type: "text", nullable: true),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -825,6 +966,38 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 });
 
             migrationBuilder.CreateTable(
+                name: "PPETypeCodes",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    CategoryId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Code = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    SortOrder = table.Column<int>(type: "integer", nullable: false),
+                    IsActive = table.Column<bool>(type: "boolean", nullable: false),
+                    COAReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PPETypeCodes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_PPETypeCodes_PPECategoryCodes_CategoryId",
+                        column: x => x.CategoryId,
+                        principalSchema: "inventories",
+                        principalTable: "PPECategoryCodes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProcurementPlanItems",
                 schema: "inventories",
                 columns: table => new
@@ -922,6 +1095,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Name = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
                     Description = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
                     AcquisitionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
@@ -957,6 +1131,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     Unit = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     UnitCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     Location = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    ClassCode = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: true),
+                    CategoryCode = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: true),
+                    ItemCode = table.Column<string>(type: "character varying(3)", maxLength: 3, nullable: true),
                     SuppliesAndMaterialsReceivingReportId = table.Column<Guid>(type: "uuid", nullable: false)
                 },
                 constraints: table =>
@@ -1079,7 +1256,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     AcquisitionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     SerialNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     ModelNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    Location = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     Condition = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     UnitOfMeasure = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
@@ -1090,7 +1266,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     PPEType = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
                     AccumulatedDepreciation = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
                     QRCodeData = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: true),
-                    PropertyNumber = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true),
                     QRGeneratedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     CurrentCustodianId = table.Column<Guid>(type: "uuid", nullable: true),
                     TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
@@ -1294,6 +1469,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     AssignmentType = table.Column<string>(type: "text", nullable: false),
                     Quantity = table.Column<int>(type: "integer", nullable: false),
                     AssetClassification = table.Column<int>(type: "integer", nullable: false),
+                    Location = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
                     Reason = table.Column<string>(type: "text", nullable: true),
                     Remarks = table.Column<string>(type: "text", nullable: true),
                     TransferredToEmployeeId = table.Column<Guid>(type: "uuid", nullable: true),
@@ -1343,20 +1519,32 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 });
 
             migrationBuilder.CreateTable(
-                name: "AssetReclassificationHistories",
+                name: "AssetDisposals",
                 schema: "inventories",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    AssetId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AssetNumber = table.Column<string>(type: "text", nullable: false),
-                    OldClassification = table.Column<int>(type: "integer", nullable: false),
-                    NewClassification = table.Column<int>(type: "integer", nullable: false),
-                    EffectiveDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Reason = table.Column<string>(type: "text", nullable: false),
-                    AcquisitionCostAtReclassification = table.Column<decimal>(type: "numeric", nullable: false),
-                    COAReference = table.Column<string>(type: "text", nullable: true),
-                    Remarks = table.Column<string>(type: "text", nullable: true),
+                    PhysicalAssetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssetPropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    AssetDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    RequestedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    RequestDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DisposalMethod = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    JustificationReason = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    AssetConditionAtDisposal = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    ApprovedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    ApprovedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ApprovalNotes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    CompletedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    SalvageValue = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    GainOrLoss = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    DisposalReferenceNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CancelledOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CancelledBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    CancellationReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
                     LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -1366,14 +1554,116 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_AssetReclassificationHistories", x => x.Id);
+                    table.PrimaryKey("PK_AssetDisposals", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_AssetReclassificationHistories_PhysicalAssets_AssetId",
-                        column: x => x.AssetId,
+                        name: "FK_AssetDisposals_Employees_ApprovedBy",
+                        column: x => x.ApprovedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_Employees_CancelledBy",
+                        column: x => x.CancelledBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_Employees_CompletedBy",
+                        column: x => x.CompletedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_Employees_RequestedBy",
+                        column: x => x.RequestedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_PhysicalAssets_PhysicalAssetId",
+                        column: x => x.PhysicalAssetId,
                         principalSchema: "inventories",
                         principalTable: "PhysicalAssets",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AssetMaintenances",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PhysicalAssetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssetPropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    AssetDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    ScheduledDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    StartedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletionNotes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    FindingsNotes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    ScheduledBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    PerformedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    ApprovedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    EstimatedCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    ActualCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    CostReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CancelledOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CancelledBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    CancellationReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AssetMaintenances", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_Employees_ApprovedBy",
+                        column: x => x.ApprovedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_Employees_CancelledBy",
+                        column: x => x.CancelledBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_Employees_PerformedBy",
+                        column: x => x.PerformedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_Employees_ScheduledBy",
+                        column: x => x.ScheduledBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_PhysicalAssets_PhysicalAssetId",
+                        column: x => x.PhysicalAssetId,
+                        principalSchema: "inventories",
+                        principalTable: "PhysicalAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -1820,11 +2110,11 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 columns: new[] { "Id", "AllowsForUse", "Code", "ColorCode", "Created", "CreatedBy", "Deleted", "DeletedBy", "Description", "DisplayName", "IsActive", "LastModified", "LastModifiedBy", "RequiresDisposal", "RequiresRepair", "SortOrder" },
                 values: new object[,]
                 {
-                    { new Guid("5d9263de-e5fb-4f58-b930-2028dcf2c8a0"), true, "Good", "#28a745", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset is in excellent working condition", "Good", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, false, false, 1 },
-                    { new Guid("aa635205-5079-4222-bc27-43c92ed71157"), true, "Poor", "#fd7e14", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset has significant wear, may need repair", "Poor", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, false, true, 3 },
-                    { new Guid("acceae57-4620-4249-8a93-3f8e5e72c9c2"), false, "Unserviceable", "#dc3545", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset is not functional, requires major repair", "Unserviceable", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, false, true, 4 },
-                    { new Guid("e6f3b00f-d125-421c-ba38-6214fc67d8d0"), true, "Fair", "#ffc107", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset has minor wear but still functional", "Fair", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, false, false, 2 },
-                    { new Guid("ee20580b-9ffb-4079-8d7b-e86bcead292b"), false, "ForDisposal", "#6c757d", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset is beyond repair and should be disposed", "For Disposal", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, true, false, 5 }
+                    { new Guid("2ef149e6-d738-4e81-9206-552201f5718d"), true, "Fair", "#ffc107", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset has minor wear but still functional", "Fair", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, false, false, 2 },
+                    { new Guid("353f5619-4e02-4411-b7f8-2c5f05dfeb55"), true, "Poor", "#fd7e14", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset has significant wear, may need repair", "Poor", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, false, true, 3 },
+                    { new Guid("9deb18f3-e5fa-4bc6-839c-a41510f50111"), true, "Good", "#28a745", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset is in excellent working condition", "Good", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, false, false, 1 },
+                    { new Guid("a20c625d-9c6b-46d2-a3f3-8b93453d47cc"), false, "ForDisposal", "#6c757d", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset is beyond repair and should be disposed", "For Disposal", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, true, false, 5 },
+                    { new Guid("c9d58c96-b73e-4de6-b7f2-ec0c2d5372f7"), false, "Unserviceable", "#dc3545", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, "Asset is not functional, requires major repair", "Unserviceable", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, false, true, 4 }
                 });
 
             migrationBuilder.InsertData(
@@ -1833,11 +2123,11 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 columns: new[] { "Id", "Created", "CreatedBy", "Deleted", "DeletedBy", "Description", "IssuedDate", "LastModified", "LastModifiedBy", "LastTransactionDate", "LastTransactionReference", "LastTransactionType", "Location", "PropertyCode", "Quantity", "ReceivedDate", "Status" },
                 values: new object[,]
                 {
-                    { new Guid("0aba5db9-db62-4686-9560-8af03efafa60"), new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Office Chair", null, new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), "PPERR-002", "PPERR", "Main Office", "237", 20, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), 1 },
-                    { new Guid("316f6324-68f6-462d-a6d2-e7b7ab4a01c3"), new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Desktop Computer", null, new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), "PPERR-001", "PPERR", "IT Office - Room 101", "234", 10, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), 1 },
-                    { new Guid("3c01b487-d17f-4fa0-8394-d78e6faf6402"), new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Desk Lamp", null, new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), "PPERR-002", "PPERR", "Main Office", "238", 15, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), 1 },
-                    { new Guid("c969f975-2567-4138-b02c-fab8f9dd48ff"), new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Printer", null, new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), "PPERR-001", "PPERR", "IT Office - Room 103", "236", 3, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), 1 },
-                    { new Guid("ca30dcf2-b1e2-4581-ad06-efcc881fc72d"), new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Laptop Computer", null, new DateTimeOffset(new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Unspecified).AddTicks(3399), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), "PPERR-001", "PPERR", "IT Office - Room 102", "235", 5, new DateTime(2026, 1, 23, 5, 12, 58, 113, DateTimeKind.Utc).AddTicks(3399), 1 }
+                    { new Guid("10000000-0000-0000-0000-000000000001"), new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Desktop Computer", null, new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "PPERR-001", "PPERR", "IT Office - Room 101", "234", 10, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1 },
+                    { new Guid("10000000-0000-0000-0000-000000000002"), new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Laptop Computer", null, new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "PPERR-001", "PPERR", "IT Office - Room 102", "235", 5, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1 },
+                    { new Guid("10000000-0000-0000-0000-000000000003"), new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Printer", null, new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "PPERR-001", "PPERR", "IT Office - Room 103", "236", 3, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1 },
+                    { new Guid("10000000-0000-0000-0000-000000000004"), new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Office Chair", null, new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "PPERR-002", "PPERR", "Main Office", "237", 20, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1 },
+                    { new Guid("10000000-0000-0000-0000-000000000005"), new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000001"), null, null, "Desk Lamp", null, new DateTimeOffset(new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "PPERR-002", "PPERR", "Main Office", "238", 15, new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), 1 }
                 });
 
             migrationBuilder.InsertData(
@@ -1846,11 +2136,11 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 columns: new[] { "Id", "COAReference", "Category", "Code", "Created", "CreatedBy", "DefaultDepreciationRate", "DefaultUsefulLifeYears", "Deleted", "DeletedBy", "DepreciationAccountCode", "Description", "IconName", "IsActive", "LastModified", "LastModifiedBy", "Name", "RCAAccountCode", "SortOrder" },
                 values: new object[,]
                 {
-                    { new Guid("1771185c-aace-419f-a6cf-104a07f09247"), "COA Circular 2022-002", "General", "OTHER", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 10m, 10, null, null, "10699010", "Other property, plant and equipment", "box", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Other PPE", "10699990", 5 },
-                    { new Guid("81a8575b-34a0-4fe4-af62-1af49d991de9"), "COA Circular 2022-002", "Technology", "ICT", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 33.33m, 3, null, null, "10699010", "Computers, servers, network equipment", "desktop", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "ICT Equipment", "10607010", 4 },
-                    { new Guid("b97868ec-4c69-4ad8-b861-b7f759c3031c"), "COA Circular 2022-002", "Office", "FURNITURE", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 10m, 10, null, null, "10699010", "Office furniture, fixtures, and reference books", "chair", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Furniture, Fixtures and Books", "10606010", 3 },
-                    { new Guid("ce42ce96-0b92-4cb1-9496-330af1c989fc"), "COA Circular 2022-002", "Transportation", "TRANSPORTATION", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 20m, 5, null, null, "10699010", "Vehicles, motorcycles, boats", "car", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Transportation Equipment", "10605010", 2 },
-                    { new Guid("e4642772-3ad6-4736-a540-ff9c73893f06"), "COA Circular 2022-002", "Production", "MACHINERY", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 10m, 10, null, null, "10699010", "Industrial machinery, tools, and equipment", "gear", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Machinery and Equipment", "10604010", 1 }
+                    { new Guid("2256ae46-1ec4-4931-ab02-0075de6088cb"), "COA Circular 2022-002", "General", "OTHER", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 10m, 10, null, null, "10699010", "Other property, plant and equipment", "box", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Other PPE", "10699990", 5 },
+                    { new Guid("32be7c49-9e71-4bca-bf2b-e7cb951acdc0"), "COA Circular 2022-002", "Office", "FURNITURE", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 10m, 10, null, null, "10699010", "Office furniture, fixtures, and reference books", "chair", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Furniture, Fixtures and Books", "10606010", 3 },
+                    { new Guid("6181b40d-03a5-485a-a743-8bbb1d77e27e"), "COA Circular 2022-002", "Transportation", "TRANSPORTATION", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 20m, 5, null, null, "10699010", "Vehicles, motorcycles, boats", "car", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Transportation Equipment", "10605010", 2 },
+                    { new Guid("6b718490-31c7-404f-bd39-329429f023a1"), "COA Circular 2022-002", "Production", "MACHINERY", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 10m, 10, null, null, "10699010", "Industrial machinery, tools, and equipment", "gear", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Machinery and Equipment", "10604010", 1 },
+                    { new Guid("f90263f4-fdcb-4e7a-84a2-d076263cd772"), "COA Circular 2022-002", "Technology", "ICT", new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), 33.33m, 3, null, null, "10699010", "Computers, servers, network equipment", "desktop", true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "ICT Equipment", "10607010", 4 }
                 });
 
             migrationBuilder.InsertData(
@@ -1859,25 +2149,25 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 columns: new[] { "Id", "Abbreviation", "BaseUnitId", "Code", "ConversionFactor", "Created", "CreatedBy", "Deleted", "DeletedBy", "IsActive", "IsDefault", "LastModified", "LastModifiedBy", "Name", "SortOrder", "UnitType" },
                 values: new object[,]
                 {
-                    { new Guid("11087ecd-b56d-4fe7-9f40-de602c73bcbf"), "can", null, "CAN", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Can", 53, 6 },
-                    { new Guid("11c8de38-bc26-4ac7-a3ff-4cc8f87afa3e"), "ft", null, "FT", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Feet", 33, 4 },
-                    { new Guid("206de9f8-4146-4a45-b528-1c73f3b1ea42"), "L", null, "L", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Liter", 20, 3 },
-                    { new Guid("2410eeaa-c2a4-46d7-9320-b4337f141c3f"), "mL", null, "ML", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Milliliter", 21, 3 },
-                    { new Guid("2a1b6921-aaaf-44bb-b96f-041eaa4120a7"), "mm", null, "MM", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Millimeter", 32, 4 },
-                    { new Guid("6b3aa276-0e7f-42d0-a249-8e098d1f8f47"), "m", null, "M", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Meter", 30, 4 },
-                    { new Guid("6b96c7dd-5e18-4a0c-9c3f-6e958a23ab57"), "unit", null, "UNIT", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Unit", 3, 1 },
-                    { new Guid("8078b956-3266-4b10-a434-473f37093ea8"), "pair", null, "PAIR", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Pair", 4, 1 },
-                    { new Guid("96a5630f-2ac5-4042-b62c-20f019f0a9b9"), "MT", null, "MT", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Metric Ton", 12, 2 },
-                    { new Guid("9a3e2cdd-fa25-4d6c-8577-d767afc5ed79"), "set", null, "SET", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Set", 2, 1 },
-                    { new Guid("a2747561-2a22-476d-aeac-2c6b44096a61"), "kg", null, "KG", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Kilogram", 10, 2 },
-                    { new Guid("a411ca10-9dd2-4bd0-a43e-902dd7e88828"), "pack", null, "PACK", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Pack", 51, 6 },
-                    { new Guid("aceb9d77-ccf2-4cc6-93aa-9e37f9aa7aed"), "m²", null, "SQM", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Square Meter", 40, 5 },
-                    { new Guid("b231b179-2545-4d16-82c8-cf5117e85be9"), "btl", null, "BOTTLE", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Bottle", 52, 6 },
-                    { new Guid("cb2b19ea-ff7c-4b71-89df-9787b83ca65b"), "gal", null, "GAL", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Gallon", 22, 3 },
-                    { new Guid("d8d66d3b-f3e3-45b2-b6af-e6bcbb296662"), "cm", null, "CM", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Centimeter", 31, 4 },
-                    { new Guid("d9c8d74f-6bfb-4651-9e0d-c0a7b04a4754"), "box", null, "BOX", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Box", 50, 6 },
-                    { new Guid("e8f21e33-8691-474c-8734-98550197a35e"), "g", null, "G", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Gram", 11, 2 },
-                    { new Guid("fd80e628-d666-4736-84bb-10402bfb4621"), "pc", null, "PC", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Piece", 1, 1 }
+                    { new Guid("02112e18-c02e-4776-b5b5-74a5f5f5b89d"), "can", null, "CAN", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Can", 53, 6 },
+                    { new Guid("0af6668f-e5b2-49a5-bd49-d5806186b9c8"), "gal", null, "GAL", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Gallon", 22, 3 },
+                    { new Guid("26fe2d0a-8213-44ee-9c11-2811751d67ed"), "MT", null, "MT", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Metric Ton", 12, 2 },
+                    { new Guid("3d864e79-2318-48d1-99f9-efbdbe998b93"), "btl", null, "BOTTLE", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Bottle", 52, 6 },
+                    { new Guid("498c483a-d7d4-4295-a4fb-73ecaa282f8d"), "box", null, "BOX", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Box", 50, 6 },
+                    { new Guid("67c337d2-8d7b-4cf8-b69f-357f789d3213"), "set", null, "SET", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Set", 2, 1 },
+                    { new Guid("689cc506-6334-4b0b-9bbf-e89aa5808732"), "pair", null, "PAIR", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Pair", 4, 1 },
+                    { new Guid("775be8da-1055-497f-87d0-eb0d0102b260"), "L", null, "L", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Liter", 20, 3 },
+                    { new Guid("9b794821-8454-47ad-bdd9-8d804f6ce5c0"), "g", null, "G", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Gram", 11, 2 },
+                    { new Guid("9eab679e-1c67-4a44-8c87-454b02c157ad"), "unit", null, "UNIT", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Unit", 3, 1 },
+                    { new Guid("afe50868-88e7-4e95-b17c-9d1ae16e88e0"), "m²", null, "SQM", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Square Meter", 40, 5 },
+                    { new Guid("b712d2b0-3a95-4498-b127-210be4f94d93"), "m", null, "M", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Meter", 30, 4 },
+                    { new Guid("bc3257f7-5964-47b1-9090-6483af167fe2"), "pc", null, "PC", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, true, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Piece", 1, 1 },
+                    { new Guid("cc44f5ba-00c6-4ebb-b159-3a3fbb4a3918"), "kg", null, "KG", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Kilogram", 10, 2 },
+                    { new Guid("d0908c1d-d033-4b50-bfd7-c40de563b636"), "mm", null, "MM", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Millimeter", 32, 4 },
+                    { new Guid("d29c207f-28f3-4c7a-884b-7c360caf8b84"), "ft", null, "FT", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Feet", 33, 4 },
+                    { new Guid("d63763d9-b69d-4f2c-991b-e22f59acc849"), "mL", null, "ML", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Milliliter", 21, 3 },
+                    { new Guid("e6a5da9c-60ad-4858-8c78-400f195bab7c"), "pack", null, "PACK", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Pack", 51, 6 },
+                    { new Guid("fc92cc7f-ced9-4081-bd29-c779fa7423e8"), "cm", null, "CM", null, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), new Guid("00000000-0000-0000-0000-000000000000"), null, null, true, false, new DateTimeOffset(new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified), new TimeSpan(0, 0, 0, 0, 0)), null, "Centimeter", 31, 4 }
                 });
 
             migrationBuilder.CreateIndex(
@@ -1981,10 +2271,124 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AssetReclassificationHistories_AssetId",
+                name: "IX_AssetDisposals_ApprovedBy",
                 schema: "inventories",
-                table: "AssetReclassificationHistories",
-                column: "AssetId");
+                table: "AssetDisposals",
+                column: "ApprovedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetDisposals_CancelledBy",
+                schema: "inventories",
+                table: "AssetDisposals",
+                column: "CancelledBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetDisposals_CompletedBy",
+                schema: "inventories",
+                table: "AssetDisposals",
+                column: "CompletedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetDisposals_PhysicalAssetId",
+                schema: "inventories",
+                table: "AssetDisposals",
+                column: "PhysicalAssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetDisposals_PropertyCode",
+                schema: "inventories",
+                table: "AssetDisposals",
+                column: "AssetPropertyCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetDisposals_RequestDate",
+                schema: "inventories",
+                table: "AssetDisposals",
+                column: "RequestDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetDisposals_RequestedBy",
+                schema: "inventories",
+                table: "AssetDisposals",
+                column: "RequestedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetDisposals_Status",
+                schema: "inventories",
+                table: "AssetDisposals",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetDisposals_StatusApprover",
+                schema: "inventories",
+                table: "AssetDisposals",
+                columns: new[] { "Status", "ApprovedBy" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_ApprovedBy",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "ApprovedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_CancelledBy",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "CancelledBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_PerformedBy",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "PerformedBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_PhysicalAssetId",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "PhysicalAssetId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_PropertyCode",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "AssetPropertyCode");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_ScheduledBy",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "ScheduledBy");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_ScheduledDate",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "ScheduledDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_Status",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_StatusScheduled",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                columns: new[] { "Status", "ScheduledDate" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_StatusTechnician",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                columns: new[] { "Status", "PerformedBy" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AssetMaintenances_Type",
+                schema: "inventories",
+                table: "AssetMaintenances",
+                column: "Type");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AssetRequisitions_EmployeeId",
@@ -2229,6 +2633,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_NfaOfficeCodes_Code",
+                schema: "inventories",
+                table: "NfaOfficeCodes",
+                column: "Code",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_PhysicalAssets_CurrentClassification",
                 schema: "inventories",
                 table: "PhysicalAssets",
@@ -2260,10 +2671,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PhysicalAssets_PropertyNumber",
+                name: "IX_PPECategoryCodes_Code",
                 schema: "inventories",
-                table: "PhysicalAssets",
-                column: "PropertyNumber",
+                table: "PPECategoryCodes",
+                column: "Code",
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -2271,6 +2682,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 schema: "inventories",
                 table: "PpeIssuanceReport",
                 column: "ReportNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PPEItemCodes_ClassCode_CategoryCode_Code",
+                schema: "inventories",
+                table: "PPEItemCodes",
+                columns: new[] { "ClassCode", "CategoryCode", "Code" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -2287,6 +2705,13 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 column: "PPEType",
                 unique: true,
                 filter: "\"IsActive\" = true AND \"Deleted\" IS NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PPETypeCodes_CategoryId_Code",
+                schema: "inventories",
+                table: "PPETypeCodes",
+                columns: new[] { "CategoryId", "Code" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_PPETypeDefinitions_Code",
@@ -2332,6 +2757,26 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 schema: "inventories",
                 table: "ProjectBudgets",
                 column: "ProjectId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyAcknowledgementReceipt_EmployeeId",
+                schema: "inventories",
+                table: "PropertyAcknowledgementReceipt",
+                column: "EmployeeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyAcknowledgementReceipt_PARNumber",
+                schema: "inventories",
+                table: "PropertyAcknowledgementReceipt",
+                column: "PARNumber",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PropertyCodeSequences_YearKey_OfficeCode_ClassCode_Category~",
+                schema: "inventories",
+                table: "PropertyCodeSequences",
+                columns: new[] { "YearKey", "OfficeCode", "ClassCode", "CategoryCode", "ItemCode" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -2478,7 +2923,11 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 schema: "inventories");
 
             migrationBuilder.DropTable(
-                name: "AssetReclassificationHistories",
+                name: "AssetDisposals",
+                schema: "inventories");
+
+            migrationBuilder.DropTable(
+                name: "AssetMaintenances",
                 schema: "inventories");
 
             migrationBuilder.DropTable(
@@ -2538,7 +2987,15 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 schema: "inventories");
 
             migrationBuilder.DropTable(
+                name: "NfaOfficeCodes",
+                schema: "inventories");
+
+            migrationBuilder.DropTable(
                 name: "PpeIssuanceReport",
+                schema: "inventories");
+
+            migrationBuilder.DropTable(
+                name: "PPEItemCodes",
                 schema: "inventories");
 
             migrationBuilder.DropTable(
@@ -2547,6 +3004,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
 
             migrationBuilder.DropTable(
                 name: "PPETypeAccountMappings",
+                schema: "inventories");
+
+            migrationBuilder.DropTable(
+                name: "PPETypeCodes",
                 schema: "inventories");
 
             migrationBuilder.DropTable(
@@ -2563,6 +3024,14 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
 
             migrationBuilder.DropTable(
                 name: "ProjectBudgets",
+                schema: "inventories");
+
+            migrationBuilder.DropTable(
+                name: "PropertyAcknowledgementReceipt",
+                schema: "inventories");
+
+            migrationBuilder.DropTable(
+                name: "PropertyCodeSequences",
                 schema: "inventories");
 
             migrationBuilder.DropTable(
@@ -2615,6 +3084,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
 
             migrationBuilder.DropTable(
                 name: "JournalEntryVouchers",
+                schema: "inventories");
+
+            migrationBuilder.DropTable(
+                name: "PPECategoryCodes",
                 schema: "inventories");
 
             migrationBuilder.DropTable(

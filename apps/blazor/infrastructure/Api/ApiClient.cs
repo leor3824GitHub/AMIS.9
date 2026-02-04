@@ -34339,9 +34339,6 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("qrCodeData")]
         public string? QrCodeData { get; set; } = default!;
 
-        [System.Text.Json.Serialization.JsonPropertyName("propertyNumber")]
-        public string? PropertyNumber { get; set; } = default!;
-
     }
 
     [System.CodeDom.Compiler.GeneratedCode("NJsonSchema", "14.6.1.0 (NJsonSchema v11.5.1.0 (Newtonsoft.Json v13.0.0.0))")]
@@ -34350,9 +34347,6 @@ namespace AMIS.Blazor.Infrastructure.Api
 
         [System.Text.Json.Serialization.JsonPropertyName("assetId")]
         public System.Guid AssetId { get; set; } = default!;
-
-        [System.Text.Json.Serialization.JsonPropertyName("propertyNumber")]
-        public string? PropertyNumber { get; set; } = default!;
 
         [System.Text.Json.Serialization.JsonPropertyName("generatedDate")]
         public System.DateTime GeneratedDate { get; set; } = default!;

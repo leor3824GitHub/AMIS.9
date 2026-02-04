@@ -58,7 +58,6 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
 
         // QR Code & Identification (NEW)
         builder.Property(x => x.QRCodeData).HasMaxLength(5000);
-        builder.Property(x => x.PropertyNumber).HasMaxLength(50);
         builder.Property(x => x.QRGeneratedDate);
         builder.Property(x => x.CurrentCustodianId);
 
@@ -68,12 +67,11 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
 
-        // AssignmentHistory and ReclassificationHistory relationships are handled by their
+        // AssignmentHistory relationships are handled by their
         // PhysicalAssetId foreign keys and will be auto-discovered by EF Core
 
         // Indexes
         builder.HasIndex(x => x.PropertyCode).IsUnique();
-        builder.HasIndex(x => x.PropertyNumber).IsUnique();
         builder.HasIndex(x => x.CurrentCustodianId);
         builder.HasIndex(x => x.CurrentClassification);
         builder.HasIndex(x => x.DisposalDate);

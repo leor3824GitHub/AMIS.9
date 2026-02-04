@@ -15,7 +15,7 @@ namespace AMIS.WebApi.Inventories.Domain;
 public class PhysicalAsset : AuditableEntity, IAggregateRoot
 {
     // Core Identification
-    public string PropertyCode { get; private set; } = default!; // PropertyCode or PropertyNumber
+    public string PropertyCode { get; private set; } = default!;
     public Guid ProductId { get; private set; }
     public string Description { get; private set; } = default!;
 
@@ -50,7 +50,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
     // QR Code & Identification Support
     public string? QRCodeData { get; private set; } // Base64 encoded QR code image or raw QR data
-    public string? PropertyNumber { get; private set; } // Auto-generated property identification number
     public DateTime? QRGeneratedDate { get; private set; } // When QR was generated
     public Guid? CurrentCustodianId { get; private set; } // Currently assigned custodian
 
@@ -59,16 +58,12 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     public bool IsDepreciable => CurrentClassification == PropertyClassification.PropertyPlantEquipment;
     public AssetAssignmentHistory? CurrentAssignment =>
         AssignmentHistory.FirstOrDefault(h => h.Status == "Active");
-    public AssetReclassificationHistory? LastReclassification =>
-        ReclassificationHistory.OrderByDescending(h => h.EffectiveDate).FirstOrDefault();
     public bool HasQRCode => !string.IsNullOrEmpty(QRCodeData);
 
     // Navigation
     public virtual Product Product { get; private set; } = default!;
     public virtual ICollection<AssetAssignmentHistory> AssignmentHistory { get; private set; }
         = new List<AssetAssignmentHistory>();
-    public virtual ICollection<AssetReclassificationHistory> ReclassificationHistory { get; private set; }
-        = new List<AssetReclassificationHistory>();
     public virtual ICollection<AssetDisposal> Disposals { get; private set; }
         = new List<AssetDisposal>();
     public virtual ICollection<AssetMaintenance> MaintenanceHistory { get; private set; }
@@ -181,49 +176,37 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     /// Reclassify asset when COA/DBM changes thresholds
     /// Records reclassification history for audit trail
     /// </summary>
-    public void Reclassify(PropertyClassification newClassification, string reason, DateTime effectiveDate)
-    {
-        if (string.IsNullOrWhiteSpace(reason))
-            throw new ArgumentException("Reclassification reason is required.", nameof(reason));
-        if (IsDisposed)
-            throw new InvalidOperationException("Cannot reclassify a disposed asset.");
+    // public void Reclassify(PropertyClassification newClassification, string reason, DateTime effectiveDate)
+    // {
+    //     if (string.IsNullOrWhiteSpace(reason))
+    //         throw new ArgumentException("Reclassification reason is required.", nameof(reason));
+    //     if (IsDisposed)
+    //         throw new InvalidOperationException("Cannot reclassify a disposed asset.");
 
-        var oldClassification = CurrentClassification;
+    //     var oldClassification = CurrentClassification;
 
-        if (oldClassification == newClassification)
-            return; // No change needed
+    //     if (oldClassification == newClassification)
+    //         return; // No change needed
 
-        // Record reclassification history
-        var history = AssetReclassificationHistory.Create(
-            Id,
-            PropertyCode,
-            oldClassification,
-            newClassification,
-            effectiveDate,
-            reason,
-            AcquisitionCost);
+    //     CurrentClassification = newClassification;
 
-        ReclassificationHistory.Add(history);
+    //     // Adjust PPE-specific fields based on new classification
+    //     if (newClassification != PropertyClassification.PropertyPlantEquipment)
+    //     {
+    //         // Downgraded from PPE - clear PPE fields
+    //         PPEType = null;
+    //         // Keep AccumulatedDepreciation for historical record
+    //     }
 
-        CurrentClassification = newClassification;
-
-        // Adjust PPE-specific fields based on new classification
-        if (newClassification != PropertyClassification.PropertyPlantEquipment)
-        {
-            // Downgraded from PPE - clear PPE fields
-            PPEType = null;
-            // Keep AccumulatedDepreciation for historical record
-        }
-
-        QueueDomainEvent(new PhysicalAssetReclassified
-        {
-            PhysicalAsset = this,
-            OldClassification = oldClassification,
-            NewClassification = newClassification,
-            Reason = reason,
-            EffectiveDate = effectiveDate
-        });
-    }
+    //     QueueDomainEvent(new PhysicalAssetReclassified
+    //     {
+    //         PhysicalAsset = this,
+    //         OldClassification = oldClassification,
+    //         NewClassification = newClassification,
+    //         Reason = reason,
+    //         EffectiveDate = effectiveDate
+    //     });
+    // }
 
     /// <summary>
     /// Issue asset via ICS (Semi-Expendable) or PAR (PPE)
@@ -385,7 +368,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     /// Generates and stores a QR code for the asset.
     /// QR code data should contain property code and asset identification.
     /// </summary>
-    public void GenerateQRCode(string qrCodeData, string? propertyNumber = null)
+    public void GenerateQRCode(string qrCodeData)
     {
         if (string.IsNullOrWhiteSpace(qrCodeData))
             throw new ArgumentException("QR code data cannot be empty.", nameof(qrCodeData));
@@ -394,13 +377,11 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             throw new InvalidOperationException("Cannot generate QR code for disposed asset.");
 
         QRCodeData = qrCodeData;
-        PropertyNumber = propertyNumber ?? GeneratePropertyNumber();
         QRGeneratedDate = DateTime.UtcNow;
 
         QueueDomainEvent(new PhysicalAssetQRCodeGenerated
         {
             PhysicalAsset = this,
-            PropertyNumber = PropertyNumber,
             GeneratedDate = QRGeneratedDate.Value
         });
     }
@@ -441,18 +422,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             PhysicalAsset = this,
             ClearedDate = DateTime.UtcNow
         });
-    }
-
-    /// <summary>
-    /// Generates a property number if not already set.
-    /// Format: PPE-{Year}{Month}-{SequenceNumber} or SEMI-{Year}{Month}-{SequenceNumber}
-    /// </summary>
-    private string GeneratePropertyNumber()
-    {
-        var prefix = CurrentClassification == PropertyClassification.PropertyPlantEquipment ? "PPE" : "SEMI";
-        var now = DateTime.UtcNow;
-        var timestamp = now.Ticks % 10000;
-        return $"{prefix}-{now:yyyyMM}-{timestamp:D5}";
     }
 
     private static void ValidateCreate(

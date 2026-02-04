@@ -14,13 +14,12 @@ public sealed class GenerateQRCodeHandler(
         var asset = await repository.GetByIdAsync(request.AssetId, cancellationToken)
             ?? throw new InvalidOperationException($"Physical asset with ID {request.AssetId} not found.");
 
-        asset.GenerateQRCode(request.QRCodeData, request.PropertyNumber);
+        asset.GenerateQRCode(request.QRCodeData);
 
         await repository.UpdateAsync(asset, cancellationToken);
 
         return new GenerateQRCodeResponse(
             asset.Id,
-            asset.PropertyNumber!,
             asset.QRGeneratedDate!.Value);
     }
 }

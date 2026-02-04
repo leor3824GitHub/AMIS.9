@@ -15,7 +15,7 @@ public static class GenerateQRCodeEndpoint
     {
         endpoints.MapPost("/{id:guid}/generate-qrcode", async (Guid id, GenerateQRCodeRequest request, ISender mediator) =>
         {
-            var command = new GenerateQRCodeCommand(id, request.QRCodeData, request.PropertyNumber);
+            var command = new GenerateQRCodeCommand(id, request.QRCodeData);
             var response = await mediator.Send(command);
             return Results.Ok(response);
         })
@@ -29,6 +29,6 @@ public static class GenerateQRCodeEndpoint
         .MapToApiVersion(new ApiVersion(1, 0));
     }
 
-    private sealed record GenerateQRCodeRequest(string QRCodeData, string? PropertyNumber = null);
+    private sealed record GenerateQRCodeRequest(string QRCodeData);
 }
 

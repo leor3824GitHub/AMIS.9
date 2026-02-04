@@ -44,7 +44,6 @@ public sealed class InventoriesDbContext : FshDbContext
     // Unified Physical Asset with Dynamic Classification
     public DbSet<PhysicalAsset> PhysicalAssets { get; set; } = null!;
     public DbSet<AssetAssignmentHistory> AssetAssignmentHistories { get; set; } = null!;
-    public DbSet<AssetReclassificationHistory> AssetReclassificationHistories { get; set; } = null!;
     public DbSet<AssetClassificationRule> AssetClassificationRules { get; set; } = null!;
     public DbSet<RcaAccountCodeDefinition> RcaAccountCodes { get; set; } = null!;
     public DbSet<PPETypeAccountMapping> PPETypeAccountMappings { get; set; } = null!;
