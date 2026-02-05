@@ -94,7 +94,18 @@
     [Inject]
     private ISnackbar Snackbar { get; set; } = default!;
 
-    private CreatePhysicalAssetCommand Model = new();
+    private CreatePhysicalAssetCommand Model = new CreatePhysicalAssetCommand
+    {
+        PropertyCode = "",
+        ProductId = Guid.Empty,
+        Description = "",
+        AcquisitionCost = 0.0,
+        AcquisitionDate = DateTime.Now,
+        EstimatedUsefulLife = 60,
+        Classification = PropertyClassification._2,
+        Quantity = 1,
+        UnitOfMeasure = "piece"
+    };
     private string _acquisitionCostStr = "";
     private DateTime? _acquisitionDate;
     private ProductResponse? _selectedProduct;
@@ -105,18 +116,6 @@
         _selectedProduct = null;
         _acquisitionCostStr = "";
         _acquisitionDate = DateTime.Now;
-        Model = new CreatePhysicalAssetCommand
-        {
-            PropertyCode = "",
-            ProductId = Guid.Empty,
-            Description = "",
-            AcquisitionCost = 0.0,
-            AcquisitionDate = DateTime.Now,
-            EstimatedUsefulLife = 60,
-            Classification = PropertyClassification._2,
-            Quantity = 1,
-            UnitOfMeasure = "piece"
-        };
     }
 
     private async Task OnCreate()
