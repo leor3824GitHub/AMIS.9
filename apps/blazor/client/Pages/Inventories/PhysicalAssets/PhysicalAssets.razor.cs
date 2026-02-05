@@ -22,6 +22,9 @@ public partial class PhysicalAssets
     private ISnackbar? Snackbar { get; set; }
 
     private bool _canView;
+    private bool _canCreate;
+    private bool _canEdit;
+    private bool _canDelete;
     private bool _loading;
     private string _searchString = string.Empty;
     private IEnumerable<PhysicalAssetResponse> _entityList = Array.Empty<PhysicalAssetResponse>();
@@ -31,6 +34,9 @@ public partial class PhysicalAssets
     {
         var user = (await AuthState).User;
         _canView = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PhysicalAssets);
+        _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.PhysicalAssets);
+        _canEdit = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.PhysicalAssets);
+        _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.PhysicalAssets);
     }
 
     private async Task<GridData<PhysicalAssetResponse>> ServerReload(GridState<PhysicalAssetResponse> state)
@@ -96,5 +102,55 @@ public partial class PhysicalAssets
     private async Task Reload()
     {
         await _table.ReloadServerData();
+    }
+
+    private async Task OpenCreateDialog()
+    {
+        var dialog = await DialogService.ShowAsync<CreatePhysicalAssetDialog>("Create Physical Asset",
+            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await Reload();
+        }
+    }
+
+    private async Task OpenEditDialog(Guid id)
+    {
+        var parameters = new DialogParameters<UpdatePhysicalAssetDialog>
+        {
+            { x => x.AssetId, id }
+        };
+
+        var dialog = await DialogService.ShowAsync<UpdatePhysicalAssetDialog>("Update Physical Asset", parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        var result = await dialog.Result;
+        if (!result.Canceled)
+        {
+            await Reload();
+        }
+    }
+
+    private async Task DeleteAsync(Guid id)
+    {
+        var confirmed = await DialogService.ShowMessageBox("Delete Physical Asset",
+            "Are you sure you want to delete this physical asset? This action cannot be undone.",
+            yesText: "Delete", cancelText: "Cancel");
+
+        if (confirmed == true)
+        {
+            try
+            {
+                await ApiClient.DeletePhysicalAssetEndpointAsync("1", id);
+                Snackbar?.Add("Physical asset deleted successfully.", Severity.Success);
+                await Reload();
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Error deleting physical asset: {ex.Message}", Severity.Error);
+            }
+        }
     }
 }

@@ -1,0 +1,148 @@
+@namespace AMIS.Blazor.Client.Pages.Inventories.PhysicalAssets
+
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <MudDialog>
+        <TitleContent>
+            <MudText Typo="Typo.h6">Update Physical Asset</MudText>
+        </TitleContent>
+        <DialogContent>
+            @if (_asset != null)
+            {
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <MudGrid>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption">
+                            <strong>Asset:</strong> @_asset.PropertyCode - @_asset.Description
+                        </MudText>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudSelect T="string" Label="Condition" @bind-Value="Model.Condition">
+                            <MudSelectItem T="string" Value="@("Good")">Good</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("Fair")">Fair</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("Poor")">Poor</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("Unserviceable")">Unserviceable</MudSelectItem>
+                            <MudSelectItem T="string" Value="@("ForDisposal")">For Disposal</MudSelectItem>
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudText Typo="Typo.caption">Current Custodian ID</MudText>
+                        <MudTextField @bind-Value="_custodianIdStr" Label="Custodian ID"
+                            Placeholder="Leave empty to keep current" />
+                        @if (_asset.CurrentCustodianId.HasValue)
+                        {
+                            <MudText Typo="Typo.caption" Class="mt-2">
+                                <strong>Current:</strong> @_asset.CurrentCustodianId
+                            </MudText>
+                        }
+                    </MudItem>
+                </MudGrid>
+            }
+            else
+            {
+                <MudProgressLinear Indeterminate="true" />
+            }
+        </DialogContent>
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
+                Disabled="@(_loading || _asset == null)">
+                @if (_loading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                Update
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_loading">Cancel
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public Guid AssetId { get; set; }
+
+    [Inject]
+    private IApiClient ApiClient { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    private UpdatePhysicalAssetCommand Model = default!;
+    private PhysicalAssetResponse? _asset;
+    private string _custodianIdStr = "";
+    private bool _loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            _asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", AssetId);
+            if (_asset != null)
+            {
+                Model = new UpdatePhysicalAssetCommand
+                {
+                    Id = AssetId,
+                    Condition = "",
+                    CurrentCustodianId = _asset.CurrentCustodianId
+                };
+                _custodianIdStr = _asset.CurrentCustodianId?.ToString() ?? "";
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error loading asset: {ex.Message}", Severity.Error);
+            MudDialog?.Cancel();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        if (Model == null)
+        {
+            Snackbar?.Add("Model not initialized.", Severity.Error);
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            // Parse custodian ID if provided
+            if (!string.IsNullOrWhiteSpace(_custodianIdStr))
+            {
+                if (Guid.TryParse(_custodianIdStr, out var custodianId))
+                {
+                    Model.CurrentCustodianId = custodianId;
+                }
+                else
+                {
+                    Snackbar?.Add("Invalid custodian ID format.", Severity.Warning);
+                    _loading = false;
+                    return;
+                }
+            }
+
+            await ApiClient.UpdatePhysicalAssetEndpointAsync("1", AssetId, Model);
+            Snackbar?.Add("Physical asset updated successfully.", Severity.Success);
+            MudDialog?.Close(DialogResult.Ok(true));
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error updating asset: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void Cancel() => MudDialog?.Cancel();
+}

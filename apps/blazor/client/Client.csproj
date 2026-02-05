@@ -9,6 +9,7 @@
 		<ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
 		<!-- Disable default static web assets compression to avoid MSB4018 ApplyCompressionNegotiation error for appsettings.json -->
 		<EnableDefaultStaticWebAssetsCompression>false</EnableDefaultStaticWebAssetsCompression>
+		<SkipStaticWebAssetProcessing>true</SkipStaticWebAssetProcessing>
 	</PropertyGroup>
 
 	<!-- Explicitly exclude appsettings.json from static web assets processing -->
@@ -17,7 +18,6 @@
 			<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
 			<ExcludeFromSingleFile>true</ExcludeFromSingleFile>
 		</Content>
-		<StaticWebAsset Remove="wwwroot/appsettings.json" />
 	</ItemGroup>
 
 
