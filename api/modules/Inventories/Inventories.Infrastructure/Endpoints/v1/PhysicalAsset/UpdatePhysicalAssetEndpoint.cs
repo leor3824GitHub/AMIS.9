@@ -15,7 +15,7 @@ public static class UpdatePhysicalAssetEndpoint
             .MapPut("/{id:guid}", UpdateHandler)
             .WithName(nameof(UpdatePhysicalAssetEndpoint))
             .Produces<UpdatePhysicalAssetResponse>()
-            .RequirePermission("Permissions.PhysicalAssets.Edit")
+            .RequirePermission("Permissions.PhysicalAssets.Update")
             .MapToApiVersion(1);
     }
 
@@ -25,7 +25,7 @@ public static class UpdatePhysicalAssetEndpoint
         ISender mediator,
         CancellationToken cancellationToken = default)
     {
-        var updateCommand = new UpdatePhysicalAssetCommand(id, command.Condition, command.CurrentCustodianId);
+        var updateCommand = new UpdatePhysicalAssetCommand(id, command.Condition, command.ParentAssetId);
         var response = await mediator.Send(updateCommand, cancellationToken);
         return Results.Ok(response);
     }

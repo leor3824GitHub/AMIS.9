@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Get.v1;
 
 public sealed class GetPpeReceivingReportByIdHandler(
     ILogger<GetPpeReceivingReportByIdHandler> logger,
-    [FromKeyedServices("inventories:pperr")] IReadRepository<PpeReceivingReport> repository)
+    [FromKeyedServices("inventories:pperr")] IReadRepository<PPERR> repository)
     : IRequestHandler<GetPpeReceivingReportByIdQuery, GetPpeReceivingReportByIdResponse>
 {
     public async Task<GetPpeReceivingReportByIdResponse> Handle(GetPpeReceivingReportByIdQuery request, CancellationToken cancellationToken)
@@ -22,27 +22,19 @@ public sealed class GetPpeReceivingReportByIdHandler(
             throw new KeyNotFoundException($"PPE Receiving Report with ID {request.Id} not found.");
         }
 
-        var lineItems = report.LineItems
+        var lineItems = report.Items
             .Select(li => new GetPpeReceivingLineItemResponse(
                 li.PropertyCode,
-                li.Description,
-                li.DateAcquired,
-                li.Quantity,
-                li.Unit,
-                li.UnitCost,
-                li.Location,
-                li.ClassCode,
-                li.CategoryCode,
-                li.ItemCode))
+                li.RRNumber))
             .ToList();
 
         return new GetPpeReceivingReportByIdResponse(
             report.Id,
-            report.ReportNumber,
-            report.Source.Name,
-            report.Source.Address,
-            report.ReceiptType.Value,
-            report.Source.ReceiptDate,
+            report.RRNumber,
+            report.ReceivedFrom,
+            report.Address,
+            report.Type.Value,
+            report.Date,
             report.GetTotalAmount(),
             report.Notes,
             (int)report.Status,

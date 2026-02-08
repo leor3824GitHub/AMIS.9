@@ -7,17 +7,15 @@ using AMIS.WebApi.Inventories.Domain.ValueObjects;
 namespace AMIS.WebApi.Inventories.Domain;
 
 /// <summary>
-/// Unified Physical Asset entity that handles both Semi-Expendable and PPE
-/// Classification is dynamic based on configurable thresholds from AssetClassificationRule
-/// Supports automatic reclassification when COA/DBM changes thresholds
-/// Refactored to use domain services for validation and database-driven configuration
+/// Unified Physical Asset entity that handles both Semi-Expendable and PPE assets.
+/// Manages asset lifecycle including issuance, returns, transfers, and disposal.
+/// Classification is determined dynamically through IAssetClassificationPolicy.
 /// </summary>
 public class PhysicalAsset : AuditableEntity, IAggregateRoot
 {
     // Core Identification
     public string PropertyCode { get; private set; } = default!;
     public Guid ProductId { get; private set; }
-    public string Description { get; private set; } = default!;
 
     // Acquisition Details
     public decimal AcquisitionCost { get; private set; }
@@ -30,35 +28,39 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
     // Quantity (for Semi-Expendable batch tracking)
     public int Quantity { get; private set; } = 1;
-    public string UnitOfMeasure { get; private set; } = default!; // Set from UnitOfMeasure configuration
 
     // Lifecycle
-    public int EstimatedUsefulLife { get; private set; } // in months
     public DateTime? DisposalDate { get; private init; }
     public string? DisposalReason { get; private init; }
 
-    // Classification (determined at creation/update using IAssetClassificationService)
-    public PropertyClassification CurrentClassification { get; private set; }
-
-    // PPE-Specific Fields (null if Semi-Expendable)
-    public string? PPEType { get; private set; } // Machinery, ICT, etc.
+    // PPE-Specific Fields
     public decimal AccumulatedDepreciation { get; private set; }
     public decimal BookValue => AcquisitionCost - AccumulatedDepreciation;
-
-    // Dynamic RCA Account (calculated based on current classification)
-    public string RCAAccountCode => GetRCAAccountCode();
 
     // QR Code & Identification Support
     public string? QRCodeData { get; private set; } // Base64 encoded QR code image or raw QR data
     public DateTime? QRGeneratedDate { get; private set; } // When QR was generated
-    public Guid? CurrentCustodianId { get; private set; } // Currently assigned custodian
+    public Guid? CurrentCustodianId => CurrentAssignment?.EmployeeId; // Computed from active assignment history
+
+    // Asset-Specific Photos
+    public List<string> ImagePaths { get; private set; } = new(); // Photos specific to this asset instance
 
     // Computed properties for convenience
     public bool IsDisposed => DisposalDate.HasValue;
-    public bool IsDepreciable => CurrentClassification == PropertyClassification.PropertyPlantEquipment;
     public AssetAssignmentHistory? CurrentAssignment =>
         AssignmentHistory.FirstOrDefault(h => h.Status == "Active");
     public bool HasQRCode => !string.IsNullOrEmpty(QRCodeData);
+
+    // Classification and RCA (using default policy for backward compatibility)
+    // NOTE: CurrentClassification uses hardcoded defaults. For database-driven rules,
+    // pass IAssetClassificationPolicy to domain methods instead.
+    private static readonly IAssetClassificationPolicy DefaultPolicy = 
+        AssetClassificationPolicyFactory.GetDefault();
+    
+    public PropertyClassification CurrentClassification => 
+        DefaultPolicy.DetermineClassification(AcquisitionCost);
+    
+    public string RCAAccountCode => DefaultPolicy.GetRCAAccountCode(CurrentClassification);
 
     // Navigation
     public virtual Product Product { get; private set; } = default!;
@@ -69,144 +71,67 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     public virtual ICollection<AssetMaintenance> MaintenanceHistory { get; private set; }
         = new List<AssetMaintenance>();
 
+    // Asset Hierarchy (Parent–Child)
+    public Guid? ParentAssetId { get; private set; }
+    public virtual PhysicalAsset? ParentAsset { get; private set; }
+    public virtual ICollection<PhysicalAsset> SubAssets { get; private set; }
+        = new List<PhysicalAsset>();
+
     private PhysicalAsset() { }
 
     private PhysicalAsset(
         Guid id,
         string propertyCode,
         Guid productId,
-        string description,
         decimal acquisitionCost,
         DateTime acquisitionDate,
-        int estimatedUsefulLife,
         int quantity,
-        string unitOfMeasure,
         string? serialNumber,
-        string? modelNumber,
-        string? ppeType,
-        PropertyClassification classification)
+        string? modelNumber)
     {
         Id = id;
         PropertyCode = propertyCode;
         ProductId = productId;
-        Description = description;
         AcquisitionCost = acquisitionCost;
         AcquisitionDate = acquisitionDate;
-        EstimatedUsefulLife = estimatedUsefulLife;
         Quantity = quantity;
-        UnitOfMeasure = unitOfMeasure;
         SerialNumber = serialNumber;
         ModelNumber = modelNumber;
-        PPEType = ppeType;
-        CurrentClassification = classification;
         AccumulatedDepreciation = 0;
 
         QueueDomainEvent(new PhysicalAssetCreated { PhysicalAsset = this });
     }
 
     public static PhysicalAsset Create(
-        PropertyClassification classification,
         string propertyCode,
         Guid productId,
-        string description,
         decimal acquisitionCost,
         DateTime acquisitionDate,
-        int estimatedUsefulLife,
         int quantity = 1,
-        string unitOfMeasure = "piece",
         string? serialNumber = null,
-        string? modelNumber = null,
-        string? ppeType = null)
+        string? modelNumber = null)
     {
-        ValidateCreate(propertyCode, description, acquisitionCost, quantity, estimatedUsefulLife, unitOfMeasure, classification, ppeType);
+        ValidateCreate(propertyCode, acquisitionCost, quantity);
 
         return new PhysicalAsset(
             Guid.NewGuid(),
             propertyCode,
             productId,
-            description,
             acquisitionCost,
             acquisitionDate,
-            estimatedUsefulLife,
             quantity,
-            unitOfMeasure,
             serialNumber,
-            modelNumber,
-            ppeType,
-            classification);
+            modelNumber);
     }
 
     /// <summary>
-    /// Get RCA account code based on current classification
-    /// Note: For PPE, the account code should be retrieved from PPETypeDefinition using IPPETypeService
-    /// This method provides a basic fallback when service is not available
+    /// Get classification dynamically based on acquisition cost using the default policy.
+    /// For policy-specific classification, pass an IAssetClassificationPolicy to the business methods.
     /// </summary>
-    private string GetRCAAccountCode()
+    public PropertyClassification GetCurrentClassification()
     {
-        return CurrentClassification switch
-        {
-            PropertyClassification.Consumable => ValueObjects.RCAAccountCode.SuppliesAndMaterialsInventory,
-            PropertyClassification.SemiExpendable => ValueObjects.RCAAccountCode.SemiExpendablePropertyInventory,
-            PropertyClassification.PropertyPlantEquipment => GetPPEAccountCodeFallback(),
-            _ => throw new InvalidOperationException("Unknown classification")
-        };
+        return DefaultPolicy.DetermineClassification(AcquisitionCost);
     }
-
-    /// <summary>
-    /// Fallback PPE account code logic when domain service is not available
-    /// In production, use IPPETypeService.GetRCAAccountCodeAsync() for database-driven mapping
-    /// </summary>
-    private string GetPPEAccountCodeFallback()
-    {
-        if (string.IsNullOrWhiteSpace(PPEType))
-            return ValueObjects.RCAAccountCode.OtherPropertyPlantAndEquipment;
-
-        // Basic fallback - in practice, query PPETypeDefinition table
-        return PPEType.ToUpperInvariant() switch
-        {
-            "MACHINERY" or "EQUIPMENT" => ValueObjects.RCAAccountCode.MachineryAndEquipment,
-            "TRANSPORTATION" or "VEHICLE" => ValueObjects.RCAAccountCode.TransportationEquipment,
-            "FURNITURE" or "FIXTURES" => ValueObjects.RCAAccountCode.FurnitureFixturesAndBooksEquipment,
-            "ICT" or "COMPUTER" => ValueObjects.RCAAccountCode.ICTEquipment,
-            _ => ValueObjects.RCAAccountCode.OtherPropertyPlantAndEquipment
-        };
-    }
-
-    /// <summary>
-    /// Reclassify asset when COA/DBM changes thresholds
-    /// Records reclassification history for audit trail
-    /// </summary>
-    // public void Reclassify(PropertyClassification newClassification, string reason, DateTime effectiveDate)
-    // {
-    //     if (string.IsNullOrWhiteSpace(reason))
-    //         throw new ArgumentException("Reclassification reason is required.", nameof(reason));
-    //     if (IsDisposed)
-    //         throw new InvalidOperationException("Cannot reclassify a disposed asset.");
-
-    //     var oldClassification = CurrentClassification;
-
-    //     if (oldClassification == newClassification)
-    //         return; // No change needed
-
-    //     CurrentClassification = newClassification;
-
-    //     // Adjust PPE-specific fields based on new classification
-    //     if (newClassification != PropertyClassification.PropertyPlantEquipment)
-    //     {
-    //         // Downgraded from PPE - clear PPE fields
-    //         PPEType = null;
-    //         // Keep AccumulatedDepreciation for historical record
-    //     }
-
-    //     QueueDomainEvent(new PhysicalAssetReclassified
-    //     {
-    //         PhysicalAsset = this,
-    //         OldClassification = oldClassification,
-    //         NewClassification = newClassification,
-    //         Reason = reason,
-    //         EffectiveDate = effectiveDate
-    //     });
-    // }
 
     /// <summary>
     /// Issue asset via ICS (Semi-Expendable) or PAR (PPE)
@@ -218,7 +143,11 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         string documentNumber,
         int? quantityIssued = null,
         string? location = null,
-        bool emitEvent = true)
+        bool emitEvent = true,
+        IAssetClassificationPolicy? classificationPolicy = null,
+        string? issuedByName = null,
+        string? receivedByName = null,
+        string? approvedByName = null)
     {
         ValidateIssue(employeeId, employeeName, documentNumber);
 
@@ -228,7 +157,9 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         if (IsDisposed)
             throw new InvalidOperationException("Cannot issue disposed asset.");
 
-        var classification = CurrentClassification;
+        // Use default policy if none provided
+        var policy = classificationPolicy ?? new DefaultAssetClassificationPolicy();
+        var classification = policy.DetermineClassification(AcquisitionCost);
         var docType = classification == PropertyClassification.PropertyPlantEquipment
             ? DocumentType.PAR
             : DocumentType.ICS;
@@ -246,7 +177,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
         var assignmentDate = DateTime.UtcNow;
 
-        // Create assignment history (no denormalized fields to update)
+        // Create assignment history with signature fields from formal workflow
         var history = AssetAssignmentHistory.CreateInitialAssignment(
             Id,
             PropertyCode,
@@ -257,7 +188,10 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             assignmentDate,
             quantityIssued ?? 1,
             classification,
-            location);
+            location,
+            issuedByName,
+            receivedByName,
+            approvedByName);
 
         AssignmentHistory.Add(history);
 
@@ -279,7 +213,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     /// <summary>
     /// Return asset from employee (works for both ICS and PAR)
     /// </summary>
-    public void Return(string reason, string condition, Guid acceptedBy, int? quantityReturned = null)
+    public void Return(string reason, string condition, Guid acceptedBy, int? quantityReturned = null, IAssetClassificationPolicy? classificationPolicy = null)
     {
         if (string.IsNullOrWhiteSpace(reason))
             throw new ArgumentException("Return reason is required.", nameof(reason));
@@ -292,7 +226,9 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         if (currentAssignment == null)
             throw new InvalidOperationException("Asset is not currently assigned.");
 
-        var classification = CurrentClassification;
+        // Use default policy if none provided
+        var policy = classificationPolicy ?? new DefaultAssetClassificationPolicy();
+        var classification = policy.DetermineClassification(AcquisitionCost);
         var returnDate = DateTime.UtcNow;
 
         // Validate quantity for semi-expendable
@@ -320,11 +256,108 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     }
 
     /// <summary>
-    /// Record depreciation (only applicable for PPE classification)
+    /// Transfer asset from one employee to another.
+    /// Creates a new assignment record without clearing the current assignment.
     /// </summary>
-    public void RecordDepreciation(decimal amount, DateTime depreciationDate)
+    public AssetAssignmentHistory Transfer(
+        Guid newEmployeeId,
+        string newEmployeeName,
+        string transferDocumentNumber,
+        int? quantityTransferred = null,
+        string? location = null,
+        bool emitEvent = true,
+        IAssetClassificationPolicy? classificationPolicy = null,
+        string? transferReason = null)
     {
-        if (!IsDepreciable)
+        ValidateIssue(newEmployeeId, newEmployeeName, transferDocumentNumber);
+
+        var currentAssignment = CurrentAssignment;
+        if (currentAssignment == null)
+            throw new InvalidOperationException("Asset is not currently assigned. Cannot transfer unassigned asset.");
+
+        if (IsDisposed)
+            throw new InvalidOperationException("Cannot transfer disposed asset.");
+
+        // Use default policy if none provided
+        var policy = classificationPolicy ?? new DefaultAssetClassificationPolicy();
+        var classification = policy.DetermineClassification(AcquisitionCost);
+
+        // Validate quantity for semi-expendable
+        if (classification == PropertyClassification.SemiExpendable)
+        {
+            if (!quantityTransferred.HasValue || quantityTransferred <= 0)
+                throw new ArgumentException("Quantity transferred is required for semi-expendable items.");
+            if (quantityTransferred > Quantity)
+                throw new InvalidOperationException("Insufficient stock available for transfer.");
+        }
+
+        var transferDate = DateTime.UtcNow;
+        var docType = classification == PropertyClassification.PropertyPlantEquipment
+            ? DocumentType.PAR
+            : DocumentType.ICS;
+
+        // Create new assignment history for transfer
+        var newAssignment = AssetAssignmentHistory.CreateInitialAssignment(
+            Id,
+            PropertyCode,
+            newEmployeeId,
+            newEmployeeName,
+            transferDocumentNumber,
+            docType,
+            transferDate,
+            quantityTransferred ?? 1,
+            classification,
+            location);
+
+        AssignmentHistory.Add(newAssignment);
+
+        if (emitEvent)
+        {
+            QueueDomainEvent(new PhysicalAssetIssued
+            {
+                PhysicalAsset = this,
+                EmployeeId = newEmployeeId,
+                DocumentNumber = transferDocumentNumber,
+                DocumentType = docType,
+                Quantity = quantityTransferred ?? 1
+            });
+        }
+
+        return newAssignment;
+    }
+
+    /// <summary>
+    /// Disposes of the asset with a reason.
+    /// Once disposed, asset cannot be issued, transferred, or used in other operations.
+    /// </summary>
+    public void Dispose(string disposalReason)
+    {
+        if (string.IsNullOrWhiteSpace(disposalReason))
+            throw new ArgumentException("Disposal reason is required.", nameof(disposalReason));
+        if (IsDisposed)
+            throw new InvalidOperationException("Asset is already disposed.");
+
+        if (CurrentAssignment != null)
+            throw new InvalidOperationException("Cannot dispose asset while assigned. Return asset first.");
+
+        QueueDomainEvent(new PhysicalAssetDisposed
+        {
+            PhysicalAsset = this,
+            DisposalReason = disposalReason,
+            DisposalDate = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
+    /// Record depreciation (only applicable for PPE classification).
+    /// Classification is determined by IAssetClassificationPolicy.
+    /// </summary>
+    public void RecordDepreciation(decimal amount, DateTime depreciationDate, IAssetClassificationPolicy? classificationPolicy = null)
+    {
+        // Use default policy if none provided
+        var policy = classificationPolicy ?? new DefaultAssetClassificationPolicy();
+        var classification = policy.DetermineClassification(AcquisitionCost);
+        if (classification != PropertyClassification.PropertyPlantEquipment)
             throw new InvalidOperationException("Only PPE classification can be depreciated.");
         if (amount <= 0)
             throw new ArgumentException("Depreciation amount must be greater than zero.", nameof(amount));
@@ -387,67 +420,81 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     }
 
     /// <summary>
-    /// Assigns the asset to a custodian/employee.
+    /// Sets the parent asset for this asset (creates a parent-child relationship).
     /// </summary>
-    public void AssignToCustodian(Guid employeeId)
+    /// <param name="parentAssetId">The ID of the parent asset.</param>
+    public void SetParentAsset(Guid parentAssetId)
     {
-        if (employeeId == Guid.Empty)
-            throw new ArgumentException("Employee ID must be provided.", nameof(employeeId));
+        if (parentAssetId == Guid.Empty)
+            throw new ArgumentException("Parent asset ID must be a valid GUID.", nameof(parentAssetId));
+        if (parentAssetId == Id)
+            throw new InvalidOperationException("An asset cannot be its own parent.");
 
-        if (IsDisposed)
-            throw new InvalidOperationException("Cannot assign disposed asset.");
-
-        CurrentCustodianId = employeeId;
-
-        QueueDomainEvent(new PhysicalAssetAssignedToCustodian
-        {
-            PhysicalAsset = this,
-            CustodianId = employeeId,
-            AssignmentDate = DateTime.UtcNow
-        });
+        ParentAssetId = parentAssetId;
     }
 
     /// <summary>
-    /// Clears the current custodian assignment.
+    /// Clears the parent asset relationship.
     /// </summary>
-    public void ClearCustodian()
+    public void ClearParentAsset()
     {
-        if (IsDisposed)
-            throw new InvalidOperationException("Cannot clear custodian of disposed asset.");
+        ParentAssetId = null;
+    }
 
-        CurrentCustodianId = null;
-
-        QueueDomainEvent(new PhysicalAssetCustodianCleared
+    /// <summary>
+    /// Add an image path to this asset's photo collection.
+    /// </summary>
+    public PhysicalAsset AddImagePath(string imagePath)
+    {
+        if (!string.IsNullOrWhiteSpace(imagePath) && !ImagePaths.Contains(imagePath))
         {
-            PhysicalAsset = this,
-            ClearedDate = DateTime.UtcNow
-        });
+            ImagePaths.Add(imagePath);
+        }
+        return this;
+    }
+
+    /// <summary>
+    /// Remove a specific image path from this asset's photo collection.
+    /// </summary>
+    public PhysicalAsset RemoveImagePath(string imagePath)
+    {
+        if (ImagePaths.Remove(imagePath))
+        {
+        }
+        return this;
+    }
+
+    /// <summary>
+    /// Clear all image paths from this asset.
+    /// </summary>
+    public PhysicalAsset ClearImagePaths()
+    {
+        if (ImagePaths.Count > 0)
+        {
+            ImagePaths.Clear();
+        }
+        return this;
+    }
+
+    private static bool AreImagePathsEqual(List<string> list1, List<string> list2)
+    {
+        if (list1.Count != list2.Count)
+            return false;
+
+        return list1.SequenceEqual(list2);
     }
 
     private static void ValidateCreate(
         string propertyCode,
-        string description,
         decimal acquisitionCost,
-        int quantity,
-        int estimatedUsefulLife,
-        string unitOfMeasure,
-        PropertyClassification classification,
-        string? ppeType)
+        int quantity)
     {
         if (string.IsNullOrWhiteSpace(propertyCode))
             throw new ArgumentException("Property code is required.", nameof(propertyCode));
-        if (string.IsNullOrWhiteSpace(description))
-            throw new ArgumentException("Description is required.", nameof(description));
-        if (string.IsNullOrWhiteSpace(unitOfMeasure))
-            throw new ArgumentException("Unit of measure is required.", nameof(unitOfMeasure));
         if (acquisitionCost <= 0)
             throw new ArgumentException("Acquisition cost must be greater than zero.", nameof(acquisitionCost));
         if (quantity <= 0)
             throw new ArgumentException("Quantity must be greater than zero.", nameof(quantity));
-        if (estimatedUsefulLife <= 0)
-            throw new ArgumentException("Estimated useful life must be greater than zero.", nameof(estimatedUsefulLife));
-        if (classification == PropertyClassification.PropertyPlantEquipment && string.IsNullOrWhiteSpace(ppeType))
-            throw new ArgumentException("PPE type is required for Property, Plant and Equipment classification.", nameof(ppeType));
     }
 
     private static void ValidateIssue(Guid employeeId, string employeeName, string documentNumber)

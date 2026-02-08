@@ -35,50 +35,11 @@ public sealed class SuppliesAndMaterialsReceivingReportConfiguration
                 v => ReceivingTransactionType.FromString(v))
             .IsRequired();
 
-        builder.OwnsMany(x => x.LineItems, lineItemBuilder =>
-        {
-            lineItemBuilder.WithOwner().HasForeignKey("SuppliesAndMaterialsReceivingReportId");
-            lineItemBuilder.HasKey("Id");
-
-            lineItemBuilder.Property(li => li.Name)
-                .HasMaxLength(200)
-                .IsRequired();
-
-            lineItemBuilder.Property(li => li.Description)
-                .HasMaxLength(500)
-                .IsRequired();
-
-            lineItemBuilder.Property(li => li.Reference)
-                .HasMaxLength(100);
-
-            lineItemBuilder.Property(li => li.AcquisitionDate)
-                .IsRequired();
-
-            lineItemBuilder.Property(li => li.Quantity)
-                .HasPrecision(18, 4)
-                .IsRequired();
-
-            lineItemBuilder.Property(li => li.Unit)
-                .HasMaxLength(50)
-                .IsRequired();
-
-            lineItemBuilder.Property(li => li.UnitCost)
-                .HasPrecision(18, 2)
-                .IsRequired();
-
-            lineItemBuilder.Property(li => li.Location)
-                .HasMaxLength(200)
-                .IsRequired();
-
-            lineItemBuilder.Property(li => li.ClassCode)
-                .HasMaxLength(2);
-
-            lineItemBuilder.Property(li => li.CategoryCode)
-                .HasMaxLength(2);
-
-            lineItemBuilder.Property(li => li.ItemCode)
-                .HasMaxLength(3);
-        });
+        // Line Items collection - using separate entity
+        builder.HasMany(x => x.LineItems)
+            .WithOne()
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.OwnsOne(x => x.Authentication, authBuilder =>
         {

@@ -42,10 +42,17 @@ public sealed class CreatePARHandler(
 
             par.AddLineItems(lineItems);
 
+            // Note: Signature information (IssuedByName, ReceivedByName, ApprovedByName) 
+            // will be stored in the AssignmentHistory when assets are issued.
+            // This consolidation approach tracks formal signatures in AssetAssignmentHistory
+            // with DocumentType.PAR flag for formal document tracking.
+
             await repository.AddAsync(par, cancellationToken);
             await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            logger.LogInformation("PAR {PARNumber} created as Draft.", request.PARNumber);
+            logger.LogInformation("PAR {PARNumber} created as Draft with {Count} line items.", 
+                request.PARNumber, request.LineItems.Count);
+            
             return new CreatePARResponse(
                 par.Id,
                 par.PARNumber,

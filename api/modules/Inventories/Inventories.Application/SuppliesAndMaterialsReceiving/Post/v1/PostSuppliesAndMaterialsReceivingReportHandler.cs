@@ -2,6 +2,7 @@ using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Application.Acceptances.Services;
 using AMIS.WebApi.Inventories.Application.PropertyCodes;
 using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Domain.Services;
 using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +19,7 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
     [FromKeyedServices("inventories:semex-transaction-logs")] IRepository<SemexTransactionLogDomain> transactionLogRepository,
     [FromKeyedServices("inventories:physicalassets")] IRepository<PhysicalAsset> assetRepository,
     [FromKeyedServices("inventories:products")] IRepository<Product> productRepository,
-    [FromKeyedServices("inventories:classificationRules")] IReadRepository<AssetClassificationRule> classificationRuleRepository,
+    [FromKeyedServices("inventories:assetclassificationrules")] IReadRepository<AssetClassificationRule> classificationRuleRepository,
     IAssetPropertyCodeGenerator propertyCodeGenerator)
     : IRequestHandler<PostSuppliesAndMaterialsReceivingReportCommand, PostSuppliesAndMaterialsReceivingReportResponse>
 {
@@ -112,12 +113,9 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
                         product = Product.Create(
                             name: productName,
                             description: lineItem.Description,
-                            sku: lineItem.UnitCost,
-                            unit: lineItem.Unit,
-                            imagePath: null,
-                            categoryId: null,
-                            classification: PropertyClassification.SemiExpendable,
-                            estimatedUsefulLife: 12);
+                            unitOfMeasure: lineItem.Unit ?? "piece",
+                            estimatedUsefulLife: 12,
+                            categoryId: null);
 
                         await productRepository.AddAsync(product, cancellationToken).ConfigureAwait(false);
                     }
@@ -132,20 +130,14 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
                             ItemCode: lineItem.ItemCode,
                             SequenceSuffix: "0"),
                         cancellationToken).ConfigureAwait(false);
-
                     var asset = PhysicalAsset.Create(
-                        PropertyClassification.SemiExpendable,
                         propertyCode,
                         product.Id,
-                        lineItem.Description,
                         lineItem.UnitCost * quantity,
                         lineItem.AcquisitionDate,
-                        estimatedUsefulLife: 12,
                         quantity: quantity,
-                        unitOfMeasure: lineItem.Unit,
                         serialNumber: null,
-                        modelNumber: null,
-                        ppeType: null);
+                        modelNumber: null);
 
                     await assetRepository.AddAsync(asset, cancellationToken).ConfigureAwait(false);
                 }
@@ -183,12 +175,9 @@ public sealed class PostSuppliesAndMaterialsReceivingReportHandler(
         decimal unitCost,
         DateTime acquisitionDate)
     {
-        var applicableRule = rules
-            .Where(r => r.IsEffectiveOn(acquisitionDate) && r.AppliesToAsset(unitCost))
-            .OrderByDescending(r => r.Priority)
-            .FirstOrDefault();
-
-        return applicableRule?.Classification ?? PropertyClassification.Consumable;
+        // Use DatabaseAssetClassificationPolicy for consistent rule matching
+        var policy = new DatabaseAssetClassificationPolicy(rules, acquisitionDate);
+        return policy.DetermineClassification(unitCost);
     }
 
     // TODO: Fix Query.Where type inference issues with Ardalis Specification

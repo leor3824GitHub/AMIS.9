@@ -21,15 +21,18 @@ public sealed class UpdatePhysicalAssetHandler(
         // Update condition if provided
         if (!string.IsNullOrWhiteSpace(request.Condition))
         {
-            physicalAsset.GetType().GetProperty(nameof(PhysicalAsset.Condition))?
-                .SetValue(physicalAsset, request.Condition);
+            physicalAsset.UpdateCondition(request.Condition);
         }
 
-        // Update custodian if provided
-        if (request.CurrentCustodianId.HasValue)
+        // Update parent asset if provided
+        if (request.ParentAssetId.HasValue)
         {
-            physicalAsset.GetType().GetProperty(nameof(PhysicalAsset.CurrentCustodianId))?
-                .SetValue(physicalAsset, request.CurrentCustodianId);
+            physicalAsset.SetParentAsset(request.ParentAssetId.Value);
+        }
+        else if (request.ParentAssetId == null && physicalAsset.ParentAssetId.HasValue)
+        {
+            // Explicitly null ParentAssetId means clear it
+            physicalAsset.ClearParentAsset();
         }
 
         await repository.UpdateAsync(physicalAsset, cancellationToken);
@@ -37,8 +40,7 @@ public sealed class UpdatePhysicalAssetHandler(
         return new UpdatePhysicalAssetResponse(
             physicalAsset.Id,
             physicalAsset.CurrentAssignment?.Location,
-            physicalAsset.Condition,
-            physicalAsset.CurrentCustodianId);
+            physicalAsset.Condition);
     }
 }
 

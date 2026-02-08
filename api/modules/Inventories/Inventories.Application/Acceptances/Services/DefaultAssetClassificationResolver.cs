@@ -18,12 +18,6 @@ public sealed class DefaultAssetClassificationResolver : IAssetClassificationRes
             : PropertyClassification.SemiExpendable;
     }
 
-    public string? ResolvePpeType(PurchaseItem item)
-    {
-        ArgumentNullException.ThrowIfNull(item);
-        return item.UnitPrice >= PpeThreshold ? "Equipment" : null;
-    }
-
     public int ResolveEstimatedUsefulLifeMonths(PurchaseItem item)
     {
         ArgumentNullException.ThrowIfNull(item);
@@ -39,7 +33,7 @@ public sealed class DefaultAssetClassificationResolver : IAssetClassificationRes
     public string ResolveUnitOfMeasure(PurchaseItem item)
     {
         ArgumentNullException.ThrowIfNull(item);
-        return item.Product?.Unit ?? "piece";
+        return "piece"; // Default unit; actual unit determined at PhysicalAsset level
     }
 }
 

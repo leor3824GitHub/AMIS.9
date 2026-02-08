@@ -165,13 +165,13 @@ public static class FshPermissions
         new("Cancel PpeIssuance", FshActions.Cancel, FshResources.PpeIssuance),
 
         //ppe receiving reports (PPER)
-        new("View PpeReceiving", FshActions.View, FshResources.PpeReceiving, IsBasic: true),
-        new("Search PpeReceiving", FshActions.Search, FshResources.PpeReceiving, IsBasic: true),
-        new("Create PpeReceiving", FshActions.Create, FshResources.PpeReceiving),
-        new("Update PpeReceiving", FshActions.Update, FshResources.PpeReceiving),
-        new("Post PpeReceiving", FshActions.Post, FshResources.PpeReceiving),
-        new("Delete PpeReceiving", FshActions.Delete, FshResources.PpeReceiving),
-        new("Cancel PpeReceiving", FshActions.Cancel, FshResources.PpeReceiving),
+        new("View Pper", FshActions.View, FshResources.Pper, IsBasic: true),
+        new("Search Pper", FshActions.Search, FshResources.Pper, IsBasic: true),
+        new("Create Pper", FshActions.Create, FshResources.Pper),
+        new("Update Pper", FshActions.Update, FshResources.Pper),
+        new("Post Pper", FshActions.Post, FshResources.Pper),
+        new("Delete Pper", FshActions.Delete, FshResources.Pper),
+        new("Cancel Pper", FshActions.Cancel, FshResources.Pper),
 
         //property acknowledgement receipt (PAR)
         new("View PropertyAcknowledgementReceipt", FshActions.View, FshResources.PropertyAcknowledgementReceipt, IsBasic: true),
@@ -244,13 +244,31 @@ public static class FshPermissions
         new("Create AssetRequisitions", FshActions.Create, FshResources.AssetRequisitions),
         new("Accept AssetRequisitions", FshActions.Accept, FshResources.AssetRequisitions),
 
+        //asset classification rules
+        new("View AssetClassificationRules", FshActions.View, FshResources.AssetClassificationRules, IsBasic: true),
+        new("Search AssetClassificationRules", FshActions.Search, FshResources.AssetClassificationRules, IsBasic: true),
+        new("Create AssetClassificationRules", FshActions.Create, FshResources.AssetClassificationRules),
+        new("Update AssetClassificationRules", FshActions.Update, FshResources.AssetClassificationRules),
+        new("Delete AssetClassificationRules", FshActions.Delete, FshResources.AssetClassificationRules),
+        new("Export AssetClassificationRules", FshActions.Export, FshResources.AssetClassificationRules),
+
         //physical assets
         new("View PhysicalAssets", FshActions.View, FshResources.PhysicalAssets, IsBasic: true),
+        new("Search PhysicalAssets", FshActions.Search, FshResources.PhysicalAssets, IsBasic: true),
         new("Create PhysicalAssets", FshActions.Create, FshResources.PhysicalAssets),
         new("Update PhysicalAssets", FshActions.Update, FshResources.PhysicalAssets),
         new("Delete PhysicalAssets", FshActions.Delete, FshResources.PhysicalAssets),
+        new("Export PhysicalAssets", FshActions.Export, FshResources.PhysicalAssets),
         new("Issue PhysicalAssets", FshActions.Issue, FshResources.PhysicalAssets),
         new("Return PhysicalAssets", FshActions.Return, FshResources.PhysicalAssets),
+
+        //property code sequences
+        new("View PropertyCodeSequences", FshActions.View, FshResources.PropertyCodeSequences, IsBasic: true),
+        new("Search PropertyCodeSequences", FshActions.Search, FshResources.PropertyCodeSequences, IsBasic: true),
+        new("Create PropertyCodeSequences", FshActions.Create, FshResources.PropertyCodeSequences),
+        new("Update PropertyCodeSequences", FshActions.Update, FshResources.PropertyCodeSequences),
+        new("Delete PropertyCodeSequences", FshActions.Delete, FshResources.PropertyCodeSequences),
+        new("Export PropertyCodeSequences", FshActions.Export, FshResources.PropertyCodeSequences),
 
         //depreciation schedules
         new("View DepreciationSchedules", FshActions.View, FshResources.DepreciationSchedules, IsBasic: true),

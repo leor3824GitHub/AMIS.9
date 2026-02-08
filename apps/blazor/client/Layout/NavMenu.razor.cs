@@ -40,6 +40,7 @@ public partial class NavMenu
     private bool _canViewJournalEntryVouchers;
     private bool _canViewAssetRequisitions;
     private bool _canViewPhysicalAssets;
+    private bool _canViewPropertyCodeSequences;
     private bool CanViewAdministrationGroup => _canViewUsers || _canViewRoles || _canViewTenants;
     private bool CanViewAccountingGroup => _canViewDepreciationSchedules || _canViewJournalEntryVouchers;
     private bool CanViewMyAccountabilityGroup => _canViewAssetRequisitions || _canViewPhysicalAssets;
@@ -63,7 +64,7 @@ public partial class NavMenu
         _canViewSmir = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.SuppliesAndMaterialsIssuance);
         _canViewSmrr = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.SuppliesAndMaterialsReceiving);
         _canViewPpeIssuanceReports = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PpeIssuance);
-        _canViewPpeReceivingReports = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PpeReceiving);
+        _canViewPpeReceivingReports = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Pper);
         _canViewPropertyAcknowledgementReceipt = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PropertyAcknowledgementReceipt);
         _canViewCategories = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Categories);
         _canViewSuppliers = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.Suppliers);
@@ -74,5 +75,6 @@ public partial class NavMenu
         _canViewJournalEntryVouchers = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.JournalEntryVouchers);
         _canViewAssetRequisitions = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.AssetRequisitions);
         _canViewPhysicalAssets = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PhysicalAssets);
+        _canViewPropertyCodeSequences = await AuthService.HasPermissionAsync(user, FshActions.View, FshResources.PropertyCodeSequences);
     }
 }

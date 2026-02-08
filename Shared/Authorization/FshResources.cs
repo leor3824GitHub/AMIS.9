@@ -27,7 +27,7 @@ public static class FshResources
     public const string SuppliesAndMaterialsIssuance = nameof(SuppliesAndMaterialsIssuance);
     public const string SuppliesAndMaterialsReceiving = nameof(SuppliesAndMaterialsReceiving);
     public const string PpeIssuance = nameof(PpeIssuance);
-    public const string PpeReceiving = nameof(PpeReceiving);
+    public const string Pper = nameof(Pper);
     public const string PropertyAcknowledgementReceipt = nameof(PropertyAcknowledgementReceipt);
     public const string InventoryTransactions = nameof(InventoryTransactions);
     public const string Inspections = nameof(Inspections);
@@ -38,6 +38,7 @@ public static class FshResources
     public const string PPETypeMappings = nameof(PPETypeMappings);
     public const string PhysicalAssets = nameof(PhysicalAssets);
     public const string AssetRequisitions = nameof(AssetRequisitions);
+    public const string AssetClassificationRules = nameof(AssetClassificationRules);
     public const string DepreciationSchedules = nameof(DepreciationSchedules);
     public const string JournalEntryVouchers = nameof(JournalEntryVouchers);
     public const string Todos = nameof(Todos);
@@ -49,4 +50,5 @@ public static class FshResources
     public const string AnnualProcurementPlans = nameof(AnnualProcurementPlans);
     public const string AnnualProcurementPlanItems = nameof(AnnualProcurementPlanItems);
     public const string ProcurementProjects = nameof(ProcurementProjects);
+    public const string PropertyCodeSequences = nameof(PropertyCodeSequences);
 }

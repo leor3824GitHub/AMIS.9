@@ -1,0 +1,180 @@
+@namespace AMIS.Blazor.Client.Pages.Inventories
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudDialog>
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="w-100">
+            <MudIcon Icon="@Icons.Material.Filled.QrCode2" Size="Size.Large" Color="Color.Primary" />
+            <div>
+                <MudText Typo="Typo.h5" Class="font-weight-bold">Property Code Generator</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Generate unique property codes for asset registration</MudText>
+            </div>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="4">
+            <!-- Loading Indicator -->
+            @if (_loading)
+            {
+                <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(63, 81, 181, 0.05); text-align: center;">
+                    <MudStack Spacing="2" AlignItems="AlignItems.Center">
+                        <MudProgressCircular Indeterminate="true" />
+                        <MudText Typo="Typo.body2">Loading classifications from server...</MudText>
+                    </MudStack>
+                </MudCard>
+            }
+            else
+            {
+            <!-- Selection Section -->
+            <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(63, 81, 181, 0.05);">
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-4">
+                    <MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Small" Class="mr-2" />
+                    Code Configuration
+                </MudText>
+                <MudGrid Spacing="3">
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="string" Label="Asset Classification" Value="_selectedClassification"
+                            ValueChanged="OnClassificationChanged"
+                            Required="true" Variant="Variant.Outlined" Style="width: 100%;">
+                            @foreach (var classification in _itemDescriptionsByClassification.Keys)
+                            {
+                                <MudSelectItem T="string" Value="@classification">
+                                    @classification
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" sm="6">
+                        <MudSelect T="string" Label="Item Description" @bind-Value="_selectedItemDescription"
+                            Required="true" Variant="Variant.Outlined" Style="width: 100%;"
+                            Disabled="@string.IsNullOrWhiteSpace(_selectedClassification)">
+                            @foreach (var itemDesc in _itemDescriptions)
+                            {
+                                <MudSelectItem T="string" Value="@itemDesc">
+                                    @itemDesc
+                                </MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                </MudGrid>
+            </MudCard>
+            }
+
+            <!-- Generate Button -->
+            <MudStack Row="true" Spacing="2" Justify="Justify.Center">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Large"
+                    OnClick="GeneratePropertyCode"
+                    Disabled="@(string.IsNullOrWhiteSpace(_selectedClassification) || string.IsNullOrWhiteSpace(_selectedItemDescription) || _generating)">
+                    @if (_generating)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                    }
+                    Generate Code
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" Size="Size.Large"
+                    OnClick="ResetForm" Disabled="@_generating">
+                    Reset
+                </MudButton>
+            </MudStack>
+
+            <!-- Generated Code Display -->
+            @if (!string.IsNullOrWhiteSpace(_generatedPropertyCode))
+            {
+                <MudCard Elevation="1" Class="pa-6" Style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <MudStack Spacing="3">
+                        <MudText Typo="Typo.subtitle1" Class="font-weight-bold">Generated Property Code</MudText>
+                        
+                        <MudPaper Class="pa-4" Style="background-color: rgba(255,255,255,0.1);">
+                            <MudText Typo="Typo.h5" Class="font-weight-bold font-family-monospace text-center">
+                                @_generatedPropertyCode
+                            </MudText>
+                        </MudPaper>
+
+                        <MudGrid Spacing="2">
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.caption">
+                                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                                    Classification: <strong>@_selectedClassification</strong>
+                                </MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.caption">
+                                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                                    Item Description: <strong>@_selectedItemDescription</strong>
+                                </MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.caption">
+                                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                                    Class Code: <strong>@_classCode</strong>
+                                </MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.caption">
+                                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                                    Category Code: <strong>@_categoryCode</strong>
+                                </MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.caption">
+                                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                                    Item Code: <strong>@_itemCode</strong>
+                                </MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.caption">
+                                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                                    Sequence: <strong>@_allocatedSequence.ToString("D4")</strong>
+                                </MudText>
+                            </MudItem>
+                        </MudGrid>
+
+                        <MudDivider Class="my-2" Style="border-color: rgba(255,255,255,0.3);" />
+
+                        <MudStack Row="true" Spacing="2">
+                            <MudButton Variant="Variant.Filled" Color="Color.Info" Size="Size.Small"
+                                OnClick="CopyToClipboard">
+                                <MudIcon Icon="@Icons.Material.Filled.ContentCopy" Size="Size.Small" Class="mr-1" />
+                                Copy to Clipboard
+                            </MudButton>
+                        </MudStack>
+                    </MudStack>
+                </MudCard>
+            }
+
+            <!-- Information Card -->
+            <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.05);">
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" Class="mr-2" />
+                    Property Code Format
+                </MudText>
+                <MudText Typo="Typo.body2" Class="mb-2">
+                    Format: <code>YYYY-OFFICE-CLASSID-CATID-ITEMID-SEQUENCE.0</code>
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">
+                    • YYYY: Current fiscal year (e.g., 2026)
+                    <br />
+                    • OFFICE: Organization office code (e.g., NFA)
+                    <br />
+                    • CLASSID: Asset classification code (e.g., OE, DP, LT, FF)
+                    <br />
+                    • CATID: Category code (e.g., 01, 02, 03) - auto-populated from item description
+                    <br />
+                    • ITEMID: Item/subcategory code (e.g., 001, 002) - specific item type (auto-populated)
+                    <br />
+                    • SEQUENCE: Auto-incremented unique number for each classification/category/item combination
+                    <br />
+                    <br />
+                    <strong>Example:</strong> <code>2026-NFA-OE-01-001-0001.0</code> (Office Equipment, Category 01, Item 001, Sequence 0001)
+                </MudText>
+            </MudCard>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="Cancel" Variant="Variant.Text">Cancel</MudButton>
+        <MudButton OnClick="UseCodeInDialog" Color="Color.Primary" Variant="Variant.Filled" Disabled="@(string.IsNullOrWhiteSpace(_generatedPropertyCode))">
+            Use This Code
+        </MudButton>
+    </DialogActions>
+</MudDialog>

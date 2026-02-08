@@ -1,0 +1,232 @@
+@namespace AMIS.Blazor.Client.Pages.Inventories.PhysicalAssets
+
+@if (_asset != null)
+{
+<MudDialog>
+    <TitleContent>
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="w-100">
+            <MudIcon Icon="@Icons.Material.Filled.FilePresent" Size="Size.Large" Color="Color.Primary" />
+            <div>
+                <MudText Typo="Typo.h6" Class="font-weight-bold">Issue as Property Acknowledgement Receipt (PAR)</MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary">Formal asset issuance for PPE</MudText>
+            </div>
+        </MudStack>
+    </TitleContent>
+    <DialogContent>
+        <MudStack Spacing="3">
+            <!-- Asset Info -->
+            <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(63, 81, 181, 0.05);">
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                    Asset Details
+                </MudText>
+                <MudText Typo="Typo.body2"><strong>Property Code:</strong> @_asset.PropertyCode</MudText>
+                <MudText Typo="Typo.body2"><strong>Description:</strong> @_asset.ProductName</MudText>
+                <MudText Typo="Typo.body2"><strong>Acquisition Cost:</strong> ₱@_asset.AcquisitionCost.ToString("N2")</MudText>
+                <MudText Typo="Typo.body2"><strong>Acquisition Date:</strong> @_asset.AcquisitionDate.ToShortDateString()</MudText>
+            </MudCard>
+
+            <!-- PAR Header -->
+            <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.05);">
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.DocumentScanner" Size="Size.Small" Class="mr-1" />
+                    PAR Information
+                </MudText>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_parNumber" Label="PAR Number" 
+                            Required="true" Variant="Variant.Outlined" ReadOnly="true"
+                            HelperText="Auto-generated" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_employeeName" Label="Custodian Name" 
+                            Required="true" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_department" Label="Department" 
+                            Required="true" Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_position" Label="Position" 
+                            Variant="Variant.Outlined" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_issuancePurpose" Label="Issuance Purpose" 
+                            Variant="Variant.Outlined" 
+                            HelperText="Optional: Why is this asset being issued?" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_issuanceLocation" Label="Issuance Location" 
+                            Variant="Variant.Outlined" 
+                            HelperText="Optional: Where will asset be stationed?" />
+                    </MudItem>
+                </MudGrid>
+            </MudCard>
+
+            <!-- Formal Signatures (PAR Approval) -->
+            <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(233, 30, 99, 0.05);">
+                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                    <MudIcon Icon="@Icons.Material.Filled.VerifiedUser" Size="Size.Small" Class="mr-1" />
+                    Formal Signatures
+                </MudText>
+                <MudText Typo="Typo.caption" Color="Color.Secondary" Class="mb-3">
+                    Names of personnel involved in the issuance approval process
+                </MudText>
+                <MudGrid Spacing="2">
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_issuedByName" Label="Issued By" 
+                            Variant="Variant.Outlined" 
+                            HelperText="Name of person issuing the asset" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_receivedByName" Label="Received By" 
+                            Variant="Variant.Outlined" 
+                            HelperText="Name of custodian (defaults to custodian name if empty)" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_approvedByName" Label="Approved By" 
+                            Variant="Variant.Outlined" 
+                            HelperText="Name of approving authority" />
+                    </MudItem>
+                </MudGrid>
+            </MudCard>
+
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-2">
+                <MudText Typo="Typo.body2">
+                    This will create a formal Property Acknowledgement Receipt (PAR) and assign the asset to the custodian.
+                    The PAR will be immediately posted upon completion.
+                </MudText>
+            </MudAlert>
+        </MudStack>
+    </DialogContent>
+    <DialogActions>
+        <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnValidSubmit"
+            Disabled="@_loading">
+            @if (_loading)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+            }
+            Create and Post PAR
+        </MudButton>
+        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_loading">Cancel
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+}
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Inject]
+    private IApiClient ApiClient { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Parameter]
+    public Guid AssetId { get; set; }
+
+    private PhysicalAssetResponse? _asset;
+    private bool _loading = false;
+
+    // Form fields
+    private string _parNumber = string.Empty;
+    private string _employeeName = string.Empty;
+    private string _department = string.Empty;
+    private string _position = string.Empty;
+    private string _issuancePurpose = string.Empty;
+    private string _issuanceLocation = string.Empty;
+    
+    // Formal signature fields
+    private string _issuedByName = string.Empty;
+    private string _receivedByName = string.Empty;
+    private string _approvedByName = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", AssetId);
+            
+            // Initialize PAR number with current date and random suffix
+            _parNumber = $"PAR-{DateTime.Now:yyyy}-{new Random().Next(10000):D4}";
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Failed to load asset: {ex.Message}", Severity.Error);
+            MudDialog?.Cancel();
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        if (_asset == null)
+        {
+            Snackbar?.Add("Invalid form state", Severity.Error);
+            return;
+        }
+
+        // Validate required fields
+        if (string.IsNullOrWhiteSpace(_employeeName))
+        {
+            Snackbar?.Add("Custodian name is required", Severity.Warning);
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(_department))
+        {
+            Snackbar?.Add("Department is required", Severity.Warning);
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            var lineItems = new List<CreatePARLineItemRequest>
+            {
+                new()
+                {
+                    PropertyCode = _asset.PropertyCode,
+                    Description = _asset.ProductName,
+                    DateAcquired = _asset.AcquisitionDate,
+                    AcquisitionCost = _asset.AcquisitionCost
+                }
+            };
+
+            var command = new CreatePARCommand
+            {
+                ParNumber = _parNumber,
+                EmployeeName = _employeeName,
+                Department = _department,
+                Position = _position ?? string.Empty,
+                IssuancePurpose = _issuancePurpose ?? string.Empty,
+                IssuanceLocation = _issuanceLocation ?? string.Empty,
+                EmployeeId = System.Guid.Empty,
+                IssuanceDate = DateTime.Now,
+                LineItems = lineItems
+                // Signature fields (IssuedByName, ReceivedByName, ApprovedByName) 
+                // will be added once the API client is regenerated
+            };
+
+            // Call CreatePAR endpoint
+            var result = await ApiClient.CreatePAREndpointAsync("1", command);
+            
+            Snackbar?.Add("PAR created and asset issued successfully", Severity.Success);
+            MudDialog?.Close(DialogResult.Ok(result));
+        }
+        catch (ApiException ex)
+        {
+            Snackbar?.Add($"Error creating PAR: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void Cancel()
+    {
+        MudDialog?.Cancel();
+    }
+}

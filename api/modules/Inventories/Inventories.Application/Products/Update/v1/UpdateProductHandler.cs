@@ -1,6 +1,4 @@
 using AMIS.Framework.Core.Persistence;
-using AMIS.Framework.Core.Storage;
-using AMIS.Framework.Core.Storage.File;
 using AMIS.WebApi.Inventories.Domain;
 using AMIS.WebApi.Inventories.Domain.Exceptions;
 using MediatR;
@@ -10,8 +8,7 @@ using Microsoft.Extensions.Logging;
 namespace AMIS.WebApi.Inventories.Application.Products.Update.v1;
 public sealed class UpdateProductHandler(
     ILogger<UpdateProductHandler> logger,
-    [FromKeyedServices("inventories:products")] IRepository<Product> repository,
-    IStorageService storageService)
+    [FromKeyedServices("inventories:products")] IRepository<Product> repository)
     : IRequestHandler<UpdateProductCommand, UpdateProductResponse>
 {
     public async Task<UpdateProductResponse> Handle(UpdateProductCommand request, CancellationToken cancellationToken)
@@ -20,24 +17,7 @@ public sealed class UpdateProductHandler(
         var product = await repository.GetByIdAsync(request.Id, cancellationToken);
         _ = product ?? throw new ProductNotFoundException(request.Id);
 
-        // Remove old image if flag is set
-        if (request.DeleteCurrentImage)
-        {
-            var currentProductImagePath = product.ImagePath;
-            if (!string.IsNullOrEmpty(currentProductImagePath))
-            {
-                string root = Directory.GetCurrentDirectory();
-                storageService.Remove(new Uri(Path.Combine(root, currentProductImagePath)));
-            }
-
-            product = product.ClearImagePath();
-        }
-
-        var productImagePath = request.Image is not null
-            ? (await storageService.UploadAsync<Product>(request.Image, FileType.Image, cancellationToken)).ToString()
-            : product.ImagePath;
-
-        var updatedProduct = product.Update(request.Name, request.Description, request.SKU, request.Unit, productImagePath, request.CategoryId);
+        var updatedProduct = product.Update(request.Name, request.Description, request.UnitOfMeasure, request.EstimatedUsefulLife, request.CategoryId);
         await repository.UpdateAsync(updatedProduct, cancellationToken);
         logger.LogInformation("product with id : {ProductId} updated.", product.Id);
         return new UpdateProductResponse(product.Id);

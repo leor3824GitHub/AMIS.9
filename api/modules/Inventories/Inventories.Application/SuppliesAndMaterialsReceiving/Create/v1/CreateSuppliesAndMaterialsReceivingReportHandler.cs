@@ -40,7 +40,7 @@ public sealed class CreateSuppliesAndMaterialsReceivingReportHandler(
             request.Notes);
 
         // Add line items
-        var lineItems = request.LineItems.Select(dto => new ReceivingLineItem(
+        var lineItems = request.LineItems.Select(dto => new SuppliesAndMaterialsReceivingLineItem(
             dto.Name,
             dto.Description,
             dto.AcquisitionDate,

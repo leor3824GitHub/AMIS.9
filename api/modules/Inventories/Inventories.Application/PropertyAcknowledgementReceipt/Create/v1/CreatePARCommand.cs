@@ -20,7 +20,10 @@ public sealed record CreatePARCommand(
     string? Position = null,
     string? IssuancePurpose = null,
     string? IssuanceLocation = null,
-    string? Notes = null) : IRequest<CreatePARResponse>;
+    string? Notes = null,
+    string? IssuedByName = null,
+    string? ReceivedByName = null,
+    string? ApprovedByName = null) : IRequest<CreatePARResponse>;
 
 public sealed record CreatePARResponse(
     Guid Id,

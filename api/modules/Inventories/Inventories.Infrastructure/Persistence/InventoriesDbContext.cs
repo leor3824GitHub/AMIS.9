@@ -78,10 +78,13 @@ public sealed class InventoriesDbContext : FshDbContext
     // Supplies and Materials Issuance/Receiving Reports (NFA Philippines)
     public DbSet<SuppliesAndMaterialsIssuanceReport> SuppliesAndMaterialsIssuanceReports { get; set; } = null!;
     public DbSet<SuppliesAndMaterialsReceivingReport> SuppliesAndMaterialsReceivingReports { get; set; } = null!;
+    public DbSet<SuppliesAndMaterialsReceivingLineItem> SuppliesAndMaterialsReceivingLineItems { get; set; } = null!;
 
     // PPE Issuance/Receiving Reports (NFA Philippines)
-    public DbSet<PpeIssuanceReport> PpeIssuanceReports { get; set; } = null!;
-    public DbSet<PpeReceivingReport> PpeReceivingReports { get; set; } = null!;
+    public DbSet<PPEIR> PPEIRs { get; set; } = null!;
+    public DbSet<PPEIRLineItem> PPEIRLineItems { get; set; } = null!;
+    public DbSet<PPERR> PPERRs { get; set; } = null!;
+    public DbSet<PPERRLineItem> PPERRLineItems { get; set; } = null!;
 
     // Property Accountability Receipt (PAR)
     public DbSet<PropertyAcknowledgementReceipt> PropertyAcknowledgementReceipts { get; set; } = null!;

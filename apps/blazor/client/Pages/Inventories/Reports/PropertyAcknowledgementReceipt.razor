@@ -80,12 +80,12 @@
                     </MudItem>
 
                     <MudItem xs="12" md="6">
-                        <MudAutocomplete T="EmployeeDto" @bind-Value="_selectedEmployee" Label="Employee/Custodian"
+                        <MudAutocomplete T="EmployeeResponse" @bind-Value="_selectedEmployee" Label="Employee/Custodian"
                             Required="true" SearchFunc="@SearchEmployees" ToStringFunc="@(e => e?.Name ?? "")"
                             Disabled="@(_reportStatus != 0 || _isReadOnly)" Clearable="true">
                             <ItemTemplate Context="employee">
                                 <MudText>@employee.Name</MudText>
-                                <MudText Typo="Typo.caption">@employee.Department</MudText>
+                                <MudText Typo="Typo.caption">@employee.ResponsibilityCode</MudText>
                             </ItemTemplate>
                         </MudAutocomplete>
                     </MudItem>

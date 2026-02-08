@@ -12,9 +12,9 @@ var builder = DistributedApplication.CreateBuilder(args);
 var username = builder.AddParameter("pg-username", "admin");
 var password = builder.AddParameter("pg-password", "admin");
 
-var database = builder.AddPostgres("db", username, password, port: 15432)
+var database = builder.AddPostgres("db", username, password, port: 5432)
     .WithDataVolume()
-    .AddDatabase("AMIS268");
+    .AddDatabase("AMIS272");
 
 var api = builder.AddProject<Projects.Server>("webapi")
     .WaitFor(database);

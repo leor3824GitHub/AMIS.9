@@ -1,6 +1,5 @@
 using Finbuckle.MultiTenant;
 using AMIS.WebApi.Inventories.Domain;
-using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -12,19 +11,23 @@ internal sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
         builder.IsMultiTenant();
         builder.HasKey(x => x.Id);
-        builder.Property(x => x.Name).HasMaxLength(100);
+        builder.Property(x => x.Name).HasMaxLength(100).IsRequired();
         builder.Property(x => x.Description).HasMaxLength(1000);
-
-        builder.Property(x => x.PropertyClassification)
-            .HasConversion<int>()
-            .HasDefaultValue(PropertyClassification.Consumable)
-            .HasComment("1=Consumable, 2=SemiExpendable, 3=PPE");
-
+        builder.Property(x => x.UnitOfMeasure)
+            .IsRequired()
+            .HasMaxLength(50)
+            .HasDefaultValue("piece");
         builder.Property(x => x.EstimatedUsefulLife)
-            .HasDefaultValue(12)
-            .HasComment("Estimated useful life in months");
+            .IsRequired()
+            .HasDefaultValue(12);
+        
+        builder.HasOne(x => x.Category)
+            .WithMany()
+            .HasForeignKey(x => x.CategoryId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.SetNull);
 
-        builder.HasIndex(x => x.PropertyClassification);
+        builder.HasIndex(x => x.CategoryId);
     }
 }
 

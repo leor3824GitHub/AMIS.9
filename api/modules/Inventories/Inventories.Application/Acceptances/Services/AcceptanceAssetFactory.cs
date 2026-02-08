@@ -7,7 +7,8 @@ namespace AMIS.WebApi.Inventories.Application.Acceptances.Services;
 
 /// <summary>
 /// Application-layer factory that turns posted Acceptances into PhysicalAsset instances.
-/// Delegates property code and classification decisions to caller-provided resolvers so infrastructure/config lookups stay outside the domain.
+/// Asset classification is determined dynamically from acquisition cost.
+/// Delegates property code generation to caller-provided resolvers so infrastructure/config lookups stay outside the domain.
 /// </summary>
 public static class AcceptanceAssetFactory
 {
@@ -33,10 +34,6 @@ public static class AcceptanceAssetFactory
                 throw new InvalidOperationException("Purchase item must have an associated product to create an asset.");
 
             var classification = classificationResolver.ResolveClassification(purchaseItem);
-            var ppeType = classificationResolver.ResolvePpeType(purchaseItem);
-            var estimatedUsefulLife = classificationResolver.ResolveEstimatedUsefulLifeMonths(purchaseItem);
-            var description = classificationResolver.ResolveDescription(purchaseItem);
-            var unitOfMeasure = classificationResolver.ResolveUnitOfMeasure(purchaseItem);
 
             if (classification == PropertyClassification.PropertyPlantEquipment)
             {
@@ -44,18 +41,13 @@ public static class AcceptanceAssetFactory
                 {
                     var propertyCode = await codeGenerator.GenerateAsync(acceptanceItem, cancellationToken).ConfigureAwait(false);
                     var asset = PhysicalAsset.Create(
-                        classification,
                         propertyCode,
                         purchaseItem.ProductId.Value,
-                        description,
                         purchaseItem.UnitPrice,
                         acceptance.AcceptanceDate,
-                        estimatedUsefulLife,
                         quantity: 1,
-                        unitOfMeasure: unitOfMeasure,
                         serialNumber: null,
-                        modelNumber: null,
-                        ppeType: ppeType);
+                        modelNumber: null);
 
                     assets.Add(asset);
                 }
@@ -64,18 +56,13 @@ public static class AcceptanceAssetFactory
             {
                 var propertyCode = await codeGenerator.GenerateAsync(acceptanceItem, cancellationToken).ConfigureAwait(false);
                 var asset = PhysicalAsset.Create(
-                    classification,
                     propertyCode,
                     purchaseItem.ProductId.Value,
-                    description,
                     purchaseItem.UnitPrice * acceptanceItem.QtyAccepted,
                     acceptance.AcceptanceDate,
-                    estimatedUsefulLife,
                     acceptanceItem.QtyAccepted,
-                    unitOfMeasure,
                     serialNumber: null,
-                    modelNumber: null,
-                    ppeType: ppeType);
+                    modelNumber: null);
 
                 assets.Add(asset);
             }

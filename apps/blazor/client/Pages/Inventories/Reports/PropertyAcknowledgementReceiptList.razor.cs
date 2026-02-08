@@ -20,7 +20,7 @@ public partial class PropertyAcknowledgementReceiptList
         _loading = true;
         try
         {
-            var response = await ApiClient.GetPARListAsync();
+            var response = await ApiClient.ListPARsEndpointAsync("1");
 
             // Client-side filtering (since the API endpoint doesn't support server-side filtering)
             var filtered = response?.PaRs ?? new List<PARDto>();
@@ -103,7 +103,7 @@ public partial class PropertyAcknowledgementReceiptList
         {
             try
             {
-                await ApiClient.PostPARAsync(id);
+                await ApiClient.PostPAREndpointAsync("1", id);
                 Snackbar.Add("PAR posted successfully", Severity.Success);
                 await _table!.ReloadServerData();
             }

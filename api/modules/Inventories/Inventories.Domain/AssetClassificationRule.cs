@@ -5,99 +5,144 @@ using AMIS.WebApi.Inventories.Domain.ValueObjects;
 namespace AMIS.WebApi.Inventories.Domain;
 
 /// <summary>
-/// Configurable asset classification rules based on COA/DBM circulars
-/// Allows threshold changes without code modification
+/// Minimal asset classification rule for cost-based categorization.
+/// Used by DatabaseAssetClassificationPolicy to determine asset classification.
 /// </summary>
 public class AssetClassificationRule : AuditableEntity, IAggregateRoot
 {
-    public string RuleName { get; private set; } = default!;
+    /// <summary>Name of the rule for reference (e.g., "PPE 2026").</summary>
+    public string Name { get; private set; } = default!;
+
+    /// <summary>Classification assigned to assets within this cost range.</summary>
     public PropertyClassification Classification { get; private set; }
+
+    /// <summary>Minimum acquisition cost for this classification (inclusive).</summary>
     public decimal MinimumCost { get; private set; }
+
+    /// <summary>Maximum acquisition cost for this classification (inclusive).</summary>
     public decimal MaximumCost { get; private set; }
-    public int? MinimumUsefulLifeMonths { get; private set; }
+
+    /// <summary>Date when this rule becomes effective.</summary>
     public DateTime EffectiveDate { get; private set; }
+
+    /// <summary>Optional date when this rule expires. Null means no expiration.</summary>
     public DateTime? ExpiryDate { get; private set; }
+
+    /// <summary>RCA account code for this classification (e.g., "1030").</summary>
     public string RCAAccountCode { get; private set; } = default!;
-    public string ExpenseAccountCode { get; private set; } = default!;
-    public string DocumentType { get; private set; } = default!; // RSMI, ICS, PAR
-    public string COAReference { get; private set; } = default!; // e.g., "COA Circular 2022-004"
-    public bool IsActive { get; private set; } = true;
-    public int Priority { get; private set; } // For overlapping rules
+
+    /// <summary>Priority for conflict resolution when cost ranges overlap (0 = highest).</summary>
+    public int Priority { get; private set; }
+
+    /// <summary>Whether this rule is currently in effect.</summary>
+    public bool IsActive { get; private set; }
 
     private AssetClassificationRule() { }
 
+    /// <summary>Creates a new asset classification rule.</summary>
     public static AssetClassificationRule Create(
-        string ruleName,
+        string name,
         PropertyClassification classification,
         decimal minimumCost,
         decimal maximumCost,
         DateTime effectiveDate,
         string rcaAccountCode,
-        string expenseAccountCode,
-        string documentType,
-        string coaReference,
-        int? minimumUsefulLifeMonths = null,
-        int priority = 10)
+        int priority = 10,
+        DateTime? expiryDate = null)
     {
+        if (minimumCost < 0 || maximumCost < 0)
+            throw new ArgumentException("Costs cannot be negative.");
+
+        if (minimumCost > maximumCost)
+            throw new ArgumentException("MinimumCost cannot exceed MaximumCost.");
+
+        if (expiryDate.HasValue && expiryDate < effectiveDate)
+            throw new ArgumentException("ExpiryDate cannot be before EffectiveDate.");
+
         return new AssetClassificationRule
         {
             Id = Guid.NewGuid(),
-            RuleName = ruleName,
+            Name = name,
             Classification = classification,
             MinimumCost = minimumCost,
             MaximumCost = maximumCost,
-            MinimumUsefulLifeMonths = minimumUsefulLifeMonths,
             EffectiveDate = effectiveDate,
+            ExpiryDate = expiryDate,
             RCAAccountCode = rcaAccountCode,
-            ExpenseAccountCode = expenseAccountCode,
-            DocumentType = documentType,
-            COAReference = coaReference,
             Priority = priority,
             IsActive = true
         };
     }
 
+    /// <summary>Deactivates this rule without deleting it.</summary>
     public void Deactivate()
     {
         IsActive = false;
     }
 
-    public void SetExpiryDate(DateTime expiryDate)
+    /// <summary>Activates a previously deactivated rule.</summary>
+    public void Activate()
     {
-        if (expiryDate < EffectiveDate)
-            throw new ArgumentException("Expiry date cannot be before effective date.");
+        IsActive = true;
+    }
 
+    /// <summary>Updates the name of this rule.</summary>
+    public void SetName(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            throw new ArgumentException("Name cannot be empty.");
+        Name = name;
+    }
+
+    /// <summary>Updates the minimum cost threshold.</summary>
+    public void SetMinimumCost(decimal minimumCost)
+    {
+        if (minimumCost < 0)
+            throw new ArgumentException("Minimum cost cannot be negative.");
+        if (minimumCost > MaximumCost)
+            throw new ArgumentException("MinimumCost cannot exceed MaximumCost.");
+        MinimumCost = minimumCost;
+    }
+
+    /// <summary>Updates the maximum cost threshold.</summary>
+    public void SetMaximumCost(decimal maximumCost)
+    {
+        if (maximumCost < 0)
+            throw new ArgumentException("Maximum cost cannot be negative.");
+        if (maximumCost < MinimumCost)
+            throw new ArgumentException("MaximumCost cannot be less than MinimumCost.");
+        MaximumCost = maximumCost;
+    }
+
+    /// <summary>Updates the effective date of this rule.</summary>
+    public void SetEffectiveDate(DateTime effectiveDate)
+    {
+        if (ExpiryDate.HasValue && effectiveDate > ExpiryDate.Value)
+            throw new ArgumentException("EffectiveDate cannot be after ExpiryDate.");
+        EffectiveDate = effectiveDate;
+    }
+
+    /// <summary>Updates the expiry date of this rule.</summary>
+    public void SetExpiryDate(DateTime? expiryDate)
+    {
+        if (expiryDate.HasValue && expiryDate.Value < EffectiveDate)
+            throw new ArgumentException("ExpiryDate cannot be before EffectiveDate.");
         ExpiryDate = expiryDate;
     }
 
-    public bool IsEffectiveOn(DateTime date)
+    /// <summary>Updates the RCA account code.</summary>
+    public void SetRCAAccountCode(string rcaAccountCode)
     {
-        if (!IsActive)
-            return false;
-
-        if (date < EffectiveDate)
-            return false;
-
-        if (ExpiryDate.HasValue && date > ExpiryDate.Value)
-            return false;
-
-        return true;
+        if (string.IsNullOrWhiteSpace(rcaAccountCode))
+            throw new ArgumentException("RCA Account Code cannot be empty.");
+        RCAAccountCode = rcaAccountCode;
     }
 
-    public bool AppliesToAsset(decimal acquisitionCost, int? usefulLifeMonths = null)
+    /// <summary>Updates the priority of this rule.</summary>
+    public void SetPriority(int priority)
     {
-        if (!IsActive)
-            return false;
-
-        if (acquisitionCost < MinimumCost || acquisitionCost > MaximumCost)
-            return false;
-
-        if (MinimumUsefulLifeMonths.HasValue && usefulLifeMonths.HasValue)
-        {
-            if (usefulLifeMonths.Value < MinimumUsefulLifeMonths.Value)
-                return false;
-        }
-
-        return true;
+        if (priority <= 0)
+            throw new ArgumentException("Priority must be greater than 0.");
+        Priority = priority;
     }
 }

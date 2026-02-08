@@ -25,7 +25,10 @@ public static class IssuePhysicalAssetEndpoint
                     EmployeeName = command.EmployeeName,
                     DocumentNumber = command.DocumentNumber,
                     QuantityIssued = command.QuantityIssued,
-                    Location = command.Location
+                    Location = command.Location,
+                    IssuedByName = command.IssuedByName,
+                    ReceivedByName = command.ReceivedByName,
+                    ApprovedByName = command.ApprovedByName
                 };
                 var response = await mediator.Send(issueCommand);
                 return Results.Ok(response);

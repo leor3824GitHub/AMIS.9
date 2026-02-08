@@ -5,6 +5,7 @@ using AMIS.Blazor.Infrastructure.Auth;
 using AMIS.Blazor.Infrastructure.Auth.Jwt;
 using AMIS.Blazor.Infrastructure.Notifications;
 using AMIS.Blazor.Infrastructure.Preferences;
+using AMIS.Blazor.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MudBlazor;
@@ -38,6 +39,7 @@ public static class Extensions
            .AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient(ClientName));
         services.AddTransient<IClientPreferenceManager, ClientPreferenceManager>();
         services.AddTransient<IPreference, ClientPreference>();
+        services.AddTransient<IPropertyCodeGenerator, PropertyCodeGenerator>();
         services.AddNotifications();
         return services;
 

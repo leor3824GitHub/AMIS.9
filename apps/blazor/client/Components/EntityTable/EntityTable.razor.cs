@@ -74,8 +74,8 @@ public partial class EntityTable<TEntity, TId, TRequest>
 
     private async Task<bool> CanDoActionAsync(string? action, AuthenticationState state) =>
         !string.IsNullOrWhiteSpace(action) &&
-            (bool.TryParse(action, out bool isTrue) && isTrue || // check if action equals "True", then it's allowed
-            Context.EntityResource is { } resource && await AuthService.HasPermissionAsync(state.User, action, resource));
+            ((bool.TryParse(action, out bool isTrue) && isTrue) || // check if action equals "True", then it's allowed
+            (Context.EntityResource is { } resource && await AuthService.HasPermissionAsync(state.User, action, resource)));
 
     private bool HasActions => _canUpdate || _canDelete || Context.HasExtraActionsFunc is not null && Context.HasExtraActionsFunc();
     private bool CanUpdateEntity(TEntity entity) => _canUpdate && (Context.CanUpdateEntityFunc is null || Context.CanUpdateEntityFunc(entity));

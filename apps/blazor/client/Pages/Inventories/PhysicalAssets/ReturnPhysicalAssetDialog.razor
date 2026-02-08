@@ -1,0 +1,208 @@
+@namespace AMIS.Blazor.Client.Pages.Inventories.PhysicalAssets
+
+<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+    <MudDialog>
+        <TitleContent>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="w-100">
+                <MudIcon Icon="@Icons.Material.Filled.Undo" Size="Size.Large" Color="Color.Warning" />
+                <div>
+                    <MudText Typo="Typo.h6" Class="font-weight-bold">Return Physical Asset</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Record asset return and condition</MudText>
+                </div>
+            </MudStack>
+        </TitleContent>
+        <DialogContent>
+            @if (_asset != null)
+            {
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+                <MudStack Spacing="3">
+                    <!-- Asset Info -->
+                    <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(63, 81, 181, 0.05);">
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                            Asset Information
+                        </MudText>
+                        <MudText Typo="Typo.body2"><strong>Property Code:</strong> @_asset.PropertyCode</MudText>
+                        <MudText Typo="Typo.body2"><strong>Serial Number:</strong> @(_asset.SerialNumber ?? "N/A")</MudText>
+                        @if (_asset.CurrentCustodianId.HasValue)
+                        {
+                            <MudText Typo="Typo.body2"><strong>Current Custodian:</strong> @_asset.CurrentCustodianId.Value.ToString().Substring(0, 8)</MudText>
+                        }
+                    </MudCard>
+
+                    <!-- Return Details -->
+                    <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(255, 152, 0, 0.05);">
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.Undo" Size="Size.Small" Class="mr-1" />
+                            Return Details
+                        </MudText>
+                        <MudGrid Spacing="2">
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="Model.Reason" Label="Return Reason" Lines="3"
+                                    Required="true" Variant="Variant.Outlined" Clearable="true"
+                                    HelperText="e.g., End of assignment, Transferred, Damaged, Lost" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudSelect T="string" Label="Asset Condition" @bind-Value="Model.Condition"
+                                    Required="true" Variant="Variant.Outlined" 
+                                    HelperText="Assess current condition of asset">
+                                    <MudSelectItem T="string" Value="@("Good")">Good</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Fair")">Fair</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Poor")">Poor</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("Unserviceable")">Unserviceable</MudSelectItem>
+                                    <MudSelectItem T="string" Value="@("ForDisposal")">For Disposal</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="_acceptedByStr" Label="Accepted By (Employee ID)"
+                                    Required="true" Placeholder="Enter receiving officer's GUID" Variant="Variant.Outlined" Clearable="true" />
+                            </MudItem>
+                            @if (_asset.Classification.ToString() == "SemiExpendable" || _asset.Classification.ToString() == "1")
+                            {
+                                <MudItem xs="12">
+                                    <MudNumericField @bind-Value="Model.QuantityReturned" Label="Quantity Returned" 
+                                        Min="1" Variant="Variant.Outlined"
+                                        HelperText="Total units being returned" />
+                                </MudItem>
+                            }
+                        </MudGrid>
+                    </MudCard>
+                </MudStack>
+            }
+            else
+            {
+                <MudProgressLinear Indeterminate="true" />
+            }
+        </DialogContent>
+        <DialogActions>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
+                Disabled="@(_loading || _asset == null)">
+                @if (_loading)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                }
+                Return Asset
+            </MudButton>
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_loading">Cancel
+            </MudButton>
+        </DialogActions>
+    </MudDialog>
+</EditForm>
+
+@code {
+    [CascadingParameter]
+    private IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter]
+    public Guid AssetId { get; set; }
+
+    [Inject]
+    private IApiClient ApiClient { get; set; } = default!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = default!;
+
+    [Inject]
+    protected Task<AuthenticationState> AuthState { get; set; } = default!;
+
+    private ReturnPhysicalAssetCommand Model = default!;
+    private PhysicalAssetResponse? _asset;
+    private string _acceptedByStr = "";
+    private bool _loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _loading = true;
+        try
+        {
+            _asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", AssetId);
+            if (_asset != null)
+            {
+                var user = (await AuthState).User;
+                var userId = user?.FindFirst("sub")?.Value ?? "";
+
+                Model = new ReturnPhysicalAssetCommand
+                {
+                    Id = AssetId,
+                    Reason = "",
+                    Condition = "Good",
+                    AcceptedBy = string.IsNullOrEmpty(userId) ? Guid.Empty : Guid.Parse(userId),
+                    QuantityReturned = 1
+                };
+                _acceptedByStr = Model.AcceptedBy.ToString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error loading asset: {ex.Message}", Severity.Error);
+            MudDialog?.Cancel();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OnValidSubmit()
+    {
+        if (Model == null || _asset == null)
+        {
+            Snackbar?.Add("Model or asset not initialized.", Severity.Error);
+            return;
+        }
+
+        _loading = true;
+        try
+        {
+            if (string.IsNullOrWhiteSpace(Model.Reason))
+            {
+                Snackbar?.Add("Return reason is required.", Severity.Warning);
+                _loading = false;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(Model.Condition))
+            {
+                Snackbar?.Add("Asset condition is required.", Severity.Warning);
+                _loading = false;
+                return;
+            }
+
+            if (!Guid.TryParse(_acceptedByStr, out var acceptedBy) || acceptedBy == Guid.Empty)
+            {
+                Snackbar?.Add("Invalid 'Accepted By' ID. Please provide a valid GUID.", Severity.Warning);
+                _loading = false;
+                return;
+            }
+
+            // For semi-expendable, quantity is required
+            if ((_asset.Classification.ToString() == "SemiExpendable" || _asset.Classification.ToString() == "1") && 
+                (!Model.QuantityReturned.HasValue || Model.QuantityReturned <= 0))
+            {
+                Snackbar?.Add("Quantity returned is required for semi-expendable items.", Severity.Warning);
+                _loading = false;
+                return;
+            }
+
+            Model.AcceptedBy = acceptedBy;
+
+            var response = await ApiClient.ReturnPhysicalAssetEndpointAsync("1", AssetId, Model);
+            if (response != null)
+            {
+                Snackbar?.Add("Asset returned successfully.", Severity.Success);
+                MudDialog?.Close(DialogResult.Ok(true));
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error returning asset: {ex.Message}", Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void Cancel() => MudDialog?.Cancel();
+}

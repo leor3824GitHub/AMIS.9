@@ -17,24 +17,27 @@ public sealed class SearchPhysicalAssetsSpecs : Specification<PhysicalAsset, Phy
             p.Id,
             p.PropertyCode,
             p.ProductId,
-            p.Description,
+            p.Product.Name,
             p.AcquisitionCost,
             p.AcquisitionDate,
-            p.EstimatedUsefulLife,
             p.CurrentClassification,
             p.Quantity,
-            p.UnitOfMeasure,
             p.SerialNumber,
             p.ModelNumber,
             p.AssignmentHistory
                 .OrderByDescending(h => h.AssignmentDate)
                 .Select(h => h.Location)
                 .FirstOrDefault(),
-            p.PPEType,
             p.AccumulatedDepreciation,
             p.BookValue,
             p.RCAAccountCode,
-            p.CurrentCustodianId));
+            p.AssignmentHistory
+                .FirstOrDefault(h => h.Status == "Active") != null
+                ? p.AssignmentHistory.FirstOrDefault(h => h.Status == "Active")!.EmployeeId
+                : null,
+            p.ParentAssetId,
+            p.ParentAsset != null ? p.ParentAsset.Product.Name : null,
+            p.ParentAsset != null ? p.ParentAsset.PropertyCode : null));
     }
 }
 

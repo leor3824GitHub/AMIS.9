@@ -8,11 +8,12 @@ public sealed class ListPpeReceivingReportsResponse
 public sealed class PpeReceivingReportDto
 {
     public Guid Id { get; set; }
-    public string ReportNumber { get; set; } = string.Empty;
-    public string SourceName { get; set; } = string.Empty;
-    public string ReceiptType { get; set; } = string.Empty;
-    public DateTime SourceReceiptDate { get; set; }
-    public int LineItemsCount { get; set; }
+    public string RRNumber { get; set; } = string.Empty;
+    public string ReceivedFrom { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
+    public string Type { get; set; } = string.Empty;
+    public DateTime Date { get; set; }
+    public int ItemsCount { get; set; }
     public decimal TotalAmount { get; set; }
     public int Status { get; set; }
     public DateTime CreatedAt { get; set; }

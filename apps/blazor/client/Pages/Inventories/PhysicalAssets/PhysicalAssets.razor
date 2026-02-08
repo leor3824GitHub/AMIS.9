@@ -33,7 +33,14 @@
             Hover="true" Bordered="true" Striped="true">
             <Columns>
                 <PropertyColumn Property="x => x.PropertyCode" Title="Property Code" />
-                <PropertyColumn Property="x => x.Description" Title="Description" />
+                <PropertyColumn Property="x => x.ProductName" Title="Product Name" />
+                <TemplateColumn Title="Classification" Sortable="false">
+                    <CellTemplate>
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
+                            @GetClassificationLabel(context.Item.Classification)
+                        </MudChip>
+                    </CellTemplate>
+                </TemplateColumn>
                 <TemplateColumn Title="Acquired" Sortable="false">
                     <CellTemplate>
                         <MudText Typo="Typo.body2">@context.Item.AcquisitionDate.ToShortDateString()</MudText>
@@ -41,23 +48,78 @@
                 </TemplateColumn>
                 <TemplateColumn Title="Cost" Sortable="false">
                     <CellTemplate>
-                        <MudText Typo="Typo.body2">@context.Item.AcquisitionCost.ToString("C2")</MudText>
+                        <MudText Typo="Typo.body2">₱@context.Item.AcquisitionCost.ToString("N2")</MudText>
                     </CellTemplate>
                 </TemplateColumn>
                 <PropertyColumn Property="x => x.Quantity" Title="Qty" />
-                <PropertyColumn Property="x => x.UnitOfMeasure" Title="Unit" />
-                <PropertyColumn Property="x => x.Location" Title="Location" />
-                <PropertyColumn Property="x => x.Classification" Title="Class" />
-                <PropertyColumn Property="x => x.PpeType" Title="PPE Type" />
-                <PropertyColumn Property="x => x.SerialNumber" Title="Serial" />
-                <PropertyColumn Property="x => x.ModelNumber" Title="Model" />
-                <TemplateColumn Title="Actions" Sortable="false">
+                <TemplateColumn Title="Parent Asset" Sortable="false">
+                    <CellTemplate>
+                        @if (context.Item.ParentAssetId.HasValue)
+                        {
+                            <MudStack Spacing="0">
+                                <MudText Typo="Typo.caption" Class="font-weight-bold">@(context.Item.ParentAssetProductName ?? "Parent Asset")</MudText>
+                                <MudText Typo="Typo.caption" Color="Color.Secondary">@context.Item.ParentAssetPropertyCode</MudText>
+                            </MudStack>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">None</MudText>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Custodian" Sortable="false">
+                    <CellTemplate>
+                        @if (context.Item.CurrentCustodianId.HasValue)
+                        {
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Info">
+                                @context.Item.CurrentCustodianId.Value.ToString().Substring(0, 8)
+                            </MudChip>
+                        }
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Color="Color.Secondary">Unassigned</MudText>
+                        }
+                    </CellTemplate>
+                </TemplateColumn>
+                <TemplateColumn Title="Actions" Sortable="false" Style="width: 350px">
                     <CellTemplate>
                         @if (_canEdit)
                         {
                             <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
                                 OnClick="@(() => OpenEditDialog(context.Item.Id))" Title="Edit" />
                         }
+                        <MudIconButton Icon="@Icons.Material.Filled.Info" Size="Size.Small" Color="Color.Info"
+                            OnClick="@(() => OpenDetailsDialog(context.Item.Id))" Title="View Details" />
+                        
+                        <!-- Issue Menu: ICS or PAR based on classification -->
+                        <MudMenu Icon="@Icons.Material.Filled.Assignment" Size="Size.Small" Color="Color.Success"
+                            AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                            @if ((int)context.Item.Classification == 3)  @* PropertyPlantEquipment (PPE) *@
+                            {
+                                <MudMenuItem OnClick="@(() => OpenIssuePARDialog(context.Item.Id))">
+                                    <MudIcon Icon="@Icons.Material.Filled.FilePresent" Class="mr-2" />
+                                    Issue as PAR (PPE)
+                                </MudMenuItem>
+                            }
+                            @if ((int)context.Item.Classification == 2)  @* SemiExpendable *@
+                            {
+                                <MudMenuItem OnClick="@(() => OpenIssueICSDialog(context.Item.Id))">
+                                    <MudIcon Icon="@Icons.Material.Filled.Receipt" Class="mr-2" />
+                                    Issue as ICS (Semi-Exp)
+                                </MudMenuItem>
+                            }
+                            @if ((int)context.Item.Classification == 3)  @* PropertyPlantEquipment (PPE) *@
+                            {
+                                <MudDivider Class="my-1" />
+                                <MudMenuItem OnClick="@(() => OpenIssueICSDialog(context.Item.Id))">
+                                    <MudIcon Icon="@Icons.Material.Filled.Receipt" Class="mr-2" />
+                                    Quick Issue as ICS
+                                </MudMenuItem>
+                            }
+                        </MudMenu>
+                        
+                        <MudIconButton Icon="@Icons.Material.Filled.Undo" Size="Size.Small" Color="Color.Warning"
+                            OnClick="@(() => OpenReturnDialog(context.Item.Id))" Title="Return Asset" />
                         @if (_canDelete)
                         {
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"

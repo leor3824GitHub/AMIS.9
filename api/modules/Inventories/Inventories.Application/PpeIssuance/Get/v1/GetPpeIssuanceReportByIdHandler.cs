@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeIssuance.Get.v1;
 
 public sealed class GetPpeIssuanceReportByIdHandler(
     ILogger<GetPpeIssuanceReportByIdHandler> logger,
-    [FromKeyedServices("inventories:ppeir")] IReadRepository<PpeIssuanceReport> repository)
+    [FromKeyedServices("inventories:ppeir")] IReadRepository<PPEIR> repository)
     : IRequestHandler<GetPpeIssuanceReportByIdQuery, GetPpeIssuanceReportByIdResponse>
 {
     public async Task<GetPpeIssuanceReportByIdResponse> Handle(
@@ -25,36 +25,25 @@ public sealed class GetPpeIssuanceReportByIdHandler(
             throw new KeyNotFoundException($"PPE Issuance Report with ID {request.Id} not found.");
         }
 
-        var totalCost = report.GetTotalAcquisitionCost();
-        var lineItems = report.LineItems.Select(li => new PpeIssuanceLineItemResponse(
-            li.PropertyCode,
-            li.Specification,
-            1.0,  // Default quantity to 1 since domain doesn't have Quantity
-            "pc",  // Default unit since domain doesn't have Unit
-            li.DateAcquired,
-            li.AcquisitionCost,
-            li.AccumulatedDepreciation,
-            li.BookValue,
-            li.Location)).ToList();
+        var lineItems = report.Items.Select(li => new PpeIssuanceLineItemResponse(
+            li.PropertyCode)).ToList();
 
         logger.LogInformation(
-            "Successfully retrieved PPE Issuance Report with ID: {Id}, Report Number: {ReportNumber}",
+            "Successfully retrieved PPE Issuance Report with ID: {Id}, IR Number: {IRNumber}",
             report.Id,
-            report.ReportNumber);
+            report.IRNumber);
 
         return new GetPpeIssuanceReportByIdResponse(
             report.Id,
-            report.ReportNumber,
-            report.Recipient.Name,
-            report.Recipient.Address,
-            report.IssuanceType.Value,
-            report.IssuanceDate,
-            totalCost,
-            report.LineItems.Count,
+            report.IRNumber,
+            report.IssuedTo,
+            report.Address,
+            report.Type.Value,
+            report.Date,
+            report.Items.Count,
             (int)report.Status,
             report.Notes,
-            lineItems,
-            report.Created.DateTime);
+            lineItems);
     }
 }
 

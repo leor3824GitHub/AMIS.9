@@ -46,25 +46,8 @@ public sealed class ReturnPARHandler(
                 request.ReceivedByEmployeeName,
                 request.ReturnRemarks);
 
-            // Unassign custodian from each asset in the PAR (assets returned)
-            foreach (var lineItem in par.LineItems)
-            {
-                var spec = new AssetByPropertyCodeSpec(lineItem.PropertyCode);
-                var asset = await assetRepository
-                    .FirstOrDefaultAsync(spec, cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (asset is not null)
-                {
-                    asset.ClearCustodian();
-                    await assetRepository.UpdateAsync(asset, cancellationToken).ConfigureAwait(false);
-
-                    logger.LogInformation(
-                        "Asset {PropertyCode} returned and custodian unassigned via PAR {PARNumber}",
-                        lineItem.PropertyCode,
-                        par.PARNumber);
-                }
-            }
+            // Note: Asset custodian is automatically managed via Return() method
+            // which marks assignments as returned. CurrentCustodianId is computed from CurrentAssignment.
 
             await parRepository.UpdateAsync(par, cancellationToken);
             await parRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

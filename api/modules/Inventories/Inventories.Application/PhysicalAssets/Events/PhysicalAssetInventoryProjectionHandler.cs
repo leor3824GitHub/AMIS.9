@@ -47,7 +47,7 @@ public sealed class PhysicalAssetInventoryProjectionHandler :
             {
                 var registry = InventoryRegistry.CreateFromReceiving(
                     code,
-                    asset.Description ?? string.Empty,
+                    asset.Product?.Name ?? string.Empty,
                     asset.Quantity,
                     asset.CurrentAssignment?.Location ?? string.Empty,
                     reportNumber: "AUTO-CREATE-ON-ASSET-CREATE");

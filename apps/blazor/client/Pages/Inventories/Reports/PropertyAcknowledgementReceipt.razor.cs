@@ -11,7 +11,7 @@ public partial class PropertyAcknowledgementReceipt
 
     private Guid? _reportId;
     private PARModel _model = new();
-    private EmployeeDto? _selectedEmployee;
+    private EmployeeResponse? _selectedEmployee;
     private string _reportStatusText = "Draft";
     private int _reportStatus = 0;
     private bool _isReadOnly;
@@ -44,7 +44,7 @@ public partial class PropertyAcknowledgementReceipt
     {
         try
         {
-            var response = await ApiClient.GetPARByIdAsync(id);
+            var response = await ApiClient.GetPAREndpointAsync("1", id);
             _reportId = response.Id;
             _model.PARNumber = response.ParNumber;
             _model.EmployeeId = response.EmployeeId;
@@ -87,36 +87,30 @@ public partial class PropertyAcknowledgementReceipt
         return $"PAR-{DateTime.Now:yyyyMMdd}-{Guid.NewGuid().ToString()[..8].ToUpper()}";
     }
 
-    private async Task<IEnumerable<EmployeeDto>> SearchEmployees(string searchText, CancellationToken cancellationToken)
+    private async Task<IEnumerable<EmployeeResponse>> SearchEmployees(string searchText, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(searchText))
-            return Array.Empty<EmployeeDto>();
+            return Array.Empty<EmployeeResponse>();
 
         try
         {
-            var response = await ApiClient.SearchEmployeesAsync(searchText);
-            return response?.Select(employee => new EmployeeDto
-            {
-                Id = employee.Id ?? Guid.Empty,
-                Name = employee.Name ?? string.Empty,
-                Department = employee.ResponsibilityCode,
-                Position = employee.Designation
-            }) ?? Enumerable.Empty<EmployeeDto>();
+            var response = await ApiClient.SearchEmployeesEndpointAsync("1", new SearchEmployeesCommand { Keyword = searchText }, cancellationToken);
+            return response?.Items ?? Enumerable.Empty<EmployeeResponse>();
         }
         catch
         {
-            return Array.Empty<EmployeeDto>();
+            return Array.Empty<EmployeeResponse>();
         }
     }
 
-    private void OnEmployeeSelected(EmployeeDto? employee)
+    private void OnEmployeeSelected(EmployeeResponse? employee)
     {
         if (employee != null)
         {
-            _model.EmployeeId = employee.Id;
+            _model.EmployeeId = employee.Id ?? Guid.Empty;
             _model.EmployeeName = employee.Name;
-            _model.Department = employee.Department ?? "";
-            _model.Position = employee.Position;
+            _model.Department = employee.ResponsibilityCode ?? "";
+            _model.Position = employee.Designation;
         }
     }
 
@@ -221,7 +215,7 @@ public partial class PropertyAcknowledgementReceipt
                     LineItems = updateLineItems
                 };
 
-                await ApiClient.UpdatePARAsync(_reportId.Value, updateRequest);
+                await ApiClient.UpdatePAREndpointAsync("1", _reportId.Value, updateRequest);
                 Snackbar.Add("PAR updated successfully", Severity.Success);
             }
             else
@@ -250,7 +244,7 @@ public partial class PropertyAcknowledgementReceipt
                     LineItems = createLineItems
                 };
 
-                var response = await ApiClient.CreatePARAsync(createRequest);
+                var response = await ApiClient.CreatePAREndpointAsync("1", createRequest);
                 _reportId = response.Id;
                 Snackbar.Add("PAR created successfully", Severity.Success);
                 Navigation.NavigateTo($"/inventories/reports/par/{_reportId}");
@@ -273,7 +267,7 @@ public partial class PropertyAcknowledgementReceipt
         {
             try
             {
-                await ApiClient.PostPARAsync(_reportId.Value);
+                await ApiClient.PostPAREndpointAsync("1", _reportId.Value);
                 Snackbar.Add("PAR posted and items assigned successfully", Severity.Success);
                 await LoadReportAsync(_reportId.Value);
             }
@@ -312,7 +306,7 @@ public partial class PropertyAcknowledgementReceipt
         {
             try
             {
-                await ApiClient.CancelPARAsync(_reportId.Value);
+                await ApiClient.CancelPAREndpointAsync("1", _reportId.Value);
                 Snackbar.Add("PAR cancelled successfully", Severity.Success);
                 await LoadReportAsync(_reportId.Value);
             }

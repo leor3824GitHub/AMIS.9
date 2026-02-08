@@ -29,7 +29,7 @@ public static class UpdatePpeReceivingReportEndpoint
             .Produces<Application.PpeReceiving.Update.v1.UpdatePpeReceivingReportResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequirePermission($"{FshResources.PpeReceiving}.{FshActions.Update}")
+            .RequirePermission($"{FshResources.Pper}.{FshActions.Update}")
             .MapToApiVersion(1);
     }
 }

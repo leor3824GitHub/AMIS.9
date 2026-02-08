@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Create.v1;
 
 public sealed class CreatePpeReceivingReportHandler(
     ILogger<CreatePpeReceivingReportHandler> logger,
-    [FromKeyedServices("inventories:pperr")] IRepository<PpeReceivingReport> receivingRepository)
+    [FromKeyedServices("inventories:pperr")] IRepository<PPERR> receivingRepository)
     : IRequestHandler<CreatePpeReceivingReportCommand, CreatePpeReceivingReportResponse>
 {
     public async Task<CreatePpeReceivingReportResponse> Handle(CreatePpeReceivingReportCommand request, CancellationToken cancellationToken)
@@ -17,34 +17,24 @@ public sealed class CreatePpeReceivingReportHandler(
 
         try
         {
-            var source = new PpeSourceInfo(request.SourceName, request.SourceAddress, request.SourceReceiptDate);
-            var receiptType = PpeReceiptType.FromString(request.ReceiptType);
-
-            var report = new PpeReceivingReport(
-                request.ReportNumber,
-                source,
-                receiptType,
+            var report = new PPERR(
+                request.RRNumber,
+                request.ReceivedFrom,
+                request.Address,
+                PpeReceiptType.FromString(request.Type),
+                request.Date,
                 request.Notes);
 
-            var lineItems = request.LineItems.Select(x => new PpeReceivingLineItem(
+            var lineItems = request.LineItems.Select(x => new PPERRLineItem(
                 x.PropertyCode,
-                x.Description,
-                x.DateAcquired,
-                x.Quantity,
-                x.Unit,
-                x.UnitCost,
-                x.Location,
-                x.PpeType,
-                x.ClassCode,
-                x.CategoryCode,
-                x.ItemCode)).ToList();
+                request.RRNumber)).ToList();
 
-            report.AddLineItems(lineItems);
+            report.AddItems(lineItems);
 
             await receivingRepository.AddAsync(report, cancellationToken);
             await receivingRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
 
-            logger.LogInformation("PPE Receiving Report {ReportNumber} created as Draft.", request.ReportNumber);
+            logger.LogInformation("PPE Receiving Report {RRNumber} created as Draft.", request.RRNumber);
             return new CreatePpeReceivingReportResponse(report.Id);
         }
         catch (Exception ex)
@@ -54,4 +44,5 @@ public sealed class CreatePpeReceivingReportHandler(
         }
     }
 }
+
 

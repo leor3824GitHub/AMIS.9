@@ -25,7 +25,7 @@ public static class GenerateQRCodeEndpoint
         .Produces<GenerateQRCodeResponse>()
         .ProducesProblem(StatusCodes.Status400BadRequest)
         .ProducesProblem(StatusCodes.Status404NotFound)
-        .RequirePermission("Permissions.PhysicalAssets.Edit")
+        .RequirePermission("Permissions.PhysicalAssets.Update")
         .MapToApiVersion(new ApiVersion(1, 0));
     }
 

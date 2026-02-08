@@ -17,9 +17,6 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
             .IsRequired()
             .HasMaxLength(50);
         builder.Property(x => x.ProductId).IsRequired();
-        builder.Property(x => x.Description)
-            .IsRequired()
-            .HasMaxLength(500);
 
         // Acquisition details
         builder.Property(x => x.AcquisitionCost)
@@ -36,22 +33,15 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
 
         // Quantity and UOM
         builder.Property(x => x.Quantity).IsRequired();
-        builder.Property(x => x.UnitOfMeasure)
-            .IsRequired()
-            .HasMaxLength(50);
 
         // Lifecycle
-        builder.Property(x => x.EstimatedUsefulLife).IsRequired();
         builder.Property(x => x.DisposalDate);
         builder.Property(x => x.DisposalReason).HasMaxLength(500);
 
-        // Classification
-        builder.Property(x => x.CurrentClassification)
-            .IsRequired()
-            .HasConversion<string>();
+        // Classification - computed property, not mapped to database
+        builder.Ignore(x => x.CurrentClassification);
 
         // PPE-specific
-        builder.Property(x => x.PPEType).HasMaxLength(100);
         builder.Property(x => x.AccumulatedDepreciation)
             .IsRequired()
             .HasPrecision(18, 2);
@@ -59,7 +49,12 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
         // QR Code & Identification (NEW)
         builder.Property(x => x.QRCodeData).HasMaxLength(5000);
         builder.Property(x => x.QRGeneratedDate);
-        builder.Property(x => x.CurrentCustodianId);
+        
+        // CurrentCustodianId is now computed from CurrentAssignment.EmployeeId, not stored
+        builder.Ignore(x => x.CurrentCustodianId);
+
+        // Asset Hierarchy (Parent-Child)
+        builder.Property(x => x.ParentAssetId);
 
         // Navigation
         builder.HasOne(x => x.Product)
@@ -67,13 +62,17 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
             .HasForeignKey(x => x.ProductId)
             .OnDelete(DeleteBehavior.Restrict);
 
+        // Self-referential hierarchy: Parent Asset
+        builder.HasOne(x => x.ParentAsset)
+            .WithMany(x => x.SubAssets)
+            .HasForeignKey(x => x.ParentAssetId)
+            .OnDelete(DeleteBehavior.SetNull);
+
         // AssignmentHistory relationships are handled by their
         // PhysicalAssetId foreign keys and will be auto-discovered by EF Core
 
         // Indexes
         builder.HasIndex(x => x.PropertyCode).IsUnique();
-        builder.HasIndex(x => x.CurrentCustodianId);
-        builder.HasIndex(x => x.CurrentClassification);
         builder.HasIndex(x => x.DisposalDate);
     }
 }

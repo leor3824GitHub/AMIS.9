@@ -49,7 +49,7 @@ public sealed class UpdateSuppliesAndMaterialsReceivingReportHandler(
             // Clear and re-add line items
             // TODO: report.ClearLineItems();
 
-            var lineItems = request.LineItems.Select(dto => new ReceivingLineItem(
+            var lineItems = request.LineItems.Select(dto => new SuppliesAndMaterialsReceivingLineItem(
                 dto.Name,
                 dto.Description,
                 dto.AcquisitionDate,
