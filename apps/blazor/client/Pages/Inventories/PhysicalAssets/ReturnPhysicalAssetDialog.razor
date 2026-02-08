@@ -1,18 +1,20 @@
 @namespace AMIS.Blazor.Client.Pages.Inventories.PhysicalAssets
 
-<EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
-    <MudDialog>
-        <TitleContent>
-            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="w-100">
-                <MudIcon Icon="@Icons.Material.Filled.Undo" Size="Size.Large" Color="Color.Warning" />
-                <div>
-                    <MudText Typo="Typo.h6" Class="font-weight-bold">Return Physical Asset</MudText>
-                    <MudText Typo="Typo.caption" Color="Color.Secondary">Record asset return and condition</MudText>
-                </div>
-            </MudStack>
-        </TitleContent>
-        <DialogContent>
-            @if (_asset != null)
+@if (Model != null)
+{
+    <EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
+        <MudDialog>
+            <TitleContent>
+                <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="w-100">
+                    <MudIcon Icon="@Icons.Material.Filled.Undo" Size="Size.Large" Color="Color.Warning" />
+                    <div>
+                        <MudText Typo="Typo.h6" Class="font-weight-bold">Return Physical Asset</MudText>
+                        <MudText Typo="Typo.caption" Color="Color.Secondary">Record asset return and condition</MudText>
+                    </div>
+                </MudStack>
+            </TitleContent>
+            <DialogContent>
+                @if (_asset != null)
             {
                 <DataAnnotationsValidator />
                 <ValidationSummary />
@@ -55,8 +57,20 @@
                                 </MudSelect>
                             </MudItem>
                             <MudItem xs="12">
-                                <MudTextField @bind-Value="_acceptedByStr" Label="Accepted By (Employee ID)"
-                                    Required="true" Placeholder="Enter receiving officer's GUID" Variant="Variant.Outlined" Clearable="true" />
+                                <MudSelect T="Guid?" 
+                                           Label="Accepted By (Employee Name)" 
+                                           @bind-Value="SelectedEmployeeId"
+                                           Required="true" 
+                                           Variant="Variant.Outlined"
+                                           Disabled="@(_employees.Count == 0)"
+                                           AdornmentIcon="@Icons.Material.Filled.Person"
+                                           Adornment="Adornment.Start"
+                                           HelperText="Select the receiving officer">
+                                    @foreach (var employee in _employees)
+                                    {
+                                        <MudSelectItem T="Guid?" Value="@employee.Id">@employee.Name</MudSelectItem>
+                                    }
+                                </MudSelect>
                             </MudItem>
                             @if (_asset.Classification.ToString() == "SemiExpendable" || _asset.Classification.ToString() == "1")
                             {
@@ -89,6 +103,15 @@
         </DialogActions>
     </MudDialog>
 </EditForm>
+}
+else
+{
+    <MudDialog>
+        <DialogContent>
+            <MudProgressLinear Indeterminate="true" />
+        </DialogContent>
+    </MudDialog>
+}
 
 @code {
     [CascadingParameter]
@@ -97,18 +120,22 @@
     [Parameter]
     public Guid AssetId { get; set; }
 
+    [Parameter]
+    public IReadOnlyList<EmployeeResponse> Employees { get; set; } = Array.Empty<EmployeeResponse>();
+
     [Inject]
     private IApiClient ApiClient { get; set; } = default!;
 
     [Inject]
     private ISnackbar Snackbar { get; set; } = default!;
 
-    [Inject]
+    [CascadingParameter]
     protected Task<AuthenticationState> AuthState { get; set; } = default!;
 
     private ReturnPhysicalAssetCommand Model = default!;
     private PhysicalAssetResponse? _asset;
-    private string _acceptedByStr = "";
+    private List<EmployeeResponse> _employees = new();
+    private Guid? SelectedEmployeeId;
     private bool _loading;
 
     protected override async Task OnInitializedAsync()
@@ -116,21 +143,26 @@
         _loading = true;
         try
         {
+            // Load asset
             _asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", AssetId);
+            
+            // Use employees passed as parameter
+            _employees = Employees.ToList();
+            
             if (_asset != null)
             {
                 var user = (await AuthState).User;
                 var userId = user?.FindFirst("sub")?.Value ?? "";
+                var userGuid = string.IsNullOrEmpty(userId) ? Guid.Empty : Guid.Parse(userId);
 
                 Model = new ReturnPhysicalAssetCommand
                 {
                     Id = AssetId,
                     Reason = "",
                     Condition = "Good",
-                    AcceptedBy = string.IsNullOrEmpty(userId) ? Guid.Empty : Guid.Parse(userId),
+                    AcceptedBy = userGuid,
                     QuantityReturned = 1
                 };
-                _acceptedByStr = Model.AcceptedBy.ToString();
             }
         }
         catch (Exception ex)
@@ -169,9 +201,9 @@
                 return;
             }
 
-            if (!Guid.TryParse(_acceptedByStr, out var acceptedBy) || acceptedBy == Guid.Empty)
+            if (!SelectedEmployeeId.HasValue || SelectedEmployeeId == Guid.Empty)
             {
-                Snackbar?.Add("Invalid 'Accepted By' ID. Please provide a valid GUID.", Severity.Warning);
+                Snackbar?.Add("Please select an employee to accept the asset.", Severity.Warning);
                 _loading = false;
                 return;
             }
@@ -185,7 +217,7 @@
                 return;
             }
 
-            Model.AcceptedBy = acceptedBy;
+            Model.AcceptedBy = SelectedEmployeeId.Value;
 
             var response = await ApiClient.ReturnPhysicalAssetEndpointAsync("1", AssetId, Model);
             if (response != null)

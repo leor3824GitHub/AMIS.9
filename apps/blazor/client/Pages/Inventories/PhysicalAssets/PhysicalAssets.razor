@@ -119,7 +119,8 @@
                         </MudMenu>
                         
                         <MudIconButton Icon="@Icons.Material.Filled.Undo" Size="Size.Small" Color="Color.Warning"
-                            OnClick="@(() => OpenReturnDialog(context.Item.Id))" Title="Return Asset" />
+                            OnClick="@(() => OpenReturnDialog(context.Item.Id))" Title="Return Asset" 
+                            Disabled="@(!CanReturnAsset(context.Item))" />
                         @if (_canDelete)
                         {
                             <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"

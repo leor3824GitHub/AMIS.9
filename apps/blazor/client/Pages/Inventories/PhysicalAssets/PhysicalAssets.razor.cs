@@ -29,6 +29,8 @@ public partial class PhysicalAssets
     private string _searchString = string.Empty;
     private IEnumerable<PhysicalAssetResponse> _entityList = Array.Empty<PhysicalAssetResponse>();
     private int _totalItems;
+    private List<EmployeeResponse> _employees = new();
+    private Guid _currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -37,6 +39,36 @@ public partial class PhysicalAssets
         _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.PhysicalAssets);
         _canEdit = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.PhysicalAssets);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.PhysicalAssets);
+        
+        // Get current user ID
+        var userId = user?.FindFirst("sub")?.Value ?? "";
+        if (!string.IsNullOrEmpty(userId) && Guid.TryParse(userId, out var userGuid))
+        {
+            _currentUserId = userGuid;
+        }
+        
+        await LoadEmployees();
+    }
+
+    private async Task LoadEmployees()
+    {
+        try
+        {
+            var searchFilter = new SearchEmployeesCommand
+            {
+                PageSize = 10000, // Load all employees
+                PageNumber = 1
+            };
+            var result = await ApiClient.SearchEmployeesEndpointAsync("1", searchFilter);
+            if (result?.Items != null)
+            {
+                _employees = result.Items.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error loading employees: {ex.Message}", Severity.Warning);
+        }
     }
 
     private string GetClassificationLabel(PropertyClassification classification)
@@ -195,7 +227,11 @@ public partial class PhysicalAssets
 
             var dialog = await DialogService.ShowAsync<IssuePhysicalAssetDialog>(
                 $"Issue Asset (ICS): {asset.PropertyCode}",
-                new DialogParameters<IssuePhysicalAssetDialog> { { x => x.AssetId, id } },
+                new DialogParameters<IssuePhysicalAssetDialog> 
+                { 
+                    { x => x.AssetId, id },
+                    { x => x.Employees, _employees }
+                },
                 new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
 
             var result = await dialog.Result;
@@ -223,7 +259,11 @@ public partial class PhysicalAssets
 
             var dialog = await DialogService.ShowAsync<IssuePARDialog>(
                 $"Issue Asset (PAR): {asset.PropertyCode}",
-                new DialogParameters<IssuePARDialog> { { x => x.AssetId, id } },
+                new DialogParameters<IssuePARDialog> 
+                { 
+                    { x => x.AssetId, id },
+                    { x => x.Employees, _employees }
+                },
                 new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
 
             var result = await dialog.Result;
@@ -251,7 +291,11 @@ public partial class PhysicalAssets
 
             var dialog = await DialogService.ShowAsync<ReturnPhysicalAssetDialog>(
                 $"Return Asset: {asset.PropertyCode}",
-                new DialogParameters<ReturnPhysicalAssetDialog> { { x => x.AssetId, id } },
+                new DialogParameters<ReturnPhysicalAssetDialog> 
+                { 
+                    { x => x.AssetId, id },
+                    { x => x.Employees, _employees }
+                },
                 new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
 
             var result = await dialog.Result;
@@ -285,5 +329,10 @@ public partial class PhysicalAssets
                 Snackbar?.Add($"Error deleting physical asset: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private bool CanReturnAsset(PhysicalAssetResponse asset)
+    {
+        return asset?.CurrentCustodianId == _currentUserId && _currentUserId != Guid.Empty;
     }
 }

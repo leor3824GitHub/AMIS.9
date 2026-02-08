@@ -39,8 +39,20 @@
                             HelperText="Auto-generated" />
                     </MudItem>
                     <MudItem xs="12">
-                        <MudTextField @bind-Value="_employeeName" Label="Custodian Name" 
-                            Required="true" Variant="Variant.Outlined" />
+                        <MudSelect T="Guid?" 
+                                   Label="Custodian Name" 
+                                   @bind-Value="SelectedEmployeeId"
+                                   Required="true" 
+                                   Variant="Variant.Outlined"
+                                   Disabled="@(_employees.Count == 0)"
+                                   AdornmentIcon="@Icons.Material.Filled.Person"
+                                   Adornment="Adornment.Start"
+                                   HelperText="Select custodian who will receive the asset">
+                            @foreach (var employee in _employees)
+                            {
+                                <MudSelectItem T="Guid?" Value="@employee.Id">@employee.Name</MudSelectItem>
+                            }
+                        </MudSelect>
                     </MudItem>
                     <MudItem xs="12">
                         <MudTextField @bind-Value="_department" Label="Department" 
@@ -127,8 +139,13 @@
     [Parameter]
     public Guid AssetId { get; set; }
 
+    [Parameter]
+    public IReadOnlyList<EmployeeResponse> Employees { get; set; } = Array.Empty<EmployeeResponse>();
+
     private PhysicalAssetResponse? _asset;
     private bool _loading = false;
+    private List<EmployeeResponse> _employees = new();
+    private Guid? SelectedEmployeeId;
 
     // Form fields
     private string _parNumber = string.Empty;
@@ -148,6 +165,7 @@
         try
         {
             _asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", AssetId);
+            _employees = Employees.ToList();
             
             // Initialize PAR number with current date and random suffix
             _parNumber = $"PAR-{DateTime.Now:yyyy}-{new Random().Next(10000):D4}";
@@ -167,10 +185,10 @@
             return;
         }
 
-        // Validate required fields
-        if (string.IsNullOrWhiteSpace(_employeeName))
+        // Validate employee selection
+        if (!SelectedEmployeeId.HasValue || SelectedEmployeeId == Guid.Empty)
         {
-            Snackbar?.Add("Custodian name is required", Severity.Warning);
+            Snackbar?.Add("Please select a custodian", Severity.Warning);
             return;
         }
 
@@ -183,6 +201,13 @@
         _loading = true;
         try
         {
+            // Get selected employee
+            var selectedEmployee = _employees.FirstOrDefault(e => e.Id == SelectedEmployeeId);
+            if (selectedEmployee != null)
+            {
+                _employeeName = selectedEmployee.Name;
+            }
+
             var lineItems = new List<CreatePARLineItemRequest>
             {
                 new()
@@ -202,7 +227,7 @@
                 Position = _position ?? string.Empty,
                 IssuancePurpose = _issuancePurpose ?? string.Empty,
                 IssuanceLocation = _issuanceLocation ?? string.Empty,
-                EmployeeId = System.Guid.Empty,
+                EmployeeId = SelectedEmployeeId.Value,
                 IssuanceDate = DateTime.Now,
                 LineItems = lineItems
                 // Signature fields (IssuedByName, ReceivedByName, ApprovedByName) 
