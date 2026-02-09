@@ -1,9 +1,11 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.Framework.Core.Exceptions;
 using AMIS.WebApi.Inventories.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace AMIS.WebApi.Inventories.Application.PhysicalAssets.Issue.v1;
 
@@ -20,20 +22,44 @@ public sealed class IssuePhysicalAssetHandler(
         ArgumentNullException.ThrowIfNull(request);
 
         var asset = await repository.GetByIdAsync(request.Id, cancellationToken)
-            ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
+            ?? throw new FshException(
+                $"Physical asset {request.Id} not found",
+                new[] { $"Asset with ID {request.Id} does not exist" },
+                HttpStatusCode.NotFound);
 
         // Pass signature names for formal PAR workflow (optional for semi-expendable ICS)
-        var history = asset.Issue(
-            request.EmployeeId,
-            request.EmployeeName,
-            request.DocumentNumber,
-            request.QuantityIssued,
-            request.Location,
-            emitEvent: true,
-            classificationPolicy: null,
-            request.IssuedByName,
-            request.ReceivedByName,
-            request.ApprovedByName);
+        AssetAssignmentHistory history;
+        try
+        {
+            history = asset.Issue(
+                request.EmployeeId,
+                request.EmployeeName,
+                request.DocumentNumber,
+                request.QuantityIssued,
+                request.Location,
+                emitEvent: true,
+                classificationPolicy: null,
+                request.IssuedByName,
+                request.ReceivedByName,
+                request.ApprovedByName);
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Convert domain validation errors to proper HTTP responses
+            throw new FshException(
+                ex.Message,
+                new[] { ex.Message },
+                ex.Message.Contains("already assigned", StringComparison.OrdinalIgnoreCase) 
+                    ? HttpStatusCode.Conflict  // 409 for already assigned
+                    : HttpStatusCode.BadRequest); // 400 for other validation errors
+        }
+        catch (ArgumentException ex)
+        {
+            throw new FshException(
+                ex.Message,
+                new[] { ex.Message },
+                HttpStatusCode.BadRequest);
+        }
         
         try
         {
@@ -48,20 +74,35 @@ public sealed class IssuePhysicalAssetHandler(
             
             // Reload the asset from the database
             var reloadedAsset = await repository.GetByIdAsync(request.Id, cancellationToken)
-                ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
+                ?? throw new FshException(
+                    $"Physical asset {request.Id} not found",
+                    new[] { $"Asset with ID {request.Id} was deleted" },
+                    HttpStatusCode.NotFound);
             
             // Re-apply the issue operation
-            history = reloadedAsset.Issue(
-                request.EmployeeId,
-                request.EmployeeName,
-                request.DocumentNumber,
-                request.QuantityIssued,
-                request.Location,
-                emitEvent: true,
-                classificationPolicy: null,
-                request.IssuedByName,
-                request.ReceivedByName,
-                request.ApprovedByName);
+            try
+            {
+                history = reloadedAsset.Issue(
+                    request.EmployeeId,
+                    request.EmployeeName,
+                    request.DocumentNumber,
+                    request.QuantityIssued,
+                    request.Location,
+                    emitEvent: true,
+                    classificationPolicy: null,
+                    request.IssuedByName,
+                    request.ReceivedByName,
+                    request.ApprovedByName);
+            }
+            catch (InvalidOperationException ex)
+            {
+                throw new FshException(
+                    ex.Message,
+                    new[] { ex.Message },
+                    ex.Message.Contains("already assigned", StringComparison.OrdinalIgnoreCase)
+                        ? HttpStatusCode.Conflict
+                        : HttpStatusCode.BadRequest);
+            }
             
             // Try update again
             await repository.UpdateAsync(reloadedAsset, cancellationToken);
