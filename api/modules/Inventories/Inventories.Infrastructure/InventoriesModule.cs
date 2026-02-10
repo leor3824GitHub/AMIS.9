@@ -25,7 +25,6 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.IssuanceItem;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Acceptance;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InventoryTransaction;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.AnnualProcurementPlans;
-using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InspectionRequest;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Inspection;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PurchaseRequest;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Product;
@@ -164,18 +163,6 @@ public static class InventoriesModule
             acceptanceGroup.MapAcceptanceCancelEndpoint();
 
             acceptanceGroup.MapAcceptanceItemManagementEndpoints();
-
-            var inspectionRequestGroup = app.MapGroup("inspectionRequests").WithTags("inspectionRequests");
-            inspectionRequestGroup.MapInspectionRequestCreationEndpoint();
-            inspectionRequestGroup.MapInspectionRequestDeletionEndpoint();
-            inspectionRequestGroup.MapInspectionRequestDeletionRangeEndpoint();
-            inspectionRequestGroup.MapGetInspectionRequestEndpoint();
-            inspectionRequestGroup.MapGetInspectionRequestListEndpoint();
-            inspectionRequestGroup.MapInspectionRequestUpdateEndpoint();
-            inspectionRequestGroup.MapInspectionRequestAssignInspectorEndpoint();
-            inspectionRequestGroup.MapInspectionRequestMarkCompletedEndpoint();
-            inspectionRequestGroup.MapInspectionRequestMarkAcceptedEndpoint();
-            inspectionRequestGroup.MapInspectionRequestUpdateStatusEndpoint();
 
             var purchaseRequestGroup = app.MapGroup("purchaseRequests").WithTags("purchaseRequests");
             purchaseRequestGroup.MapPurchaseRequestCreationEndpoint();
@@ -392,8 +379,6 @@ public static class InventoriesModule
         builder.Services.AddKeyedScoped<IRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:assets");
         builder.Services.AddKeyedScoped<IReadRepository<PhysicalAsset>, InventoriesRepository<PhysicalAsset>>("inventories:assets");
 
-        builder.Services.AddKeyedScoped<IRepository<InspectionRequest>, InventoriesRepository<InspectionRequest>>("inventories:inspectionRequests");
-        builder.Services.AddKeyedScoped<IReadRepository<InspectionRequest>, InventoriesRepository<InspectionRequest>>("inventories:inspectionRequests");
         builder.Services.AddKeyedScoped<IRepository<PurchaseRequest>, InventoriesRepository<PurchaseRequest>>("inventories:purchaseRequests");
         builder.Services.AddKeyedScoped<IReadRepository<PurchaseRequest>, InventoriesRepository<PurchaseRequest>>("inventories:purchaseRequests");
 

@@ -23,42 +23,42 @@ internal sealed class PurchaseWithItemsSpec : Specification<Purchase>
 public sealed class CreateInspectionHandler(
     ILogger<CreateInspectionHandler> logger,
     [FromKeyedServices("inventories:inspections")] IRepository<Inspection> repository,
-    [FromKeyedServices("inventories:inspectionRequests")] IRepository<InspectionRequest> inspectionRequestRepository,
-    [FromKeyedServices("inventories:purchases")] IRepository<Purchase> purchaseRepository)
+    [FromKeyedServices("inventories:purchases")] IRepository<Purchase> purchaseRepository,
+    [FromKeyedServices("inventories:physicalAssets")] IRepository<PhysicalAsset> assetRepository)
     : IRequestHandler<CreateInspectionCommand, CreateInspectionResponse>
 {
     public async Task<CreateInspectionResponse> Handle(CreateInspectionCommand request, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var inspectionRequest = await inspectionRequestRepository.GetByIdAsync(request.InspectionRequestId, cancellationToken);
-        if (inspectionRequest is null)
+        Inspection inspection = request.Type switch
         {
-            throw new InvalidOperationException("Create an inspection request before recording an inspection.");
-        }
+            InspectionType.NewDelivery => await CreateNewDeliveryInspection(request, cancellationToken),
+            InspectionType.AssetReturn => await CreateAssetReturnInspection(request, cancellationToken),
+            InspectionType.Repair => await CreateRepairInspection(request, cancellationToken),
+            _ => throw new InvalidOperationException($"Unknown inspection type: {request.Type}")
+        };
 
-        if (inspectionRequest.PurchaseId != request.PurchaseId)
-        {
-            throw new InvalidOperationException("The inspection must target the same purchase as its inspection request.");
-        }
+        await repository.AddAsync(inspection, cancellationToken);
+        logger.LogInformation("Inspection created: {InspectionId} (Type: {Type})", inspection.Id, request.Type);
 
-        if (inspectionRequest.Status is InspectionRequestStatus.Pending)
-        {
-            throw new InvalidOperationException("Assign an inspector to the request before creating an inspection.");
-        }
+        return new CreateInspectionResponse(inspection.Id);
+    }
 
-        if (inspectionRequest.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
-        {
-            throw new InvalidOperationException("This inspection request has already been completed. Create a new request for additional inspections.");
-        }
+    private async Task<Inspection> CreateNewDeliveryInspection(CreateInspectionCommand request, CancellationToken cancellationToken)
+    {
+        if (!request.PurchaseId.HasValue || request.PurchaseId.Value == Guid.Empty)
+            throw new InvalidOperationException("PurchaseId is required for NewDelivery inspections.");
 
-        var inspection = Inspection.Create(
-            purchaseId: request.PurchaseId,
-            employeeId: request.InspectorId,
-            inspectedOn: request.InspectionDate,
-            remarks: request.Remarks
+        var inspection = Inspection.CreateForNewDelivery(
+            purchaseId: request.PurchaseId.Value,
+            employeeId: request.EmployeeId,
+            inspectedOn: request.InspectedOn,
+            remarks: request.Remarks,
+            iarDocumentPath: request.IARDocumentPath
         );
 
+        // Add items if provided
         if (request.Items is not null)
         {
             foreach (var item in request.Items)
@@ -66,24 +66,49 @@ public sealed class CreateInspectionHandler(
                 var status = item.InspectionItemStatus ?? InspectionItemStatus.NotInspected;
                 _ = inspection.AddItem(item.PurchaseItemId, item.QtyInspected, item.QtyPassed, item.QtyFailed, item.Remarks, status);
             }
+
+            // Evaluate status based on purchase items
+            var purchaseSpec = new PurchaseWithItemsSpec(request.PurchaseId.Value);
+            var purchase = await purchaseRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken);
+            inspection.EvaluateAndSetStatus(purchase);
         }
 
-        await repository.AddAsync(inspection, cancellationToken);
+        return inspection;
+    }
 
-        // Load purchase with items to evaluate inspection status
-        var purchaseSpec = new PurchaseWithItemsSpec(request.PurchaseId);
-        var purchase = await purchaseRepository.FirstOrDefaultAsync(purchaseSpec, cancellationToken);
-        inspection.EvaluateAndSetStatus(purchase);
+    private async Task<Inspection> CreateAssetReturnInspection(CreateInspectionCommand request, CancellationToken cancellationToken)
+    {
+        if (!request.PhysicalAssetId.HasValue || request.PhysicalAssetId.Value == Guid.Empty)
+            throw new InvalidOperationException("PhysicalAssetId is required for AssetReturn inspections.");
 
-        if (inspectionRequest.Status == InspectionRequestStatus.Assigned)
-        {
-            inspectionRequest.UpdateStatus(InspectionRequestStatus.InProgress);
-            await inspectionRequestRepository.UpdateAsync(inspectionRequest, cancellationToken);
-        }
+        var asset = await assetRepository.GetByIdAsync(request.PhysicalAssetId.Value, cancellationToken);
+        if (asset is null)
+            throw new InvalidOperationException($"Physical asset {request.PhysicalAssetId} not found.");
 
-        logger.LogInformation("Inspection created {InspectionId}", inspection.Id);
+        return Inspection.CreateForAssetReturn(
+            physicalAssetId: request.PhysicalAssetId.Value,
+            employeeId: request.EmployeeId,
+            inspectedOn: request.InspectedOn,
+            remarks: request.Remarks
+        );
+    }
 
-        return new CreateInspectionResponse(inspection.Id);
+    private async Task<Inspection> CreateRepairInspection(CreateInspectionCommand request, CancellationToken cancellationToken)
+    {
+        if (!request.PhysicalAssetId.HasValue || request.PhysicalAssetId.Value == Guid.Empty)
+            throw new InvalidOperationException("PhysicalAssetId is required for Repair inspections.");
+
+        var asset = await assetRepository.GetByIdAsync(request.PhysicalAssetId.Value, cancellationToken);
+        if (asset is null)
+            throw new InvalidOperationException($"Physical asset {request.PhysicalAssetId} not found.");
+
+        return Inspection.CreateForRepair(
+            physicalAssetId: request.PhysicalAssetId.Value,
+            employeeId: request.EmployeeId,
+            inspectedOn: request.InspectedOn,
+            remarks: request.Remarks
+        );
     }
 }
+
 
