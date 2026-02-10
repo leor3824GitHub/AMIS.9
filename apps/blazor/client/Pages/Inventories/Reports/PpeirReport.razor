@@ -1,0 +1,285 @@
+@page "/inventories/reports/ppeir"
+@page "/inventories/reports/ppeir/{ReportId}"
+@using AMIS.Blazor.Client.Components
+@using AMIS.Blazor.Infrastructure.Api
+@using System.ComponentModel.DataAnnotations
+
+<PageHeader Title="PPE Issuance Report" Header="PPE Issuance Report" SubHeader="Issue PPE items from inventory" />
+
+@code {
+    [Parameter]
+    public string? ReportId { get; set; }
+}
+
+<MudPaper Class="report-shell pa-4">
+    <MudStack Spacing="3">
+        <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2">
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="flex-1">
+                PPE Issuance Report (PPEIR) for PPE disposals and transfers.
+                @if (_isReadOnly)
+                {
+                    <strong> - View Only Mode</strong>
+                }
+            </MudAlert>
+            <MudChip T="string" Variant="Variant.Outlined" Color="@(_reportStatus == 0 ? Color.Warning : Color.Success)"
+                Icon="@(_reportStatus == 0 ? Icons.Material.Filled.Edit : Icons.Material.Filled.Lock)">
+                @_reportStatusText
+            </MudChip>
+        </MudStack>
+
+        <MudStack Row="true" Spacing="1">
+            @if (!_isReadOnly)
+            {
+                @if (_reportStatus == 0)
+                {
+                    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="SubmitAsync" Disabled="@(!CanSave)"
+                        StartIcon="@Icons.Material.Filled.Save">@_actionButtonText</MudButton>
+                    @if (CanPost)
+                    {
+                        <MudButton Variant="Variant.Filled" Color="Color.Warning" OnClick="PostAsync"
+                            StartIcon="@Icons.Material.Filled.Lock">Post &amp; Lock</MudButton>
+                    }
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="ResetWithConfirmation"
+                        StartIcon="@Icons.Material.Filled.Refresh">Reset</MudButton>
+                    @if (_reportId.HasValue)
+                    {
+                        <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => CancelEdit())"
+                            StartIcon="@Icons.Material.Filled.Close">Cancel Edit</MudButton>
+                    }
+                }
+                else
+                {
+                    @* TODO: Enable after API client regeneration
+                    <MudButton Variant="Variant.Filled" Color="Color.Warning" Disabled="true"
+                        StartIcon="@Icons.Material.Filled.Undo">Cancel & Reverse (Coming Soon)</MudButton>
+                    <MudButton Variant="Variant.Filled" Color="Color.Error" Disabled="true"
+                        StartIcon="@Icons.Material.Filled.Delete">Delete (Coming Soon)</MudButton>
+                    *@
+                }
+            }
+            <MudButton Variant="Variant.Outlined" Color="Color.Info" OnClick="@(() => PrintAsync())"
+                StartIcon="@Icons.Material.Filled.Print">Print</MudButton>
+            @if (_reportId.HasValue && _reportStatus == 0 && !_isReadOnly)
+            {
+                <MudButton Variant="Variant.Outlined" Color="Color.Error" OnClick="@(() => GoToList())"
+                    StartIcon="@Icons.Material.Filled.Close">Cancel Edit</MudButton>
+            }
+            <MudButton Variant="Variant.Outlined" Color="Color.Default" OnClick="@(() => GoToList())"
+                StartIcon="@Icons.Material.Filled.ArrowBack">Back to List</MudButton>
+        </MudStack>
+        <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+            <MudTabPanel Text="Report Details" Icon="@Icons.Material.Filled.Description">
+                <MudGrid GutterSize="2">
+                    <MudItem xs="12" md="4">
+                        <MudTextField @bind-Value="_model.IrNumber" For="@(() => _model.IrNumber)"
+                            Label="IR Number" Required="true" MaxLength="10"
+                            Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudDatePicker @bind-Date="_model.Date" Label="Date" Required="true"
+                            MaxDate="@DateTime.Today" Format="MM/dd/yyyy"
+                            Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                    <MudItem xs="12" md="4">
+                        <MudSelect T="string" @bind-Value="_model.Type" Label="Type" Required="true"
+                            Disabled="@(_reportStatus != 0 || _isReadOnly)">
+                            @foreach (var type in IssuanceTypes)
+                            {
+                                <MudSelectItem Value="@type">@type</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_model.IssuedTo" For="@(() => _model.IssuedTo)"
+                            Label="Issued To" Required="true" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                    <MudItem xs="12" md="6">
+                        <MudTextField @bind-Value="_model.Address" For="@(() => _model.Address)"
+                            Label="Address" Required="true" Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                    <MudItem xs="12">
+                        <MudTextField @bind-Value="_model.Notes" Label="Notes" Lines="3"
+                            Disabled="@(_reportStatus != 0 || _isReadOnly)" />
+                    </MudItem>
+                </MudGrid>
+            </MudTabPanel>
+
+            <MudTabPanel Text="Line Items" Icon="@Icons.Material.Filled.List" BadgeData="@_model.LineItems.Count"
+                BadgeColor="Color.Info">
+                <MudPaper Class="line-card pa-3">
+                    <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+                        <MudText Typo="Typo.subtitle1">Line Items</MudText>
+                        <MudChip T="string" Color="Color.Info" Variant="Variant.Outlined">@_model.LineItems.Count item(s)</MudChip>
+                    </MudStack>
+
+                    @if (_reportStatus == 0)
+                    {
+                        <MudPaper Class="pa-3 mt-3" Outlined="true">
+                            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="mb-2">
+                                <MudText Typo="Typo.h6">Add Items from Inventory</MudText>
+                                <MudButtonGroup Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">
+                                    <MudButton OnClick="@(() => SetSelectionMode(SelectionMode.Search))" 
+                                        Variant="@(_selectionMode == SelectionMode.Search ? Variant.Filled : Variant.Outlined)"
+                                        StartIcon="@Icons.Material.Filled.Search">
+                                        Search
+                                    </MudButton>
+                                    <MudButton OnClick="@(() => SetSelectionMode(SelectionMode.List))" 
+                                        Variant="@(_selectionMode == SelectionMode.List ? Variant.Filled : Variant.Outlined)"
+                                        StartIcon="@Icons.Material.Filled.List">
+                                        Select from List
+                                    </MudButton>
+                                </MudButtonGroup>
+                            </MudStack>
+
+                            <MudStack Spacing="2">
+                                @if (_selectionMode == SelectionMode.Search)
+                                {
+                                    <MudTextField @bind-Value="_searchKeyword" Label="Search by Property Code or Description"
+                                        Placeholder="Type to search..." Adornment="Adornment.End" 
+                                        AdornmentIcon="@Icons.Material.Filled.Search" FullWidth="true" 
+                                        Immediate="true" DebounceInterval="300" OnDebounceIntervalElapsed="SearchInventoryAsync" />
+                                }
+                                else
+                                {
+                                    <MudStack Row="true" Spacing="2">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Info" 
+                                            OnClick="LoadAllInventoryAsync"
+                                            StartIcon="@Icons.Material.Filled.Refresh"
+                                            Disabled="_isLoadingInventory">
+                                            Load All Inventory
+                                        </MudButton>
+                                        @if (_inventorySearchResults.Count > 0)
+                                        {
+                                            <MudText Typo="Typo.body2" Class="align-self-center">
+                                                Showing @_inventorySearchResults.Count item(s)
+                                            </MudText>
+                                        }
+                                    </MudStack>
+                                }
+
+                                @if (_isLoadingInventory)
+                                {
+                                    <MudProgressLinear Indeterminate="true" />
+                                }
+
+                                @if (_inventorySearchResults.Count > 0)
+                                {
+                                    <MudText Typo="Typo.caption">Select one or more items to add (@_selectedInventoryItems.Count selected):</MudText>
+                                    <MudTable Items="_inventorySearchResults" Dense="true" Hover="true" FixedHeader="true" 
+                                        Height="300px" MultiSelection="true" @bind-SelectedItems="_selectedInventoryItems"
+                                        SelectOnRowClick="true">
+                                        <HeaderContent>
+                                            <MudTh><MudTableSortLabel SortBy="new Func<InventoryRegistryResponse, object>(x => x.PropertyCode)">Property Code</MudTableSortLabel></MudTh>
+                                            <MudTh>Description</MudTh>
+                                            <MudTh>Location</MudTh>
+                                            <MudTh Style="text-align:right">Available</MudTh>
+                                            <MudTh>Status</MudTh>
+                                        </HeaderContent>
+                                        <RowTemplate>
+                                            <MudTd DataLabel="Property Code"><strong>@context.PropertyCode</strong></MudTd>
+                                            <MudTd DataLabel="Description">@context.Description</MudTd>
+                                            <MudTd DataLabel="Location">@context.Location</MudTd>
+                                            <MudTd DataLabel="Available" Style="text-align:right">
+                                                <MudChip T="string" Color="Color.Primary" Variant="Variant.Outlined" Size="Size.Small">@context.Quantity</MudChip>
+                                            </MudTd>
+                                            <MudTd DataLabel="Status">
+                                                <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">@context.Status</MudChip>
+                                            </MudTd>
+                                        </RowTemplate>
+                                    </MudTable>
+
+                                    <MudStack Row="true" Spacing="1">
+                                        <MudButton Variant="Variant.Filled" Color="Color.Primary" 
+                                            OnClick="AddSelectedItemsAsync" 
+                                            StartIcon="@Icons.Material.Filled.Add"
+                                            Disabled="@(!_selectedInventoryItems.Any())">
+                                            Add @_selectedInventoryItems.Count Item(s)
+                                        </MudButton>
+                                        <MudButton Variant="Variant.Outlined" Color="Color.Secondary" 
+                                            OnClick="ClearSelection"
+                                            StartIcon="@Icons.Material.Filled.Clear">
+                                            Clear Selection
+                                        </MudButton>
+                                    </MudStack>
+                                }
+                                else if (_hasSearchedInventory && !_isLoadingInventory)
+                                {
+                                    <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                                        @if (_selectionMode == SelectionMode.Search)
+                                        {
+                                            @if (string.IsNullOrWhiteSpace(_searchKeyword))
+                                            {
+                                                <text>Start typing to search for inventory items.</text>
+                                            }
+                                            else
+                                            {
+                                                <text>No items found matching "@_searchKeyword"</text>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <text>Click "Load All Inventory" to view available items.</text>
+                                        }
+                                    </MudAlert>
+                                }
+                            </MudStack>
+                        </MudPaper>
+                    }
+                    else
+                    {
+                        <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Class="mt-3">
+                            This report is locked (Posted). Cannot add or edit line items. @* TODO: Cancel link coming after API client regeneration *@
+                        </MudAlert>
+                    }
+
+                    <MudTable Items="_model.LineItems" Dense="true" Hover="true" Class="mt-3">
+                        <HeaderContent>
+                            <MudTh>Property Code</MudTh>
+                            @if (_reportStatus == 0)
+                            {
+                                <MudTh align="right"></MudTh>
+                            }
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
+                            <MudTd align="right">
+                                @if (_reportStatus == 0)
+                                {
+                                    <MudStack Row="true" Spacing="0">
+                                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error"
+                                            OnClick="() => RemoveItem(context)" Title="Remove" Size="Size.Small" />
+                                    </MudStack>
+                                }
+                                else
+                                {
+                                    <MudChip T="string" Disabled="true" Color="Color.Default"
+                                        Icon="@Icons.Material.Filled.Lock" Size="Size.Small">Locked</MudChip>
+                                }
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+                </MudPaper>
+            </MudTabPanel>
+        </MudTabs>
+
+        @if (_createdId is not null)
+        {
+            <MudAlert Severity="Severity.Success" Variant="Variant.Filled">
+                PPE Issuance Report created with Id: @_createdId
+            </MudAlert>
+        }
+    </MudStack>
+</MudPaper>
+
+<!-- Print Dialog -->
+<MudDialog @bind-Visible="_isPrintDialogOpen"
+    Options="@(new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true, CloseOnEscapeKey = true })">
+    <DialogContent>
+        <PpeirPrint Model="_model" />
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="PrintDocument" Variant="Variant.Filled" Color="Color.Primary"
+            StartIcon="@Icons.Material.Filled.Print">Print Now</MudButton>
+        <MudButton OnClick="ClosePrintDialog" Variant="Variant.Text" Color="Color.Secondary">Close</MudButton>
+    </DialogActions>
+</MudDialog>

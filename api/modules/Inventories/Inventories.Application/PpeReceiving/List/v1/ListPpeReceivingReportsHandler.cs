@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeReceiving.List.v1;
 
 public sealed class ListPpeReceivingReportsHandler(
     ILogger<ListPpeReceivingReportsHandler> logger,
-    [FromKeyedServices("inventories:pperr")] IReadRepository<PpeReceivingReport> repository)
+    [FromKeyedServices("inventories:pperr")] IReadRepository<PPERR> repository)
     : IRequestHandler<ListPpeReceivingReportsQuery, ListPpeReceivingReportsResponse>
 {
     public async Task<ListPpeReceivingReportsResponse> Handle(
@@ -24,11 +24,12 @@ public sealed class ListPpeReceivingReportsHandler(
             .Select(x => new PpeReceivingReportDto
             {
                 Id = x.Id,
-                ReportNumber = x.ReportNumber,
-                SourceName = x.Source.Name,
-                ReceiptType = x.ReceiptType.Value,
-                SourceReceiptDate = x.Source.ReceiptDate,
-                LineItemsCount = x.LineItems.Count,
+                RRNumber = x.RRNumber,
+                ReceivedFrom = x.ReceivedFrom,
+                Address = x.Address,
+                Type = x.Type.Value,
+                Date = x.Date,
+                ItemsCount = x.Items.Count,
                 TotalAmount = x.GetTotalAmount(),
                 Status = (int)x.Status,
                 CreatedAt = x.Created.DateTime,

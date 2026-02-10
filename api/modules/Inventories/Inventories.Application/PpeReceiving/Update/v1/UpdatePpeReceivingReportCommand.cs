@@ -4,11 +4,11 @@ namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Update.v1;
 
 public sealed record UpdatePpeReceivingReportCommand(
     Guid Id,
+    string ReceivedFrom,
+    string Address,
+    string Type,
+    DateTime Date,
     IReadOnlyList<UpdatePpeReceivingLineItemRequest> LineItems,
-    string SourceName,
-    string SourceAddress,
-    DateTime SourceReceiptDate,
-    string ReceiptType,
     string? Notes = null) : IRequest<UpdatePpeReceivingReportResponse>;
 
 public sealed record UpdatePpeReceivingLineItemRequest(

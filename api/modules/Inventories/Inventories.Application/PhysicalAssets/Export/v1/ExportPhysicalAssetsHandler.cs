@@ -33,11 +33,11 @@ public sealed class ExportPhysicalAssetsHandler(
     private static byte[] GenerateCsv(IEnumerable<PhysicalAsset> assets)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("PropertyCode,Description,Classification,AcquisitionCost,AcquisitionDate,Location,Condition,Quantity,BookValue,IsDisposed,CurrentCustodianId");
+        sb.AppendLine("PropertyCode,Classification,AcquisitionCost,AcquisitionDate,Location,Condition,Quantity,BookValue,IsDisposed,CurrentCustodianId");
 
         foreach (var asset in assets)
         {
-            sb.AppendLine($"{asset.PropertyCode},{EscapeCsv(asset.Description)},{asset.CurrentClassification},{asset.AcquisitionCost},{asset.AcquisitionDate:yyyy-MM-dd},{EscapeCsv(asset.CurrentAssignment?.Location)},{asset.Condition},{asset.Quantity},{asset.BookValue},{asset.IsDisposed},{asset.CurrentCustodianId}");
+            sb.AppendLine($"{asset.PropertyCode},{asset.CurrentClassification},{asset.AcquisitionCost},{asset.AcquisitionDate:yyyy-MM-dd},{EscapeCsv(asset.CurrentAssignment?.Location)},{asset.Condition},{asset.Quantity},{asset.BookValue},{asset.IsDisposed},{asset.CurrentCustodianId}");
         }
 
         return Encoding.UTF8.GetBytes(sb.ToString());

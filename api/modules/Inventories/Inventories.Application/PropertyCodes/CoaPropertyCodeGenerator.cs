@@ -160,12 +160,14 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
         string itemCode,
         CancellationToken cancellationToken)
     {
-        var spec = new PropertyCodeSequenceByKeySpec(yearKey, officeCode, classCode, categoryCode, itemCode);
+        // Fetch sequence using ClassCode and CategoryCode for proper matching with seeded data
+        var spec = new PropertyCodeSequenceByClassAndCategorySpec(classCode, categoryCode);
         var sequence = await _sequenceRepo.FirstOrDefaultAsync(spec, cancellationToken).ConfigureAwait(false);
 
         if (sequence is null)
         {
-            sequence = PropertyCodeSequence.Create(yearKey, officeCode, classCode, categoryCode, itemCode, _options.ResetSequenceAnnually);
+            // If no sequence exists for this ClassCode/CategoryCode, create a new one with LastSequenceValue = 0
+            sequence = PropertyCodeSequence.Create(classCode, classCode, categoryCode, "001", "Standard Item", null);
             await _sequenceRepo.AddAsync(sequence, cancellationToken).ConfigureAwait(false);
         }
 
@@ -192,18 +194,15 @@ public sealed class CoaPropertyCodeGenerator : IAssetPropertyCodeGenerator
             Query.Where(x => x.ClassCode == classCode && x.CategoryCode == categoryCode && x.Code == code && x.IsActive);
     }
 
-    private sealed class PropertyCodeSequenceByKeySpec : Ardalis.Specification.Specification<PropertyCodeSequence>
+    private sealed class PropertyCodeSequenceByClassAndCategorySpec : Ardalis.Specification.Specification<PropertyCodeSequence>
     {
-        public PropertyCodeSequenceByKeySpec(
-            int yearKey,
-            string officeCode,
-            string classCode,
-            string categoryCode,
-            string itemCode) =>
-            Query.Where(x => x.YearKey == yearKey
-                && x.OfficeCode == officeCode
-                && x.ClassCode == classCode
-                && x.CategoryCode == categoryCode
-                && x.ItemCode == itemCode);
+        public PropertyCodeSequenceByClassAndCategorySpec(string classCode, string categoryCode) =>
+            Query.Where(x => x.ClassCode == classCode && x.CategoryCode == categoryCode);
+    }
+
+    private sealed class PropertyCodeSequenceByClassificationAndCategorySpec : Ardalis.Specification.Specification<PropertyCodeSequence>
+    {
+        public PropertyCodeSequenceByClassificationAndCategorySpec(string classification, string category) =>
+            Query.Where(x => x.Classification == classification && x.CategoryCode == category);
     }
 }

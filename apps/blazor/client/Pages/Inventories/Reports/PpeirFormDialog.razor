@@ -1,0 +1,237 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+@using System.ComponentModel.DataAnnotations
+@using System.Collections.ObjectModel
+
+<MudDialog @bind-IsVisible="_isDialogOpen">
+    <DialogContent>
+        <MudStack Spacing="3">
+            <MudAlert Severity="Severity.Info" Variant="Variant.Outlined">
+                PPE Issuance Report (PPEIR) - Fill out details and line items
+            </MudAlert>
+            <MudForm @ref="_form" Model="_model">
+                <MudStack Row="true" Spacing="2" Class="mb-3" Justify="Justify.FlexEnd">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="SubmitAsync" StartIcon="@Icons.Material.Filled.Save">Save PPEIR</MudButton>
+                    <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Reset" StartIcon="@Icons.Material.Filled.Restore">Reset</MudButton>
+                </MudStack>
+
+                <MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4">
+                    <MudTabPanel Text="Report Details" Icon="@Icons.Material.Filled.Description">
+                        <MudGrid GutterSize="2" Class="mt-2">
+                            <MudItem xs="12" md="2">
+                                <MudTextField @bind-Value="_model.IrNumber" For="@(() => _model.IrNumber)" Label="IR Number" Required="true" Class="w-50" />
+                            </MudItem>
+                            <MudItem xs="12" md="5">
+                                <MudTextField @bind-Value="_model.IssuedTo" For="@(() => _model.IssuedTo)" Label="Issued To" Required="true" FullWidth="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="5">
+                                <MudTextField @bind-Value="_model.Address" For="@(() => _model.Address)" Label="Address" Required="true" FullWidth="true" />
+                            </MudItem>
+                            <MudItem xs="12" md="3">
+                                <MudSelect @bind-Value="_model.Type" For="@(() => _model.Type)" Label="Type" Required="true">
+                                    <MudSelectItem Value="@("IssuedToEmployee")">Issued to Employee</MudSelectItem>
+                                    <MudSelectItem Value="@("IssuedToDepartment")">Issued to Department</MudSelectItem>
+                                    <MudSelectItem Value="@("Transfer")">Transfer</MudSelectItem>
+                                    <MudSelectItem Value="@("Return")">Return</MudSelectItem>
+                                </MudSelect>
+                            </MudItem>
+                            <MudItem xs="12" md="3">
+                                <MudDatePicker @bind-Date="_model.Date" For="@(() => _model.Date)" Label="Date" />
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudTextField @bind-Value="_model.Notes" For="@(() => _model.Notes)" Label="Notes" Lines="3" FullWidth="true" />
+                            </MudItem>
+                        </MudGrid>
+                    </MudTabPanel>
+
+                    <MudTabPanel Text="Line Items" Icon="@Icons.Material.Filled.ViewList">
+                        <MudStack Spacing="2" Class="mt-3">
+                            <MudText Typo="Typo.subtitle2">Add Line Items (Property Code Only)</MudText>
+                            <MudGrid GutterSize="2">
+                                <MudItem xs="12" md="9">
+                                    <MudTextField @bind-Value="_draft.PropertyCode" Label="Property Code" />
+                                </MudItem>
+                                <MudItem xs="12" md="3">
+                                    <MudButton Variant="Variant.Outlined" Color="Color.Primary" OnClick="AddItemAsync" StartIcon="@Icons.Material.Filled.Add" FullWidth="true">Add Item</MudButton>
+                                </MudItem>
+                            </MudGrid>
+
+                            @if (_model.LineItems.Count > 0)
+                            {
+                                <MudTable Items="@_model.LineItems.ToList()" Dense="true" Hover="true" Class="mt-3">
+                                    <HeaderContent>
+                                        <MudTh>Property Code</MudTh>
+                                        <MudTh align="center">Actions</MudTh>
+                                    </HeaderContent>
+                                    <RowTemplate>
+                                        <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
+                                        <MudTd align="center">
+                                            <MudIconButton Icon="@Icons.Material.Filled.Edit" Color="Color.Primary" Size="Size.Small" OnClick="@(() => EditItemAsync(_model.LineItems.ToList().IndexOf(context)))" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.ContentCopy" Color="Color.Info" Size="Size.Small" OnClick="@(() => DuplicateItemAsync(context))" />
+                                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Color="Color.Error" Size="Size.Small" OnClick="@(() => RemoveItemAsync(_model.LineItems.ToList().IndexOf(context)))" />
+                                        </MudTd>
+                                    </RowTemplate>
+                                </MudTable>
+                            }
+                        </MudStack>
+                    </MudTabPanel>
+                </MudTabs>
+            </MudForm>
+        </MudStack>
+    </DialogContent>
+</MudDialog>
+
+@code {
+    private const string ApiVersion = "1";
+    [Inject] public IApiClient ApiClient { get; set; } = default!;
+    [Inject] public ISnackbar Snackbar { get; set; } = default!;
+    [Parameter] public EventCallback OnSaved { get; set; }
+
+    private bool _isDialogOpen;
+    private MudForm? _form;
+    private PpeirModel _model = new();
+    private PpeIssuanceLineItemModel _draft = new();
+    private int _editingIndex = -1;
+
+    public void Open()
+    {
+        Reset();
+        _isDialogOpen = true;
+    }
+
+    private void Reset()
+    {
+        _model = new();
+        _draft = new();
+        _editingIndex = -1;
+    }
+
+    private async Task AddItemAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_draft.PropertyCode))
+        {
+            Snackbar.Add("Property Code is required", Severity.Warning);
+            return;
+        }
+
+        // Check if property code already exists
+        if (_model.LineItems.Any(x => x.PropertyCode == _draft.PropertyCode.Trim()))
+        {
+            Snackbar.Add("Property Code already added", Severity.Warning);
+            return;
+        }
+
+        if (_editingIndex >= 0)
+        {
+            _model.LineItems[_editingIndex] = new PpeIssuanceLineItemModel
+            {
+                PropertyCode = _draft.PropertyCode.Trim(),
+            };
+            Snackbar.Add("Item updated", Severity.Success);
+            _editingIndex = -1;
+        }
+        else
+        {
+            _model.LineItems.Add(new PpeIssuanceLineItemModel
+            {
+                PropertyCode = _draft.PropertyCode.Trim(),
+            });
+            Snackbar.Add("Item added", Severity.Success);
+        }
+        _draft = new();
+    }
+
+    private async Task EditItemAsync(int index)
+    {
+        _draft = new PpeIssuanceLineItemModel
+        {
+            PropertyCode = _model.LineItems.ElementAt(index).PropertyCode,
+        };
+        _editingIndex = index;
+    }
+
+    private async Task RemoveItemAsync(int index)
+    {
+        _model.LineItems.Remove(_model.LineItems.ElementAt(index));
+    }
+
+    private async Task DuplicateItemAsync(PpeIssuanceLineItemModel item)
+    {
+        _draft = new PpeIssuanceLineItemModel
+        {
+            PropertyCode = item.PropertyCode,
+        };
+        Snackbar.Add("Item duplicated to draft. Click 'Add Item' to save.", Severity.Info);
+    }
+
+    private async Task SubmitAsync()
+    {
+        if (_model.LineItems.Count == 0)
+        {
+            Snackbar.Add("Add at least one line item", Severity.Warning);
+            return;
+        }
+
+        if (_model.Date > DateTime.Today)
+        {
+            Snackbar.Add("Date cannot be in the future", Severity.Warning);
+            return;
+        }
+
+        try
+        {
+            var command = new CreatePpeIssuanceReportCommand
+            {
+                IrNumber = _model.IrNumber,
+                IssuedTo = _model.IssuedTo,
+                Address = _model.Address,
+                Type = _model.Type,
+                Date = _model.Date ?? DateTime.Today,
+                Notes = _model.Notes,
+                LineItems = _model.LineItems.Select(x => new CreatePpeIssuanceLineItemRequest
+                {
+                    PropertyCode = x.PropertyCode,
+                }).ToList(),
+            };
+
+            var response = await ApiClient.CreatePpeIssuanceReportEndpointAsync(ApiVersion, command);
+            Snackbar.Add("PPE Issuance Report saved", Severity.Success);
+            await OnSaved.InvokeAsync();
+            _isDialogOpen = false;
+        }
+        catch (Exception ex)
+        {
+            Snackbar.Add(ex.Message, Severity.Error);
+        }
+    }
+
+    public class PpeirModel
+    {
+        public Guid Id { get; set; }
+
+        [Required, MaxLength(50)]
+        public string IrNumber { get; set; } = string.Empty;
+
+        [Required]
+        public string IssuedTo { get; set; } = string.Empty;
+
+        [Required]
+        public string Address { get; set; } = string.Empty;
+
+        [Required, MaxLength(50)]
+        public string Type { get; set; } = "IssuedToEmployee";
+
+        [Required]
+        public DateTime? Date { get; set; } = DateTime.Today;
+
+        public string Notes { get; set; } = string.Empty;
+
+        public Collection<PpeIssuanceLineItemModel> LineItems { get; } = new();
+    }
+
+    public class PpeIssuanceLineItemModel
+    {
+        [MaxLength(50)]
+        public string PropertyCode { get; set; } = string.Empty;
+    }
+}

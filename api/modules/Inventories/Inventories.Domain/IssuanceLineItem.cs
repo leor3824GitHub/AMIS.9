@@ -38,7 +38,7 @@ public record IssuanceLineItem
         if (unitCost < 0)
             throw new ArgumentException("Unit cost cannot be negative.", nameof(unitCost));
 
-        if (acquisitionDate > DateTime.UtcNow)
+        if (acquisitionDate.Date > DateTime.UtcNow.Date)
             throw new ArgumentException("Acquisition date cannot be in the future.", nameof(acquisitionDate));
 
         PropertyCode = propertyCode;

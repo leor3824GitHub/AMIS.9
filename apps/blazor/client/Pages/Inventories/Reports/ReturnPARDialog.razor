@@ -55,7 +55,7 @@
                 ReturnRemarks = _returnNotes
             };
 
-            await ApiClient.ReturnPARAsync(request);
+            await ApiClient.ReturnPAREndpointAsync("1", PARId, request);
             Snackbar.Add("PAR items returned successfully", Severity.Success);
             await MudDialog.CloseAsync(DialogResult.Ok(true));
         }

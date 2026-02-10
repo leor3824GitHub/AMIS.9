@@ -11,7 +11,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Update.v1;
 
 public sealed class UpdatePpeReceivingReportHandler(
     ILogger<UpdatePpeReceivingReportHandler> logger,
-    [FromKeyedServices("inventories:pperr")] IRepository<PpeReceivingReport> repository,
+    [FromKeyedServices("inventories:pperr")] IRepository<PPERR> repository,
     IAuthorizationService authorizationService)
     : IRequestHandler<UpdatePpeReceivingReportCommand, UpdatePpeReceivingReportResponse>
 {
@@ -22,7 +22,7 @@ public sealed class UpdatePpeReceivingReportHandler(
         // Authorization check: Only users with Update permission can update reports
         var authResult = await authorizationService.AuthorizeAsync(
             null,
-            $"{FshResources.PpeReceiving}.{FshActions.Update}");
+            $"{FshResources.Pper}.{FshActions.Update}");
 
         if (!authResult.Succeeded)
         {
@@ -56,27 +56,15 @@ public sealed class UpdatePpeReceivingReportHandler(
                     $"PPE Receiving Report with Id {request.Id} is already Posted. Only Accounting personnel can modify posted reports for data integrity purposes. If changes are necessary, please contact your Accounting department.");
             }
 
-            var source = new PpeSourceInfo(request.SourceName, request.SourceAddress, request.SourceReceiptDate);
-            var receiptType = PpeReceiptType.FromString(request.ReceiptType);
+            report.UpdateHeader(request.ReceivedFrom, request.Address, PpeReceiptType.FromString(request.Type), request.Date, request.Notes);
 
-            report.UpdateHeader(source, receiptType, request.Notes);
+            report.ClearItems();
 
-            report.ClearLineItems();
-
-            var lineItems = request.LineItems.Select(x => new PpeReceivingLineItem(
+            var lineItems = request.LineItems.Select(x => new PPERRLineItem(
                 x.PropertyCode,
-                x.Description,
-                x.DateAcquired,
-                x.Quantity,
-                x.Unit,
-                x.UnitCost,
-                x.Location,
-                x.PpeType,
-                x.ClassCode,
-                x.CategoryCode,
-                x.ItemCode)).ToList();
+                report.RRNumber)).ToList();
 
-            report.AddLineItems(lineItems);
+            report.AddItems(lineItems);
 
             await repository.UpdateAsync(report, cancellationToken).ConfigureAwait(false);
             await repository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

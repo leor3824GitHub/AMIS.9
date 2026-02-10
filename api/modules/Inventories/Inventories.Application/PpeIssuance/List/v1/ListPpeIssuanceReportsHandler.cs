@@ -8,7 +8,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeIssuance.List.v1;
 
 public sealed class ListPpeIssuanceReportsHandler(
     ILogger<ListPpeIssuanceReportsHandler> logger,
-    [FromKeyedServices("inventories:ppeir")] IReadRepository<PpeIssuanceReport> repository)
+    [FromKeyedServices("inventories:ppeir")] IReadRepository<PPEIR> repository)
     : IRequestHandler<ListPpeIssuanceReportsQuery, ListPpeIssuanceReportsResponse>
 {
     public async Task<ListPpeIssuanceReportsResponse> Handle(
@@ -24,11 +24,11 @@ public sealed class ListPpeIssuanceReportsHandler(
             .Select(x => new PpeIssuanceReportDto
             {
                 Id = x.Id,
-                ReportNumber = x.ReportNumber,
-                RecipientName = x.Recipient.Name,
-                IssuanceType = x.IssuanceType.Value,
-                IssuanceDate = x.IssuanceDate,
-                LineItemsCount = x.LineItems.Count,
+                IRNumber = x.IRNumber,
+                IssuedTo = x.IssuedTo,
+                Type = x.Type.Value,
+                Date = x.Date,
+                LineItemsCount = x.Items.Count,
                 Status = (int)x.Status,
                 CreatedAt = x.Created.DateTime,
             })

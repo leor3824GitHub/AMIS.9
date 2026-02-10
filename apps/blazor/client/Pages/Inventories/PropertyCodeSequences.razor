@@ -1,0 +1,69 @@
+@page "/inventories/property-code-sequences"
+
+<PageHeader Title="Property Code Sequences" Header="Property Code Sequences" SubHeader="Manage property code sequence trackers for asset classification." />
+
+<EntityTable @ref="_table" TEntity="PropertyCodeSequenceDto" TId="int" TRequest="PropertyCodeSequenceViewModel" Context="@Context">
+
+    <AdvancedSearchContent>
+        <!-- Advanced search provided by EntityTable framework -->
+    </AdvancedSearchContent>
+
+    <EditFormContent>
+        @if (!context.IsCreate)
+        {
+            <MudItem xs="12" md="6">
+                <MudTextField Value="@context.RequestModel.Id.ToString()" Underline=false ReadOnly Label="Sequence ID" />
+            </MudItem>
+        }
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Classification" 
+                          For="@(() => context.RequestModel.Classification)" 
+                          @bind-Value="context.RequestModel.Classification"
+                          Placeholder="e.g., OFFICE EQUIPMENT" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Category Code" 
+                          For="@(() => context.RequestModel.Category)" 
+                          @bind-Value="context.RequestModel.Category"
+                          Placeholder="e.g., 01"
+                          MaxLength="2" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Class Code" 
+                          For="@(() => context.RequestModel.ClassCode)" 
+                          @bind-Value="context.RequestModel.ClassCode"
+                          Placeholder="e.g., OE"
+                          MaxLength="3" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Item Code" 
+                          For="@(() => context.RequestModel.ItemCode)" 
+                          @bind-Value="context.RequestModel.ItemCode"
+                          Placeholder="e.g., 001"
+                          MaxLength="3" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="Item Description" 
+                          For="@(() => context.RequestModel.ItemDescription)" 
+                          @bind-Value="context.RequestModel.ItemDescription"
+                          Placeholder="e.g., ADDING MACHINE" />
+        </MudItem>
+        <MudItem xs="12" md="6">
+            <MudTextField Label="GL Account" 
+                          For="@(() => context.RequestModel.GLAccount)" 
+                          @bind-Value="context.RequestModel.GLAccount"
+                          Placeholder="Optional accounting code" />
+        </MudItem>
+        @if (!context.IsCreate)
+        {
+            <MudItem xs="12" md="6">
+                <MudNumericField Label="Last Sequence Value" 
+                                For="@(() => context.RequestModel.LastSequenceValue)" 
+                                @bind-Value="context.RequestModel.LastSequenceValue"
+                                Min="0"
+                                Hint="Current sequence number (read-only during edit)" />
+            </MudItem>
+        }
+    </EditFormContent>
+
+</EntityTable>

@@ -13,6 +13,11 @@ public record IssuePhysicalAssetCommand : IRequest<IssuePhysicalAssetResponse>
     public string DocumentNumber { get; init; } = string.Empty;
     public int? QuantityIssued { get; init; }
     public string? Location { get; init; }
+    
+    // Formal PAR signature fields (optional, used for PPE)
+    public string? IssuedByName { get; init; }
+    public string? ReceivedByName { get; init; }
+    public string? ApprovedByName { get; init; }
 }
 
 /// <summary>

@@ -8,7 +8,7 @@ using Shared.Authorization;
 namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Cancel.v1;
 
 public sealed class CancelPpeReceivingReportHandler(
-    [FromKeyedServices("inventories:pperr")] IRepository<Domain.PpeReceivingReport> repository,
+    [FromKeyedServices("inventories:pperr")] IRepository<Domain.PPERR> repository,
     [FromKeyedServices("inventories:inventory-registries")] IRepository<Domain.InventoryRegistry> registryRepository,
     [FromKeyedServices("inventories:inventory-transaction-logs")] IRepository<Domain.InventoryTransactionLog> transactionLogRepository,
     IAuthorizationService authorizationService,
@@ -19,7 +19,7 @@ public sealed class CancelPpeReceivingReportHandler(
         // Authorization check: Only users with Cancel permission can cancel reports
         var authResult = await authorizationService.AuthorizeAsync(
             null,
-            $"{FshResources.PpeReceiving}.{FshActions.Cancel}");
+            $"{FshResources.Pper}.{FshActions.Cancel}");
         
         if (!authResult.Succeeded)
         {
@@ -48,15 +48,15 @@ public sealed class CancelPpeReceivingReportHandler(
         // Create reversal entries in transaction log
         // For receiving (which added items), we create failure entries to document the reversal
         var transactionLogs = new List<Domain.InventoryTransactionLog>();
-        foreach (var lineItem in report.LineItems)
+        foreach (var lineItem in report.Items)
         {
             var reversalLog = Domain.InventoryTransactionLog.CreateFailure(
                 propertyCode: lineItem.PropertyCode,
                 transactionType: "PPERR",
-                reportNumber: report.ReportNumber,
-                inventoryBefore: (int)lineItem.Quantity,
+                reportNumber: report.RRNumber,
+                inventoryBefore: 1,
                 statusBefore: Domain.ValueObjects.InventoryItemStatus.InStock,
-                errorMessage: $"Reversal: Cancelled PPERR {report.ReportNumber}");
+                errorMessage: $"Reversal: Cancelled PPERR {report.RRNumber}");
 
             transactionLogs.Add(reversalLog);
         }

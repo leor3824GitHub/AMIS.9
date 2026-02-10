@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace AMIS.WebApi.Inventories.Infrastructure.Persistence.Data;
 
 /// <summary>
-/// Seeds default asset classification rules based on COA Circular 2022-004
+/// Seeds default asset classification rules based on standard DBM thresholds.
 /// </summary>
 public static class AssetClassificationRuleSeeder
 {
@@ -25,65 +25,29 @@ public static class AssetClassificationRuleSeeder
 
         logger.LogInformation("Seeding default asset classification rules...");
 
-        var effectiveDate = new DateTime(2022, 1, 1); // COA Circular 2022-004 effective date
+        var effectiveDate = new DateTime(2022, 1, 1);
 
         var rules = new[]
         {
-            // Rule 1: Consumable (≤ ₱1,000)
+            // Rule 1: Semi-Expendable (₱500 - ₱49,999)
             AssetClassificationRule.Create(
-                ruleName: "Consumable - Low Value",
-                classification: PropertyClassification.Consumable,
-                minimumCost: 0,
-                maximumCost: 1000,
-                effectiveDate: effectiveDate,
-                rcaAccountCode: RCAAccountCode.SuppliesAndMaterialsInventory,
-                expenseAccountCode: RCAAccountCode.SuppliesAndMaterialsExpense,
-                documentType: "RSMI",
-                coaReference: "COA Circular 2022-004",
-                minimumUsefulLifeMonths: null,
-                priority: 10),
-
-            // Rule 2: Semi-Expendable (₱1,001 - ₱50,000 with useful life > 1 year)
-            AssetClassificationRule.Create(
-                ruleName: "Semi-Expendable Property",
+                name: "Semi-Expendable Property",
                 classification: PropertyClassification.SemiExpendable,
-                minimumCost: 1001,
-                maximumCost: 50000,
+                minimumCost: 500,
+                maximumCost: 49999,
                 effectiveDate: effectiveDate,
                 rcaAccountCode: RCAAccountCode.SemiExpendablePropertyInventory,
-                expenseAccountCode: RCAAccountCode.SemiExpendablePropertyExpense,
-                documentType: "ICS",
-                coaReference: "COA Circular 2022-004",
-                minimumUsefulLifeMonths: 12, // Must be > 1 year
-                priority: 20),
+                priority: 10),
 
-            // Rule 3: Consumable (₱1,001 - ₱50,000 with useful life < 1 year)
+            // Rule 2: Property, Plant and Equipment (≥ ₱50,000)
             AssetClassificationRule.Create(
-                ruleName: "Consumable - Short Useful Life",
-                classification: PropertyClassification.Consumable,
-                minimumCost: 1001,
-                maximumCost: 50000,
-                effectiveDate: effectiveDate,
-                rcaAccountCode: RCAAccountCode.SuppliesAndMaterialsInventory,
-                expenseAccountCode: RCAAccountCode.SuppliesAndMaterialsExpense,
-                documentType: "RSMI",
-                coaReference: "COA Circular 2022-004",
-                minimumUsefulLifeMonths: null,
-                priority: 15), // Lower priority than semi-expendable
-
-            // Rule 4: Property, Plant and Equipment (> ₱50,000)
-            AssetClassificationRule.Create(
-                ruleName: "Property, Plant and Equipment",
+                name: "Property, Plant and Equipment",
                 classification: PropertyClassification.PropertyPlantEquipment,
-                minimumCost: 50001,
+                minimumCost: 50000,
                 maximumCost: 999999999,
                 effectiveDate: effectiveDate,
-                rcaAccountCode: RCAAccountCode.MachineryAndEquipment, // Default, varies by type
-                expenseAccountCode: RCAAccountCode.SemiExpendablePropertyExpense, // Use generic expense
-                documentType: "PAR",
-                coaReference: "COA Circular 2022-004",
-                minimumUsefulLifeMonths: null,
-                priority: 30)
+                rcaAccountCode: RCAAccountCode.MachineryAndEquipment,
+                priority: 20)
         };
 
         context.AssetClassificationRules.AddRange(rules);
@@ -93,13 +57,12 @@ public static class AssetClassificationRuleSeeder
     }
 
     /// <summary>
-    /// Create a new threshold update (e.g., when COA changes PPE threshold)
+    /// Creates new rules when thresholds change via COA directive.
     /// </summary>
     public static async Task CreateThresholdUpdateAsync(
         InventoriesDbContext context,
         decimal newPPEThreshold,
         DateTime effectiveDate,
-        string coaReference,
         ILogger logger,
         CancellationToken cancellationToken = default)
     {
@@ -108,80 +71,44 @@ public static class AssetClassificationRuleSeeder
             newPPEThreshold,
             effectiveDate);
 
-        // Expire old rules
+        // Deactivate old rules
         var oldRules = await context.AssetClassificationRules
             .Where(r => r.IsActive && (r.ExpiryDate == null || r.ExpiryDate >= effectiveDate))
             .ToListAsync(cancellationToken);
 
         foreach (var rule in oldRules)
         {
-            rule.SetExpiryDate(effectiveDate.AddDays(-1));
+            rule.Deactivate();
         }
 
         // Create new rules with updated threshold
         var newRules = new[]
         {
             AssetClassificationRule.Create(
-                ruleName: "Consumable - Low Value (Updated)",
-                classification: PropertyClassification.Consumable,
-                minimumCost: 0,
-                maximumCost: 1000,
+                name: "Semi-Expendable Property (Updated)",
+                classification: PropertyClassification.SemiExpendable,
+                minimumCost: 500,
+                maximumCost: newPPEThreshold - 1,
                 effectiveDate: effectiveDate,
-                rcaAccountCode: RCAAccountCode.SuppliesAndMaterialsInventory,
-                expenseAccountCode: RCAAccountCode.SuppliesAndMaterialsExpense,
-                documentType: "RSMI",
-                coaReference: coaReference,
-                minimumUsefulLifeMonths: null,
+                rcaAccountCode: RCAAccountCode.SemiExpendablePropertyInventory,
                 priority: 10),
 
             AssetClassificationRule.Create(
-                ruleName: "Semi-Expendable Property (Updated)",
-                classification: PropertyClassification.SemiExpendable,
-                minimumCost: 1001,
-                maximumCost: newPPEThreshold,
-                effectiveDate: effectiveDate,
-                rcaAccountCode: RCAAccountCode.SemiExpendablePropertyInventory,
-                expenseAccountCode: RCAAccountCode.SemiExpendablePropertyExpense,
-                documentType: "ICS",
-                coaReference: coaReference,
-                minimumUsefulLifeMonths: 12,
-                priority: 20),
-
-            AssetClassificationRule.Create(
-                ruleName: "Consumable - Short Useful Life (Updated)",
-                classification: PropertyClassification.Consumable,
-                minimumCost: 1001,
-                maximumCost: newPPEThreshold,
-                effectiveDate: effectiveDate,
-                rcaAccountCode: RCAAccountCode.SuppliesAndMaterialsInventory,
-                expenseAccountCode: RCAAccountCode.SuppliesAndMaterialsExpense,
-                documentType: "RSMI",
-                coaReference: coaReference,
-                minimumUsefulLifeMonths: null,
-                priority: 15),
-
-            AssetClassificationRule.Create(
-                ruleName: "Property, Plant and Equipment (Updated)",
+                name: "Property, Plant and Equipment (Updated)",
                 classification: PropertyClassification.PropertyPlantEquipment,
-                minimumCost: newPPEThreshold + 1,
+                minimumCost: newPPEThreshold,
                 maximumCost: 999999999,
                 effectiveDate: effectiveDate,
                 rcaAccountCode: RCAAccountCode.MachineryAndEquipment,
-                expenseAccountCode: RCAAccountCode.SemiExpendablePropertyExpense, // Use generic expense
-                documentType: "PAR",
-                coaReference: coaReference,
-                minimumUsefulLifeMonths: null,
-                priority: 30)
+                priority: 20)
         };
 
         context.AssetClassificationRules.AddRange(newRules);
         await context.SaveChangesAsync(cancellationToken);
 
         logger.LogInformation(
-            "Successfully created {Count} new classification rules with PPE threshold ₱{Threshold}",
-            newRules.Length,
-            newPPEThreshold);
+            "Successfully created {Count} updated asset classification rules",
+            newRules.Length);
     }
 }
-
 

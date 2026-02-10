@@ -16,9 +16,10 @@
     }
     <MudText Typo="Typo.subtitle2" Color="Color.Surface" Class="ml-4 my-3">Modules</MudText>
     <MudNavGroup Title="Inventories" Icon="@Icons.Material.Filled.AddBox">
-        @if (_canViewProducts)
+        @if (_canViewPhysicalAssets)
         {
-            <MudNavLink Href="/inventories/products" Icon="@Icons.Material.Filled.List" Class="fsh-nav-child">Products
+            <MudNavLink Href="/inventories/physical-assets" Icon="@Icons.Material.Filled.Domain" Class="fsh-nav-child">
+                Physical Assets
             </MudNavLink>
         }
         @if (_canViewPurchases)
@@ -113,31 +114,44 @@
             <MudNavLink Href="/inventories/inventories" Icon="@Icons.Material.Filled.Inventory2" Class="fsh-nav-child">
                 Inventories</MudNavLink>
         }
-        @if (_canViewPhysicalAssets)
-        {
-            <MudNavLink Href="/inventories/physical-assets" Icon="@Icons.Material.Filled.Domain" Class="fsh-nav-child">
-                Physical Assets</MudNavLink>
-        }
+
         @if (_canViewAcceptances)
         {
             <MudNavLink Href="/inventories/acceptances" Icon="@Icons.Material.Filled.AssignmentTurnedIn"
                 Class="fsh-nav-child">
                 Acceptances</MudNavLink>
         }
-        @if (_canViewCategories)
+        @* Registry *@
+        @if (_canViewProducts || _canViewCategories || _canViewSuppliers || _canViewEmployees)
         {
-            <MudNavLink Href="/inventories/categories" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Categories
-            </MudNavLink>
-        }
-        @if (_canViewSuppliers)
-        {
-            <MudNavLink Href="/inventories/suppliers" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Suppliers
-            </MudNavLink>
-        }
-        @if (_canViewEmployees)
-        {
-            <MudNavLink Href="/inventories/employees" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Employees
-            </MudNavLink>
+            <MudNavGroup Title="Registry" Icon="@Icons.Material.Filled.ListAlt">
+                @if (_canViewProducts)
+                {
+                    <MudNavLink Href="/inventories/products" Icon="@Icons.Material.Filled.List" Class="fsh-nav-child">Products
+                    </MudNavLink>
+                }
+                @if (_canViewPropertyCodeSequences)
+                {
+                    <MudNavLink Href="/inventories/property-code-sequences" Icon="@Icons.Material.Filled.Settings" Class="fsh-nav-child">
+                        Property Code
+                    </MudNavLink>
+                }
+                @if (_canViewCategories)
+                {
+                    <MudNavLink Href="/inventories/categories" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Categories
+                    </MudNavLink>
+                }
+                @if (_canViewSuppliers)
+                {
+                    <MudNavLink Href="/inventories/suppliers" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Suppliers
+                    </MudNavLink>
+                }
+                @if (_canViewEmployees)
+                {
+                    <MudNavLink Href="/inventories/employees" Icon="@Icons.Material.Filled.Label" Class="fsh-nav-child">Employees
+                    </MudNavLink>
+                }
+            </MudNavGroup>
         }
     </MudNavGroup>
     <MudNavLink Href="/todos" Icon="@Icons.Material.Filled.Checklist" Class="fsh-nav-child">Todos</MudNavLink>

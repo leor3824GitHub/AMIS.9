@@ -29,6 +29,8 @@ public partial class PhysicalAssets
     private string _searchString = string.Empty;
     private IEnumerable<PhysicalAssetResponse> _entityList = Array.Empty<PhysicalAssetResponse>();
     private int _totalItems;
+    private List<EmployeeResponse> _employees = new();
+    private Guid _currentUserId;
 
     protected override async Task OnInitializedAsync()
     {
@@ -37,6 +39,46 @@ public partial class PhysicalAssets
         _canCreate = await AuthService.HasPermissionAsync(user, FshActions.Create, FshResources.PhysicalAssets);
         _canEdit = await AuthService.HasPermissionAsync(user, FshActions.Update, FshResources.PhysicalAssets);
         _canDelete = await AuthService.HasPermissionAsync(user, FshActions.Delete, FshResources.PhysicalAssets);
+        
+        // Get current user ID
+        var userId = user?.FindFirst("sub")?.Value ?? "";
+        if (!string.IsNullOrEmpty(userId) && Guid.TryParse(userId, out var userGuid))
+        {
+            _currentUserId = userGuid;
+        }
+        
+        await LoadEmployees();
+    }
+
+    private async Task LoadEmployees()
+    {
+        try
+        {
+            var searchFilter = new SearchEmployeesCommand
+            {
+                PageSize = 10000, // Load all employees
+                PageNumber = 1
+            };
+            var result = await ApiClient.SearchEmployeesEndpointAsync("1", searchFilter);
+            if (result?.Items != null)
+            {
+                _employees = result.Items.ToList();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error loading employees: {ex.Message}", Severity.Warning);
+        }
+    }
+
+    private string GetClassificationLabel(PropertyClassification classification)
+    {
+        return classification switch
+        {
+            PropertyClassification._2 => "Semi-Expendable",
+            PropertyClassification._3 => "Property, Plant & Equipment",
+            _ => classification.ToString()
+        };
     }
 
     private async Task<GridData<PhysicalAssetResponse>> ServerReload(GridState<PhysicalAssetResponse> state)
@@ -86,8 +128,7 @@ public partial class PhysicalAssets
 
         return items.Where(asset =>
             (!string.IsNullOrWhiteSpace(asset.PropertyCode) && asset.PropertyCode.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            || (!string.IsNullOrWhiteSpace(asset.Description) && asset.Description.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            || (!string.IsNullOrWhiteSpace(asset.UnitOfMeasure) && asset.UnitOfMeasure.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
+            || (!string.IsNullOrWhiteSpace(asset.ProductName) && asset.ProductName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             || (!string.IsNullOrWhiteSpace(asset.Location) && asset.Location.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             || (!string.IsNullOrWhiteSpace(asset.SerialNumber) && asset.SerialNumber.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             || (!string.IsNullOrWhiteSpace(asset.ModelNumber) && asset.ModelNumber.Contains(_searchString, StringComparison.OrdinalIgnoreCase)));
@@ -107,7 +148,7 @@ public partial class PhysicalAssets
     private async Task OpenCreateDialog()
     {
         var dialog = await DialogService.ShowAsync<CreatePhysicalAssetDialog>("Create Physical Asset",
-            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+            new DialogOptions { MaxWidth = MaxWidth.Large, FullWidth = true });
 
         var result = await dialog.Result;
         if (!result.Canceled)
@@ -133,6 +174,142 @@ public partial class PhysicalAssets
         }
     }
 
+    private async Task OpenDetailsDialog(Guid id)
+    {
+        var parameters = new DialogParameters<UpdatePhysicalAssetDialog>
+        {
+            { x => x.AssetId, id }
+        };
+
+        var dialog = await DialogService.ShowAsync<UpdatePhysicalAssetDialog>("Asset Details", parameters,
+            new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+        await dialog.Result;
+    }
+
+    private async Task OpenIssueDialog(Guid id)
+    {
+        try
+        {
+            var asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", id);
+            if (asset == null)
+            {
+                Snackbar?.Add("Asset not found.", Severity.Error);
+                return;
+            }
+
+        // Route based on classification
+            if ((int)asset.Classification == 3)  // PropertyPlantEquipment
+            {
+                await OpenIssuePARDialog(id);
+            }
+            else
+            {
+                await OpenIssueICSDialog(id);
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error opening issue dialog: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenIssueICSDialog(Guid id)
+    {
+        try
+        {
+            var asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", id);
+            if (asset == null)
+            {
+                Snackbar?.Add("Asset not found.", Severity.Error);
+                return;
+            }
+
+            var dialog = await DialogService.ShowAsync<IssuePhysicalAssetDialog>(
+                $"Issue Asset (ICS): {asset.PropertyCode}",
+                new DialogParameters<IssuePhysicalAssetDialog> 
+                { 
+                    { x => x.AssetId, id },
+                    { x => x.Employees, _employees }
+                },
+                new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await Reload();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error opening ICS dialog: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenIssuePARDialog(Guid id)
+    {
+        try
+        {
+            var asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", id);
+            if (asset == null)
+            {
+                Snackbar?.Add("Asset not found.", Severity.Error);
+                return;
+            }
+
+            var dialog = await DialogService.ShowAsync<IssuePARDialog>(
+                $"Issue Asset (PAR): {asset.PropertyCode}",
+                new DialogParameters<IssuePARDialog> 
+                { 
+                    { x => x.AssetId, id },
+                    { x => x.Employees, _employees }
+                },
+                new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
+
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await Reload();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error opening PAR dialog: {ex.Message}", Severity.Error);
+        }
+    }
+
+    private async Task OpenReturnDialog(Guid id)
+    {
+        try
+        {
+            var asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", id);
+            if (asset == null)
+            {
+                Snackbar?.Add("Asset not found.", Severity.Error);
+                return;
+            }
+
+            var dialog = await DialogService.ShowAsync<ReturnPhysicalAssetDialog>(
+                $"Return Asset: {asset.PropertyCode}",
+                new DialogParameters<ReturnPhysicalAssetDialog> 
+                { 
+                    { x => x.AssetId, id },
+                    { x => x.Employees, _employees }
+                },
+                new DialogOptions { MaxWidth = MaxWidth.Small, FullWidth = true });
+
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                await Reload();
+            }
+        }
+        catch (Exception ex)
+        {
+            Snackbar?.Add($"Error opening return dialog: {ex.Message}", Severity.Error);
+        }
+    }
+
     private async Task DeleteAsync(Guid id)
     {
         var confirmed = await DialogService.ShowMessageBox("Delete Physical Asset",
@@ -152,5 +329,10 @@ public partial class PhysicalAssets
                 Snackbar?.Add($"Error deleting physical asset: {ex.Message}", Severity.Error);
             }
         }
+    }
+
+    private bool CanReturnAsset(PhysicalAssetResponse asset)
+    {
+        return asset?.CurrentCustodianId == _currentUserId && _currentUserId != Guid.Empty;
     }
 }

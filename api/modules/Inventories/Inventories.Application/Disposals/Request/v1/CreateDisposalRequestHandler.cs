@@ -46,11 +46,12 @@ public sealed class CreateDisposalRequestHandler(
         var employee = await employeeRepository.GetByIdAsync(currentUserId, cancellationToken)
             ?? throw new InvalidOperationException($"Employee {currentUserId} not found.");
 
-        // Create disposal request
+        // Create disposal request with asset property code, product description, and requesting employee
+        var assetDescription = asset.Product?.Description ?? asset.PropertyCode;
         var disposal = AssetDisposal.CreateRequest(
             asset.Id,
             asset.PropertyCode,
-            asset.Description,
+            assetDescription,
             employee.Id,
             disposalMethod,
             assetCondition,

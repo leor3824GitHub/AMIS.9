@@ -1,27 +1,17 @@
 namespace AMIS.WebApi.Inventories.Application.PpeIssuance.Get.v1;
 
 public sealed record PpeIssuanceLineItemResponse(
-    string PropertyCode,
-    string Description,
-    double Quantity,
-    string Unit,
-    DateTime? DateAcquired,
-    decimal AcquisitionCost,
-    decimal? AccumulatedDepreciation,
-    decimal? BookValue,
-    string? Location);
+    string PropertyCode);
 
 public sealed record GetPpeIssuanceReportByIdResponse(
     Guid Id,
-    string ReportNumber,
-    string RecipientName,
-    string RecipientAddress,
-    string IssuanceType,
-    DateTime IssuanceDate,
-    decimal TotalAcquisitionCost,
+    string IRNumber,
+    string IssuedTo,
+    string Address,
+    string Type,
+    DateTime Date,
     int LineItemCount,
     int Status,
     string? Notes,
-    IReadOnlyList<PpeIssuanceLineItemResponse> LineItems,
-    DateTime CreatedOnUtc);
+    IReadOnlyList<PpeIssuanceLineItemResponse> LineItems);
 

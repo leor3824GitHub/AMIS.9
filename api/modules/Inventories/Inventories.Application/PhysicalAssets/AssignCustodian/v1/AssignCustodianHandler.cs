@@ -14,14 +14,12 @@ public sealed class AssignCustodianHandler(
         var asset = await repository.GetByIdAsync(request.AssetId, cancellationToken)
             ?? throw new InvalidOperationException($"Physical asset with ID {request.AssetId} not found.");
 
-        asset.AssignToCustodian(request.CustodianId);
-
-        await repository.UpdateAsync(asset, cancellationToken);
-
-        return new AssignCustodianResponse(
-            asset.Id,
-            asset.CurrentCustodianId!.Value,
-            DateTime.UtcNow);
+        // DEPRECATED: Direct custodian assignment no longer supported.
+        // CurrentCustodianId is now computed from CurrentAssignment.EmployeeId
+        // Use Issue(), Transfer(), or Return() methods to manage asset custody through proper assignment history.
+        throw new NotImplementedException(
+            "Direct custodian assignment is no longer supported. " +
+            "Use Issue(), Transfer(), or Return() methods which create proper assignment history records.");
     }
 }
 

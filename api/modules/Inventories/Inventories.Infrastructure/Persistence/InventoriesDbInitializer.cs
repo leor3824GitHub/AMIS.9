@@ -266,7 +266,7 @@ internal sealed class InventoriesDbInitializer(
             if (await context.Products.FirstOrDefaultAsync(p => p.Name == name, cancellationToken) is null)
             {
                 var categoryId = categoryCount > 0 ? categories[i % categoryCount].Id : (Guid?)null;
-                var product = Product.Create(name, description, price, unit, null, categoryId, classification, usefulLife);
+                var product = Product.Create(name, description, unit, usefulLife, categoryId);
                 await context.Products.AddAsync(product, cancellationToken);
                 products.Add(product);
             }
@@ -313,7 +313,8 @@ internal sealed class InventoriesDbInitializer(
                 {
                     var product = products[NextInt(0, products.Count)];
                     var quantity = NextInt(1, 10);
-                    var unitPrice = product.Sku * (decimal)(0.9 + NextDouble() * 0.2); // �10% variance
+                    var basePrice = (decimal)(100 + NextDouble() * 4900); // Random price 100-5000
+                    var unitPrice = basePrice * (decimal)(0.9 + NextDouble() * 0.2); // ±10% variance
 
                     purchase.AddItem(product.Id, quantity, unitPrice, PurchaseStatus.Draft);
                 }

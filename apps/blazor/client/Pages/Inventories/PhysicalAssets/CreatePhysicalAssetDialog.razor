@@ -1,84 +1,122 @@
 @namespace AMIS.Blazor.Client.Pages.Inventories.PhysicalAssets
 @using AMIS.Blazor.Client.Pages.Inventories.Products
+@inject IDialogService DialogService
+@inject NavigationManager NavigationManager
 
 <EditForm Model="@Model">
     <MudDialog>
         <TitleContent>
-            <MudText Typo="Typo.h6">Create Physical Asset</MudText>
+            <MudStack Row="true" AlignItems="AlignItems.Center" Spacing="2" Class="w-100">
+                <MudIcon Icon="@Icons.Material.Filled.Inventory2" Size="Size.Large" Color="Color.Primary" />
+                <div>
+                    <MudText Typo="Typo.h5" Class="font-weight-bold">Create Physical Asset</MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">Add a new asset to your inventory</MudText>
+                </div>
+            </MudStack>
         </TitleContent>
         <DialogContent>
-            <MudGrid>
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="Model.PropertyCode" Label="Property Code" Required="true" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudAutocomplete T="ProductResponse" Label="Product" @bind-Value="_selectedProduct"
-                        SearchFunc="@SearchProducts" ToStringFunc="@(p => p == null ? "" : $"{p.Name} ({p.Id})")"
-                        Required="true" Clearable="true" ResetValueOnEmptyText="true" Variant="Variant.Outlined"
-                        Dense="false" />
-                </MudItem>
-                <MudItem xs="12" sm="6" style="display: flex; align-items: flex-end;">
-                    <MudButton Variant="Variant.Filled" Color="Color.Secondary" Size="Size.Small"
-                        OnClick="OpenNewProductDialog" FullWidth="true">
-                        <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-2" />
-                        New Product
-                    </MudButton>
-                </MudItem>
-                <MudItem xs="12">
-                    <MudTextField @bind-Value="Model.Description" Label="Description" Lines="2" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="_acquisitionCostStr" Label="Acquisition Cost" Required="true" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudDatePicker @bind-Date="_acquisitionDate" Label="Acquisition Date" Required="true"
-                        Variant="Variant.Outlined" />
-                </MudItem>
-                <MudItem xs="12" sm="4">
-                    <MudNumericField @bind-Value="Model.Quantity" Label="Quantity" Required="true"
-                        Variant="Variant.Outlined" />
-                </MudItem>
-                <MudItem xs="12" sm="4">
-                    <MudTextField @bind-Value="Model.UnitOfMeasure" Label="Unit of Measure" />
-                </MudItem>
-                <MudItem xs="12" sm="4">
-                    <MudNumericField @bind-Value="Model.EstimatedUsefulLife" Label="Useful Life (Months)"
-                        Variant="Variant.Outlined" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="Model.SerialNumber" Label="Serial Number" />
-                </MudItem>
-                <MudItem xs="12" sm="6">
-                    <MudTextField @bind-Value="Model.ModelNumber" Label="Model Number" />
-                </MudItem>
-                <MudItem xs="12">
-                    <MudSelect T="PropertyClassification" Label="Classification" @bind-Value="Model.Classification"
-                        Required="true">
-                        <MudSelectItem T="PropertyClassification" Value="PropertyClassification._1">Consumable
-                        </MudSelectItem>
-                        <MudSelectItem T="PropertyClassification" Value="PropertyClassification._2">Semi-Expendable
-                        </MudSelectItem>
-                        <MudSelectItem T="PropertyClassification" Value="PropertyClassification._3">Property, Plant &
-                            Equipment</MudSelectItem>
-                    </MudSelect>
-                </MudItem>
-                @if (Model.Classification == PropertyClassification._3)
-                {
-                    <MudItem xs="12">
-                        <MudTextField @bind-Value="Model.PpeType" Label="PPE Type" />
-                    </MudItem>
-                }
-            </MudGrid>
+            <MudStack Spacing="1">
+                <!-- Basic Information Section -->
+                <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(63, 81, 181, 0.05);">
+                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                        Basic Information
+                    </MudText>
+                    <MudGrid Spacing="1">
+                        <MudItem xs="12" sm="6">
+                            <MudStack Row="true" Spacing="1" Style="align-items: flex-start;">
+                                <MudTextField @bind-Value="Model.PropertyCode" Label="Property Code" 
+                                    Required="true" Variant="Variant.Outlined"
+                                    Clearable="true" Style="flex: 1;" />
+                                <MudTooltip Text="Generate property code in Property Code Generator page">
+                                    <MudIconButton Icon="@Icons.Material.Filled.AutoAwesome" Color="Color.Info" Size="Size.Medium"
+                                        OnClick="OpenPropertyCodeGenerator" />
+                                </MudTooltip>
+                            </MudStack>
+                        </MudItem>
+                        <MudItem xs="12" sm="6">
+                            <MudStack Row="true" Spacing="1" Style="align-items: flex-start;">
+                                <MudAutocomplete T="ProductResponse" Label="Product" @bind-Value="_selectedProduct"
+                                    SearchFunc="@SearchProducts" ToStringFunc="@(p => p == null ? string.Empty : p.Name)"
+                                    Required="true" Clearable="true" ResetValueOnEmptyText="true" Variant="Variant.Outlined"
+                                    Dense="false" Style="flex: 1;" />
+                                <MudTooltip Text="Create a new product">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Add" Color="Color.Primary" Size="Size.Medium"
+                                        OnClick="OpenNewProductDialog" />
+                                </MudTooltip>
+                            </MudStack>
+                        </MudItem>
+
+                    </MudGrid>
+                </MudCard>
+
+                <!-- Financial Information Section -->
+                <div Style="display: flex; gap: 2rem; width: 100%;">
+                    <div Style="width: 50%; display: flex; flex-direction: column; gap: 2rem;">
+                        <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.05);">
+                            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Size="Size.Small" Class="mr-1" />
+                                Financial Information / Asset Hierarchy
+                            </MudText>
+                            <MudGrid Spacing="1">
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="_acquisitionCostStr" Label="Acquisition Cost" 
+                                        Required="true" Variant="Variant.Outlined" Clearable="true" Style="width: 100%;" />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudDatePicker @bind-Date="_acquisitionDate" Label="Acquisition Date" 
+                                        Required="true" Variant="Variant.Outlined" Style="width: 100%;" 
+                                        MaxDate="DateTime.UtcNow.Date" />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudAutocomplete T="PhysicalAssetResponse" Label="Parent Asset" @bind-Value="_selectedParentAsset"
+                                        SearchFunc="@SearchParentAssets" ToStringFunc="@(p => p == null ? string.Empty : $"{p.PropertyCode} - {p.Description}")"
+                                        Clearable="true" ResetValueOnEmptyText="true" Variant="Variant.Outlined"
+                                        Dense="false" Style="width: 100%;" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudCard>                      
+                    </div>
+
+                    <!-- Quantity & Specifications Section -->
+                    <div Style="width: 50%;">
+                        <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(255, 152, 0, 0.05);">
+                            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.Settings" Size="Size.Small" Class="mr-1" />
+                                Quantity & Specifications
+                            </MudText>
+                            <div Style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                                <div Style="flex: 1;">
+                                    <MudNumericField @bind-Value="Model.Quantity" Label="Quantity" 
+                                        Required="true" Variant="Variant.Outlined" Style="width: 100%;" />
+                                </div>
+                            </div>
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="Model.SerialNumber" Label="Serial Number" 
+                                        Variant="Variant.Outlined" Clearable="true" Style="width: 100%;" />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="Model.ModelNumber" Label="Model Number" 
+                                        Variant="Variant.Outlined" Clearable="true" Style="width: 100%;" />
+                                </MudItem>
+                            </MudGrid>
+                        </MudCard>
+                    </div>
+                </div>
+            </MudStack>
         </DialogContent>
         <DialogActions>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnCreate" Disabled="@_loading">
+            <MudSpacer />
+            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_loading" Class="px-6 py-2">
+                Cancel
+            </MudButton>
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" OnClick="OnCreate" Disabled="@_loading" Class="px-6 py-2">
                 @if (_loading)
                 {
                     <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
                 }
-                Create
-            </MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_loading">Cancel
+                Create Asset
             </MudButton>
         </DialogActions>
     </MudDialog>
@@ -94,28 +132,25 @@
     [Inject]
     private ISnackbar Snackbar { get; set; } = default!;
 
-    private CreatePhysicalAssetCommand Model = new CreatePhysicalAssetCommand
+    private CreatePhysicalAssetCommand Model = new()
     {
         PropertyCode = "",
         ProductId = Guid.Empty,
-        Description = "",
         AcquisitionCost = 0.0,
-        AcquisitionDate = DateTime.Now,
-        EstimatedUsefulLife = 60,
-        Classification = PropertyClassification._2,
-        Quantity = 1,
-        UnitOfMeasure = "piece"
+        AcquisitionDate = DateTime.UtcNow,
+        Quantity = 1
     };
     private string _acquisitionCostStr = "";
     private DateTime? _acquisitionDate;
     private ProductResponse? _selectedProduct;
+    private PhysicalAssetResponse? _selectedParentAsset;
     private bool _loading;
 
     protected override void OnInitialized()
     {
         _selectedProduct = null;
         _acquisitionCostStr = "";
-        _acquisitionDate = DateTime.Now;
+        _acquisitionDate = DateTime.UtcNow;
     }
 
     private async Task OnCreate()
@@ -154,6 +189,7 @@
             Model.ProductId = _selectedProduct!.Id ?? Guid.Empty;
             Model.AcquisitionCost = cost;
             Model.AcquisitionDate = _acquisitionDate.Value;
+            Model.ParentAssetId = _selectedParentAsset?.Id;
 
             var response = await ApiClient.CreatePhysicalAssetEndpointAsync("1", Model);
             if (response != null)
@@ -175,21 +211,32 @@
     private async Task<IEnumerable<ProductResponse>> SearchProducts(string value, CancellationToken cancellationToken =
     default)
     {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return Array.Empty<ProductResponse>();
-        }
-
         try
         {
             var searchCommand = new SearchProductsCommand
             {
                 Keyword = value,
                 PageNumber = 1,
-                PageSize = 10
+                PageSize = 50
             };
             var result = await ApiClient.SearchProductsEndpointAsync("1", searchCommand, cancellationToken);
-            return result?.Items ?? Array.Empty<ProductResponse>();
+            
+            if (result?.Items == null || result.Items.Count == 0)
+            {
+                return Array.Empty<ProductResponse>();
+            }
+
+            // If no search value, return all loaded products
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return result.Items.ToList();
+            }
+
+            // Otherwise filter client-side
+            var filteredItems = result.Items
+                .Where(p => p.Name.Contains(value, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            return filteredItems;
         }
         catch
         {
@@ -197,12 +244,52 @@
         }
     }
 
+    private async Task<IEnumerable<PhysicalAssetResponse>> SearchParentAssets(string value, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Load all assets for dropdown
+            var searchCommand = new SearchPhysicalAssetsCommand
+            {
+                PageNumber = 1,
+                PageSize = 100
+            };
+            var result = await ApiClient.SearchPhysicalAssetsEndpointAsync("1", searchCommand, cancellationToken);
+            if (result?.Items == null || result.Items.Count == 0)
+                return Array.Empty<PhysicalAssetResponse>();
+
+            // Filter results client-side based on search value (if provided)
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                // Return all items if no search filter
+                return result.Items.ToList();
+            }
+
+            var filteredItems = result.Items
+                .Where(a => a.PropertyCode.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                            a.Description.Contains(value, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            return filteredItems;
+        }
+        catch
+        {
+            return Array.Empty<PhysicalAssetResponse>();
+        }
+    }
+
     private async Task OpenNewProductDialog()
     {
         try
         {
-            var dialog = await DialogService.ShowAsync<ProductDialog>("Create New Product",
-            new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
+            var parameters = new DialogParameters<ProductDialog>
+            {
+                { x => x.Model, new ProductViewModel() },
+                { x => x.IsCreate, true },
+                { x => x._categories, new List<CategoryResponse>() }
+            };
+
+            var dialog = await DialogService.ShowAsync<ProductDialog>("Create New Product", parameters,
+                new DialogOptions { MaxWidth = MaxWidth.Medium, FullWidth = true });
 
             var result = await dialog.Result;
             if (!result.Canceled)
@@ -217,4 +304,23 @@
     }
 
     private void Cancel() => MudDialog?.Cancel();
+
+    private async Task OpenPropertyCodeGenerator()
+    {
+        var options = new DialogOptions
+        {
+            MaxWidth = MaxWidth.Medium,
+            FullWidth = true,
+            CloseButton = true
+        };
+
+        var dialog = await DialogService.ShowAsync<PropertyCodeGenerator>("Generate Property Code", options);
+        var result = await dialog.Result;
+
+        if (!result.Canceled && result.Data is string propertyCode)
+        {
+            Model.PropertyCode = propertyCode;
+            Snackbar?.Add($"Property code set: {propertyCode}", Severity.Success);
+        }
+    }
 }

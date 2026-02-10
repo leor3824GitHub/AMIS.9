@@ -25,7 +25,7 @@ public static class CancelPpeReceivingReportEndpoint
             .Produces<Application.PpeReceiving.Cancel.v1.CancelPpeReceivingReportResponse>()
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequirePermission($"{FshResources.PpeReceiving}.{FshActions.Cancel}")
+            .RequirePermission($"{FshResources.Pper}.{FshActions.Cancel}")
             .MapToApiVersion(1);
     }
 }

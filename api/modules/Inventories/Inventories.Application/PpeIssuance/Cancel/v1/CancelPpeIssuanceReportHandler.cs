@@ -9,7 +9,7 @@ using Shared.Authorization;
 namespace AMIS.WebApi.Inventories.Application.PpeIssuance.Cancel.v1;
 
 public sealed class CancelPpeIssuanceReportHandler(
-    [FromKeyedServices("inventories:ppeir")] IRepository<Domain.PpeIssuanceReport> repository,
+    [FromKeyedServices("inventories:ppeir")] IRepository<Domain.PPEIR> repository,
     [FromKeyedServices("inventories:inventory-registries")] IRepository<Domain.InventoryRegistry> registryRepository,
     [FromKeyedServices("inventories:inventory-transaction-logs")] IRepository<Domain.InventoryTransactionLog> transactionLogRepository,
     IAuthorizationService authorizationService,
@@ -48,7 +48,7 @@ public sealed class CancelPpeIssuanceReportHandler(
         var transactionLogs = new List<Domain.InventoryTransactionLog>();
 
         // For issuance (which deducted items), we reverse the deduction by adding back
-        foreach (var lineItem in report.LineItems)
+        foreach (var lineItem in report.Items)
         {
             var registrySpec = new InventoryRegistryByPropertyCodeSpec(lineItem.PropertyCode);
             var registry = await registryRepository.FirstOrDefaultAsync(registrySpec, cancellationToken);
@@ -59,13 +59,13 @@ public sealed class CancelPpeIssuanceReportHandler(
                 var statusBefore = registry.Status;
 
                 // Add back 1 unit (reverse the issuance)
-                registry.AddQuantity(1, report.ReportNumber);
+                registry.AddQuantity(1, report.IRNumber);
 
                 // Create reversal log
                 var reversalLog = Domain.InventoryTransactionLog.CreateSuccess(
                     propertyCode: lineItem.PropertyCode,
                     transactionType: "PPEIR",
-                    reportNumber: report.ReportNumber,
+                    reportNumber: report.IRNumber,
                     quantityChange: 1,
                     inventoryBefore: quantityBefore,
                     inventoryAfter: registry.Quantity,
@@ -81,10 +81,10 @@ public sealed class CancelPpeIssuanceReportHandler(
                 var failureLog = Domain.InventoryTransactionLog.CreateFailure(
                     propertyCode: lineItem.PropertyCode,
                     transactionType: "PPEIR",
-                    reportNumber: report.ReportNumber,
+                    reportNumber: report.IRNumber,
                     inventoryBefore: 0,
                     statusBefore: Domain.ValueObjects.InventoryItemStatus.NotReceived,
-                    errorMessage: $"Registry entry not found for reversal of PPEIR {report.ReportNumber}");
+                    errorMessage: $"Registry entry not found for reversal of PPEIR {report.IRNumber}");
 
                 transactionLogs.Add(failureLog);
                 logger.LogWarning("Registry entry not found for property code {PropertyCode} during PPEIR {Id} cancellation", lineItem.PropertyCode, request.Id);

@@ -3,12 +3,12 @@ using MediatR;
 namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Create.v1;
 
 public sealed record CreatePpeReceivingReportCommand(
-    string ReportNumber,
+    string RRNumber,
+    string ReceivedFrom,
+    string Address,
+    string Type,
+    DateTime Date,
     IReadOnlyList<CreatePpeReceivingLineItemRequest> LineItems,
-    string SourceName,
-    string SourceAddress,
-    DateTime SourceReceiptDate,
-    string ReceiptType,
     string? Notes = null) : IRequest<CreatePpeReceivingReportResponse>;
 
 public sealed record CreatePpeReceivingLineItemRequest(

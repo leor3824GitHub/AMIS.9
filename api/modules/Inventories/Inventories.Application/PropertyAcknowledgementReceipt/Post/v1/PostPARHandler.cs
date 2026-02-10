@@ -42,34 +42,8 @@ public sealed class PostPARHandler(
 
             par.Post();
 
-            // Assign custodian to each asset in the PAR
-            foreach (var lineItem in par.LineItems)
-            {
-                var spec = new AssetByPropertyCodeSpec(lineItem.PropertyCode);
-                var asset = await assetRepository
-                    .FirstOrDefaultAsync(spec, cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (asset is null)
-                {
-                    logger.LogWarning(
-                        "Asset with PropertyCode {PropertyCode} not found for PAR {PARNumber}",
-                        lineItem.PropertyCode,
-                        par.PARNumber);
-                    throw new InvalidOperationException(
-                        $"Asset with PropertyCode '{lineItem.PropertyCode}' was not found. Cannot assign custodian.");
-                }
-
-                // Assign the asset to the employee custodian
-                asset.AssignToCustodian(par.EmployeeId);
-                await assetRepository.UpdateAsync(asset, cancellationToken).ConfigureAwait(false);
-
-                logger.LogInformation(
-                    "Asset {PropertyCode} assigned to custodian {EmployeeName} via PAR {PARNumber}",
-                    lineItem.PropertyCode,
-                    par.EmployeeName,
-                    par.PARNumber);
-            }
+            // Note: Asset custodian is automatically managed via Issue() and Return() methods
+            // which create/update AssignmentHistory records. CurrentCustodianId is computed from CurrentAssignment.
 
             await parRepository.UpdateAsync(par, cancellationToken);
             await parRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

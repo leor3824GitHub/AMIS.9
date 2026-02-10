@@ -6,25 +6,25 @@ public sealed class CreatePpeIssuanceReportCommandValidator : AbstractValidator<
 {
     public CreatePpeIssuanceReportCommandValidator()
     {
-        RuleFor(x => x.ReportNumber)
-            .NotEmpty().WithMessage("Report number is required.")
-            .MaximumLength(50).WithMessage("Report number cannot exceed 50 characters.");
+        RuleFor(x => x.IRNumber)
+            .NotEmpty().WithMessage("IR number is required.")
+            .MaximumLength(50).WithMessage("IR number cannot exceed 50 characters.");
 
-        RuleFor(x => x.RecipientName)
-            .NotEmpty().WithMessage("Recipient name is required.")
-            .MaximumLength(255).WithMessage("Recipient name cannot exceed 255 characters.");
+        RuleFor(x => x.IssuedTo)
+            .NotEmpty().WithMessage("Issued to is required.")
+            .MaximumLength(255).WithMessage("Issued to cannot exceed 255 characters.");
 
-        RuleFor(x => x.RecipientAddress)
-            .NotEmpty().WithMessage("Recipient address is required.")
-            .MaximumLength(500).WithMessage("Recipient address cannot exceed 500 characters.");
+        RuleFor(x => x.Address)
+            .NotEmpty().WithMessage("Address is required.")
+            .MaximumLength(500).WithMessage("Address cannot exceed 500 characters.");
 
-        RuleFor(x => x.IssuanceType)
-            .NotEmpty().WithMessage("Issuance type is required.")
-            .MaximumLength(50).WithMessage("Issuance type cannot exceed 50 characters.");
+        RuleFor(x => x.Type)
+            .NotEmpty().WithMessage("Type is required.")
+            .MaximumLength(50).WithMessage("Type cannot exceed 50 characters.");
 
-        RuleFor(x => x.IssuanceDate)
-            .NotEmpty().WithMessage("Issuance date is required.")
-            .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Issuance date cannot be in the future.");
+        RuleFor(x => x.Date)
+            .NotEmpty().WithMessage("Date is required.")
+            .LessThanOrEqualTo(DateTime.UtcNow).WithMessage("Date cannot be in the future.");
 
         RuleFor(x => x.LineItems)
             .NotEmpty().WithMessage("At least one line item is required.")

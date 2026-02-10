@@ -46,11 +46,12 @@ public sealed class ScheduleMaintenanceHandler(
         var scheduler = await employeeRepository.GetByIdAsync(currentUserId, cancellationToken)
             ?? throw new InvalidOperationException($"Employee {currentUserId} not found.");
 
-        // Schedule maintenance
+        // Schedule maintenance with asset description from product
+        var assetDescription = asset.Product?.Description ?? asset.PropertyCode;
         var maintenance = AssetMaintenance.Schedule(
             asset.Id,
             asset.PropertyCode,
-            asset.Description,
+            assetDescription,
             maintenanceType,
             request.Description,
             request.ScheduledDate,

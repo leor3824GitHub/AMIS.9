@@ -7,18 +7,14 @@ namespace AMIS.WebApi.Inventories.Application.Services.v1;
 
 /// <summary>
 /// Application-layer factory that transforms posted Acceptances into PhysicalAsset instances.
-/// Delegates property code generation and classification lookups to supplied functions so callers can pull metadata from configuration or other services.
+/// Asset classification is determined dynamically from acquisition cost.
+/// Delegates property code generation to supplied functions so callers can pull metadata from configuration or other services.
 /// </summary>
 public static class AcceptanceAssetFactory
 {
     public static IReadOnlyCollection<PhysicalAsset> CreateAssets(
         Acceptance acceptance,
-        Func<AcceptanceItem, string> propertyCodeFactory,
-        Func<PurchaseItem, PropertyClassification> classificationResolver,
-        Func<PurchaseItem, string?> ppeTypeResolver,
-        Func<PurchaseItem, int> estimatedUsefulLifeResolver,
-        Func<PurchaseItem, string> descriptionResolver,
-        Func<PurchaseItem, string> unitOfMeasureResolver)
+        Func<AcceptanceItem, string> propertyCodeFactory)
     {
         ArgumentNullException.ThrowIfNull(acceptance);
         if (!acceptance.IsPosted) throw new InvalidOperationException("Acceptance must be posted before creating assets.");
@@ -36,25 +32,15 @@ public static class AcceptanceAssetFactory
                 throw new InvalidOperationException("Purchase item must have an associated product to create an asset.");
 
             var propertyCode = propertyCodeFactory(acceptanceItem);
-            var classification = classificationResolver(purchaseItem);
-            var ppeType = ppeTypeResolver(purchaseItem);
-            var estimatedUsefulLife = estimatedUsefulLifeResolver(purchaseItem);
-            var description = descriptionResolver(purchaseItem);
-            var unitOfMeasure = unitOfMeasureResolver(purchaseItem);
 
             var asset = PhysicalAsset.Create(
-                classification,
-                propertyCode,
-                purchaseItem.ProductId.Value,
-                description,
-                purchaseItem.UnitPrice * acceptanceItem.QtyAccepted,
-                acceptance.AcceptanceDate,
-                estimatedUsefulLife,
-                acceptanceItem.QtyAccepted,
-                unitOfMeasure,
+                propertyCode: propertyCode,
+                productId: purchaseItem.ProductId.Value,
+                acquisitionCost: purchaseItem.UnitPrice * acceptanceItem.QtyAccepted,
+                acquisitionDate: acceptance.AcceptanceDate,
+                quantity: acceptanceItem.QtyAccepted,
                 serialNumber: null,
-                modelNumber: null,
-                ppeType: ppeType);
+                modelNumber: null);
 
             assets.Add(asset);
         }

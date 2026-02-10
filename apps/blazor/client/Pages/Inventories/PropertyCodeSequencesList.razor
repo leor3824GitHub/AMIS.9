@@ -1,0 +1,227 @@
+@page "/inventories/property-code-sequences-list"
+@using AMIS.Blazor.Infrastructure.Api
+
+<PageHeader Title="Property Code Sequences" Header="Property Code Sequences" SubHeader="Manage property code sequence trackers for asset classification." />
+
+@if (!CanCreate && !CanEdit && !CanDelete)
+{
+    <MudAlert Severity="Severity.Warning" Class="mb-4">
+        You don't have permission to manage property code sequences. Please contact an administrator if you believe this is an error.
+    </MudAlert>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex gap-2">
+        @if (CanCreate)
+        {
+            <MudButton Variant="Variant.Filled" 
+                       Color="Color.Success"
+                       StartIcon="@Icons.Material.Filled.Add"
+                       OnClick="@ShowCreateDialog"
+                       Disabled="@IsLoading">
+                <MudIcon Icon="@Icons.Material.Filled.Add" Class="me-2" />
+                Create New
+            </MudButton>
+        }
+        <MudButton Variant="Variant.Filled" 
+                   Color="Color.Secondary"
+                   StartIcon="@Icons.Material.Filled.Refresh"
+                   OnClick="@LoadSequences"
+                   Disabled="@IsLoading">
+            <MudIcon Icon="@Icons.Material.Filled.Refresh" Class="me-2" />
+            Reload
+        </MudButton>
+    </div>
+    <MudTextField Value="@SearchTerm" 
+                  ValueChanged="@((string s) => OnSearchTermChanged(s))"
+                  Immediate="true"
+                  Placeholder="Search sequences..."
+                  Adornment="Adornment.Start"
+                  AdornmentIcon="@Icons.Material.Filled.Search"
+                  Class="mt-0"
+                  Style="width: 300px" />
+</div>
+
+@if (IsLoading)
+{
+    <MudProgressCircular Indeterminate="true" />
+}
+else if (FilteredSequences.Count == 0)
+{
+    <MudAlert Severity="Severity.Info">No property code sequences found.</MudAlert>
+}
+else
+{
+    <MudTable Items="@FilteredSequences" Striped="true" Outlined="true" Hover="true">
+        <HeaderContent>
+            <MudTh>Class Code</MudTh>
+            <MudTh>Classification</MudTh>
+            <MudTh>Category Code</MudTh>
+            <MudTh>Item Code</MudTh>
+            <MudTh>Item Description</MudTh>
+            <MudTh>GL Account</MudTh>
+            <MudTh>Last Sequence</MudTh>
+            <MudTh Style="text-align: right;">Actions</MudTh>
+        </HeaderContent>
+        <RowTemplate>
+            <MudTd DataLabel="Class Code">@context.ClassCode</MudTd>
+            <MudTd DataLabel="Classification">@context.Classification</MudTd>
+            <MudTd DataLabel="Category Code">@context.CategoryCode</MudTd>
+            <MudTd DataLabel="Item Code">@context.ItemCode</MudTd>
+            <MudTd DataLabel="Item Description">@context.ItemDescription</MudTd>
+            <MudTd DataLabel="GL Account">@(context.GlAccount ?? "-")</MudTd>
+            <MudTd DataLabel="Last Sequence">@context.LastSequenceValue</MudTd>
+            <MudTd DataLabel="Actions" Style="text-align: right;">
+                @if (CanEdit || CanDelete)
+                {
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" 
+                             Variant="Variant.Filled" 
+                             Size="Size.Small"
+                             Dense="true"
+                             IconColor="Color.Info">
+                        @if (CanEdit)
+                        {
+                            <MudMenuItem @onclick="@(() => ShowEditDialog(context))">
+                                <MudIcon Icon="@Icons.Material.Filled.Edit" Class="me-2" />
+                                Edit
+                            </MudMenuItem>
+                        }
+                        @if (CanDelete)
+                        {
+                            <MudMenuItem @onclick="@(() => ShowDeleteConfirm(context))" Style="color:red!important">
+                                <MudIcon Icon="@Icons.Material.Filled.Delete" Class="me-2" />
+                                Delete
+                            </MudMenuItem>
+                        }
+                    </MudMenu>
+                }
+                else
+                {
+                    <MudChip T="string" Label="true" Variant="Variant.Text" Size="Size.Small">No actions</MudChip>
+                }
+            </MudTd>
+        </RowTemplate>
+    </MudTable>
+}
+
+<!-- Create/Edit Dialog -->
+<MudDialog @bind-IsVisible="ShowDialog" MaxWidth="MaxWidth.Small" FullWidth="true">
+    <TitleContent>
+        <MudText Typo="Typo.h5">@(IsCreateMode ? "Create New Property Code Sequence" : "Edit Property Code Sequence")</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudForm @ref="EditForm" @bind-IsValid="@FormIsValid">
+            <MudGrid>
+                @if (!IsCreateMode)
+                {
+                    <MudItem xs="12" md="6">
+                        <MudTextField Value="@EditingItem.Id.ToString()" 
+                                      ReadOnly 
+                                      Label="Sequence ID"
+                                      Variant="Variant.Outlined"
+                                      Disabled="true" />
+                    </MudItem>
+                }
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="Classification" 
+                                  @bind-Value="EditingItem.Classification"
+                                  Placeholder="e.g., OFFICE EQUIPMENT"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  RequiredError="Classification is required"
+                                  Validation="@(new Func<string, IEnumerable<string>>(ValidateClassification))" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="Category Code" 
+                                  @bind-Value="EditingItem.Category"
+                                  Placeholder="e.g., 01"
+                                  MaxLength="2"
+                                  Variant="Variant.Outlined"
+                                  Required="true"
+                                  RequiredError="Category is required" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="Class Code" 
+                                  @bind-Value="EditingItem.ClassCode"
+                                  Placeholder="e.g., OE"
+                                  MaxLength="3"
+                                  Variant="Variant.Outlined"
+                                  ReadOnly="!IsCreateMode" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudTextField Label="Item Code" 
+                                  @bind-Value="EditingItem.ItemCode"
+                                  Placeholder="e.g., 001"
+                                  MaxLength="3"
+                                  Variant="Variant.Outlined"
+                                  ReadOnly="!IsCreateMode" />
+                </MudItem>
+                <MudItem xs="12" md="12">
+                    <MudTextField Label="Item Description" 
+                                  @bind-Value="EditingItem.ItemDescription"
+                                  Placeholder="e.g., ADDING MACHINE"
+                                  Variant="Variant.Outlined"
+                                  ReadOnly="!IsCreateMode" />
+                </MudItem>
+                <MudItem xs="12" md="12">
+                    <MudTextField Label="GL Account" 
+                                  @bind-Value="EditingItem.GLAccount"
+                                  Variant="Variant.Outlined"
+                                  ReadOnly="!IsCreateMode" />
+                </MudItem>
+                @if (!IsCreateMode)
+                {
+                    <MudItem xs="12" md="6">
+                        <MudNumericField Label="Last Sequence Value" 
+                                        @bind-Value="EditingItem.LastSequenceValue"
+                                        Variant="Variant.Outlined"
+                                        Min="0" />
+                    </MudItem>
+                }
+            </MudGrid>
+        </MudForm>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseDialog">Cancel</MudButton>
+        <MudButton Color="Color.Primary" 
+                   Variant="Variant.Filled"
+                   OnClick="SaveItem"
+                   Disabled="@(!FormIsValid || IsSaving)">
+            @if (IsSaving)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="ms-2" />
+            }
+            else
+            {
+                @(IsCreateMode ? "Create" : "Update")
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>
+
+<!-- Delete Confirmation Dialog -->
+<MudDialog @bind-IsVisible="ShowDeleteDialog" MaxWidth="MaxWidth.ExtraSmall">
+    <TitleContent>
+        <MudText Typo="Typo.h6">Delete Property Code Sequence</MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>Are you sure you want to delete <strong>@DeleteItem?.Classification</strong>?</MudText>
+        <MudText Typo="Typo.body2" Color="Color.Error">This action cannot be undone.</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton OnClick="CloseDeleteDialog">Cancel</MudButton>
+        <MudButton Color="Color.Error" 
+                   Variant="Variant.Filled"
+                   OnClick="ConfirmDelete"
+                   Disabled="@IsDeleting">
+            @if (IsDeleting)
+            {
+                <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="ms-2" />
+            }
+            else
+            {
+                <span>Delete</span>
+            }
+        </MudButton>
+    </DialogActions>
+</MudDialog>

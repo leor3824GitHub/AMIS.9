@@ -42,25 +42,7 @@ public sealed class CancelPARHandler(
 
             par.Cancel();
 
-            // Unassign custodian from each asset in the PAR (reverse the assignment)
-            foreach (var lineItem in par.LineItems)
-            {
-                var spec = new AssetByPropertyCodeSpec(lineItem.PropertyCode);
-                var asset = await assetRepository
-                    .FirstOrDefaultAsync(spec, cancellationToken)
-                    .ConfigureAwait(false);
-
-                if (asset is not null)
-                {
-                    asset.ClearCustodian();
-                    await assetRepository.UpdateAsync(asset, cancellationToken).ConfigureAwait(false);
-
-                    logger.LogInformation(
-                        "Asset {PropertyCode} custodian unassigned due to PAR {PARNumber} cancellation",
-                        lineItem.PropertyCode,
-                        par.PARNumber);
-                }
-            }
+            // Note: Asset custodian is automatically managed via Return() or Transfer() methods
 
             await parRepository.UpdateAsync(par, cancellationToken);
             await parRepository.SaveChangesAsync(cancellationToken).ConfigureAwait(false);

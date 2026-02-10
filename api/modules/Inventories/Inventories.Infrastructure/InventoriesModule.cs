@@ -13,6 +13,8 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PpeIssuance;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PpeReceiving;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Employee;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.ProcurementProjects;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PropertyCode;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PropertyCodeSequence;
 using AMIS.WebApi.Inventories.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -49,6 +51,7 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PhysicalAsset;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsIssuance;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsReceiving;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PropertyAcknowledgementReceipt;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.AssetClassificationRules;
 
 using AMIS.WebApi.Inventories.Application.Services;
 
@@ -232,6 +235,13 @@ public static class InventoriesModule
             depreciationScheduleGroup.MapUpdateDepreciationScheduleEndpoint();
             depreciationScheduleGroup.MapDeleteDepreciationScheduleEndpoint();
 
+            var assetClassificationRulesGroup = app.MapGroup("assetClassificationRules").WithTags("assetClassificationRules");
+            assetClassificationRulesGroup.MapCreateAssetClassificationRuleEndpoint();
+            assetClassificationRulesGroup.MapGetAssetClassificationRuleEndpoint();
+            assetClassificationRulesGroup.MapSearchAssetClassificationRulesEndpoint();
+            assetClassificationRulesGroup.MapUpdateAssetClassificationRuleEndpoint();
+            assetClassificationRulesGroup.MapDeleteAssetClassificationRuleEndpoint();
+
             var journalEntryVoucherGroup = app.MapGroup("journalEntryVouchers").WithTags("journalEntryVouchers");
             journalEntryVoucherGroup.MapJournalEntryVoucherCreationEndpoint();
             journalEntryVoucherGroup.MapJournalEntryVoucherPostingEndpoint();
@@ -260,6 +270,17 @@ public static class InventoriesModule
             physicalAssetGroup.MapGetStockLevelsEndpoint();
 
             var assetManagementGroup = app.MapGroup("asset-management").WithTags("asset-management");
+
+            var propertyCodeGroup = app.MapGroup("property-codes").WithTags("property-codes");
+            propertyCodeGroup.MapGeneratePropertyCodeEndpoint();
+
+            var propertyCodeSequenceGroup = app.MapGroup("property-code-sequences").WithTags("property-code-sequences");
+            propertyCodeSequenceGroup.MapPropertyCodeSequenceListEndpoint();
+            propertyCodeSequenceGroup.MapPropertyCodeSequenceGetEndpoint();
+            propertyCodeSequenceGroup.MapPropertyCodeSequenceCreateEndpoint();
+            propertyCodeSequenceGroup.MapPropertyCodeSequenceUpdateEndpoint();
+            propertyCodeSequenceGroup.MapPropertyCodeSequenceDeleteEndpoint();
+            propertyCodeSequenceGroup.MapPropertyCodeSequenceAllocateEndpoint();
 
             var suppliesAndMaterialsIssuanceGroup = app.MapGroup("supplies-materials-issuance").WithTags("supplies-materials-issuance");
             suppliesAndMaterialsIssuanceGroup.MapListSuppliesAndMaterialsIssuanceReportsEndpoint();
@@ -332,6 +353,12 @@ public static class InventoriesModule
     {
         ArgumentNullException.ThrowIfNull(builder);
         builder.Services.BindDbContext<InventoriesDbContext>();
+        
+        // Register DbContext as keyed service for handlers that need transaction support
+        builder.Services.AddKeyedScoped(
+            "inventories",
+            (sp, key) => sp.GetRequiredService<InventoriesDbContext>());
+        
         builder.Services.AddScoped<IDbInitializer, InventoriesDbInitializer>();
         builder.Services.Configure<CoaPropertyCodeOptions>(builder.Configuration.GetSection("Inventories:PropertyCodes"));
         builder.Services.AddKeyedScoped<IRepository<Product>, InventoriesRepository<Product>>("inventories:products");
@@ -397,8 +424,8 @@ public static class InventoriesModule
         builder.Services.AddKeyedScoped<IRepository<UnitOfMeasure>, InventoriesRepository<UnitOfMeasure>>("inventories:unitsOfMeasure");
         builder.Services.AddKeyedScoped<IReadRepository<UnitOfMeasure>, InventoriesRepository<UnitOfMeasure>>("inventories:unitsOfMeasure");
 
-        builder.Services.AddKeyedScoped<IRepository<AssetClassificationRule>, InventoriesRepository<AssetClassificationRule>>("inventories:classificationRules");
-        builder.Services.AddKeyedScoped<IReadRepository<AssetClassificationRule>, InventoriesRepository<AssetClassificationRule>>("inventories:classificationRules");
+        builder.Services.AddKeyedScoped<IRepository<AssetClassificationRule>, InventoriesRepository<AssetClassificationRule>>("inventories:assetclassificationrules");
+        builder.Services.AddKeyedScoped<IReadRepository<AssetClassificationRule>, InventoriesRepository<AssetClassificationRule>>("inventories:assetclassificationrules");
 
         builder.Services.AddKeyedScoped<IRepository<PpeCategoryCode>, InventoriesRepository<PpeCategoryCode>>("inventories:ppeCategoryCodes");
         builder.Services.AddKeyedScoped<IReadRepository<PpeCategoryCode>, InventoriesRepository<PpeCategoryCode>>("inventories:ppeCategoryCodes");
@@ -448,12 +475,12 @@ public static class InventoriesModule
         builder.Services.AddKeyedScoped<IReadRepository<SuppliesAndMaterialsReceivingReport>, InventoriesRepository<SuppliesAndMaterialsReceivingReport>>("inventories:smrr");
 
         // PPE Issuance Report (PPEIR)
-        builder.Services.AddKeyedScoped<IRepository<PpeIssuanceReport>, InventoriesRepository<PpeIssuanceReport>>("inventories:ppeir");
-        builder.Services.AddKeyedScoped<IReadRepository<PpeIssuanceReport>, InventoriesRepository<PpeIssuanceReport>>("inventories:ppeir");
+        builder.Services.AddKeyedScoped<IRepository<PPEIR>, InventoriesRepository<PPEIR>>("inventories:ppeir");
+        builder.Services.AddKeyedScoped<IReadRepository<PPEIR>, InventoriesRepository<PPEIR>>("inventories:ppeir");
 
         // PPE Receiving Report (PPERR)
-        builder.Services.AddKeyedScoped<IRepository<PpeReceivingReport>, InventoriesRepository<PpeReceivingReport>>("inventories:pperr");
-        builder.Services.AddKeyedScoped<IReadRepository<PpeReceivingReport>, InventoriesRepository<PpeReceivingReport>>("inventories:pperr");
+        builder.Services.AddKeyedScoped<IRepository<PPERR>, InventoriesRepository<PPERR>>("inventories:pperr");
+        builder.Services.AddKeyedScoped<IReadRepository<PPERR>, InventoriesRepository<PPERR>>("inventories:pperr");
 
         // Inventory Registry & Logs (PPE)
         builder.Services.AddKeyedScoped<IRepository<InventoryRegistry>, InventoriesRepository<InventoryRegistry>>("inventories:inventory-registries");

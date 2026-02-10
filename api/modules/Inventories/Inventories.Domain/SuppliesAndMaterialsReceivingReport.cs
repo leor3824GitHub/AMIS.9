@@ -20,8 +20,8 @@ public class SuppliesAndMaterialsReceivingReport : AuditableEntity, IAggregateRo
     public ReceivingTransactionType TransactionType { get; private set; }
 
     // Line Items
-    private readonly List<ReceivingLineItem> _lineItems = [];
-    public IReadOnlyCollection<ReceivingLineItem> LineItems => _lineItems.AsReadOnly();
+    private readonly List<SuppliesAndMaterialsReceivingLineItem> _lineItems = [];
+    public IReadOnlyCollection<SuppliesAndMaterialsReceivingLineItem> LineItems => _lineItems.AsReadOnly();
 
     // Authentication
     public ReceivingAuthentication Authentication { get; private set; }
@@ -72,7 +72,7 @@ public class SuppliesAndMaterialsReceivingReport : AuditableEntity, IAggregateRo
     /// <summary>
     /// Adds a line item to the receiving report
     /// </summary>
-    public void AddLineItem(ReceivingLineItem lineItem)
+    public void AddLineItem(SuppliesAndMaterialsReceivingLineItem lineItem)
     {
         ArgumentNullException.ThrowIfNull(lineItem);
         _lineItems.Add(lineItem);
@@ -81,7 +81,7 @@ public class SuppliesAndMaterialsReceivingReport : AuditableEntity, IAggregateRo
     /// <summary>
     /// Adds multiple line items to the receiving report
     /// </summary>
-    public void AddLineItems(IEnumerable<ReceivingLineItem> lineItems)
+    public void AddLineItems(IEnumerable<SuppliesAndMaterialsReceivingLineItem> lineItems)
     {
         ArgumentNullException.ThrowIfNull(lineItems);
 
@@ -94,7 +94,7 @@ public class SuppliesAndMaterialsReceivingReport : AuditableEntity, IAggregateRo
     /// <summary>
     /// Removes a line item from the receiving report
     /// </summary>
-    public void RemoveLineItem(ReceivingLineItem lineItem)
+    public void RemoveLineItem(SuppliesAndMaterialsReceivingLineItem lineItem)
     {
         _lineItems.Remove(lineItem);
     }

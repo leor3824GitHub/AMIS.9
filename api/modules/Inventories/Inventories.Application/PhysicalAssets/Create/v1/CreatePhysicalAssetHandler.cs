@@ -16,27 +16,28 @@ public sealed class CreatePhysicalAssetHandler(
         ArgumentNullException.ThrowIfNull(request);
 
         var physicalAsset = PhysicalAsset.Create(
-            request.Classification,
             request.PropertyCode,
             request.ProductId,
-            request.Description,
             request.AcquisitionCost,
             request.AcquisitionDate,
-            request.EstimatedUsefulLife,
             request.Quantity,
-            request.UnitOfMeasure,
             request.SerialNumber,
-            request.ModelNumber,
-            request.PPEType);
+            request.ModelNumber);
+
+        // Set parent asset if provided
+        if (request.ParentAssetId.HasValue)
+        {
+            physicalAsset.SetParentAsset(request.ParentAssetId.Value);
+        }
 
         await repository.AddAsync(physicalAsset, cancellationToken);
 
         return new CreatePhysicalAssetResponse(
             physicalAsset.Id,
             physicalAsset.PropertyCode,
-            physicalAsset.Description,
             physicalAsset.AcquisitionCost,
-            physicalAsset.CurrentClassification);
+            physicalAsset.GetCurrentClassification(),
+            physicalAsset.ParentAssetId);
     }
 }
 

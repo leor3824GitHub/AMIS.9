@@ -11,7 +11,7 @@ namespace AMIS.WebApi.Inventories.Application.PpeIssuance.Update.v1;
 
 public sealed class UpdatePpeIssuanceReportHandler(
     ILogger<UpdatePpeIssuanceReportHandler> logger,
-    [FromKeyedServices("inventories:ppeir")] IRepository<PpeIssuanceReport> repository,
+    [FromKeyedServices("inventories:ppeir")] IRepository<PPEIR> repository,
     IAuthorizationService authorizationService)
     : IRequestHandler<UpdatePpeIssuanceReportCommand, UpdatePpeIssuanceReportResponse>
 {
@@ -39,42 +39,29 @@ public sealed class UpdatePpeIssuanceReportHandler(
                 throw new InvalidOperationException($"PPE Issuance Report with Id {request.Id} was not found.");
             }
 
-            // Ensure report is in Draft or Posted status before allowing updates
-            if (report.Status == PpeReportStatus.Cancelled)
+            // Ensure report is in Draft status before allowing updates
+            if (report.Status != PpeReportStatus.Draft)
             {
-                logger.LogWarning("Update attempt for cancelled PPEIR {Id}", request.Id);
+                logger.LogWarning("Update attempt for non-Draft PPEIR {Id} with status {Status}", request.Id, report.Status);
                 throw new InvalidOperationException(
-                    $"PPE Issuance Report with Id {request.Id} cannot be updated. Reports in Cancelled status cannot be modified.");
+                    $"PPE Issuance Report with Id {request.Id} cannot be updated. Only Draft reports can be modified.");
             }
 
-            // If the report is Posted, only Accounting personnel can update it for data integrity
-            // Supply officers can update Draft reports, but Posted reports are protected
-            if (report.Status == PpeReportStatus.Posted)
-            {
-                logger.LogWarning("Posted PPEIR {Id} update attempt - only accounting personnel can update posted reports", request.Id);
-                throw new InvalidOperationException(
-                    $"PPE Issuance Report with Id {request.Id} is already Posted. Only Accounting personnel can modify posted reports for data integrity purposes. If changes are necessary, please contact your Accounting department.");
-            }
+            report.UpdateHeader(
+                request.IssuedTo,
+                request.Address,
+                PpeIssueType.FromString(request.Type),
+                request.Date,
+                request.Notes);
 
-            var recipientInfo = new PpeRecipientInfo(request.RecipientName, request.RecipientAddress);
-            var issuanceType = PpeIssuanceType.FromString(request.IssuanceType);
-
-            report.UpdateHeader(recipientInfo, issuanceType, request.IssuanceDate, request.Notes);
-
-            report.ClearLineItems();
+            report.ClearItems();
 
             foreach (var lineItem in request.LineItems)
             {
-                var item = new PpeIssuanceLineItem(
+                var item = new PPEIRLineItem(
                     lineItem.PropertyCode,
-                    null,
-                    lineItem.Description,
-                    lineItem.DateAcquired ?? DateTime.UtcNow,
-                    lineItem.AcquisitionCost,
-                    lineItem.AccumulatedDepreciation,
-                    lineItem.BookValue,
-                    lineItem.Location);
-                report.AddLineItem(item);
+                    report.IRNumber);
+                report.AddItem(item);
             }
 
             await repository.UpdateAsync(report, cancellationToken).ConfigureAwait(false);

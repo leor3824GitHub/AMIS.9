@@ -4,57 +4,60 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AMIS.WebApi.Inventories.Infrastructure.Persistence.Configurations;
 
-public sealed class PpeIssuanceReportConfiguration : IEntityTypeConfiguration<PpeIssuanceReport>
+public sealed class PPEIRConfiguration : IEntityTypeConfiguration<PPEIR>
 {
-    public void Configure(EntityTypeBuilder<PpeIssuanceReport> builder)
+    public void Configure(EntityTypeBuilder<PPEIR> builder)
     {
         builder.HasKey(x => x.Id);
-        builder.ToTable(nameof(PpeIssuanceReport));
+        builder.ToTable(nameof(PPEIR));
 
-        builder.Property(x => x.ReportNumber).IsRequired().HasMaxLength(50);
-        builder.HasIndex(x => x.ReportNumber).IsUnique();
+        builder.Property(x => x.IRNumber).IsRequired().HasMaxLength(50);
+        builder.HasIndex(x => x.IRNumber).IsUnique();
 
-        builder.Property(x => x.IssuanceDate).IsRequired();
+        builder.Property(x => x.IssuedTo).IsRequired().HasMaxLength(255);
+        builder.Property(x => x.Address).IsRequired().HasMaxLength(500);
+        builder.Property(x => x.Date).IsRequired();
         builder.Property(x => x.Notes).HasMaxLength(1000);
-
-        // Distribution Tracking
-        builder.Property(x => x.DistributedToVoucher);
-        builder.Property(x => x.DistributedToPMSDS);
-        builder.Property(x => x.DistributedToAccounting);
-        builder.Property(x => x.DistributedToFile);
-
-        // Recipient Information
-        builder.OwnsOne(x => x.Recipient, recipient =>
-        {
-            recipient.Property(r => r.Name).IsRequired().HasMaxLength(255).HasColumnName("RecipientName");
-            recipient.Property(r => r.Address).IsRequired().HasMaxLength(500).HasColumnName("RecipientAddress");
-        });
+        builder.Property(x => x.Status).IsRequired();
 
         // Issuance Type
-        builder.Property(x => x.IssuanceType).IsRequired().HasConversion(
+        builder.Property(x => x.Type).IsRequired().HasConversion(
             v => v.Value,
-            v => PpeIssuanceType.FromString(v));
+            v => PpeIssueType.FromString(v));
 
-        // Line Items
-        builder.OwnsMany(x => x.LineItems, lineItems =>
-        {
-            lineItems.ToJson();
-            lineItems.Property(li => li.PropertyCode).HasMaxLength(50);
-            lineItems.Property(li => li.SerialNumber).HasMaxLength(100);
-            lineItems.Property(li => li.Specification).HasMaxLength(500);
-            lineItems.Property(li => li.DateAcquired);
-            lineItems.Property(li => li.AcquisitionCost).HasPrecision(18, 2);
-            lineItems.Property(li => li.AccumulatedDepreciation).HasPrecision(18, 2);
-            lineItems.Property(li => li.BookValue).HasPrecision(18, 2);
-            lineItems.Property(li => li.Location).HasMaxLength(200);
-        });
+        // Line Items - stored as JSON for simplicity
+        builder.HasMany<PPEIRLineItem>()
+            .WithOne()
+            .HasForeignKey("PPEIRId");
 
         // Auditable base properties
-        builder.Property(x => x.CreatedBy).IsRequired();
+        builder.Property(x => x.CreatedBy);
         builder.Property(x => x.Created).IsRequired();
         builder.Property(x => x.LastModifiedBy);
         builder.Property(x => x.LastModified);
         builder.Property(x => x.DeletedBy);
         builder.Property(x => x.Deleted);
+    }
+}
+
+/// <summary>
+/// Configuration for PPEIR Line Items
+/// </summary>
+public sealed class PPEIRLineItemConfiguration : IEntityTypeConfiguration<PPEIRLineItem>
+{
+    public void Configure(EntityTypeBuilder<PPEIRLineItem> builder)
+    {
+        builder.HasKey(x => x.Id);
+        builder.ToTable(nameof(PPEIRLineItem));
+
+        builder.Property(x => x.PropertyCode).IsRequired().HasMaxLength(50);
+        builder.Property(x => x.IRNumber).IsRequired().HasMaxLength(50);
+
+        // Foreign key
+        builder.Property<Guid>("PPEIRId").IsRequired();
+        builder.HasOne<PPEIR>()
+            .WithMany()
+            .HasForeignKey("PPEIRId")
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

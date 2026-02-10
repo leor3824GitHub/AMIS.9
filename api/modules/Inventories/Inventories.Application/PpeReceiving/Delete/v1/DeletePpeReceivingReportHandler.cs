@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 namespace AMIS.WebApi.Inventories.Application.PpeReceiving.Delete.v1;
 
 public sealed class DeletePpeReceivingReportHandler(
-    [FromKeyedServices("inventories:pperr")] IRepository<Domain.PpeReceivingReport> repository,
+    [FromKeyedServices("inventories:pperr")] IRepository<Domain.PPERR> repository,
     ILogger<DeletePpeReceivingReportHandler> logger) : IRequestHandler<DeletePpeReceivingReportCommand, DeletePpeReceivingReportResponse>
 {
     public async Task<DeletePpeReceivingReportResponse> Handle(DeletePpeReceivingReportCommand request, CancellationToken cancellationToken)

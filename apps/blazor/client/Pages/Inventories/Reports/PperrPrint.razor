@@ -1,0 +1,181 @@
+@using AMIS.Blazor.Client.Pages.Inventories.Reports
+
+<div
+    style="width: 8.5in; margin: 0 auto; padding: 0.5in; font-family: Arial, sans-serif; line-height: 1.2; font-size: 12px;">
+    <!-- Header -->
+    <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px;">
+        <div style="font-weight: bold; font-size: 11px;">Republic of the Philippines</div>
+        <div style="font-weight: bold; font-size: 12px; margin: 2px 0;">NATIONAL FOOD AUTHORITY</div>
+        <div style="font-weight: bold; font-size: 13px; margin-top: 6px;">PPE RECEIVING REPORT</div>
+    </div>
+
+    <!-- Report Number and Date Row -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+        <div style="flex: 1;">
+            <strong>RR</strong> No @Model.RrNumber
+        </div>
+        <div style="text-align: right;">
+            <strong>Date:</strong> @(Model.Date?.ToString("MM/dd/yyyy") ?? "")
+        </div>
+    </div>
+
+    <!-- Received From and Receipt Type -->
+    <div style="margin-bottom: 12px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px; width: 40%;">
+                    <strong>Received From:</strong><br>
+                    @Model.ReceivedFrom
+                </td>
+                <td style="border: 1px solid #000; padding: 4px;">
+                    <div style="display: flex; gap: 12px; font-size: 11px;">
+                        <label>☐ Purchase</label>
+                        <label>☐ Transfer</label>
+                        <label>☐ Donation</label>
+                    </div>
+                    <div style="display: flex; gap: 12px; font-size: 11px; margin-top: 3px;">
+                        <label>☐ Return</label>
+                        <label>☐ Others</label>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #000; padding: 4px;">
+                    <strong>Address:</strong><br>
+                    @Model.Address
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Line Items Table -->
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 12px;">
+        <thead>
+            <tr style="background-color: #f0f0f0;">
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">
+                    Property Code</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">
+                    Serial Number</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">
+                    PPE Specifications</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; font-size: 11px;">
+                    Qty</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; font-size: 11px;">
+                    Unit</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: center; font-weight: bold; font-size: 11px;">
+                    Date Acquired</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold; font-size: 11px;">
+                    Unit Cost</th>
+                <th style="border: 1px solid #000; padding: 4px; text-align: left; font-weight: bold; font-size: 11px;">
+                    Location</th>
+                <th
+                    style="border: 1px solid #000; padding: 4px; text-align: right; font-weight: bold; font-size: 11px;">
+                    Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.LineItems != null && Model.LineItems.Count > 0)
+            {
+                @foreach (var item in Model.LineItems)
+                {
+                    <tr>
+                        <td style="border: 1px solid #000; padding: 4px;">@item.PropertyCode</td>
+                        <td style="border: 1px solid #000; padding: 4px;"></td>
+                        <td style="border: 1px solid #000; padding: 4px;">@item.Description</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">@item.Quantity</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">@item.Unit</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: center;">
+                            @(item.DateAcquired?.ToString("MM/dd/yyyy") ?? "")</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">@item.UnitCost.ToString("C2")</td>
+                        <td style="border: 1px solid #000; padding: 4px;">@item.Location</td>
+                        <td style="border: 1px solid #000; padding: 4px; text-align: right;">@((item.Quantity *
+                                                item.UnitCost).ToString("C2"))</td>
+                    </tr>
+                }
+            }
+            <!-- Empty rows for printing -->
+            @for (int i = Model.LineItems?.Count ?? 0; i < 10; i++)
+            {
+                <tr style="height: 24px;">
+                    <td style="border: 1px solid #000; padding: 4px;"></td>
+                    <td style="border: 1px solid #000; padding: 4px;"></td>
+                    <td style="border: 1px solid #000; padding: 4px;"></td>
+                    <td style="border: 1px solid #000; padding: 4px;"></td>
+                    <td style="border: 1px solid #000; padding: 4px;"></td>
+                    <td style="border: 1px solid #000; padding: 4px;"></td>
+                    <td style="border: 1px solid #000; padding: 4px;"></td>
+                    <td style="border: 1px solid #000; padding: 4px;"></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <!-- Totals Row -->
+    <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+        <table style="width: 40%; border-collapse: collapse;">
+            <tr style="background-color: #f0f0f0;">
+                <td style="border: 1px solid #000; padding: 6px; font-weight: bold; text-align: right;">TOTAL AMOUNT:
+                </td>
+                <td style="border: 1px solid #000; padding: 6px; text-align: right; font-weight: bold;">
+                    @{
+                        var total = Model.LineItems != null && Model.LineItems.Count > 0
+                        ? Model.LineItems.Sum(li => li.Quantity * li.UnitCost)
+                        : 0;
+                    }
+                    @total.ToString("C2")
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Signature Section -->
+    <div style="margin-top: 30px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="height: 40px;">
+                <td style="text-align: center; width: 33%; border-bottom: 1px solid #000;">
+                    <div style="font-size: 10px; margin-top: 5px;"><strong>Prepared By</strong></div>
+                </td>
+                <td style="text-align: center; width: 33%; border-bottom: 1px solid #000;">
+                    <div style="font-size: 10px; margin-top: 5px;"><strong>Verified By</strong></div>
+                </td>
+                <td style="text-align: center; width: 33%; border-bottom: 1px solid #000;">
+                    <div style="font-size: 10px; margin-top: 5px;"><strong>Approved By</strong></div>
+                </td>
+            </tr>
+            <tr style="height: 20px;">
+                <td style="text-align: center; font-size: 9px; padding-top: 5px;">
+                    <div>Signature Over Printed Name</div>
+                    <div>Date</div>
+                </td>
+                <td style="text-align: center; font-size: 9px; padding-top: 5px;">
+                    <div>Signature Over Printed Name</div>
+                    <div>Date</div>
+                </td>
+                <td style="text-align: center; font-size: 9px; padding-top: 5px;">
+                    <div>Signature Over Printed Name</div>
+                    <div>Date</div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Notes Section -->
+    <div style="margin-top: 20px; border-top: 1px solid #999; padding-top: 10px;">
+        <strong>Notes:</strong>
+        <div style="font-size: 11px; margin-top: 5px; min-height: 40px;">
+            @if (!string.IsNullOrEmpty(Model.Notes))
+            {
+                @Model.Notes
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public PperrModel Model { get; set; } = new();
+}

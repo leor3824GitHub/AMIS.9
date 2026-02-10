@@ -30,7 +30,11 @@ public class AssetAssignmentHistory : AuditableEntity
     public string Status { get; private set; } = "Active"; // Active, Returned, Transferred
     public string? Condition { get; private set; } // Condition at return
     public Guid? AcceptedBy { get; private set; } // Who accepted the return
-    public DateTime? AcceptanceDate { get; private set; }
+    
+    // PAR/ICS Formal Signatures (Names only - no dates)
+    public string? IssuedByName { get; private set; } // Who issued the document
+    public string? ReceivedByName { get; private set; } // Who received the asset
+    public string? ApprovedByName { get; private set; } // Who approved (for PAR)
 
     // Navigation properties
     public virtual PhysicalAsset Asset { get; private set; } = default!;
@@ -84,9 +88,12 @@ public class AssetAssignmentHistory : AuditableEntity
         DateTime assignmentDate,
         int quantity,
         PropertyClassification assetClassification,
-        string? location = null)
+        string? location = null,
+        string? issuedByName = null,
+        string? receivedByName = null,
+        string? approvedByName = null)
     {
-        return new AssetAssignmentHistory(
+        var assignment = new AssetAssignmentHistory(
             Guid.NewGuid(),
             assetId,
             assetNumber,
@@ -97,8 +104,15 @@ public class AssetAssignmentHistory : AuditableEntity
             assignmentDate,
             quantity,
             assetClassification,
-                "Initial",
-                location);
+            "Initial",
+            location);
+        
+        // Set signature names if provided
+        assignment.IssuedByName = issuedByName;
+        assignment.ReceivedByName = receivedByName ?? employeeName;
+        assignment.ApprovedByName = approvedByName;
+        
+        return assignment;
     }
 
     /// <summary>
@@ -158,8 +172,23 @@ public class AssetAssignmentHistory : AuditableEntity
         Reason = string.IsNullOrWhiteSpace(Reason) ? reason : $"{Reason}; {reason}";
         Condition = condition;
         AcceptedBy = acceptedBy;
-        AcceptanceDate = returnDate;
         Status = "Returned";
+    }
+
+    /// <summary>
+    /// Set formal signatures for PAR/ICS document
+    /// </summary>
+    public void SetSignatures(
+        string? issuedByName = null,
+        string? receivedByName = null,
+        string? approvedByName = null)
+    {
+        if (!string.IsNullOrWhiteSpace(issuedByName))
+            IssuedByName = issuedByName;
+        if (!string.IsNullOrWhiteSpace(receivedByName))
+            ReceivedByName = receivedByName;
+        if (!string.IsNullOrWhiteSpace(approvedByName))
+            ApprovedByName = approvedByName;
     }
 
     /// <summary>

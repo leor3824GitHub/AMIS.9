@@ -60,3 +60,10 @@ public record PhysicalAssetCustodianCleared : DomainEvent
     public DateTime ClearedDate { get; init; }
 }
 
+public record PhysicalAssetDisposed : DomainEvent
+{
+    public PhysicalAsset PhysicalAsset { get; init; } = default!;
+    public string DisposalReason { get; init; } = default!;
+    public DateTime DisposalDate { get; init; }
+}
+

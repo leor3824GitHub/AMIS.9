@@ -1,42 +1,96 @@
 @namespace AMIS.Blazor.Client.Pages.Inventories.PhysicalAssets
 
+@if (Model != null)
+{
 <EditForm Model="@Model" OnValidSubmit="OnValidSubmit">
     <MudDialog>
         <TitleContent>
-            <MudText Typo="Typo.h6">Update Physical Asset</MudText>
+            <MudText Typo="Typo.h6">Manage Asset Hierarchy</MudText>
         </TitleContent>
         <DialogContent>
             @if (_asset != null)
             {
                 <DataAnnotationsValidator />
                 <ValidationSummary />
-                <MudGrid>
-                    <MudItem xs="12">
-                        <MudText Typo="Typo.caption">
-                            <strong>Asset:</strong> @_asset.PropertyCode - @_asset.Description
+                <MudStack Spacing="3">
+                    <!-- Asset Info Section -->
+                    <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(63, 81, 181, 0.05);">
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                            Asset Information
                         </MudText>
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudSelect T="string" Label="Condition" @bind-Value="Model.Condition">
-                            <MudSelectItem T="string" Value="@("Good")">Good</MudSelectItem>
-                            <MudSelectItem T="string" Value="@("Fair")">Fair</MudSelectItem>
-                            <MudSelectItem T="string" Value="@("Poor")">Poor</MudSelectItem>
-                            <MudSelectItem T="string" Value="@("Unserviceable")">Unserviceable</MudSelectItem>
-                            <MudSelectItem T="string" Value="@("ForDisposal")">For Disposal</MudSelectItem>
-                        </MudSelect>
-                    </MudItem>
-                    <MudItem xs="12">
-                        <MudText Typo="Typo.caption">Current Custodian ID</MudText>
-                        <MudTextField @bind-Value="_custodianIdStr" Label="Custodian ID"
-                            Placeholder="Leave empty to keep current" />
-                        @if (_asset.CurrentCustodianId.HasValue)
+                        <MudGrid Spacing="1">
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2"><strong>Property Code:</strong> @_asset?.PropertyCode</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2"><strong>Serial Number:</strong> @(_asset?.SerialNumber ?? "N/A")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2"><strong>Model Number:</strong> @(_asset?.ModelNumber ?? "N/A")</MudText>
+                            </MudItem>
+                            <MudItem xs="12" sm="6">
+                                <MudText Typo="Typo.body2"><strong>Classification:</strong> @_asset?.Classification</MudText>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudText Typo="Typo.body2"><strong>Quantity:</strong> @_asset?.Quantity @(_asset?.UnitOfMeasure ?? "")</MudText>
+                            </MudItem>
+                            <MudItem xs="12">
+                                <MudText Typo="Typo.body2"><strong>Location:</strong> @(_asset?.Location ?? "Not assigned")</MudText>
+                            </MudItem>
+                        </MudGrid>
+                    </MudCard>
+
+                    <!-- Financial Information Section -->
+                    @if (_asset?.Classification.ToString() == "PropertyPlantEquipment" || _asset?.Classification.ToString() == "2")
+                    {
+                        <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.05);">
+                            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.AttachMoney" Size="Size.Small" Class="mr-1" />
+                                Financial Information (PPE)
+                            </MudText>
+                            <MudGrid Spacing="1">
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2"><strong>Acquisition Cost:</strong> ₱@_asset?.AcquisitionCost.ToString("N2")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2"><strong>Accumulated Depreciation:</strong> ₱@_asset?.AccumulatedDepreciation.ToString("N2")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2"><strong>Book Value:</strong> ₱@_asset?.BookValue.ToString("N2")</MudText>
+                                </MudItem>
+                                <MudItem xs="12" sm="6">
+                                    <MudText Typo="Typo.body2"><strong>RCA Account Code:</strong> @(_asset?.RcaAccountCode ?? "N/A")</MudText>
+                                </MudItem>
+                            </MudGrid>
+                        </MudCard>
+                    }
+
+                    <!-- Parent Asset Section -->
+                    <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(156, 39, 176, 0.05);">
+                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                            <MudIcon Icon="@Icons.Material.Filled.DeviceHub" Size="Size.Small" Class="mr-1" />
+                            Asset Hierarchy
+                        </MudText>
+                        <MudText Typo="Typo.caption" Class="mb-2">Update parent asset to modify asset hierarchy</MudText>
+                        <MudAutocomplete T="PhysicalAssetResponse" Label="Parent Asset" @bind-Value="_selectedParentAsset"
+                            SearchFunc="@SearchParentAssets" ToStringFunc="@(p => p == null ? string.Empty : $"{p.PropertyCode} - {p.Description}")"
+                            Clearable="true" ResetValueOnEmptyText="true" Variant="Variant.Outlined"
+                            Dense="false" Style="width: 100%;" />
+                        @if (_asset.ParentAssetId.HasValue)
                         {
                             <MudText Typo="Typo.caption" Class="mt-2">
-                                <strong>Current:</strong> @_asset.CurrentCustodianId
+                                <strong>Current Parent:</strong> @_asset.ParentAssetId
                             </MudText>
                         }
-                    </MudItem>
-                </MudGrid>
+                        else
+                        {
+                            <MudText Typo="Typo.caption" Class="mt-2" Color="Color.Secondary">
+                                This asset has no parent asset assigned.
+                            </MudText>
+                        }
+                    </MudCard>
+                </MudStack>
             }
             else
             {
@@ -57,6 +111,7 @@
         </DialogActions>
     </MudDialog>
 </EditForm>
+}
 
 @code {
     [CascadingParameter]
@@ -71,9 +126,9 @@
     [Inject]
     private ISnackbar Snackbar { get; set; } = default!;
 
-    private UpdatePhysicalAssetCommand Model = default!;
+    private UpdatePhysicalAssetCommand? Model;
     private PhysicalAssetResponse? _asset;
-    private string _custodianIdStr = "";
+    private PhysicalAssetResponse? _selectedParentAsset;
     private bool _loading;
 
     protected override async Task OnInitializedAsync()
@@ -86,11 +141,20 @@
             {
                 Model = new UpdatePhysicalAssetCommand
                 {
-                    Id = AssetId,
-                    Condition = "",
-                    CurrentCustodianId = _asset.CurrentCustodianId
+                    Id = AssetId
                 };
-                _custodianIdStr = _asset.CurrentCustodianId?.ToString() ?? "";
+                // Load parent asset if it exists
+                if (_asset.ParentAssetId.HasValue)
+                {
+                    try
+                    {
+                        _selectedParentAsset = await ApiClient.GetPhysicalAssetEndpointAsync("1", _asset.ParentAssetId.Value);
+                    }
+                    catch
+                    {
+                        // Parent asset may have been deleted, continue without it
+                    }
+                }
             }
         }
         catch (Exception ex)
@@ -112,31 +176,38 @@
             return;
         }
 
+        // Validate: Asset cannot be its own parent
+        if (_selectedParentAsset?.Id == AssetId)
+        {
+            Snackbar?.Add("An asset cannot be assigned as its own parent.", Severity.Warning);
+            return;
+        }
+
         _loading = true;
         try
         {
-            // Parse custodian ID if provided
-            if (!string.IsNullOrWhiteSpace(_custodianIdStr))
+            // Only update if parent asset changed
+            if (_selectedParentAsset?.Id != _asset?.ParentAssetId)
             {
-                if (Guid.TryParse(_custodianIdStr, out var custodianId))
+                // Create the command with parent asset ID
+                var updateCommand = new UpdatePhysicalAssetCommand
                 {
-                    Model.CurrentCustodianId = custodianId;
-                }
-                else
-                {
-                    Snackbar?.Add("Invalid custodian ID format.", Severity.Warning);
-                    _loading = false;
-                    return;
-                }
+                    Id = AssetId,
+                    Condition = null,
+                    ParentAssetId = _selectedParentAsset?.Id
+                };
+                await ApiClient.UpdatePhysicalAssetEndpointAsync("1", AssetId, updateCommand);
+                Snackbar?.Add("Asset hierarchy updated successfully.", Severity.Success);
             }
-
-            await ApiClient.UpdatePhysicalAssetEndpointAsync("1", AssetId, Model);
-            Snackbar?.Add("Physical asset updated successfully.", Severity.Success);
+            else
+            {
+                Snackbar?.Add("No changes made.", Severity.Info);
+            }
             MudDialog?.Close(DialogResult.Ok(true));
         }
         catch (Exception ex)
         {
-            Snackbar?.Add($"Error updating asset: {ex.Message}", Severity.Error);
+            Snackbar?.Add($"Error updating asset hierarchy: {ex.Message}", Severity.Error);
         }
         finally
         {
@@ -145,4 +216,37 @@
     }
 
     private void Cancel() => MudDialog?.Cancel();
+
+    private async Task<IEnumerable<PhysicalAssetResponse>> SearchParentAssets(string value, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            // Load all assets for dropdown
+            var searchCommand = new SearchPhysicalAssetsCommand
+            {
+                PageNumber = 1,
+                PageSize = 100
+            };
+            var result = await ApiClient.SearchPhysicalAssetsEndpointAsync("1", searchCommand, cancellationToken);
+            if (result?.Items == null || result.Items.Count == 0)
+                return Array.Empty<PhysicalAssetResponse>();
+
+            // Filter results client-side based on search value (if provided)
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                // Return all items if no search filter
+                return result.Items.ToList();
+            }
+
+            var filteredItems = result.Items
+                .Where(a => a.PropertyCode.Contains(value, StringComparison.OrdinalIgnoreCase) ||
+                            a.Description.Contains(value, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            return filteredItems;
+        }
+        catch
+        {
+            return Array.Empty<PhysicalAssetResponse>();
+        }
+    }
 }
