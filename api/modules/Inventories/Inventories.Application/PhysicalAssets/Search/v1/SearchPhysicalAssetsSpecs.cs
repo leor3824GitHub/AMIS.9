@@ -35,6 +35,10 @@ public sealed class SearchPhysicalAssetsSpecs : Specification<PhysicalAsset, Phy
                 .FirstOrDefault(h => h.Status == "Active") != null
                 ? p.AssignmentHistory.FirstOrDefault(h => h.Status == "Active")!.EmployeeId
                 : null,
+            p.AssignmentHistory
+                .FirstOrDefault(h => h.Status == "Active") != null
+                ? p.AssignmentHistory.FirstOrDefault(h => h.Status == "Active")!.EmployeeName
+                : null,
             p.ParentAssetId,
             p.ParentAsset != null ? p.ParentAsset.Product.Name : null,
             p.ParentAsset != null ? p.ParentAsset.PropertyCode : null));

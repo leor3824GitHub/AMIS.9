@@ -22,7 +22,7 @@ public sealed class SearchPhysicalAssetsHandler(
         var items = await repository.ListAsync(spec, cancellationToken);
         var totalCount = await repository.CountAsync(spec, cancellationToken);
 
-        return new PagedList<PhysicalAssetResponse>(items, request.PageNumber, request.PageSize, totalCount);
+        return new PagedList<PhysicalAssetResponse>(items.ToList(), request.PageNumber, request.PageSize, totalCount);
     }
 }
 

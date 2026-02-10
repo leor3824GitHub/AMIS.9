@@ -21,6 +21,7 @@ public sealed record PhysicalAssetResponse(
     decimal BookValue,
     string RCAAccountCode,
     Guid? CurrentCustodianId,
+    string? CurrentCustodianName,
     Guid? ParentAssetId,
     string? ParentAssetProductName,
     string? ParentAssetPropertyCode);

@@ -65,48 +65,16 @@ public sealed class IssuePhysicalAssetHandler(
         {
             await repository.UpdateAsync(asset, cancellationToken);
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (DbUpdateConcurrencyException)
         {
-            // Handle concurrency conflict by reloading the entity
             logger.LogWarning(
-                "Concurrency conflict while issuing asset {AssetId}. Reloading and retrying.",
+                "Concurrency conflict while issuing asset {AssetId}.",
                 asset.Id);
-            
-            // Reload the asset from the database
-            var reloadedAsset = await repository.GetByIdAsync(request.Id, cancellationToken)
-                ?? throw new FshException(
-                    $"Physical asset {request.Id} not found",
-                    new[] { $"Asset with ID {request.Id} was deleted" },
-                    HttpStatusCode.NotFound);
-            
-            // Re-apply the issue operation
-            try
-            {
-                history = reloadedAsset.Issue(
-                    request.EmployeeId,
-                    request.EmployeeName,
-                    request.DocumentNumber,
-                    request.QuantityIssued,
-                    request.Location,
-                    emitEvent: true,
-                    classificationPolicy: null,
-                    request.IssuedByName,
-                    request.ReceivedByName,
-                    request.ApprovedByName);
-            }
-            catch (InvalidOperationException ex)
-            {
-                throw new FshException(
-                    ex.Message,
-                    new[] { ex.Message },
-                    ex.Message.Contains("already assigned", StringComparison.OrdinalIgnoreCase)
-                        ? HttpStatusCode.Conflict
-                        : HttpStatusCode.BadRequest);
-            }
-            
-            // Try update again
-            await repository.UpdateAsync(reloadedAsset, cancellationToken);
-            asset = reloadedAsset;
+
+            throw new FshException(
+                "Asset was updated by another process. Refresh and try again.",
+                new[] { "Asset was updated by another process. Refresh and try again." },
+                HttpStatusCode.Conflict);
         }
 
         logger.LogInformation(

@@ -31488,6 +31488,9 @@ namespace AMIS.Blazor.Infrastructure.Api
         [System.Text.Json.Serialization.JsonPropertyName("currentCustodianId")]
         public System.Guid? CurrentCustodianId { get; set; }
 
+        [System.Text.Json.Serialization.JsonPropertyName("currentCustodianName")]
+        public string CurrentCustodianName { get; set; }
+
         [System.Text.Json.Serialization.JsonPropertyName("parentAssetId")]
         public System.Guid? ParentAssetId { get; set; }
 

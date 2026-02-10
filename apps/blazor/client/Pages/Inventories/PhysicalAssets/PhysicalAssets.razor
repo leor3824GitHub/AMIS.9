@@ -69,10 +69,10 @@
                 </TemplateColumn>
                 <TemplateColumn Title="Custodian" Sortable="false">
                     <CellTemplate>
-                        @if (context.Item.CurrentCustodianId.HasValue)
+                        @if (!string.IsNullOrEmpty(context.Item.CurrentCustodianName))
                         {
                             <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Info">
-                                @context.Item.CurrentCustodianId.Value.ToString().Substring(0, 8)
+                                @context.Item.CurrentCustodianName
                             </MudChip>
                         }
                         else
