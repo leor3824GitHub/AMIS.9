@@ -32,7 +32,6 @@ public sealed class InventoriesDbContext : FshDbContext
     public DbSet<InspectionItem> InspectionItems { get; set; } = null!;
     public DbSet<Acceptance> Acceptances { get; set; } = null!;
     public DbSet<AcceptanceItem> AcceptanceItems { get; set; } = null!;
-    public DbSet<InspectionRequest> InspectionRequests { get; set; } = null!;
     public DbSet<PurchaseRequest> PurchaseRequests { get; set; } = null!;
     public DbSet<PurchaseRequestItem> PurchaseRequestItems { get; set; } = null!;
     public DbSet<Canvass> Canvasses { get; set; } = null!;

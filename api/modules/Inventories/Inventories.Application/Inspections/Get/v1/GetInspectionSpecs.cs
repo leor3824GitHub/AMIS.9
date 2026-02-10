@@ -14,16 +14,20 @@ public class GetInspectionSpecs : Specification<Inspection, InspectionResponse>
         Query
             .Where(i => i.Id == id)
             .Include(i => i.Purchase)
+            .Include(i => i.PhysicalAsset)
             .Include(i => i.Employee)
             .Include(i => i.Items)
                 .ThenInclude(item => item.PurchaseItem);
-        
+
         Query.Select(i => new InspectionResponse(
                 i.Id,
+                i.Type,
                 i.InspectedOn,
                 i.EmployeeId,
                 i.PurchaseId,
+                i.PhysicalAssetId,
                 i.Remarks,
+                i.IARDocumentPath,
                 new EmployeeResponse(
                     i.Employee.Id,
                     i.Employee.Name,
@@ -55,4 +59,5 @@ public class GetInspectionSpecs : Specification<Inspection, InspectionResponse>
             ));
     }
 }
+
 

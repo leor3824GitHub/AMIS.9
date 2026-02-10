@@ -24,13 +24,16 @@ public class SearchInspectionSpecs : EntitiesByPaginationFilterSpec<Inspection, 
             .Where(i => i.EmployeeId == command.InspectorId!.Value, command.InspectorId.HasValue)
             .Where(i => i.InspectedOn >= command.FromDate, command.FromDate.HasValue)
             .Where(i => i.InspectedOn <= command.ToDate, command.ToDate.HasValue);
-        
+
         Query.Select(i => new InspectionResponse(
                 i.Id,
+                i.Type,
                 i.InspectedOn,
                 i.EmployeeId,
                 i.PurchaseId,
+                i.PhysicalAssetId,
                 i.Remarks,
+                i.IARDocumentPath,
                 new EmployeeResponse(
                     i.Employee.Id,
                     i.Employee.Name,

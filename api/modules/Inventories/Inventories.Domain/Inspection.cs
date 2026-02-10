@@ -8,11 +8,38 @@ using AMIS.WebApi.Inventories.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Inventories.Domain;
 
+/// <summary>
+/// Inspection types for different asset management scenarios
+/// </summary>
+public enum InspectionType
+{
+    /// <summary>
+    /// Inspection for newly procured/delivered items from supplier
+    /// </summary>
+    NewDelivery = 0,
+
+    /// <summary>
+    /// Inspection for items/assets returned by end user
+    /// </summary>
+    AssetReturn = 1,
+
+    /// <summary>
+    /// Inspection for items/assets requiring repair (pre/post repair)
+    /// </summary>
+    Repair = 2
+}
+
+
 public class Inspection : AuditableEntity, IAggregateRoot
 {
-    // Optional link to a Purchase
+    // Inspection type (NewDelivery, AssetReturn, Repair)
+    public InspectionType Type { get; private set; }
+
+    // Links to different entities based on Type
     public Guid? PurchaseId { get; private set; }
+    public Guid? PhysicalAssetId { get; private set; }
     public virtual Purchase? Purchase { get; private set; }
+    public virtual PhysicalAsset? PhysicalAsset { get; private set; }
 
     // Employee who performed the inspection
     public Guid EmployeeId { get; private set; }
@@ -33,21 +60,23 @@ public class Inspection : AuditableEntity, IAggregateRoot
     public int TotalInspectedQuantity => Items.Sum(i => i.QtyInspected);
     public int TotalPassedQuantity => Items.Sum(i => i.QtyPassed);
     public int TotalFailedQuantity => Items.Sum(i => i.QtyFailed);
-    public bool HasAnyPassed => Items.Any(i => 
-        i.InspectionItemStatus == InspectionItemStatus.Passed || 
+    public bool HasAnyPassed => Items.Any(i =>
+        i.InspectionItemStatus == InspectionItemStatus.Passed ||
         i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation);
-    public bool HasAnyFailed => Items.Any(i => 
-        i.InspectionItemStatus == InspectionItemStatus.Failed || 
+    public bool HasAnyFailed => Items.Any(i =>
+        i.InspectionItemStatus == InspectionItemStatus.Failed ||
         i.InspectionItemStatus == InspectionItemStatus.Rejected);
 
     // Parameterless ctor for EF
     private Inspection() { }
 
     // Internal constructor - use factory Create(...) for creation
-    private Inspection(Guid id, Guid? purchaseId, Guid employeeId, DateTime inspectedOn, bool approved, string? remarks, string? iarDocumentPath)
+    private Inspection(Guid id, InspectionType type, Guid? purchaseId, Guid? physicalAssetId, Guid employeeId, DateTime inspectedOn, bool approved, string? remarks, string? iarDocumentPath)
     {
         Id = id;
+        Type = type;
         PurchaseId = purchaseId;
+        PhysicalAssetId = physicalAssetId;
         EmployeeId = employeeId;
         InspectedOn = inspectedOn;
         Approved = approved;
@@ -57,24 +86,73 @@ public class Inspection : AuditableEntity, IAggregateRoot
         Status = InspectionStatus.InProgress;
     }
 
-    // Factory - ensures Id is generated and sensible defaults are applied
-    public static Inspection Create(Guid? purchaseId, Guid employeeId, DateTime? inspectedOn = null, string? remarks = null, string? iarDocumentPath = null)
+    /// <summary>
+    /// Factory for newly procured/delivered items (linked to Purchase)
+    /// </summary>
+    public static Inspection CreateForNewDelivery(Guid purchaseId, Guid employeeId, DateTime? inspectedOn = null, string? remarks = null, string? iarDocumentPath = null)
     {
         if (employeeId == Guid.Empty)
             throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
 
         var inspectedAt = inspectedOn ?? DateTime.UtcNow;
-        var inspection = new Inspection(Guid.NewGuid(), purchaseId, employeeId, inspectedAt, false, remarks, iarDocumentPath);
+        var inspection = new Inspection(Guid.NewGuid(), InspectionType.NewDelivery, purchaseId, null, employeeId, inspectedAt, false, remarks, iarDocumentPath);
 
-        // Queue domain event for creation
         inspection.QueueDomainEvent(new InspectionCreated
         {
             InspectionId = inspection.Id,
             PurchaseId = purchaseId,
             EmployeeId = employeeId
         });
-        
+
         return inspection;
+    }
+
+    /// <summary>
+    /// Factory for items/assets returned by user (linked to PhysicalAsset)
+    /// </summary>
+    public static Inspection CreateForAssetReturn(Guid physicalAssetId, Guid employeeId, DateTime? inspectedOn = null, string? remarks = null)
+    {
+        if (employeeId == Guid.Empty)
+            throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
+
+        var inspectedAt = inspectedOn ?? DateTime.UtcNow;
+        var inspection = new Inspection(Guid.NewGuid(), InspectionType.AssetReturn, null, physicalAssetId, employeeId, inspectedAt, false, remarks, null);
+
+        inspection.QueueDomainEvent(new InspectionCreated
+        {
+            InspectionId = inspection.Id,
+            EmployeeId = employeeId
+        });
+
+        return inspection;
+    }
+
+    /// <summary>
+    /// Factory for items/assets requiring repair (pre/post repair, linked to PhysicalAsset)
+    /// </summary>
+    public static Inspection CreateForRepair(Guid physicalAssetId, Guid employeeId, DateTime? inspectedOn = null, string? remarks = null)
+    {
+        if (employeeId == Guid.Empty)
+            throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
+
+        var inspectedAt = inspectedOn ?? DateTime.UtcNow;
+        var inspection = new Inspection(Guid.NewGuid(), InspectionType.Repair, null, physicalAssetId, employeeId, inspectedAt, false, remarks, null);
+
+        inspection.QueueDomainEvent(new InspectionCreated
+        {
+            InspectionId = inspection.Id,
+            EmployeeId = employeeId
+        });
+
+        return inspection;
+    }
+
+    /// <summary>
+    /// Legacy factory - defaults to NewDelivery type for backward compatibility
+    /// </summary>
+    public static Inspection Create(Guid? purchaseId, Guid employeeId, DateTime? inspectedOn = null, string? remarks = null, string? iarDocumentPath = null)
+    {
+        return CreateForNewDelivery(purchaseId ?? Guid.Empty, employeeId, inspectedOn, remarks, iarDocumentPath);
     }
 
     // Add an existing item instance (sets link to this inspection if missing)
@@ -198,7 +276,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
 
         ChangeStatus(InspectionStatus.Rejected);
         Approved = false;
-        
+
         if (!string.IsNullOrWhiteSpace(reason))
         {
             Remarks = string.IsNullOrWhiteSpace(Remarks) ? reason : $"{Remarks}\nRejection: {reason}";
@@ -264,12 +342,12 @@ public class Inspection : AuditableEntity, IAggregateRoot
 
         // Check if all purchase items have been fully inspected
         bool allItemsFullyInspected = true;
-        
+
         foreach (var purchaseItem in purchase.Items)
         {
             // Find corresponding inspection items for this purchase item
             var inspectionItems = Items.Where(ii => ii.PurchaseItemId == purchaseItem.Id).ToList();
-            
+
             if (inspectionItems.Count == 0)
             {
                 allItemsFullyInspected = false;
@@ -278,7 +356,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
 
             // Sum up total inspected quantity for this purchase item
             var totalInspectedQty = inspectionItems.Sum(ii => ii.QtyInspected);
-            
+
             if (totalInspectedQty < purchaseItem.Qty)
             {
                 allItemsFullyInspected = false;
@@ -294,13 +372,13 @@ public class Inspection : AuditableEntity, IAggregateRoot
     }
 
     // Convenience queries
-    public IEnumerable<InspectionItem> AcceptedItems() => 
-        Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Passed || 
+    public IEnumerable<InspectionItem> AcceptedItems() =>
+        Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Passed ||
                         i.InspectionItemStatus == InspectionItemStatus.AcceptedWithDeviation)
              .ToList();
 
-    public IEnumerable<InspectionItem> RejectedItems() => 
-        Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Failed || 
+    public IEnumerable<InspectionItem> RejectedItems() =>
+        Items.Where(i => i.InspectionItemStatus == InspectionItemStatus.Failed ||
                         i.InspectionItemStatus == InspectionItemStatus.Rejected)
              .ToList();
 
@@ -309,7 +387,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     {
         if (inspectedOn == default)
             throw new ArgumentException("InspectedOn must be a valid date.", nameof(inspectedOn));
-        
+
         if (inspectedOn > DateTime.UtcNow)
             throw new ArgumentException("InspectedOn cannot be in the future.", nameof(inspectedOn));
 
@@ -321,7 +399,7 @@ public class Inspection : AuditableEntity, IAggregateRoot
     {
         if (employeeId == Guid.Empty)
             throw new ArgumentException("EmployeeId must be provided.", nameof(employeeId));
-        
+
         if (Status == InspectionStatus.Approved)
         {
             throw new InvalidOperationException("Cannot change employee for an approved inspection.");
@@ -342,7 +420,28 @@ public class Inspection : AuditableEntity, IAggregateRoot
             throw new InvalidOperationException("Cannot change purchase for an approved inspection.");
         }
 
+        if (Type != InspectionType.NewDelivery)
+        {
+            throw new InvalidOperationException("Purchase can only be set for NewDelivery inspections.");
+        }
+
         PurchaseId = purchaseId;
+    }
+
+    // Set physical asset link (for AssetReturn and Repair types)
+    public void SetPhysicalAsset(Guid? physicalAssetId)
+    {
+        if (Status == InspectionStatus.Approved)
+        {
+            throw new InvalidOperationException("Cannot change physical asset for an approved inspection.");
+        }
+
+        if (Type == InspectionType.NewDelivery)
+        {
+            throw new InvalidOperationException("Physical asset can only be set for AssetReturn or Repair inspections.");
+        }
+
+        PhysicalAssetId = physicalAssetId;
     }
 
     public void Complete()
