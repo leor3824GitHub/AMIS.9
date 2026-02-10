@@ -1,4 +1,5 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Inventories.Application.PhysicalAssets.Specifications;
 using AMIS.WebApi.Inventories.Domain;
 using MediatR;
 using Microsoft.AspNetCore.Http;
@@ -22,7 +23,8 @@ public sealed class ReturnPhysicalAssetHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var asset = await repository.GetByIdAsync(request.Id, cancellationToken)
+        var spec = new PhysicalAssetByIdSpec(request.Id);
+        var asset = await repository.FirstOrDefaultAsync(spec, cancellationToken)
             ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
 
         // Get current user ID from claims

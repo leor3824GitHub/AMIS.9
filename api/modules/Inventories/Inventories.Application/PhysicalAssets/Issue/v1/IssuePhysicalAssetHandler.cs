@@ -1,5 +1,6 @@
 using AMIS.Framework.Core.Persistence;
 using AMIS.Framework.Core.Exceptions;
+using AMIS.WebApi.Inventories.Application.PhysicalAssets.Specifications;
 using AMIS.WebApi.Inventories.Domain;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -21,7 +22,8 @@ public sealed class IssuePhysicalAssetHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var asset = await repository.GetByIdAsync(request.Id, cancellationToken)
+        var spec = new PhysicalAssetByIdSpec(request.Id);
+        var asset = await repository.FirstOrDefaultAsync(spec, cancellationToken)
             ?? throw new FshException(
                 $"Physical asset {request.Id} not found",
                 new[] { $"Asset with ID {request.Id} does not exist" },
