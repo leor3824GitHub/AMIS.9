@@ -24,7 +24,7 @@ public sealed class CreateInspectionHandler(
     ILogger<CreateInspectionHandler> logger,
     [FromKeyedServices("inventories:inspections")] IRepository<Inspection> repository,
     [FromKeyedServices("inventories:purchases")] IRepository<Purchase> purchaseRepository,
-    [FromKeyedServices("inventories:physicalAssets")] IRepository<PhysicalAsset> assetRepository)
+    [FromKeyedServices("inventories:physicalassets")] IRepository<PhysicalAsset> assetRepository)
     : IRequestHandler<CreateInspectionCommand, CreateInspectionResponse>
 {
     public async Task<CreateInspectionResponse> Handle(CreateInspectionCommand request, CancellationToken cancellationToken)
