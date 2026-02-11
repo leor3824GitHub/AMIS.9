@@ -23,8 +23,8 @@ public sealed class PostPARHandler(
         // Authorization check
         var authResult = await authorizationService.AuthorizeAsync(
             null,
-            $"{FshResources.PropertyAcknowledgementReceipt}.{FshActions.Post}");
-        
+            FshPermission.NameFor(FshActions.Post, FshResources.PropertyAcknowledgementReceipt));
+
         if (!authResult.Succeeded)
         {
             logger.LogWarning("Unauthorized post attempt for PAR {Id}", request.Id);

@@ -23,8 +23,8 @@ public sealed class CancelPARHandler(
         // Authorization check - only accounting can cancel
         var authResult = await authorizationService.AuthorizeAsync(
             null,
-            $"{FshResources.PropertyAcknowledgementReceipt}.{FshActions.Update}");
-        
+            FshPermission.NameFor(FshActions.Cancel, FshResources.PropertyAcknowledgementReceipt));
+
         if (!authResult.Succeeded)
         {
             logger.LogWarning("Unauthorized cancel attempt for PAR {Id}", request.Id);

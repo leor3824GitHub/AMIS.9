@@ -23,8 +23,8 @@ public sealed class ReturnPARHandler(
         // Authorization check
         var authResult = await authorizationService.AuthorizeAsync(
             null,
-            $"{FshResources.PropertyAcknowledgementReceipt}.{FshActions.Update}");
-        
+            FshPermission.NameFor(FshActions.Return, FshResources.PropertyAcknowledgementReceipt));
+
         if (!authResult.Succeeded)
         {
             logger.LogWarning("Unauthorized return attempt for PAR {Id}", request.Id);

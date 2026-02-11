@@ -20,8 +20,8 @@ public sealed class UpdatePARHandler(
         // Authorization check
         var authResult = await authorizationService.AuthorizeAsync(
             null,
-            $"{FshResources.PropertyAcknowledgementReceipt}.{FshActions.Update}");
-        
+            FshPermission.NameFor(FshActions.Update, FshResources.PropertyAcknowledgementReceipt));
+
         if (!authResult.Succeeded)
         {
             logger.LogWarning("Unauthorized update attempt for PAR {Id}", request.Id);
@@ -60,7 +60,7 @@ public sealed class UpdatePARHandler(
             request.Notes);
 
         par.ClearLineItems();
-        
+
         var lineItems = request.LineItems.Select(x => new Domain.PARLineItem(
             x.PropertyCode,
             x.Description,
