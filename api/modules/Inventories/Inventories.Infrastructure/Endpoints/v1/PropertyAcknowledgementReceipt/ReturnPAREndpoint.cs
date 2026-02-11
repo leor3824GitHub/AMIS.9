@@ -31,7 +31,7 @@ public static class ReturnPAREndpoint
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequirePermission($"{FshResources.PropertyAcknowledgementReceipt}.{FshActions.Update}")
+            .RequirePermission(FshPermission.NameFor(FshActions.Return, FshResources.PropertyAcknowledgementReceipt))
             .MapToApiVersion(new ApiVersion(1, 0));
     }
 }

@@ -27,7 +27,7 @@ public static class PostPAREndpoint
             .ProducesProblem(StatusCodes.Status400BadRequest)
             .ProducesProblem(StatusCodes.Status401Unauthorized)
             .ProducesProblem(StatusCodes.Status404NotFound)
-            .RequirePermission($"{FshResources.PropertyAcknowledgementReceipt}.{FshActions.Post}")
+            .RequirePermission(FshPermission.NameFor(FshActions.Post, FshResources.PropertyAcknowledgementReceipt))
             .MapToApiVersion(new ApiVersion(1, 0));
     }
 }
