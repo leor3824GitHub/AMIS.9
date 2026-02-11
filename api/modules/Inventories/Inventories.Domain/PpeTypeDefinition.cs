@@ -27,6 +27,7 @@ public class PPETypeDefinition : AuditableEntity, IAggregateRoot
     private PPETypeDefinition() { }
 
     private PPETypeDefinition(
+        Guid? id,
         string code,
         string name,
         string rcaAccountCode,
@@ -39,7 +40,7 @@ public class PPETypeDefinition : AuditableEntity, IAggregateRoot
         string? iconName = null,
         string? coaReference = null)
     {
-        Id = Guid.NewGuid();
+        Id = id ?? Guid.NewGuid();
         Code = code;
         Name = name;
         Description = description;
@@ -65,11 +66,13 @@ public class PPETypeDefinition : AuditableEntity, IAggregateRoot
         string? description = null,
         string? category = null,
         string? iconName = null,
-        string? coaReference = null)
+        string? coaReference = null,
+        Guid? id = null)
     {
         ValidateCreate(code, name, rcaAccountCode, depreciationAccountCode, defaultDepreciationRate, defaultUsefulLifeYears);
 
         return new PPETypeDefinition(
+            id,
             code,
             name,
             rcaAccountCode,
@@ -161,15 +164,15 @@ public class PPETypeDefinition : AuditableEntity, IAggregateRoot
         return new List<PPETypeDefinition>
         {
             Create("MACHINERY", "Machinery and Equipment", "10604010", "10699010", 10m, 10, 1,
-                "Industrial machinery, tools, and equipment", "Production", "gear", "COA Circular 2022-002"),
+                "Industrial machinery, tools, and equipment", "Production", "gear", "COA Circular 2022-002", new Guid("8cfb4254-c41d-4217-a176-998a332e4a68")),
             Create("TRANSPORTATION", "Transportation Equipment", "10605010", "10699010", 20m, 5, 2,
-                "Vehicles, motorcycles, boats", "Transportation", "car", "COA Circular 2022-002"),
+                "Vehicles, motorcycles, boats", "Transportation", "car", "COA Circular 2022-002", new Guid("4a2d8afe-1374-4cc0-b1f8-d86dd9bd9526")),
             Create("FURNITURE", "Furniture, Fixtures and Books", "10606010", "10699010", 10m, 10, 3,
-                "Office furniture, fixtures, and reference books", "Office", "chair", "COA Circular 2022-002"),
+                "Office furniture, fixtures, and reference books", "Office", "chair", "COA Circular 2022-002", new Guid("1b062724-34c0-40fc-aaa3-618afe3146d4")),
             Create("ICT", "ICT Equipment", "10607010", "10699010", 33.33m, 3, 4,
-                "Computers, servers, network equipment", "Technology", "desktop", "COA Circular 2022-002"),
+                "Computers, servers, network equipment", "Technology", "desktop", "COA Circular 2022-002", new Guid("114e8090-cab3-43d6-9485-f5d28642e9b8")),
             Create("OTHER", "Other PPE", "10699990", "10699010", 10m, 10, 5,
-                "Other property, plant and equipment", "General", "box", "COA Circular 2022-002")
+                "Other property, plant and equipment", "General", "box", "COA Circular 2022-002", new Guid("211945cc-dde6-4b91-a3f7-0da8e5fa742d"))
         };
     }
 }

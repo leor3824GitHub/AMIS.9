@@ -20,7 +20,7 @@ public partial class PropertyAcknowledgementReceiptList
         _loading = true;
         try
         {
-            var response = await ApiClient.ListPARsEndpointAsync("1");
+            var response = await ApiClient.ListPARsEndpointAsync("1", cancellationToken);
 
             // Client-side filtering (since the API endpoint doesn't support server-side filtering)
             var filtered = response?.PaRs ?? new List<PARDto>();
@@ -80,9 +80,21 @@ public partial class PropertyAcknowledgementReceiptList
         _table?.ReloadServerData();
     }
 
-    private Color GetStatusColor(string status)
+    private void OnClearStatusFilter()
     {
-        return status?.ToLower() switch
+        _statusFilter = null;
+        _table?.ReloadServerData();
+    }
+
+    private Task OnDateRangeChanged()
+    {
+        _table?.ReloadServerData();
+        return Task.CompletedTask;
+    }
+
+    private static Color GetStatusColor(string? status)
+    {
+        return status?.ToLowerInvariant() switch
         {
             "draft" => Color.Default,
             "posted" => Color.Success,
@@ -99,7 +111,7 @@ public partial class PropertyAcknowledgementReceiptList
             "Posting this PAR will assign the PPE items to the custodian and lock the document. Continue?",
             yesText: "Post", cancelText: "Cancel");
 
-        if (confirmed == true)
+        if (confirmed is true)
         {
             try
             {
@@ -128,6 +140,14 @@ public partial class PropertyAcknowledgementReceiptList
         if (!result.Canceled)
         {
             await _table!.ReloadServerData();
+        }
+    }
+
+    private async Task OnTableSearchDebounce()
+    {
+        if (_table is not null)
+        {
+            await _table.ReloadServerData();
         }
     }
 }

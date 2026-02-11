@@ -14,6 +14,7 @@ public sealed class PhysicalAssetByIdSpec : Specification<PhysicalAsset>
         Query
             .Where(p => p.Id == id)
             .Include(p => p.AssignmentHistory)
-            .Include(p => p.Product);
+            .Include(p => p.Product)
+            .AsSplitQuery(); // Use split query to avoid cartesian explosion and tracking issues
     }
 }

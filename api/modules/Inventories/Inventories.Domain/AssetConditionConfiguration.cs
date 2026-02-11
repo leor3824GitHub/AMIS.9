@@ -22,6 +22,7 @@ public class AssetConditionConfiguration : AuditableEntity, IAggregateRoot
     private AssetConditionConfiguration() { }
 
     private AssetConditionConfiguration(
+        Guid? id,
         string code,
         string displayName,
         string? description,
@@ -31,7 +32,7 @@ public class AssetConditionConfiguration : AuditableEntity, IAggregateRoot
         bool requiresRepair,
         bool requiresDisposal)
     {
-        Id = Guid.NewGuid();
+        Id = id ?? Guid.NewGuid();
         Code = code;
         DisplayName = displayName;
         Description = description;
@@ -51,7 +52,8 @@ public class AssetConditionConfiguration : AuditableEntity, IAggregateRoot
         int sortOrder = 10,
         bool allowsForUse = true,
         bool requiresRepair = false,
-        bool requiresDisposal = false)
+        bool requiresDisposal = false,
+        Guid? id = null)
     {
         if (string.IsNullOrWhiteSpace(code))
             throw new ArgumentException("Condition code is required.", nameof(code));
@@ -61,6 +63,7 @@ public class AssetConditionConfiguration : AuditableEntity, IAggregateRoot
             throw new ArgumentException("Color code is required.", nameof(colorCode));
 
         return new AssetConditionConfiguration(
+            id,
             code,
             displayName,
             description,
@@ -104,11 +107,11 @@ public class AssetConditionConfiguration : AuditableEntity, IAggregateRoot
     {
         return new List<AssetConditionConfiguration>
         {
-            Create("Good", "Good", "Asset is in excellent working condition", "#28a745", 1, allowsForUse: true),
-            Create("Fair", "Fair", "Asset has minor wear but still functional", "#ffc107", 2, allowsForUse: true),
-            Create("Poor", "Poor", "Asset has significant wear, may need repair", "#fd7e14", 3, allowsForUse: true, requiresRepair: true),
-            Create("Unserviceable", "Unserviceable", "Asset is not functional, requires major repair", "#dc3545", 4, allowsForUse: false, requiresRepair: true),
-            Create("ForDisposal", "For Disposal", "Asset is beyond repair and should be disposed", "#6c757d", 5, allowsForUse: false, requiresDisposal: true)
+            Create("Good", "Good", "Asset is in excellent working condition", "#28a745", 1, allowsForUse: true, id: new Guid("948eeb63-a4c1-4f14-93db-0fa72489a82a")),
+            Create("Fair", "Fair", "Asset has minor wear but still functional", "#ffc107", 2, allowsForUse: true, id: new Guid("faac3215-d242-4963-855a-426efb3e5410")),
+            Create("Poor", "Poor", "Asset has significant wear, may need repair", "#fd7e14", 3, allowsForUse: true, requiresRepair: true, id: new Guid("0d302547-c9eb-4d6a-a6a7-5102b8a5cd0c")),
+            Create("Unserviceable", "Unserviceable", "Asset is not functional, requires major repair", "#dc3545", 4, allowsForUse: false, requiresRepair: true, id: new Guid("69157626-1bea-4571-aeb6-4db0363c01e1")),
+            Create("ForDisposal", "For Disposal", "Asset is beyond repair and should be disposed", "#6c757d", 5, allowsForUse: false, requiresDisposal: true, id: new Guid("38aa5cfc-5eec-4865-9b28-978b54c8e4c6"))
         };
     }
 }

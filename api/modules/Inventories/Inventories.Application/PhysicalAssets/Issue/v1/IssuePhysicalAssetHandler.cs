@@ -66,6 +66,7 @@ public sealed class IssuePhysicalAssetHandler(
         try
         {
             await repository.UpdateAsync(asset, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateConcurrencyException)
         {

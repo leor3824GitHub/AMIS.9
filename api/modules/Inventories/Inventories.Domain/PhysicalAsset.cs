@@ -45,6 +45,9 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     // Asset-Specific Photos
     public List<string> ImagePaths { get; private set; } = new(); // Photos specific to this asset instance
 
+    // Optimistic Concurrency Control
+    public int Version { get; private set; } = 0; // Incremented on each modification
+
     // Computed properties for convenience
     public bool IsDisposed => DisposalDate.HasValue;
     public AssetAssignmentHistory? CurrentAssignment =>
@@ -54,12 +57,12 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     // Classification and RCA (using default policy for backward compatibility)
     // NOTE: CurrentClassification uses hardcoded defaults. For database-driven rules,
     // pass IAssetClassificationPolicy to domain methods instead.
-    private static readonly IAssetClassificationPolicy DefaultPolicy = 
+    private static readonly IAssetClassificationPolicy DefaultPolicy =
         AssetClassificationPolicyFactory.GetDefault();
-    
-    public PropertyClassification CurrentClassification => 
+
+    public PropertyClassification CurrentClassification =>
         DefaultPolicy.DetermineClassification(AcquisitionCost);
-    
+
     public string RCAAccountCode => DefaultPolicy.GetRCAAccountCode(CurrentClassification);
 
     // Navigation
@@ -98,8 +101,18 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         SerialNumber = serialNumber;
         ModelNumber = modelNumber;
         AccumulatedDepreciation = 0;
+        Version = 0;
 
         QueueDomainEvent(new PhysicalAssetCreated { PhysicalAsset = this });
+    }
+
+    /// <summary>
+    /// Increments the version number for optimistic concurrency control.
+    /// Called whenever the aggregate is modified.
+    /// </summary>
+    private void IncrementVersion()
+    {
+        Version++;
     }
 
     public static PhysicalAsset Create(
@@ -207,6 +220,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             });
         }
 
+        IncrementVersion();
         return history;
     }
 
@@ -253,6 +267,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             Condition = condition,
             QuantityReturned = quantityReturned ?? 1
         });
+
+        IncrementVersion();
     }
 
     /// <summary>
@@ -323,6 +339,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             });
         }
 
+        IncrementVersion();
         return newAssignment;
     }
 
@@ -346,6 +363,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             DisposalReason = disposalReason,
             DisposalDate = DateTime.UtcNow
         });
+
+        IncrementVersion();
     }
 
     /// <summary>
@@ -376,6 +395,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             AccumulatedDepreciation = AccumulatedDepreciation,
             BookValue = BookValue
         });
+
+        IncrementVersion();
     }
 
     public void UpdateCondition(string condition, string? remarks = null)
@@ -395,6 +416,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             Condition = Condition,
             Remarks = remarks
         });
+
+        IncrementVersion();
     }
 
     /// <summary>
@@ -417,6 +440,8 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             PhysicalAsset = this,
             GeneratedDate = QRGeneratedDate.Value
         });
+
+        IncrementVersion();
     }
 
     /// <summary>
@@ -431,6 +456,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             throw new InvalidOperationException("An asset cannot be its own parent.");
 
         ParentAssetId = parentAssetId;
+        IncrementVersion();
     }
 
     /// <summary>
@@ -439,6 +465,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     public void ClearParentAsset()
     {
         ParentAssetId = null;
+        IncrementVersion();
     }
 
     /// <summary>
@@ -449,6 +476,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         if (!string.IsNullOrWhiteSpace(imagePath) && !ImagePaths.Contains(imagePath))
         {
             ImagePaths.Add(imagePath);
+            IncrementVersion();
         }
         return this;
     }
@@ -460,6 +488,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     {
         if (ImagePaths.Remove(imagePath))
         {
+            IncrementVersion();
         }
         return this;
     }
@@ -472,6 +501,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         if (ImagePaths.Count > 0)
         {
             ImagePaths.Clear();
+            IncrementVersion();
         }
         return this;
     }

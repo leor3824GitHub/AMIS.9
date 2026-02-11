@@ -49,9 +49,26 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
         // QR Code & Identification (NEW)
         builder.Property(x => x.QRCodeData).HasMaxLength(5000);
         builder.Property(x => x.QRGeneratedDate);
-        
+
+        // Optimistic concurrency control using Version instead of LastModified
+        // Version is incremented on every state-changing operation
+        builder.Property(x => x.Version)
+            .IsRequired()
+            .HasDefaultValue(0)
+            .IsConcurrencyToken();
+
         // CurrentCustodianId is now computed from CurrentAssignment.EmployeeId, not stored
         builder.Ignore(x => x.CurrentCustodianId);
+
+        // RCAAccountCode is computed from CurrentClassification and DefaultPolicy, not stored
+        builder.Ignore(x => x.RCAAccountCode);
+
+        // ImagePaths collection persisted as JSON (text type, not array)
+        builder.Property(x => x.ImagePaths)
+            .HasColumnType("text")
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
+                v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>());
 
         // Asset Hierarchy (Parent-Child)
         builder.Property(x => x.ParentAssetId);
@@ -68,8 +85,23 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
             .HasForeignKey(x => x.ParentAssetId)
             .OnDelete(DeleteBehavior.SetNull);
 
-        // AssignmentHistory relationships are handled by their
-        // PhysicalAssetId foreign keys and will be auto-discovered by EF Core
+        // AssignmentHistory navigation property (OneToMany)
+        builder.HasMany(x => x.AssignmentHistory)
+            .WithOne(x => x.Asset)
+            .HasForeignKey(x => x.AssetId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Maintenance history navigation property (OneToMany)
+        builder.HasMany(x => x.MaintenanceHistory)
+            .WithOne(x => x.Asset)
+            .HasForeignKey(x => x.PhysicalAssetId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        // Disposals navigation property (OneToMany)
+        builder.HasMany(x => x.Disposals)
+            .WithOne(x => x.Asset)
+            .HasForeignKey(x => x.PhysicalAssetId)
+            .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
         builder.HasIndex(x => x.PropertyCode).IsUnique();

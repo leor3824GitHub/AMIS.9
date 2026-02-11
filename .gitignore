@@ -367,3 +367,6 @@ FodyWeavers.xsd
 >>>>>>> origin/jan1626
 api/server/appsettings.Development.json
 api/server/appsettings.json
+/api/server/appsettings.Development.json
+/api/server/appsettings.json
+/aspire/Host/Program.cs

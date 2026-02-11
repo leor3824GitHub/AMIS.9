@@ -28,9 +28,9 @@ public sealed class ReturnPhysicalAssetHandler(
             ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
 
         // Get current user ID from claims
-        var currentUserId = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+        var currentUserId = httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
             ?? httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value;
-        
+
         if (string.IsNullOrEmpty(currentUserId))
             throw new UnauthorizedAccessException("Unable to determine current user.");
 
@@ -42,10 +42,11 @@ public sealed class ReturnPhysicalAssetHandler(
             throw new InvalidOperationException("You can only return assets that are assigned to you.");
 
         asset.Return(request.Reason, request.Condition, request.AcceptedBy, request.QuantityReturned);
-        
+
         try
         {
             await repository.UpdateAsync(asset, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
         }
         catch (DbUpdateConcurrencyException ex)
         {
@@ -53,20 +54,21 @@ public sealed class ReturnPhysicalAssetHandler(
             logger.LogWarning(
                 "Concurrency conflict while returning asset {AssetId}. Reloading and retrying.",
                 asset.Id);
-            
+
             // Reload the asset from the database
             var reloadedAsset = await repository.GetByIdAsync(request.Id, cancellationToken)
                 ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
-            
+
             // Validate again after reload
             if (reloadedAsset.CurrentCustodianId != userGuid)
                 throw new InvalidOperationException("You can only return assets that are assigned to you.");
-            
+
             // Re-apply the return operation
             reloadedAsset.Return(request.Reason, request.Condition, request.AcceptedBy, request.QuantityReturned);
-            
+
             // Try update again
             await repository.UpdateAsync(reloadedAsset, cancellationToken);
+            await repository.SaveChangesAsync(cancellationToken);
             asset = reloadedAsset;
         }
 

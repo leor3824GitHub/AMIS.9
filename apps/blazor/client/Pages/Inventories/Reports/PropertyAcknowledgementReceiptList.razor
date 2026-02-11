@@ -10,7 +10,7 @@
                 <div class="d-flex justify-space-between align-center mb-4">
                     <MudText Typo="Typo.h5">Property Acknowledgement Receipt (PAR)</MudText>
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add"
-                        Href="/inventories/reports/par">
+                               Href="/inventories/reports/par">
                         Create New PAR
                     </MudButton>
                 </div>
@@ -18,13 +18,13 @@
 
             <MudItem xs="12" sm="6" md="4">
                 <MudTextField @bind-Value="_searchString" Label="Search" Variant="Variant.Outlined"
-                    Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" DebounceInterval="500"
-                    OnDebounceIntervalElapsed="@(() => _table?.ReloadServerData())" />
+                              Adornment="Adornment.End" AdornmentIcon="@Icons.Material.Filled.Search" DebounceInterval="500"
+                              OnDebounceIntervalElapsed="OnTableSearchDebounce" />
             </MudItem>
 
             <MudItem xs="12" sm="6" md="3">
                 <MudSelect @bind-Value="_statusFilter" Label="Status" Variant="Variant.Outlined" T="string" Clearable
-                    OnClearButtonClick="@(() => { _statusFilter = null; _table?.ReloadServerData(); })">
+                           OnClearButtonClick="OnClearStatusFilter">
                     <MudSelectItem Value="@("Draft")">Draft</MudSelectItem>
                     <MudSelectItem Value="@("Posted")">Posted</MudSelectItem>
                     <MudSelectItem Value="@("Returned")">Returned</MudSelectItem>
@@ -34,7 +34,7 @@
 
             <MudItem xs="12" sm="6" md="3">
                 <MudDateRangePicker @bind-DateRange="_dateRange" Label="Date Range" Variant="Variant.Outlined" Clearable
-                    OnClearButtonClick="@(() => { _dateRange = null; _table?.ReloadServerData(); })" />
+                                    @bind-DateRange:after="OnDateRangeChanged" />
             </MudItem>
 
             <MudItem xs="12" sm="6" md="2">
@@ -45,8 +45,8 @@
 
             <MudItem xs="12">
                 <MudTable T="PARDto" @ref="_table"
-                    ServerData="@(new Func<TableState, CancellationToken, Task<TableData<PARDto>>>(LoadDataAsync))"
-                    Hover="true" Striped="true" Dense="true" Loading="@_loading" LoadingProgressColor="Color.Primary">
+                          ServerData="@(new Func<TableState, CancellationToken, Task<TableData<PARDto>>>(LoadDataAsync))"
+                          Hover="true" Striped="true" Dense="true" Loading="@_loading" LoadingProgressColor="Color.Primary">
                     <HeaderContent>
                         <MudTh>PAR Number</MudTh>
                         <MudTh>Employee</MudTh>
@@ -69,24 +69,24 @@
                         <MudTd DataLabel="Items Count">@context.LineItemsCount</MudTd>
                         <MudTd DataLabel="Actions">
                             <MudIconButton Icon="@Icons.Material.Filled.Visibility" Size="Size.Small" Color="Color.Info"
-                                Href="@($"/inventories/reports/par/{context.Id}")" Title="View" />
+                                           Href="@($"/inventories/reports/par/{context.Id}")" Title="View" />
                             @if (context.Status?.Equals("Draft", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small" Color="Color.Primary"
-                                    Href="@($"/inventories/reports/par/{context.Id}")" Title="Edit" />
+                                               Href="@($"/inventories/reports/par/{context.Id}")" Title="Edit" />
                                 <MudIconButton Icon="@Icons.Material.Filled.Send" Size="Size.Small" Color="Color.Success"
-                                    OnClick="@(() => PostPAR(context.Id))" Title="Post" />
+                                               OnClick="@(() => PostPAR(context.Id))" Title="Post" />
                             }
                             @if (context.Status?.Equals("Posted", StringComparison.OrdinalIgnoreCase) == true)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.KeyboardReturn" Size="Size.Small"
-                                    Color="Color.Warning" OnClick="@(() => ReturnPAR(context.Id, context.ParNumber))"
-                                    Title="Return Items" />
+                                               Color="Color.Warning" OnClick="@(() => ReturnPAR(context.Id, context.ParNumber))"
+                                               Title="Return Items" />
                             }
                             @if (context.Status?.Equals("Cancelled", StringComparison.OrdinalIgnoreCase) != true)
                             {
                                 <MudIconButton Icon="@Icons.Material.Filled.Print" Size="Size.Small" Color="Color.Default"
-                                    Href="@($"/inventories/reports/par-print/{context.Id}")" Title="Print" />
+                                               Href="@($"/inventories/reports/par-print/{context.Id}")" Title="Print" />
                             }
                         </MudTd>
                     </RowTemplate>

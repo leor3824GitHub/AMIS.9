@@ -17,6 +17,7 @@ public sealed class UpdateConditionHandler(
         asset.UpdateCondition(request.Condition, request.Remarks);
 
         await repository.UpdateAsync(asset, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
 
         return new UpdateConditionResponse(
             asset.Id,

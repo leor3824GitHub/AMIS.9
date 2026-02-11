@@ -15,86 +15,81 @@
             </TitleContent>
             <DialogContent>
                 @if (_asset != null)
-            {
-                <DataAnnotationsValidator />
-                <ValidationSummary />
-                <MudStack Spacing="3">
-                    <!-- Asset Info -->
-                    <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(63, 81, 181, 0.05);">
-                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
-                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
-                            Asset Information
-                        </MudText>
-                        <MudText Typo="Typo.body2"><strong>Property Code:</strong> @_asset.PropertyCode</MudText>
-                        <MudText Typo="Typo.body2"><strong>Classification:</strong> @_asset.Classification</MudText>
-                        <MudText Typo="Typo.body2"><strong>Current Quantity:</strong> @_asset.Quantity</MudText>
-                    </MudCard>
-
-                    <!-- Issue Details -->
-                    <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.05);">
-                        <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
-                            <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Small" Class="mr-1" />
-                            Issue Details
-                        </MudText>
-                        <MudGrid Spacing="2">
-                            <MudItem xs="12">
-                                <MudSelect T="Guid?" 
-                                           Label="Employee Name" 
-                                           @bind-Value="SelectedEmployeeId"
-                                           Required="true" 
-                                           Variant="Variant.Outlined"
-                                           Disabled="@(_employees.Count == 0)"
-                                           AdornmentIcon="@Icons.Material.Filled.Person"
-                                           Adornment="Adornment.Start"
-                                           HelperText="Select employee to assign asset">
-                                    @foreach (var employee in _employees)
-                                    {
-                                        <MudSelectItem T="Guid?" Value="@employee.Id">@employee.Name</MudSelectItem>
-                                    }
-                                </MudSelect>
-                            </MudItem>
-                            <MudItem xs="12">
-                            <MudTextField @bind-Value="Model.DocumentNumber" Label="Document Number (ICS)" 
-                                Required="true" Variant="Variant.Outlined" Clearable="true" 
-                                HelperText="e.g., ICS-2024-001" />
-                            </MudItem>
-                            <MudItem xs="12">
-                                <MudTextField @bind-Value="Model.Location" Label="Location/Department" 
-                                    Variant="Variant.Outlined" Clearable="true" 
-                                    HelperText="Optional: Where asset will be stationed" />
-                            </MudItem>
-                            @* SemiExpendable *@
-                            @if (_asset?.Classification != null && (int)_asset.Classification == 2)
-                            {
-                                <MudItem xs="12">
-                                    <MudNumericField @bind-Value="Model.QuantityIssued" Label="Quantity to Issue" 
-                                        Required="true" Min="1" Max="@_asset.Quantity" Variant="Variant.Outlined"
-                                        HelperText="@($"Available: {_asset.Quantity}")" />
-                                </MudItem>
-                            }
-                        </MudGrid>
-                    </MudCard>
-                </MudStack>
-            }
-            else
-            {
-                <MudProgressLinear Indeterminate="true" />
-            }
-        </DialogContent>
-        <DialogActions>
-            <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
-                Disabled="@(_loading || _asset == null)">
-                @if (_loading)
                 {
-                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                    <DataAnnotationsValidator />
+                    <ValidationSummary />
+                    <MudStack Spacing="3">
+                        <!-- Asset Info -->
+                        <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(63, 81, 181, 0.05);">
+                            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Class="mr-1" />
+                                Asset Information
+                            </MudText>
+                            <MudText Typo="Typo.body2"><strong>Property Code:</strong> @_asset.PropertyCode</MudText>
+                            <MudText Typo="Typo.body2"><strong>Classification:</strong> @_asset.Classification</MudText>
+                            <MudText Typo="Typo.body2"><strong>Current Quantity:</strong> @_asset.Quantity</MudText>
+                        </MudCard>
+
+                        <!-- Issue Details -->
+                        <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.05);">
+                            <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                                <MudIcon Icon="@Icons.Material.Filled.Assignment" Size="Size.Small" Class="mr-1" />
+                                Issue Details
+                            </MudText>
+                            <MudGrid Spacing="2">
+                                <MudItem xs="12">
+                                    <MudSelect T="Guid?" Label="Employee Name" @bind-Value="SelectedEmployeeId" Required="true"
+                                               Variant="Variant.Outlined" Disabled="@(_employees.Count == 0)"
+                                               AdornmentIcon="@Icons.Material.Filled.Person" Adornment="Adornment.Start"
+                                               HelperText="Select employee to assign asset">
+                                        @foreach (var employee in _employees)
+                                        {
+                                            <MudSelectItem T="Guid?" Value="@employee.Id">@employee.Name</MudSelectItem>
+                                        }
+                                    </MudSelect>
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="Model.DocumentNumber" Label="Document Number (ICS)"
+                                                  Required="true" Variant="Variant.Outlined" Clearable="true"
+                                                  HelperText="e.g., ICS-2024-001" />
+                                </MudItem>
+                                <MudItem xs="12">
+                                    <MudTextField @bind-Value="Model.Location" Label="Location/Department"
+                                                  Variant="Variant.Outlined" Clearable="true"
+                                                  HelperText="Optional: Where asset will be stationed" />
+                                </MudItem>
+                                @* SemiExpendable *@
+                                @if (_asset?.Classification != null && (int)_asset.Classification == 2)
+                                {
+                                    <MudItem xs="12">
+                                        <MudNumericField @bind-Value="Model.QuantityIssued" Label="Quantity to Issue"
+                                                         Required="true" Min="1" Max="@_asset.Quantity" Variant="Variant.Outlined"
+                                                         HelperText="@($"Available: {_asset.Quantity}")" />
+                                    </MudItem>
+                                }
+                            </MudGrid>
+                        </MudCard>
+                    </MudStack>
                 }
-                Issue Asset
-            </MudButton>
-            <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_loading">Cancel
-            </MudButton>
-        </DialogActions>
-    </MudDialog>
-</EditForm>
+                else
+                {
+                    <MudProgressLinear Indeterminate="true" />
+                }
+            </DialogContent>
+            <DialogActions>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
+                           Disabled="@(_loading || _asset == null)">
+                    @if (_loading)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                    }
+                    Issue Asset
+                </MudButton>
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_loading">Cancel
+                </MudButton>
+            </DialogActions>
+        </MudDialog>
+    </EditForm>
 }
 else
 {
@@ -134,7 +129,7 @@ else
         {
             _asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", AssetId);
             _employees = Employees.ToList();
-            
+
             if (_asset != null)
             {
                 Model = new IssuePhysicalAssetCommand
@@ -192,7 +187,7 @@ else
             }
 
             // For semi-expendable, quantity is required
-            if ((int)_asset.Classification == 2 &&  // SemiExpendable 
+            if ((int)_asset.Classification == 2 && // SemiExpendable
                 (!Model.QuantityIssued.HasValue || Model.QuantityIssued <= 0))
             {
                 Snackbar?.Add("Quantity issued is required for semi-expendable items.", Severity.Warning);
@@ -201,7 +196,8 @@ else
             }
 
             // Validate quantity availability
-            if ((int)_asset.Classification == 2 && Model.QuantityIssued.HasValue && Model.QuantityIssued > _asset.Quantity)  // SemiExpendable
+            if ((int)_asset.Classification == 2 && Model.QuantityIssued.HasValue && Model.QuantityIssued > _asset.Quantity)
+            //emiExpendable
             {
                 Snackbar?.Add($"Insufficient quantity. Available: {_asset.Quantity}", Severity.Warning);
                 _loading = false;
@@ -216,11 +212,22 @@ else
                 Model.EmployeeName = selectedEmployee.Name;
             }
 
-            var response = await ApiClient.IssuePhysicalAssetEndpointAsync("1", AssetId, Model);
-            if (response != null)
+            try
             {
-                Snackbar?.Add($"Asset issued successfully to {Model.EmployeeName}.", Severity.Success);
-                MudDialog?.Close(DialogResult.Ok(true));
+                var response = await ApiClient.IssuePhysicalAssetEndpointAsync("1", AssetId, Model);
+                if (response != null)
+                {
+                    Snackbar?.Add($"Asset issued successfully to {Model.EmployeeName}.", Severity.Success);
+                    MudDialog?.Close(DialogResult.Ok(true));
+                }
+                else
+                {
+                    Snackbar?.Add("Failed to issue asset. No response from server.", Severity.Error);
+                }
+            }
+            catch (Exception apiEx)
+            {
+                Snackbar?.Add($"Error issuing asset: {apiEx.Message}", Severity.Error);
             }
         }
         catch (Exception ex)

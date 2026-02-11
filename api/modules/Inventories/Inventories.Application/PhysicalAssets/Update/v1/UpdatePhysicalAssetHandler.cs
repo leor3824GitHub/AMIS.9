@@ -36,6 +36,7 @@ public sealed class UpdatePhysicalAssetHandler(
         }
 
         await repository.UpdateAsync(physicalAsset, cancellationToken);
+        await repository.SaveChangesAsync(cancellationToken);
 
         return new UpdatePhysicalAssetResponse(
             physicalAsset.Id,
