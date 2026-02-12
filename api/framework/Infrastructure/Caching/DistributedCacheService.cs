@@ -126,7 +126,6 @@ public class DistributedCacheService : ICacheService
         try
         {
             await _cache.SetAsync(key, value, GetOptions(slidingExpiration), token);
-            _logger.LogDebug("cached data with key : {Key}", key);
         }
         catch
         {

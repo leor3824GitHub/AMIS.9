@@ -48,28 +48,14 @@ public sealed class ReturnPhysicalAssetHandler(
             await repository.UpdateAsync(asset, cancellationToken);
             await repository.SaveChangesAsync(cancellationToken);
         }
-        catch (DbUpdateConcurrencyException ex)
+        catch (DbUpdateConcurrencyException)
         {
-            // Handle concurrency conflict by reloading the entity
             logger.LogWarning(
-                "Concurrency conflict while returning asset {AssetId}. Reloading and retrying.",
+                "Concurrency conflict while returning asset {AssetId}. Another process may be modifying this asset.",
                 asset.Id);
 
-            // Reload the asset from the database
-            var reloadedAsset = await repository.GetByIdAsync(request.Id, cancellationToken)
-                ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
-
-            // Validate again after reload
-            if (reloadedAsset.CurrentCustodianId != userGuid)
-                throw new InvalidOperationException("You can only return assets that are assigned to you.");
-
-            // Re-apply the return operation
-            reloadedAsset.Return(request.Reason, request.Condition, request.AcceptedBy, request.QuantityReturned);
-
-            // Try update again
-            await repository.UpdateAsync(reloadedAsset, cancellationToken);
-            await repository.SaveChangesAsync(cancellationToken);
-            asset = reloadedAsset;
+            throw new InvalidOperationException(
+                "Asset was updated by another process. Please refresh the page and try again.");
         }
 
         var currentAssignment = asset.CurrentAssignment;

@@ -162,13 +162,6 @@ else
             return;
         }
 
-        // Validate: Asset is not already assigned
-        if (_asset.CurrentCustodianId.HasValue)
-        {
-            Snackbar?.Add("This asset is already assigned to another employee. Use Transfer instead.", Severity.Warning);
-            return;
-        }
-
         _loading = true;
         try
         {
@@ -182,6 +175,26 @@ else
             if (string.IsNullOrWhiteSpace(Model.DocumentNumber))
             {
                 Snackbar?.Add("Document number is required.", Severity.Warning);
+                _loading = false;
+                return;
+            }
+
+            // Refresh asset data from server to check current state
+            try
+            {
+                _asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", AssetId);
+            }
+            catch (Exception ex)
+            {
+                Snackbar?.Add($"Failed to verify asset status: {ex.Message}", Severity.Error);
+                _loading = false;
+                return;
+            }
+
+            // Validate: Asset is not already assigned
+            if (_asset != null && _asset.CurrentCustodianId.HasValue)
+            {
+                Snackbar?.Add("This asset is already assigned to another employee. Please close this dialog and try again.", Severity.Warning);
                 _loading = false;
                 return;
             }

@@ -51,9 +51,7 @@ public sealed class IssuePhysicalAssetHandler(
             throw new FshException(
                 ex.Message,
                 new[] { ex.Message },
-                ex.Message.Contains("already assigned", StringComparison.OrdinalIgnoreCase) 
-                    ? HttpStatusCode.Conflict  // 409 for already assigned
-                    : HttpStatusCode.BadRequest); // 400 for other validation errors
+                HttpStatusCode.BadRequest); // Use BadRequest for domain validation errors
         }
         catch (ArgumentException ex)
         {
@@ -62,7 +60,7 @@ public sealed class IssuePhysicalAssetHandler(
                 new[] { ex.Message },
                 HttpStatusCode.BadRequest);
         }
-        
+
         try
         {
             await repository.UpdateAsync(asset, cancellationToken);
@@ -71,12 +69,12 @@ public sealed class IssuePhysicalAssetHandler(
         catch (DbUpdateConcurrencyException)
         {
             logger.LogWarning(
-                "Concurrency conflict while issuing asset {AssetId}.",
+                "Concurrency conflict while issuing asset {AssetId}. Another process may be modifying this asset.",
                 asset.Id);
 
             throw new FshException(
-                "Asset was updated by another process. Refresh and try again.",
-                new[] { "Asset was updated by another process. Refresh and try again." },
+                "Asset was updated by another process. Please refresh the page and try again.",
+                new[] { "Asset was updated by another process. Please refresh the page and try again." },
                 HttpStatusCode.Conflict);
         }
 
