@@ -10,6 +10,10 @@ public class AssetAssignmentHistoryConfiguration : IEntityTypeConfiguration<Asse
     {
         builder.ToTable("AssetAssignmentHistories");
 
+        // Configure Status to be stored as string for compatibility with existing database
+        builder.Property(a => a.Status)
+            .HasConversion<string>();
+
         builder.HasOne(a => a.Asset)
             .WithMany(a => a.AssignmentHistory)
             .HasForeignKey(a => a.AssetId)

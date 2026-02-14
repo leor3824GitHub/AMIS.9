@@ -59,7 +59,7 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     public bool IsDisposed => DisposalDate.HasValue;
     public bool IsDepreciable => CurrentClassification == PropertyClassification.PropertyPlantEquipment;
     public AssetAssignmentHistory? CurrentAssignment =>
-        AssignmentHistory.FirstOrDefault(h => h.Status == "Active");
+        AssignmentHistory.FirstOrDefault(h => h.Status == AssignmentStatus.Active);
     public AssetReclassificationHistory? LastReclassification =>
         ReclassificationHistory.OrderByDescending(h => h.EffectiveDate).FirstOrDefault();
     public bool HasQRCode => !string.IsNullOrEmpty(QRCodeData);

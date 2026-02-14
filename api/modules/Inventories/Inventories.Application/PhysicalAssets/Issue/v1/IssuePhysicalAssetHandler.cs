@@ -1,4 +1,5 @@
 using AMIS.Framework.Core.Persistence;
+using AMIS.WebApi.Inventories.Application.PhysicalAssets.Specifications;
 using AMIS.WebApi.Inventories.Domain;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +19,9 @@ public sealed class IssuePhysicalAssetHandler(
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        var asset = await repository.GetByIdAsync(request.Id, cancellationToken)
+        // Use specification to eagerly load assignment history
+        var spec = new GetPhysicalAssetWithHistorySpec(request.Id);
+        var asset = await repository.FirstOrDefaultAsync(spec, cancellationToken)
             ?? throw new InvalidOperationException($"Physical asset {request.Id} not found");
 
         var history = asset.Issue(request.EmployeeId, request.EmployeeName, request.DocumentNumber, request.QuantityIssued);

@@ -26,7 +26,7 @@ public class AssetAssignmentHistory : AuditableEntity
     public string? Remarks { get; private set; }
     public Guid? TransferredToEmployeeId { get; private set; } // If transferred
     public string? TransferredToDocumentNumber { get; private set; } // New ICS/PAR after transfer
-    public string Status { get; private set; } = "Active"; // Active, Returned, Transferred
+    public AssignmentStatus Status { get; private set; } = AssignmentStatus.Active; // Active, Returned, Transferred
     public string? Condition { get; private set; } // Condition at return
     public Guid? AcceptedBy { get; private set; } // Who accepted the return
     public DateTime? AcceptanceDate { get; private set; }
@@ -65,7 +65,7 @@ public class AssetAssignmentHistory : AuditableEntity
         AssetClassification = assetClassification;
         AssignmentType = assignmentType;
         Reason = reason;
-        Status = "Active";
+        Status = AssignmentStatus.Active;
     }
 
     /// <summary>
@@ -129,7 +129,7 @@ public class AssetAssignmentHistory : AuditableEntity
 
         history.TransferredToEmployeeId = toEmployeeId;
         history.TransferredToDocumentNumber = newDocumentNumber;
-        history.Status = "Transferred";
+        history.Status = AssignmentStatus.Transferred;
         history.ReturnDate = transferDate;
 
         return history;
@@ -144,7 +144,7 @@ public class AssetAssignmentHistory : AuditableEntity
         string condition,
         Guid acceptedBy)
     {
-        if (Status == "Returned")
+        if (Status == AssignmentStatus.Returned)
             throw new InvalidOperationException("Assignment is already marked as returned.");
 
         ReturnDate = returnDate;
@@ -152,7 +152,7 @@ public class AssetAssignmentHistory : AuditableEntity
         Condition = condition;
         AcceptedBy = acceptedBy;
         AcceptanceDate = returnDate;
-        Status = "Returned";
+        Status = AssignmentStatus.Returned;
     }
 
     /// <summary>
@@ -180,6 +180,6 @@ public class AssetAssignmentHistory : AuditableEntity
     /// <summary>
     /// Check if assignment is currently active
     /// </summary>
-    public bool IsActive() => Status == "Active";
+    public bool IsActive() => Status == AssignmentStatus.Active;
 }
 
