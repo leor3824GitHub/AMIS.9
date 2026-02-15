@@ -51,10 +51,10 @@
                                    Adornment="Adornment.Start"
                                    AdornmentIcon="@Icons.Material.Filled.RequestPage"
                                    Class="input-field request-field">
-                            @foreach (var r in InspectionRequests.Where(r => r.Status == InspectionRequestStatus.Assigned || r.Status == InspectionRequestStatus.InProgress))
+                            @foreach (var r in InspectionRequests.Where(r => r.Status == InspectionStatus.InProgress || r.Status == InspectionStatus.Completed))
                             {
                                 <MudSelectItem T="Guid?" Value="@r.Id">
-                                    @r.DateCreated.ToString("MMM dd, yyyy") - @(r.Purchase?.Supplier?.Name ?? "Unknown Supplier")
+                                    @r.InspectedOn.ToString("MMM dd, yyyy") - @(r.Purchase?.Supplier?.Name ?? "Unknown Supplier")
                                 </MudSelectItem>
                             }
                         </MudSelect>

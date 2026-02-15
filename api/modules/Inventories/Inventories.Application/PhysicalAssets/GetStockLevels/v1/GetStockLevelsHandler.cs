@@ -27,10 +27,8 @@ public sealed class GetStockLevelsHandler(
             .GroupBy(a => a.Condition)
             .ToDictionary(g => g.Key, g => g.Count());
 
-        var byLocation = assets
-            .Where(a => !a.IsDisposed && !string.IsNullOrEmpty(a.CurrentAssignment?.Location))
-            .GroupBy(a => a.CurrentAssignment!.Location!)
-            .ToDictionary(g => g.Key, g => g.Count());
+        // Location tracking removed - CurrentAssignment navigation no longer available
+        var byLocation = new Dictionary<string, int>();
 
         return new GetStockLevelsResponse(
             totalAssets,

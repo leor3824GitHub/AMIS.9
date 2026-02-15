@@ -45,11 +45,11 @@ public partial class MyAssets
                     {
                         Id = a.Id,
                         PropertyCode = a.PropertyCode ?? "N/A",
-                        AssetName = a.Description ?? "Unknown Asset",
-                        Category = a.PpeType ?? "Uncategorized",
+                        AssetName = a.ProductName ?? "Unknown Asset",
+                        Category = "Asset",
                         AcquisitionCost = (decimal)a.AcquisitionCost,
                         Condition = "Good", // Default condition
-                        DateAssigned = a.AcquisitionDate // Using acquisition date as proxy
+                        DateAssigned = DateTime.Now // Default to current date
                     })
                     .ToList();
                 

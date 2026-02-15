@@ -49,8 +49,6 @@
                           Hover="true" Striped="true" Dense="true" Loading="@_loading" LoadingProgressColor="Color.Primary">
                     <HeaderContent>
                         <MudTh>PAR Number</MudTh>
-                        <MudTh>Employee</MudTh>
-                        <MudTh>Department</MudTh>
                         <MudTh>Issuance Date</MudTh>
                         <MudTh>Status</MudTh>
                         <MudTh>Items Count</MudTh>
@@ -58,8 +56,6 @@
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd DataLabel="PAR Number">@context.ParNumber</MudTd>
-                        <MudTd DataLabel="Employee">@context.EmployeeName</MudTd>
-                        <MudTd DataLabel="Department">@context.Department</MudTd>
                         <MudTd DataLabel="Issuance Date">@context.IssuanceDate.ToString("MM/dd/yyyy")</MudTd>
                         <MudTd DataLabel="Status">
                             <MudChip T="string" Color="@GetStatusColor(context.Status)" Size="Size.Small">

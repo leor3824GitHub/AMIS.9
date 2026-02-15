@@ -144,31 +144,34 @@
             }
 
             <!-- Information Card -->
-            <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.05);">
-                <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
-                    <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" Class="mr-2" />
-                    Property Code Format
-                </MudText>
-                <MudText Typo="Typo.body2" Class="mb-2">
-                    Format: <code>YYYY-OFFICE-CLASSID-CATID-ITEMID-SEQUENCE.0</code>
-                </MudText>
-                <MudText Typo="Typo.caption" Color="Color.Secondary">
-                    • YYYY: Current fiscal year (e.g., 2026)
-                    <br />
-                    • OFFICE: Organization office code (e.g., NFA)
-                    <br />
-                    • CLASSID: Asset classification code (e.g., OE, DP, LT, FF)
-                    <br />
-                    • CATID: Category code (e.g., 01, 02, 03) - auto-populated from item description
-                    <br />
-                    • ITEMID: Item/subcategory code (e.g., 001, 002) - specific item type (auto-populated)
-                    <br />
-                    • SEQUENCE: Auto-incremented unique number for each classification/category/item combination
-                    <br />
-                    <br />
-                    <strong>Example:</strong> <code>2026-NFA-OE-01-001-0001.0</code> (Office Equipment, Category 01, Item 001, Sequence 0001)
-                </MudText>
-            </MudCard>
+            @if (string.IsNullOrWhiteSpace(_generatedPropertyCode))
+            {
+                <MudCard Elevation="0" Class="pa-4" Style="background-color: rgba(76, 175, 80, 0.05);">
+                    <MudText Typo="Typo.subtitle2" Class="font-weight-bold mb-3">
+                        <MudIcon Icon="@Icons.Material.Filled.HelpOutline" Size="Size.Small" Class="mr-2" />
+                        Property Code Format
+                    </MudText>
+                    <MudText Typo="Typo.body2" Class="mb-2">
+                        Format: <code>YYYY-OFFICE-CLASSID-CATID-ITEMID-SEQUENCE.0</code>
+                    </MudText>
+                    <MudText Typo="Typo.caption" Color="Color.Secondary">
+                        • YYYY: Current fiscal year (e.g., 2026)
+                        <br />
+                        • OFFICE: Organization office code (e.g., NFA)
+                        <br />
+                        • CLASSID: Asset classification code (e.g., OE, DP, LT, FF)
+                        <br />
+                        • CATID: Category code (e.g., 01, 02, 03) - auto-populated from item description
+                        <br />
+                        • ITEMID: Item/subcategory code (e.g., 001, 002) - specific item type (auto-populated)
+                        <br />
+                        • SEQUENCE: Auto-incremented unique number for each classification/category/item combination
+                        <br />
+                        <br />
+                        <strong>Example:</strong> <code>2026-NFA-OE-01-001-0001.0</code> (Office Equipment, Category 01, Item 001, Sequence 0001)
+                    </MudText>
+                </MudCard>
+            }
         </MudStack>
     </DialogContent>
     <DialogActions>

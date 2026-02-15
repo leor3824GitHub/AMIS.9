@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class Initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -279,6 +279,41 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_NfaOfficeCodes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "PhysicalAssets",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AcquisitionCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    AcquisitionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    SerialNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    ModelNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    Condition = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    DisposalDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    DisposalReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    AccumulatedDepreciation = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    QRCodeData = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: true),
+                    QRGeneratedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ImagePaths = table.Column<string>(type: "text", nullable: false),
+                    Version = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
+                    ParentAssetId = table.Column<Guid>(type: "uuid", nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_PhysicalAssets", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -951,6 +986,244 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 });
 
             migrationBuilder.CreateTable(
+                name: "AssetAssignmentHistories",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
+                    EmployeeName = table.Column<string>(type: "text", nullable: false),
+                    DocumentNumber = table.Column<string>(type: "text", nullable: false),
+                    DocumentType = table.Column<int>(type: "integer", nullable: false),
+                    TransDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    AssignmentType = table.Column<string>(type: "text", nullable: false),
+                    Quantity = table.Column<int>(type: "integer", nullable: false),
+                    Location = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
+                    Remarks = table.Column<string>(type: "text", nullable: true),
+                    Status = table.Column<string>(type: "text", nullable: false),
+                    Condition = table.Column<string>(type: "text", nullable: true),
+                    AcceptedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    IssuedByName = table.Column<string>(type: "text", nullable: true),
+                    ReceivedByName = table.Column<string>(type: "text", nullable: true),
+                    ApprovedByName = table.Column<string>(type: "text", nullable: true),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AssetAssignmentHistories", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AssetAssignmentHistories_Employees_EmployeeId",
+                        column: x => x.EmployeeId,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AssetAssignmentHistories_PhysicalAssets_AssetId",
+                        column: x => x.AssetId,
+                        principalSchema: "inventories",
+                        principalTable: "PhysicalAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AssetDisposals",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PhysicalAssetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssetPropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    AssetDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    RequestedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    RequestDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    DisposalMethod = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    JustificationReason = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    AssetConditionAtDisposal = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    ApprovedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    ApprovedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    ApprovalNotes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    CompletedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    SalvageValue = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    GainOrLoss = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    DisposalReferenceNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CancelledOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CancelledBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    CancellationReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AssetDisposals", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_Employees_ApprovedBy",
+                        column: x => x.ApprovedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_Employees_CancelledBy",
+                        column: x => x.CancelledBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_Employees_CompletedBy",
+                        column: x => x.CompletedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_Employees_RequestedBy",
+                        column: x => x.RequestedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AssetDisposals_PhysicalAssets_PhysicalAssetId",
+                        column: x => x.PhysicalAssetId,
+                        principalSchema: "inventories",
+                        principalTable: "PhysicalAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AssetMaintenances",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PhysicalAssetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    AssetPropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    AssetDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    Type = table.Column<int>(type: "integer", nullable: false),
+                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
+                    ScheduledDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    StartedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CompletionNotes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    FindingsNotes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
+                    ScheduledBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    PerformedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    ApprovedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    EstimatedCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    ActualCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
+                    CostReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
+                    CancelledOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    CancelledBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    CancellationReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AssetMaintenances", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_Employees_ApprovedBy",
+                        column: x => x.ApprovedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_Employees_CancelledBy",
+                        column: x => x.CancelledBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_Employees_PerformedBy",
+                        column: x => x.PerformedBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_Employees_ScheduledBy",
+                        column: x => x.ScheduledBy,
+                        principalSchema: "inventories",
+                        principalTable: "Employees",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_AssetMaintenances_PhysicalAssets_PhysicalAssetId",
+                        column: x => x.PhysicalAssetId,
+                        principalSchema: "inventories",
+                        principalTable: "PhysicalAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "DepreciationSchedules",
+                schema: "inventories",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uuid", nullable: false),
+                    PhysicalAssetId = table.Column<Guid>(type: "uuid", nullable: false),
+                    Month = table.Column<int>(type: "integer", nullable: false),
+                    Year = table.Column<int>(type: "integer", nullable: false),
+                    MonthlyDepreciationAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    AccumulatedDepreciationAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
+                    Status = table.Column<int>(type: "integer", nullable: false),
+                    JournalEntryVoucherId = table.Column<Guid>(type: "uuid", nullable: true),
+                    PostedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    Remarks = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
+                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
+                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
+                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
+                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
+                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_DepreciationSchedules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_DepreciationSchedules_JournalEntryVouchers_JournalEntryVouc~",
+                        column: x => x.JournalEntryVoucherId,
+                        principalSchema: "inventories",
+                        principalTable: "JournalEntryVouchers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_DepreciationSchedules_PhysicalAssets_PhysicalAssetId",
+                        column: x => x.PhysicalAssetId,
+                        principalSchema: "inventories",
+                        principalTable: "PhysicalAssets",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "PPETypeCodes",
                 schema: "inventories",
                 columns: table => new
@@ -1297,55 +1570,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 });
 
             migrationBuilder.CreateTable(
-                name: "PhysicalAssets",
-                schema: "inventories",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    ProductId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AcquisitionCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    AcquisitionDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    SerialNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    ModelNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    Condition = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Quantity = table.Column<int>(type: "integer", nullable: false),
-                    DisposalDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    DisposalReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    AccumulatedDepreciation = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    QRCodeData = table.Column<string>(type: "character varying(5000)", maxLength: 5000, nullable: true),
-                    QRGeneratedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ImagePaths = table.Column<string>(type: "text", nullable: false),
-                    Version = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
-                    ParentAssetId = table.Column<Guid>(type: "uuid", nullable: true),
-                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_PhysicalAssets", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_PhysicalAssets_PhysicalAssets_ParentAssetId",
-                        column: x => x.ParentAssetId,
-                        principalSchema: "inventories",
-                        principalTable: "PhysicalAssets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_PhysicalAssets_Products_ProductId",
-                        column: x => x.ProductId,
-                        principalSchema: "inventories",
-                        principalTable: "Products",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "AssetRequisitions",
                 schema: "inventories",
                 columns: table => new
@@ -1507,264 +1731,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         principalTable: "PurchaseRequests",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AssetAssignmentHistories",
-                schema: "inventories",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    AssetId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AssetNumber = table.Column<string>(type: "text", nullable: false),
-                    EmployeeId = table.Column<Guid>(type: "uuid", nullable: false),
-                    EmployeeName = table.Column<string>(type: "text", nullable: false),
-                    DocumentNumber = table.Column<string>(type: "text", nullable: false),
-                    DocumentType = table.Column<int>(type: "integer", nullable: false),
-                    AssignmentDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    ReturnDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    AssignmentType = table.Column<string>(type: "text", nullable: false),
-                    Quantity = table.Column<int>(type: "integer", nullable: false),
-                    AssetClassification = table.Column<int>(type: "integer", nullable: false),
-                    Location = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: true),
-                    Reason = table.Column<string>(type: "text", nullable: true),
-                    Remarks = table.Column<string>(type: "text", nullable: true),
-                    TransferredToEmployeeId = table.Column<Guid>(type: "uuid", nullable: true),
-                    TransferredToDocumentNumber = table.Column<string>(type: "text", nullable: true),
-                    Status = table.Column<string>(type: "text", nullable: false),
-                    Condition = table.Column<string>(type: "text", nullable: true),
-                    AcceptedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    IssuedByName = table.Column<string>(type: "text", nullable: true),
-                    ReceivedByName = table.Column<string>(type: "text", nullable: true),
-                    ApprovedByName = table.Column<string>(type: "text", nullable: true),
-                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AssetAssignmentHistories", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AssetAssignmentHistories_Employees_AcceptedBy",
-                        column: x => x.AcceptedBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AssetAssignmentHistories_Employees_EmployeeId",
-                        column: x => x.EmployeeId,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AssetAssignmentHistories_Employees_TransferredToEmployeeId",
-                        column: x => x.TransferredToEmployeeId,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AssetAssignmentHistories_PhysicalAssets_AssetId",
-                        column: x => x.AssetId,
-                        principalSchema: "inventories",
-                        principalTable: "PhysicalAssets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AssetDisposals",
-                schema: "inventories",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PhysicalAssetId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AssetPropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    AssetDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    RequestedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    RequestDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    DisposalMethod = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    JustificationReason = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    AssetConditionAtDisposal = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    ApprovedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    ApprovedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    ApprovalNotes = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    CompletedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CompletedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    SalvageValue = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    GainOrLoss = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    DisposalReferenceNumber = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    CancelledOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CancelledBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    CancellationReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AssetDisposals", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AssetDisposals_Employees_ApprovedBy",
-                        column: x => x.ApprovedBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_AssetDisposals_Employees_CancelledBy",
-                        column: x => x.CancelledBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_AssetDisposals_Employees_CompletedBy",
-                        column: x => x.CompletedBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_AssetDisposals_Employees_RequestedBy",
-                        column: x => x.RequestedBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AssetDisposals_PhysicalAssets_PhysicalAssetId",
-                        column: x => x.PhysicalAssetId,
-                        principalSchema: "inventories",
-                        principalTable: "PhysicalAssets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AssetMaintenances",
-                schema: "inventories",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PhysicalAssetId = table.Column<Guid>(type: "uuid", nullable: false),
-                    AssetPropertyCode = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    AssetDescription = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
-                    Type = table.Column<int>(type: "integer", nullable: false),
-                    Description = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: false),
-                    ScheduledDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    StartedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CompletedOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CompletionNotes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    FindingsNotes = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
-                    ScheduledBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    PerformedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    ApprovedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    EstimatedCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    ActualCost = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: true),
-                    CostReference = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: true),
-                    CancelledOn = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    CancelledBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    CancellationReason = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AssetMaintenances", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AssetMaintenances_Employees_ApprovedBy",
-                        column: x => x.ApprovedBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_AssetMaintenances_Employees_CancelledBy",
-                        column: x => x.CancelledBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_AssetMaintenances_Employees_PerformedBy",
-                        column: x => x.PerformedBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_AssetMaintenances_Employees_ScheduledBy",
-                        column: x => x.ScheduledBy,
-                        principalSchema: "inventories",
-                        principalTable: "Employees",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_AssetMaintenances_PhysicalAssets_PhysicalAssetId",
-                        column: x => x.PhysicalAssetId,
-                        principalSchema: "inventories",
-                        principalTable: "PhysicalAssets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "DepreciationSchedules",
-                schema: "inventories",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uuid", nullable: false),
-                    PhysicalAssetId = table.Column<Guid>(type: "uuid", nullable: false),
-                    Month = table.Column<int>(type: "integer", nullable: false),
-                    Year = table.Column<int>(type: "integer", nullable: false),
-                    MonthlyDepreciationAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    AccumulatedDepreciationAmount = table.Column<decimal>(type: "numeric(18,2)", precision: 18, scale: 2, nullable: false),
-                    Status = table.Column<int>(type: "integer", nullable: false),
-                    JournalEntryVoucherId = table.Column<Guid>(type: "uuid", nullable: true),
-                    PostedDate = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    Remarks = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
-                    TenantId = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
-                    Created = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    CreatedBy = table.Column<Guid>(type: "uuid", nullable: false),
-                    LastModified = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    LastModifiedBy = table.Column<Guid>(type: "uuid", nullable: true),
-                    Deleted = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: true),
-                    DeletedBy = table.Column<Guid>(type: "uuid", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DepreciationSchedules", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_DepreciationSchedules_JournalEntryVouchers_JournalEntryVouc~",
-                        column: x => x.JournalEntryVoucherId,
-                        principalSchema: "inventories",
-                        principalTable: "JournalEntryVouchers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.SetNull);
-                    table.ForeignKey(
-                        name: "FK_DepreciationSchedules_PhysicalAssets_PhysicalAssetId",
-                        column: x => x.PhysicalAssetId,
-                        principalSchema: "inventories",
-                        principalTable: "PhysicalAssets",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -2418,12 +2384,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_AssetAssignmentHistories_AcceptedBy",
-                schema: "inventories",
-                table: "AssetAssignmentHistories",
-                column: "AcceptedBy");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_AssetAssignmentHistories_AssetId",
                 schema: "inventories",
                 table: "AssetAssignmentHistories",
@@ -2434,12 +2394,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 schema: "inventories",
                 table: "AssetAssignmentHistories",
                 column: "EmployeeId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_AssetAssignmentHistories_TransferredToEmployeeId",
-                schema: "inventories",
-                table: "AssetAssignmentHistories",
-                column: "TransferredToEmployeeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_AssetConditionConfigurations_Code",
@@ -2828,18 +2782,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 schema: "inventories",
                 table: "PhysicalAssets",
                 column: "DisposalDate");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PhysicalAssets_ParentAssetId",
-                schema: "inventories",
-                table: "PhysicalAssets",
-                column: "ParentAssetId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_PhysicalAssets_ProductId",
-                schema: "inventories",
-                table: "PhysicalAssets",
-                column: "ProductId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PhysicalAssets_PropertyCode",
@@ -3300,6 +3242,10 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 schema: "inventories");
 
             migrationBuilder.DropTable(
+                name: "Products",
+                schema: "inventories");
+
+            migrationBuilder.DropTable(
                 name: "PhysicalAssets",
                 schema: "inventories");
 
@@ -3308,15 +3254,11 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                 schema: "inventories");
 
             migrationBuilder.DropTable(
-                name: "Products",
+                name: "Categories",
                 schema: "inventories");
 
             migrationBuilder.DropTable(
                 name: "Canvasses",
-                schema: "inventories");
-
-            migrationBuilder.DropTable(
-                name: "Categories",
                 schema: "inventories");
 
             migrationBuilder.DropTable(

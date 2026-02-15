@@ -1,0 +1,243 @@
+@using AMIS.Blazor.Infrastructure.Api
+@using MudBlazor
+
+<MudPaper Class="pa-4 mb-4">
+    <MudStack Spacing="3">
+        <!-- Header -->
+        <MudStack Row="true" Spacing="2">
+            <MudIcon Icon="@Icons.Material.Filled.History" Size="Size.Large" />
+            <MudStack Spacing="0">
+                <MudText Typo="Typo.h6">Asset Movement History</MudText>
+                <MudText Typo="Typo.caption" Class="text-secondary">
+                    Complete accountability trail across PAR, ICS, PPEIR, and SMIR documents
+                </MudText>
+            </MudStack>
+            <MudSpacer />
+            @if (_loading)
+            {
+                <MudProgressCircular Indeterminate="true" Size="Size.Small" />
+            }
+        </MudStack>
+
+        @if (_summary != null)
+        {
+            <!-- Current Status Summary -->
+            <MudGrid Spacing="2">
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.caption" Class="text-secondary">Property Code</MudText>
+                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                @_summary.PropertyCode
+                            </MudText>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.caption" Class="text-secondary">Current Status</MudText>
+                            <MudChip T="string" Size="Size.Small" 
+                                Color="@(_summary.CurrentStatus == "Active" ? Color.Success : Color.Default)">
+                                @_summary.CurrentStatus
+                            </MudChip>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.caption" Class="text-secondary">Current Holder</MudText>
+                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                @(_summary.CurrentHolderName ?? "N/A")
+                            </MudText>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+                <MudItem xs="12" sm="6" md="3">
+                    <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                        <MudStack Spacing="1">
+                            <MudText Typo="Typo.caption" Class="text-secondary">As of Date</MudText>
+                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                @(_summary.CurrentAsOfDate?.ToShortDateString() ?? "N/A")
+                            </MudText>
+                        </MudStack>
+                    </MudPaper>
+                </MudItem>
+            </MudGrid>
+
+            <!-- Movement Timeline -->
+            @if (_summary.MovementHistory != null && _summary.MovementHistory.Count > 0)
+            {
+                <MudDivider />
+                <MudText Typo="Typo.h6" Class="mt-3">Movement Timeline</MudText>
+                
+                <MudStack Spacing="2" Class="mt-2">
+                    @foreach (var movement in _summary.MovementHistory.OrderBy(m => m.Date))
+                    {
+                        <MudPaper Class="pa-3" Elevation="0" Outlined="true">
+                            <MudGrid Spacing="2">
+                                <!-- Timeline Indicator -->
+                                <MudItem xs="12" sm="2">
+                                    <MudStack Spacing="1" AlignItems="AlignItems.Center">
+                                        <MudChip T="string" Size="Size.Small" 
+                                            Color="@GetDocumentColor(movement.DocumentType)"
+                                            Variant="Variant.Outlined">
+                                            @movement.DocumentType
+                                        </MudChip>
+                                        <MudText Typo="Typo.caption">
+                                            @movement.Date.ToShortDateString()
+                                        </MudText>
+                                    </MudStack>
+                                </MudItem>
+
+                                <!-- Movement Details -->
+                                <MudItem xs="12" sm="10">
+                                    <MudStack Spacing="1">
+                                        <MudStack Row="true" Spacing="2">
+                                            <MudText Typo="Typo.body2" Class="font-weight-bold">
+                                                @movement.DocumentNumber
+                                            </MudText>
+                                            <MudChip T="string" Size="Size.Small" 
+                                                Color="@GetMovementTypeColor(movement.MovementType)"
+                                                Label="true">
+                                                @movement.MovementType
+                                            </MudChip>
+                                            @if (movement.IsActive)
+                                            {
+                                                <MudChip T="string" Size="Size.Small" Color="Color.Success" 
+                                                    Icon="@Icons.Material.Filled.CheckCircle" Label="true">
+                                                    Active Custody
+                                                </MudChip>
+                                            }
+                                        </MudStack>
+
+                                        <MudGrid Spacing="1" Class="mt-1">
+                                            @if (!string.IsNullOrEmpty(movement.EmployeeName))
+                                            {
+                                                <MudItem xs="12" sm="6">
+                                                    <MudText Typo="Typo.caption">
+                                                        <strong>Issued to:</strong> @movement.EmployeeName
+                                                    </MudText>
+                                                </MudItem>
+                                            }
+                                            @if (movement.Quantity > 0)
+                                            {
+                                                <MudItem xs="12" sm="6">
+                                                    <MudText Typo="Typo.caption">
+                                                        <strong>Quantity:</strong> @movement.Quantity
+                                                    </MudText>
+                                                </MudItem>
+                                            }
+                                            @if (!string.IsNullOrEmpty(movement.Location))
+                                            {
+                                                <MudItem xs="12" sm="6">
+                                                    <MudText Typo="Typo.caption">
+                                                        <strong>Location:</strong> @movement.Location
+                                                    </MudText>
+                                                </MudItem>
+                                            }
+                                            @if (!string.IsNullOrEmpty(movement.Condition))
+                                            {
+                                                <MudItem xs="12" sm="6">
+                                                    <MudText Typo="Typo.caption">
+                                                        <strong>Condition:</strong> @movement.Condition
+                                                    </MudText>
+                                                </MudItem>
+                                            }
+                                            @if (!string.IsNullOrEmpty(movement.Remarks))
+                                            {
+                                                <MudItem xs="12">
+                                                    <MudText Typo="Typo.caption">
+                                                        <strong>Remarks:</strong> @movement.Remarks
+                                                    </MudText>
+                                                </MudItem>
+                                            }
+                                        </MudGrid>
+                                    </MudStack>
+                                </MudItem>
+                            </MudGrid>
+                        </MudPaper>
+                    }
+                </MudStack>
+            }
+            else if (!_loading)
+            {
+                <MudAlert Severity="Severity.Info" Variant="Variant.Outlined" Dense="true">
+                    No movement history found for this asset.
+                </MudAlert>
+            }
+        }
+        else if (_errorMessage != null)
+        {
+            <MudAlert Severity="Severity.Error" Variant="Variant.Outlined">
+                @_errorMessage
+            </MudAlert>
+        }
+        else if (!_loading)
+        {
+            <MudAlert Severity="Severity.Warning" Variant="Variant.Outlined">
+                Asset movement data is not available.
+            </MudAlert>
+        }
+    </MudStack>
+</MudPaper>
+
+@code {
+    [Parameter]
+    public Guid AssetId { get; set; }
+
+    [Inject]
+    private IApiClient ApiClient { get; set; } = null!;
+
+    [Inject]
+    private ISnackbar Snackbar { get; set; } = null!;
+
+    private dynamic? _summary;
+    private bool _loading;
+    private string? _errorMessage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAssetMovementHistory();
+    }
+
+    private async Task LoadAssetMovementHistory()
+    {
+        if (AssetId == Guid.Empty)
+            return;
+
+        try
+        {
+            _loading = true;
+            _errorMessage = null;
+            _summary = await ApiClient.GetAssetMovementHistoryAsync(AssetId);
+        }
+        catch (Exception ex)
+        {
+            _errorMessage = $"Failed to load asset movement history: {ex.Message}";
+            Snackbar.Add(_errorMessage, Severity.Error);
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private Color GetDocumentColor(string documentType) => documentType switch
+    {
+        "PAR" => Color.Primary,
+        "ICS" => Color.Info,
+        "PPEIR" => Color.Warning,
+        "SMIR" => Color.Success,
+        _ => Color.Default
+    };
+
+    private Color GetMovementTypeColor(string movementType) => movementType switch
+    {
+        "Issuance" => Color.Success,
+        "Transfer" => Color.Info,
+        "Return" => Color.Warning,
+        _ => Color.Default
+    };
+}

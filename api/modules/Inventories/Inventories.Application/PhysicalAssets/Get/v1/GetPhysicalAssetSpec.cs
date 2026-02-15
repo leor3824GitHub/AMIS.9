@@ -1,5 +1,6 @@
 using Ardalis.Specification;
 using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
 
 namespace AMIS.WebApi.Inventories.Application.PhysicalAssets.Get.v1;
 
@@ -13,30 +14,21 @@ public sealed class GetPhysicalAssetSpec : Specification<PhysicalAsset, Physical
             p.Id,
             p.PropertyCode,
             p.ProductId,
-            p.Product.Name,
+            null, // ProductName - removed navigation
             p.AcquisitionCost,
             p.AcquisitionDate,
             p.CurrentClassification,
             p.Quantity,
             p.SerialNumber,
             p.ModelNumber,
-            p.AssignmentHistory
-                .OrderByDescending(h => h.AssignmentDate)
-                .Select(h => h.Location)
-                .FirstOrDefault(),
+            null, // Location - removed navigation
             p.AccumulatedDepreciation,
             p.BookValue,
             p.RCAAccountCode,
-            p.AssignmentHistory
-                .FirstOrDefault(h => h.Status == "Active") != null
-                ? p.AssignmentHistory.FirstOrDefault(h => h.Status == "Active")!.EmployeeId
-                : null,
-            p.AssignmentHistory
-                .FirstOrDefault(h => h.Status == "Active") != null
-                ? p.AssignmentHistory.FirstOrDefault(h => h.Status == "Active")!.EmployeeName
-                : null,
+            null, // CurrentCustodianId - removed navigation
+            null, // CurrentCustodianName - removed navigation
             p.ParentAssetId,
-            p.ParentAsset != null ? p.ParentAsset.Product.Name : null,
-            p.ParentAsset != null ? p.ParentAsset.PropertyCode : null));
+            null, // ParentAssetProductName - removed navigation
+            null)); // ParentAssetPropertyCode - removed navigation
     }
 }

@@ -8,7 +8,7 @@
 <PageHeader 
     Title="Asset Issuance" 
     Header="Supply Officer Asset Issuance"
-    SubHeader="Issue PPE (via PAR) and Semi-Expendable Property (via ICS) to custodians" />
+    SubHeader="Issue Semi-Expendable Property (via ICS) to custodians" />
 
 <MudPaper Class="pa-4">
     <MudStack Row="true" Spacing="2" Class="mb-4">
@@ -73,11 +73,8 @@
                         </TemplateColumn>
                         <TemplateColumn Title="Document Type" Sortable="false">
                             <CellTemplate>
-                                <MudChip 
-                                    Size="Size.Small"
-                                    Color="Color.Default"
-                                    Variant="Variant.Filled">
-                                    @GetDocumentTypeLabel(null)
+                                <MudChip Size="Size.Small" Color="@GetDocumentTypeColor(context.Item.Type)" Variant="Variant.Filled">
+                                    @GetDocumentTypeLabel(context.Item.Type)
                                 </MudChip>
                             </CellTemplate>
                         </TemplateColumn>
@@ -100,7 +97,7 @@
                                         Size="Size.Small"
                                         Color="Color.Info"
                                         OnClick="@(() => OnPreviewDocument(context.Item))"
-                                        Title="Preview PAR/ICS" />
+                                        Title="@GetPreviewTitle(context.Item.Type)" />
                                     <MudIconButton 
                                         Icon="@Icons.Material.Filled.Edit"
                                         Size="Size.Small"
@@ -113,7 +110,7 @@
                                         Size="Size.Small"
                                         Color="Color.Success"
                                         OnClick="@(() => OnPrint(context.Item))"
-                                        Title="Print Document" />
+                                        Title="@GetPrintTitle(context.Item.Type)" />
                                 </MudStack>
                             </CellTemplate>
                         </TemplateColumn>
@@ -158,8 +155,8 @@
                         </TemplateColumn>
                         <TemplateColumn Title="Document Type" Sortable="false">
                             <CellTemplate>
-                                <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Filled">
-                                    @GetDocumentTypeLabel(null)
+                                <MudChip Size="Size.Small" Color="@GetDocumentTypeColor(context.Item.Type)" Variant="Variant.Filled">
+                                    @GetDocumentTypeLabel(context.Item.Type)
                                 </MudChip>
                             </CellTemplate>
                         </TemplateColumn>
@@ -178,7 +175,7 @@
                                     Size="Size.Small"
                                     Color="Color.Info"
                                     OnClick="@(() => OnPreviewDocument(context.Item))"
-                                    Title="Preview Document" />
+                                    Title="@GetPreviewTitle(context.Item.Type)" />
                             </CellTemplate>
                         </TemplateColumn>
                     </Columns>
@@ -212,8 +209,8 @@
                         </TemplateColumn>
                         <TemplateColumn Title="Document Type" Sortable="false">
                             <CellTemplate>
-                                <MudChip Size="Size.Small" Color="Color.Default" Variant="Variant.Filled">
-                                    @GetDocumentTypeLabel(null)
+                                <MudChip Size="Size.Small" Color="@GetDocumentTypeColor(context.Item.Type)" Variant="Variant.Filled">
+                                    @GetDocumentTypeLabel(context.Item.Type)
                                 </MudChip>
                             </CellTemplate>
                         </TemplateColumn>
@@ -234,7 +231,8 @@
                                     Icon="@Icons.Material.Filled.Preview"
                                     Size="Size.Small"
                                     Color="Color.Info"
-                                    OnClick="@(() => OnPreviewDocument(context.Item))" />
+                                    OnClick="@(() => OnPreviewDocument(context.Item))"
+                                    Title="@GetPreviewTitle(context.Item.Type)" />
                             </CellTemplate>
                         </TemplateColumn>
                     </Columns>

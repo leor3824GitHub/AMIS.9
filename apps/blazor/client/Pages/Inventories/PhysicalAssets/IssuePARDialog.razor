@@ -21,7 +21,7 @@
                     Asset Details
                 </MudText>
                 <MudText Typo="Typo.body2"><strong>Property Code:</strong> @_asset.PropertyCode</MudText>
-                <MudText Typo="Typo.body2"><strong>Description:</strong> @_asset.ProductName</MudText>
+                <MudText Typo="Typo.body2"><strong>Description:</strong> @_asset.PropertyCode</MudText>
                 <MudText Typo="Typo.body2"><strong>Acquisition Cost:</strong> ₱@_asset.AcquisitionCost.ToString("N2")</MudText>
                 <MudText Typo="Typo.body2"><strong>Acquisition Date:</strong> @_asset.AcquisitionDate.ToShortDateString()</MudText>
             </MudCard>
@@ -213,7 +213,7 @@
                 new()
                 {
                     PropertyCode = _asset.PropertyCode,
-                    Description = _asset.ProductName,
+                    Description = _asset.PropertyCode, // ProductName no longer available
                     DateAcquired = _asset.AcquisitionDate,
                     AcquisitionCost = _asset.AcquisitionCost
                 }

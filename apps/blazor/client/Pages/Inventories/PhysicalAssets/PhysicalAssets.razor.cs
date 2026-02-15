@@ -26,6 +26,7 @@ public partial class PhysicalAssets
     private bool _canEdit;
     private bool _canDelete;
     private bool _loading;
+    private bool _isReloading;
     private string _searchString = string.Empty;
     private IEnumerable<PhysicalAssetResponse> _entityList = Array.Empty<PhysicalAssetResponse>();
     private int _totalItems;
@@ -128,8 +129,6 @@ public partial class PhysicalAssets
 
         return items.Where(asset =>
             (!string.IsNullOrWhiteSpace(asset.PropertyCode) && asset.PropertyCode.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            || (!string.IsNullOrWhiteSpace(asset.ProductName) && asset.ProductName.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
-            || (!string.IsNullOrWhiteSpace(asset.Location) && asset.Location.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             || (!string.IsNullOrWhiteSpace(asset.SerialNumber) && asset.SerialNumber.Contains(_searchString, StringComparison.OrdinalIgnoreCase))
             || (!string.IsNullOrWhiteSpace(asset.ModelNumber) && asset.ModelNumber.Contains(_searchString, StringComparison.OrdinalIgnoreCase)));
     }
@@ -237,7 +236,15 @@ public partial class PhysicalAssets
             var result = await dialog.Result;
             if (!result.Canceled)
             {
-                await Reload();
+                _isReloading = true;
+                try
+                {
+                    await Reload();
+                }
+                finally
+                {
+                    _isReloading = false;
+                }
             }
         }
         catch (Exception ex)
@@ -269,7 +276,15 @@ public partial class PhysicalAssets
             var result = await dialog.Result;
             if (!result.Canceled)
             {
-                await Reload();
+                _isReloading = true;
+                try
+                {
+                    await Reload();
+                }
+                finally
+                {
+                    _isReloading = false;
+                }
             }
         }
         catch (Exception ex)
@@ -333,6 +348,7 @@ public partial class PhysicalAssets
 
     private bool CanReturnAsset(PhysicalAssetResponse asset)
     {
-        return asset?.CurrentCustodianId == _currentUserId && _currentUserId != Guid.Empty;
+        // TODO: Implement separate query to check if current user is custodian
+        return false; // Disabled until assignment tracking is implemented
     }
 }

@@ -47,9 +47,9 @@ public sealed class PhysicalAssetInventoryProjectionHandler :
             {
                 var registry = InventoryRegistry.CreateFromReceiving(
                     code,
-                    asset.Product?.Name ?? string.Empty,
+                    code, // Product.Name removed - using PropertyCode instead
                     asset.Quantity,
-                    asset.CurrentAssignment?.Location ?? string.Empty,
+                    string.Empty, // Location removed - CurrentAssignment navigation no longer available
                     reportNumber: "AUTO-CREATE-ON-ASSET-CREATE");
 
                 await _registryRepo.AddAsync(registry, cancellationToken);

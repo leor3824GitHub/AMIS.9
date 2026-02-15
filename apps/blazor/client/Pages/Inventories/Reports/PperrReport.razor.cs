@@ -46,10 +46,7 @@ public partial class PperrReport : ComponentBase
         string.IsNullOrWhiteSpace(_physicalAssetSearch)
             ? _physicalAssets ?? Enumerable.Empty<PhysicalAssetResponse>()
             : (_physicalAssets ?? Enumerable.Empty<PhysicalAssetResponse>()).Where(asset =>
-                (!string.IsNullOrWhiteSpace(asset.PropertyCode) && asset.PropertyCode.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase))
-                || (!string.IsNullOrWhiteSpace(asset.Description) && asset.Description.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase))
-                || (!string.IsNullOrWhiteSpace(asset.Location) && asset.Location.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase))
-                || (!string.IsNullOrWhiteSpace(asset.UnitOfMeasure) && asset.UnitOfMeasure.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase)));
+                (!string.IsNullOrWhiteSpace(asset.PropertyCode) && asset.PropertyCode.Contains(_physicalAssetSearch, StringComparison.OrdinalIgnoreCase)));
 
     private bool CanSave => !_isReadOnly && _reportStatus == 0 && ((_reportId is null && _canCreate) || (_reportId.HasValue && _canUpdate));
     private bool CanPost => !_isReadOnly && _reportStatus == 0 && _reportId.HasValue && _canPost;
@@ -238,15 +235,15 @@ public partial class PperrReport : ComponentBase
         _model.LineItems.Add(new PperrLineItemModel
         {
             PropertyCode = asset.PropertyCode ?? "",
-            Description = asset.Description ?? "",
-            DateAcquired = asset.AcquisitionDate,
-            Quantity = asset.Quantity,
-            Unit = asset.UnitOfMeasure ?? "",
+            Description = asset.ProductName ?? "",
+            DateAcquired = DateTime.Now,
+            Quantity = 1,
+            Unit = "",
             UnitCost = asset.AcquisitionCost,
             Location = asset.Location ?? ""
         });
 
-        Snackbar.Add($"Added: {asset.Description ?? asset.PropertyCode}", Severity.Success);
+        Snackbar.Add($"Added: {asset.ProductName ?? asset.PropertyCode}", Severity.Success);
         StateHasChanged();
     }
 

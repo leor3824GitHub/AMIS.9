@@ -51,10 +51,7 @@ public sealed class UpdatePARHandler(
 
         par.UpdateHeader(
             request.EmployeeId,
-            request.EmployeeName,
-            request.Department,
             request.IssuanceDate,
-            request.Position,
             request.IssuancePurpose,
             request.IssuanceLocation,
             request.Notes);

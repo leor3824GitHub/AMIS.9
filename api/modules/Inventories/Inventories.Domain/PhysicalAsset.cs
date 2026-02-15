@@ -40,7 +40,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     // QR Code & Identification Support
     public string? QRCodeData { get; private set; } // Base64 encoded QR code image or raw QR data
     public DateTime? QRGeneratedDate { get; private set; } // When QR was generated
-    public Guid? CurrentCustodianId => CurrentAssignment?.EmployeeId; // Computed from active assignment history
 
     // Asset-Specific Photos
     public List<string> ImagePaths { get; private set; } = new(); // Photos specific to this asset instance
@@ -50,35 +49,19 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
     // Computed properties for convenience
     public bool IsDisposed => DisposalDate.HasValue;
-    public AssetAssignmentHistory? CurrentAssignment =>
-        AssignmentHistory.FirstOrDefault(h => h.Status == "Active");
     public bool HasQRCode => !string.IsNullOrEmpty(QRCodeData);
 
-    // Classification and RCA (using default policy for backward compatibility)
-    // NOTE: CurrentClassification uses hardcoded defaults. For database-driven rules,
-    // pass IAssetClassificationPolicy to domain methods instead.
     private static readonly IAssetClassificationPolicy DefaultPolicy =
         AssetClassificationPolicyFactory.GetDefault();
 
     public PropertyClassification CurrentClassification =>
         DefaultPolicy.DetermineClassification(AcquisitionCost);
 
-    public string RCAAccountCode => DefaultPolicy.GetRCAAccountCode(CurrentClassification);
+    // RCAAccountCode is computed from CurrentClassification and DefaultPolicy, not stored
+    public string RCAAccountCode => "TBD"; // Placeholder - should be resolved from the classification rule
 
-    // Navigation
-    public virtual Product Product { get; private set; } = default!;
-    public virtual ICollection<AssetAssignmentHistory> AssignmentHistory { get; private set; }
-        = new List<AssetAssignmentHistory>();
-    public virtual ICollection<AssetDisposal> Disposals { get; private set; }
-        = new List<AssetDisposal>();
-    public virtual ICollection<AssetMaintenance> MaintenanceHistory { get; private set; }
-        = new List<AssetMaintenance>();
-
-    // Asset Hierarchy (Parent–Child)
+    // Asset Hierarchy (Parent–Child) - ID only, no navigation
     public Guid? ParentAssetId { get; private set; }
-    public virtual PhysicalAsset? ParentAsset { get; private set; }
-    public virtual ICollection<PhysicalAsset> SubAssets { get; private set; }
-        = new List<PhysicalAsset>();
 
     private PhysicalAsset() { }
 
@@ -149,8 +132,9 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
     /// <summary>
     /// Issue asset via ICS (Semi-Expendable) or PAR (PPE)
     /// Automatically uses correct document type based on classification
+    /// NOTE: Assignment tracking moved to separate aggregate - this just validates and emits event
     /// </summary>
-    public AssetAssignmentHistory Issue(
+    public void Issue(
         Guid employeeId,
         string employeeName,
         string documentNumber,
@@ -163,9 +147,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         string? approvedByName = null)
     {
         ValidateIssue(employeeId, employeeName, documentNumber);
-
-        if (CurrentAssignment != null)
-            throw new InvalidOperationException("Asset is already assigned. Use Transfer instead.");
 
         if (IsDisposed)
             throw new InvalidOperationException("Cannot issue disposed asset.");
@@ -188,26 +169,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             Quantity -= quantityIssued.Value;
         }
 
-        var assignmentDate = DateTime.UtcNow;
-
-        // Create assignment history with signature fields from formal workflow
-        var history = AssetAssignmentHistory.CreateInitialAssignment(
-            Id,
-            PropertyCode,
-            employeeId,
-            employeeName,
-            documentNumber,
-            docType,
-            assignmentDate,
-            quantityIssued ?? 1,
-            classification,
-            location,
-            issuedByName,
-            receivedByName,
-            approvedByName);
-
-        AssignmentHistory.Add(history);
-
         if (emitEvent)
         {
             QueueDomainEvent(new PhysicalAssetIssued
@@ -221,11 +182,11 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         }
 
         IncrementVersion();
-        return history;
     }
 
     /// <summary>
     /// Return asset from employee (works for both ICS and PAR)
+    /// NOTE: Assignment tracking moved to separate aggregate - this just updates asset state
     /// </summary>
     public void Return(string reason, string condition, Guid acceptedBy, int? quantityReturned = null, IAssetClassificationPolicy? classificationPolicy = null)
     {
@@ -236,14 +197,9 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         if (acceptedBy == Guid.Empty)
             throw new ArgumentException("Accepted by is required.", nameof(acceptedBy));
 
-        var currentAssignment = CurrentAssignment;
-        if (currentAssignment == null)
-            throw new InvalidOperationException("Asset is not currently assigned.");
-
         // Use default policy if none provided
         var policy = classificationPolicy ?? new DefaultAssetClassificationPolicy();
         var classification = policy.DetermineClassification(AcquisitionCost);
-        var returnDate = DateTime.UtcNow;
 
         // Validate quantity for semi-expendable
         if (classification == PropertyClassification.SemiExpendable)
@@ -253,9 +209,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
             Quantity += quantityReturned.Value;
         }
-
-        // Mark assignment as returned
-        currentAssignment.MarkAsReturned(returnDate, reason, condition, acceptedBy);
 
         // Update condition using validated value
         Condition = validCondition!.Value;
@@ -273,9 +226,9 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
 
     /// <summary>
     /// Transfer asset from one employee to another.
-    /// Creates a new assignment record without clearing the current assignment.
+    /// NOTE: Assignment tracking moved to separate aggregate - this just validates and emits event
     /// </summary>
-    public AssetAssignmentHistory Transfer(
+    public void Transfer(
         Guid newEmployeeId,
         string newEmployeeName,
         string transferDocumentNumber,
@@ -286,10 +239,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         string? transferReason = null)
     {
         ValidateIssue(newEmployeeId, newEmployeeName, transferDocumentNumber);
-
-        var currentAssignment = CurrentAssignment;
-        if (currentAssignment == null)
-            throw new InvalidOperationException("Asset is not currently assigned. Cannot transfer unassigned asset.");
 
         if (IsDisposed)
             throw new InvalidOperationException("Cannot transfer disposed asset.");
@@ -307,25 +256,9 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
                 throw new InvalidOperationException("Insufficient stock available for transfer.");
         }
 
-        var transferDate = DateTime.UtcNow;
         var docType = classification == PropertyClassification.PropertyPlantEquipment
             ? DocumentType.PAR
             : DocumentType.ICS;
-
-        // Create new assignment history for transfer
-        var newAssignment = AssetAssignmentHistory.CreateInitialAssignment(
-            Id,
-            PropertyCode,
-            newEmployeeId,
-            newEmployeeName,
-            transferDocumentNumber,
-            docType,
-            transferDate,
-            quantityTransferred ?? 1,
-            classification,
-            location);
-
-        AssignmentHistory.Add(newAssignment);
 
         if (emitEvent)
         {
@@ -340,7 +273,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
         }
 
         IncrementVersion();
-        return newAssignment;
     }
 
     /// <summary>
@@ -353,9 +285,6 @@ public class PhysicalAsset : AuditableEntity, IAggregateRoot
             throw new ArgumentException("Disposal reason is required.", nameof(disposalReason));
         if (IsDisposed)
             throw new InvalidOperationException("Asset is already disposed.");
-
-        if (CurrentAssignment != null)
-            throw new InvalidOperationException("Cannot dispose asset while assigned. Return asset first.");
 
         QueueDomainEvent(new PhysicalAssetDisposed
         {

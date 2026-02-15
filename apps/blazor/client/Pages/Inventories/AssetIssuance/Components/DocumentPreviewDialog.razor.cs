@@ -39,18 +39,25 @@ public partial class DocumentPreviewDialog
         // In a real implementation, this would trigger JavaScript to open print preview
     }
 
-    private Color GetDocTypeColor(string? type) => type switch
+    private Color GetDocTypeColor(IssuanceType? type) => type switch
     {
-        "PAR" => Color.Warning,
-        "ICS" => Color.Info,
+        IssuanceType._0 => Color.Warning,
+        IssuanceType._1 => Color.Info,
         _ => Color.Default
     };
 
-    private string GetDocTypeLabel(string? type) => type switch
+    private string GetDocTypeLabel(IssuanceType? type) => type switch
     {
-        "PAR" => "PAR (Property Acknowledgment Receipt)",
-        "ICS" => "ICS (Inventory Custodian Slip)",
-        _ => "Unknown"
+        IssuanceType._0 => "PAR (Property Acknowledgement Receipt)",
+        IssuanceType._1 => "ICS (Inventory Custodian Slip)",
+        _ => "Unknown Document Type"
+    };
+
+    private string GetDocTypeAbbrev(IssuanceType? type) => type switch
+    {
+        IssuanceType._0 => "PAR",
+        IssuanceType._1 => "ICS",
+        _ => "Document"
     };
 
     private Color GetStatusColor(string? status) => status switch

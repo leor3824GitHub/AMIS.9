@@ -207,27 +207,38 @@ public partial class AssetIssuance
     private string GetInitials(string? name) => 
         string.IsNullOrEmpty(name) ? "?" : new string(name.Split(' ').Select(x => x.FirstOrDefault()).ToArray());
 
-    private string GetDocumentTypeLabel(string? type) => type switch
+    private string GetDocumentTypeLabel(IssuanceType? type) => type switch
     {
-        "PAR" => "PAR (Property Acknowledgment Receipt)",
-        "ICS" => "ICS (Inventory Custodian Slip)",
+        IssuanceType._0 => "PAR (Property Acknowledgement Receipt)",
+        IssuanceType._1 => "ICS (Inventory Custodian Slip)",
         _ => "Unknown"
     };
 
-    private Color GetDocumentTypeColor(string? type) => type switch
+    private Color GetDocumentTypeColor(IssuanceType? type) => type switch
     {
-        "PAR" => Color.Warning,
-        "ICS" => Color.Info,
+        IssuanceType._0 => Color.Warning,
+        IssuanceType._1 => Color.Info,
         _ => Color.Default
+    };
+
+    private string GetPreviewTitle(IssuanceType? type) => type switch
+    {
+        IssuanceType._0 => "Preview PAR",
+        IssuanceType._1 => "Preview ICS",
+        _ => "Preview Document"
+    };
+
+    private string GetPrintTitle(IssuanceType? type) => type switch
+    {
+        IssuanceType._0 => "Print PAR",
+        IssuanceType._1 => "Print ICS",
+        _ => "Print Document"
     };
 
     private Color GetStatusColor(string? status) => status switch
     {
-        "Pending" => Color.Warning,
-        "Accepted" => Color.Success,
-        "Rejected" => Color.Error,
-        "Returned" => Color.Secondary,
-        "Cancelled" => Color.Default,
+        "Closed" => Color.Success,
+        "Open" => Color.Warning,
         _ => Color.Default
     };
 

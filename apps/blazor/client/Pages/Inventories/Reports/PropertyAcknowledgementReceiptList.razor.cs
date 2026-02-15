@@ -28,8 +28,7 @@ public partial class PropertyAcknowledgementReceiptList
             if (!string.IsNullOrEmpty(_searchString))
             {
                 filtered = filtered.Where(p =>
-                    p.ParNumber?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true ||
-                    p.EmployeeName?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true
+                    p.ParNumber?.Contains(_searchString, StringComparison.OrdinalIgnoreCase) == true
                 ).ToList();
             }
 

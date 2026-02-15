@@ -33,10 +33,10 @@
                                 <MudText Typo="Typo.body2"><strong>Classification:</strong> @_asset?.Classification</MudText>
                             </MudItem>
                             <MudItem xs="12">
-                                <MudText Typo="Typo.body2"><strong>Quantity:</strong> @_asset?.Quantity @(_asset?.UnitOfMeasure ?? "")</MudText>
+                                <MudText Typo="Typo.body2"><strong>Quantity:</strong> -</MudText>
                             </MudItem>
                             <MudItem xs="12">
-                                <MudText Typo="Typo.body2"><strong>Location:</strong> @(_asset?.Location ?? "Not assigned")</MudText>
+
                             </MudItem>
                         </MudGrid>
                     </MudCard>
@@ -74,7 +74,7 @@
                         </MudText>
                         <MudText Typo="Typo.caption" Class="mb-2">Update parent asset to modify asset hierarchy</MudText>
                         <MudAutocomplete T="PhysicalAssetResponse" Label="Parent Asset" @bind-Value="_selectedParentAsset"
-                            SearchFunc="@SearchParentAssets" ToStringFunc="@(p => p == null ? string.Empty : $"{p.PropertyCode} - {p.Description}")"
+                            SearchFunc="@SearchParentAssets" ToStringFunc="@(p => p == null ? string.Empty : p.PropertyCode)"
                             Clearable="true" ResetValueOnEmptyText="true" Variant="Variant.Outlined"
                             Dense="false" Style="width: 100%;" />
                         @if (_asset.ParentAssetId.HasValue)
@@ -239,8 +239,7 @@
             }
 
             var filteredItems = result.Items
-                .Where(a => a.PropertyCode.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                            a.Description.Contains(value, StringComparison.OrdinalIgnoreCase))
+                .Where(a => a.PropertyCode.Contains(value, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             return filteredItems;
         }

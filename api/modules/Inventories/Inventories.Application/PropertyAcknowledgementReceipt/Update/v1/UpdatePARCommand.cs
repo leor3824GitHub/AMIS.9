@@ -13,11 +13,8 @@ public sealed record UpdatePARLineItemRequest(
 public sealed record UpdatePARCommand(
     Guid Id,
     Guid EmployeeId,
-    string EmployeeName,
-    string Department,
     DateTime IssuanceDate,
     IReadOnlyList<UpdatePARLineItemRequest> LineItems,
-    string? Position = null,
     string? IssuancePurpose = null,
     string? IssuanceLocation = null,
     string? Notes = null) : IRequest<UpdatePARResponse>;

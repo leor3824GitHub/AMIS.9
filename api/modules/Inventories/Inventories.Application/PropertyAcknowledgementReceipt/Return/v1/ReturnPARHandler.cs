@@ -43,7 +43,6 @@ public sealed class ReturnPARHandler(
             par.Return(
                 request.ReturnDate,
                 request.ReceivedByEmployeeId,
-                request.ReceivedByEmployeeName,
                 request.ReturnRemarks);
 
             // Note: Asset custodian is automatically managed via Return() method

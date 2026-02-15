@@ -17,17 +17,14 @@ public sealed class CreatePARHandler(
         try
         {
             logger.LogInformation(
-                "Creating new PAR with number: {PARNumber} for employee: {EmployeeName}",
+                "Creating new PAR with number: {PARNumber} for employee: {EmployeeId}",
                 request.PARNumber,
-                request.EmployeeName);
+                request.EmployeeId);
 
             var par = new Domain.PropertyAcknowledgementReceipt(
                 request.PARNumber,
                 request.EmployeeId,
-                request.EmployeeName,
-                request.Department,
                 request.IssuanceDate,
-                request.Position,
                 request.IssuancePurpose,
                 request.IssuanceLocation,
                 request.Notes);

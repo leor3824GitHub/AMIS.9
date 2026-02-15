@@ -198,22 +198,22 @@ public partial class AcceptanceDialog
 
         try
         {
-            var search = new SearchInspectionRequestsCommand
+            var search = new SearchInspectionsCommand
             {
                 PageNumber = 1,
                 PageSize = 1,
                 PurchaseId = purchaseId
             };
 
-            var result = await ApiClient.SearchInspectionRequestsEndpointAsync("1", search);
-            var request = result?.Items?.FirstOrDefault();
+            var result = await ApiClient.SearchInspectionsEndpointAsync("1", search);
+            var inspection = result?.Items?.FirstOrDefault();
 
-            if (request is null)
+            if (inspection is null)
             {
                 _prerequisitesMet = false;
-                _prerequisiteMessage = "Submit and complete an inspection request for this purchase before creating an acceptance.";
+                _prerequisiteMessage = "Submit and complete an inspection for this purchase before creating an acceptance.";
             }
-            else if (request.Status is InspectionRequestStatus.Completed or InspectionRequestStatus.Accepted)
+            else if (inspection.Status is InspectionStatus.Completed or InspectionStatus.Approved)
             {
                 _prerequisitesMet = true;
                 _prerequisiteMessage = null;
@@ -221,8 +221,8 @@ public partial class AcceptanceDialog
             else
             {
                 _prerequisitesMet = false;
-                var statusText = request.Status.ToString();
-                _prerequisiteMessage = $"Inspection request is currently {statusText}. Complete the inspection before creating an acceptance.";
+                var statusText = inspection.Status.ToString();
+                _prerequisiteMessage = $"Inspection is currently {statusText}. Complete and approve the inspection before creating an acceptance.";
             }
         }
         catch (Exception ex)

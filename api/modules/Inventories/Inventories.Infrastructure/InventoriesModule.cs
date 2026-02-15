@@ -15,6 +15,7 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.Employee;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.ProcurementProjects;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PropertyCode;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PropertyCodeSequence;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.AssetMovement;
 using AMIS.WebApi.Inventories.Infrastructure.Middleware;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
@@ -51,6 +52,7 @@ using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PhysicalAsset;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsIssuance;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.SuppliesAndMaterialsReceiving;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.PropertyAcknowledgementReceipt;
+using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.InventoryCustodianSlip;
 using AMIS.WebApi.Inventories.Infrastructure.Endpoints.v1.AssetClassificationRules;
 
 using AMIS.WebApi.Inventories.Application.Services;
@@ -347,6 +349,16 @@ public static class InventoriesModule
             parGroup.MapPostPAREndpoint();
             parGroup.MapCancelPAREndpoint();
             parGroup.MapReturnPAREndpoint();
+
+            var icsGroup = app.MapGroup("inventory-custodian-slips").WithTags("inventory-custodian-slips");
+            icsGroup.MapListICSEndpoint();
+            icsGroup.MapCreateICSEndpoint();
+            icsGroup.MapGetICSEndpoint();
+            icsGroup.MapUpdateICSEndpoint();
+            icsGroup.MapDeleteICSEndpoint();
+            icsGroup.MapPostICSEndpoint();
+            icsGroup.MapCancelICSEndpoint();
+            icsGroup.MapReturnICSEndpoint();
         }
     }
     public static WebApplicationBuilder RegisterInventoriesServices(this WebApplicationBuilder builder)
@@ -502,6 +514,10 @@ public static class InventoriesModule
         // Property Accountability Receipt (PAR)
         builder.Services.AddKeyedScoped<IRepository<PropertyAcknowledgementReceipt>, InventoriesRepository<PropertyAcknowledgementReceipt>>("inventories:par");
         builder.Services.AddKeyedScoped<IReadRepository<PropertyAcknowledgementReceipt>, InventoriesRepository<PropertyAcknowledgementReceipt>>("inventories:par");
+
+        // Inventory Custodian Slip (ICS)
+        builder.Services.AddKeyedScoped<IRepository<InventoryCustodianSlip>, InventoriesRepository<InventoryCustodianSlip>>("inventories:ics");
+        builder.Services.AddKeyedScoped<IReadRepository<InventoryCustodianSlip>, InventoriesRepository<InventoryCustodianSlip>>("inventories:ics");
 
         // Asset Disposal
         builder.Services.AddKeyedScoped<IRepository<AssetDisposal>, InventoriesRepository<AssetDisposal>>("inventories:disposals");

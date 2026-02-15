@@ -36,17 +36,8 @@ public sealed class IssuePhysicalAssetCommandValidator : AbstractValidator<Issue
             .WithName("AssetId")
             .WithMessage("Physical asset not found.");
 
-        RuleFor(x => x)
-            .MustAsync(async (command, cancellationToken) => 
-            {
-                var asset = await repository.GetByIdAsync(command.Id, cancellationToken);
-                if (asset == null) return true; // Let the previous rule handle this
-                
-                // Check if asset is already assigned
-                return asset.CurrentAssignment == null;
-            })
-            .WithName("Asset")
-            .WithMessage("Asset is already assigned to another employee. Use Transfer instead.");
+        // Assignment validation removed - CurrentAssignment navigation no longer available
+        // Assignment tracking moved to separate aggregate
 
         RuleFor(x => x)
             .MustAsync(async (command, cancellationToken) => 

@@ -57,9 +57,6 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
             .HasDefaultValue(0)
             .IsConcurrencyToken();
 
-        // CurrentCustodianId is now computed from CurrentAssignment.EmployeeId, not stored
-        builder.Ignore(x => x.CurrentCustodianId);
-
         // RCAAccountCode is computed from CurrentClassification and DefaultPolicy, not stored
         builder.Ignore(x => x.RCAAccountCode);
 
@@ -70,38 +67,8 @@ internal sealed class PhysicalAssetConfiguration : IEntityTypeConfiguration<Phys
                 v => System.Text.Json.JsonSerializer.Serialize(v, (System.Text.Json.JsonSerializerOptions?)null),
                 v => System.Text.Json.JsonSerializer.Deserialize<List<string>>(v, (System.Text.Json.JsonSerializerOptions?)null) ?? new List<string>());
 
-        // Asset Hierarchy (Parent-Child)
+        // Asset Hierarchy (Parent-Child) - Foreign key only, no navigation
         builder.Property(x => x.ParentAssetId);
-
-        // Navigation
-        builder.HasOne(x => x.Product)
-            .WithMany()
-            .HasForeignKey(x => x.ProductId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // Self-referential hierarchy: Parent Asset
-        builder.HasOne(x => x.ParentAsset)
-            .WithMany(x => x.SubAssets)
-            .HasForeignKey(x => x.ParentAssetId)
-            .OnDelete(DeleteBehavior.SetNull);
-
-        // AssignmentHistory navigation property (OneToMany)
-        builder.HasMany(x => x.AssignmentHistory)
-            .WithOne(x => x.Asset)
-            .HasForeignKey(x => x.AssetId)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // Maintenance history navigation property (OneToMany)
-        builder.HasMany(x => x.MaintenanceHistory)
-            .WithOne(x => x.Asset)
-            .HasForeignKey(x => x.PhysicalAssetId)
-            .OnDelete(DeleteBehavior.Restrict);
-
-        // Disposals navigation property (OneToMany)
-        builder.HasMany(x => x.Disposals)
-            .WithOne(x => x.Asset)
-            .HasForeignKey(x => x.PhysicalAssetId)
-            .OnDelete(DeleteBehavior.Restrict);
 
         // Indexes
         builder.HasIndex(x => x.PropertyCode).IsUnique();

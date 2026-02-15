@@ -224,8 +224,13 @@ public partial class AssetIssuanceDialog
             var issuance = await ApiClient.GetIssuanceEndpointAsync("1", issuanceId);
             if (issuance != null)
             {
-                // Load custodian and items for editing
-                // This would populate the dialog with existing data
+                // Populate dialog with existing issuance data
+                _selectedCustodian = issuance.Employee;
+                _documentType = issuance.Type == IssuanceType._0 ? "PAR" : "ICS";
+                _totalIssuanceAmount = (decimal)issuance.TotalAmount;
+                
+                // Note: Items would need to be loaded separately via issuance items endpoint
+                // For now, user can view/modify the document through preview or items management
             }
         }
         catch (Exception ex)

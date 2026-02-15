@@ -19,9 +19,11 @@ public sealed class PropertyAcknowledgementReceiptConfiguration : IEntityTypeCon
         // Custodian/Employee Information
         builder.Property(x => x.EmployeeId).IsRequired();
         builder.HasIndex(x => x.EmployeeId);
-        builder.Property(x => x.EmployeeName).IsRequired().HasMaxLength(255);
-        builder.Property(x => x.Department).IsRequired().HasMaxLength(255);
-        builder.Property(x => x.Position).HasMaxLength(255);
+        builder.HasOne(x => x.Employee)
+            .WithMany()
+            .HasForeignKey(x => x.EmployeeId)
+            .IsRequired()
+            .OnDelete(DeleteBehavior.Cascade);
 
         // Issuance Information
         builder.Property(x => x.IssuanceDate).IsRequired();
@@ -44,7 +46,10 @@ public sealed class PropertyAcknowledgementReceiptConfiguration : IEntityTypeCon
         builder.Property(x => x.ReturnDate);
         builder.Property(x => x.ReturnRemarks).HasMaxLength(1000);
         builder.Property(x => x.ReceivedByEmployeeId);
-        builder.Property(x => x.ReceivedByEmployeeName).HasMaxLength(255);
+        builder.HasOne(x => x.ReceivedByEmployee)
+            .WithMany()
+            .HasForeignKey(x => x.ReceivedByEmployeeId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Authentication/Signatures
         builder.Property(x => x.IssuedByName).HasMaxLength(255);

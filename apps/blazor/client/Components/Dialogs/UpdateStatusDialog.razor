@@ -4,7 +4,7 @@
     <DialogContent>
         <MudSelect @bind-Value="_selectedStatus" Label="New Status" Variant="Variant.Outlined"
             AnchorOrigin="Origin.BottomCenter">
-            @foreach (InspectionRequestStatus status in Enum.GetValues(typeof(InspectionRequestStatus)))
+            @foreach (InspectionStatus status in Enum.GetValues(typeof(InspectionStatus)))
             {
                 <MudSelectItem Value="@status" Disabled="@(status == CurrentStatus)">
                     @status.ToString()
@@ -21,9 +21,9 @@
 
 @code {
     [CascadingParameter] IMudDialogInstance? MudDialog { get; set; }
-    [Parameter] public InspectionRequestStatus CurrentStatus { get; set; }
+    [Parameter] public InspectionStatus CurrentStatus { get; set; }
 
-    private InspectionRequestStatus _selectedStatus;
+    private InspectionStatus _selectedStatus;
 
     protected override void OnInitialized()
     {

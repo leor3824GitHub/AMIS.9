@@ -25,8 +25,6 @@ public sealed class ListPARsHandler(
                 Id = x.Id,
                 PARNumber = x.PARNumber,
                 EmployeeId = x.EmployeeId,
-                EmployeeName = x.EmployeeName,
-                Department = x.Department,
                 IssuanceDate = x.IssuanceDate,
                 Status = x.Status.ToString(),
                 LineItemsCount = x.GetLineItemsCount(),

@@ -1,5 +1,6 @@
 using AMIS.Framework.Core.Persistence;
 using AMIS.WebApi.Inventories.Domain;
+using AMIS.WebApi.Inventories.Domain.ValueObjects;
 using AMIS.WebApi.Inventories.Application.PropertyAcknowledgementReceipt.Specs;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -74,16 +75,19 @@ public class InventoryReconciliationJob
                     var activeAssignmentCount = 0;
                     var returnedCount = 0;
 
-                    foreach (var asset in assets)
-                    {
-                        if (asset.CurrentAssignment != null)
-                        {
-                            if (asset.CurrentAssignment.Status == "Active")
-                                activeAssignmentCount++;
-                            else if (asset.CurrentAssignment.Status == "Returned")
-                                returnedCount++;
-                        }
-                    }
+                    // Assignment tracking removed - CurrentAssignment navigation no longer available
+                    // foreach (var asset in assets)
+                    // {
+                    //     if (asset.CurrentAssignmentInfo != null)
+                    //     {
+                    //         if (asset.IsActive)
+                    //             activeAssignmentCount++;
+                    //         else
+                    //             returnedCount++;
+                    //     }
+                    // }
+
+
 
                     result.ActiveAssignmentCount = activeAssignmentCount;
                     result.ReturnedAssignmentCount = returnedCount;
@@ -174,16 +178,17 @@ public class InventoryReconciliationJob
                     var activeAssignmentCount = 0;
                     var consumedCount = 0;
 
-                    foreach (var asset in assets)
-                    {
-                        if (asset.CurrentAssignment != null)
-                        {
-                            if (asset.CurrentAssignment.Status == "Active")
-                                activeAssignmentCount++;
-                            else if (asset.CurrentAssignment.Status == "Returned")
-                                consumedCount++;
-                        }
-                    }
+                    // Assignment tracking removed - CurrentAssignment navigation no longer available
+                    // foreach (var asset in assets)
+                    // {
+                    //     if (asset.CurrentAssignmentInfo != null)
+                    //     {
+                    //         if (asset.IsActive)
+                    //             activeAssignmentCount++;
+                    //         else
+                    //             consumedCount++;
+                    //     }
+                    // }
 
                     result.ActiveAssignmentCount = activeAssignmentCount;
                     result.ConsumedCount = consumedCount;

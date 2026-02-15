@@ -6,7 +6,6 @@ public sealed record ReturnPARCommand(
     Guid Id,
     DateTime ReturnDate,
     Guid ReceivedByEmployeeId,
-    string ReceivedByEmployeeName,
     string? ReturnRemarks = null) : IRequest<ReturnPARResponse>;
 
 public sealed record ReturnPARResponse(

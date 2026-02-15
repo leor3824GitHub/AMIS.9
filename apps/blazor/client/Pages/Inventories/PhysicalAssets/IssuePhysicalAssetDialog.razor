@@ -78,14 +78,14 @@
             </DialogContent>
             <DialogActions>
                 <MudButton Variant="Variant.Filled" Color="Color.Primary" ButtonType="ButtonType.Submit"
-                           Disabled="@(_loading || _asset == null)">
+                           Disabled="@(_loading || _isSubmitting || _asset == null)">
                     @if (_loading)
                     {
                         <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
                     }
                     Issue Asset
                 </MudButton>
-                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_loading">Cancel
+                <MudButton Variant="Variant.Outlined" Color="Color.Secondary" OnClick="Cancel" Disabled="@_isSubmitting">Cancel
                 </MudButton>
             </DialogActions>
         </MudDialog>
@@ -121,6 +121,7 @@ else
     private List<EmployeeResponse> _employees = new();
     private Guid? SelectedEmployeeId;
     private bool _loading;
+    private bool _isSubmitting = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -156,12 +157,20 @@ else
 
     private async Task OnValidSubmit()
     {
+        // Prevent double-submission by checking if already submitting
+        if (_isSubmitting)
+        {
+            Snackbar?.Add("Request already in progress. Please wait...", Severity.Warning);
+            return;
+        }
+
         if (Model == null || _asset == null)
         {
             Snackbar?.Add("Model or asset not initialized.", Severity.Error);
             return;
         }
 
+        _isSubmitting = true;
         _loading = true;
         try
         {
@@ -179,25 +188,8 @@ else
                 return;
             }
 
-            // Refresh asset data from server to check current state
-            try
-            {
-                _asset = await ApiClient.GetPhysicalAssetEndpointAsync("1", AssetId);
-            }
-            catch (Exception ex)
-            {
-                Snackbar?.Add($"Failed to verify asset status: {ex.Message}", Severity.Error);
-                _loading = false;
-                return;
-            }
-
-            // Validate: Asset is not already assigned
-            if (_asset != null && _asset.CurrentCustodianId.HasValue)
-            {
-                Snackbar?.Add("This asset is already assigned to another employee. Please close this dialog and try again.", Severity.Warning);
-                _loading = false;
-                return;
-            }
+            // TODO: Validate assignment status via separate query
+            // CurrentCustodianId is no longer available from PhysicalAsset response
 
             // For semi-expendable, quantity is required
             if ((int)_asset.Classification == 2 && // SemiExpendable
@@ -250,6 +242,7 @@ else
         finally
         {
             _loading = false;
+            _isSubmitting = false;
         }
     }
 

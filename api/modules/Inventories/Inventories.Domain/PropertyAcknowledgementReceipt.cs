@@ -17,9 +17,7 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
 
     // Custodian/Employee Information
     public Guid EmployeeId { get; private set; }
-    public string EmployeeName { get; private set; }
-    public string Department { get; private set; }
-    public string? Position { get; private set; }
+    public virtual Employee Employee { get; private set; } = default!;
 
     // Issuance Information
     public DateTime IssuanceDate { get; private set; }
@@ -34,7 +32,7 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
     public DateTime? ReturnDate { get; private set; }
     public string? ReturnRemarks { get; private set; }
     public Guid? ReceivedByEmployeeId { get; private set; }
-    public string? ReceivedByEmployeeName { get; private set; }
+    public virtual Employee? ReceivedByEmployee { get; private set; }
 
     // Authentication/Signatures
     public string? IssuedByName { get; private set; }
@@ -50,8 +48,6 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
     private PropertyAcknowledgementReceipt()
     {
         PARNumber = string.Empty;
-        EmployeeName = string.Empty;
-        Department = string.Empty;
     }
 
     /// <summary>
@@ -60,10 +56,7 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
     public PropertyAcknowledgementReceipt(
         string parNumber,
         Guid employeeId,
-        string employeeName,
-        string department,
         DateTime issuanceDate,
-        string? position = null,
         string? issuancePurpose = null,
         string? issuanceLocation = null,
         string? notes = null)
@@ -71,14 +64,9 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
         ArgumentException.ThrowIfNullOrWhiteSpace(parNumber);
         if (employeeId == Guid.Empty)
             throw new ArgumentException("Employee ID cannot be empty.", nameof(employeeId));
-        ArgumentException.ThrowIfNullOrWhiteSpace(employeeName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(department);
 
         PARNumber = parNumber;
         EmployeeId = employeeId;
-        EmployeeName = employeeName;
-        Department = department;
-        Position = position;
         IssuanceDate = issuanceDate;
         IssuancePurpose = issuancePurpose;
         IssuanceLocation = issuanceLocation;
@@ -122,10 +110,7 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
     /// </summary>
     public void UpdateHeader(
         Guid employeeId,
-        string employeeName,
-        string department,
         DateTime issuanceDate,
-        string? position = null,
         string? issuancePurpose = null,
         string? issuanceLocation = null,
         string? notes = null)
@@ -134,13 +119,8 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
 
         if (employeeId == Guid.Empty)
             throw new ArgumentException("Employee ID cannot be empty.", nameof(employeeId));
-        ArgumentException.ThrowIfNullOrWhiteSpace(employeeName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(department);
 
         EmployeeId = employeeId;
-        EmployeeName = employeeName;
-        Department = department;
-        Position = position;
         IssuanceDate = issuanceDate;
         IssuancePurpose = issuancePurpose;
         IssuanceLocation = issuanceLocation;
@@ -202,7 +182,6 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
     public void Return(
         DateTime returnDate,
         Guid receivedByEmployeeId,
-        string receivedByEmployeeName,
         string? returnRemarks = null)
     {
         if (Status != PARStatus.Posted)
@@ -210,11 +189,9 @@ public class PropertyAcknowledgementReceipt : AuditableEntity, IAggregateRoot
 
         if (receivedByEmployeeId == Guid.Empty)
             throw new ArgumentException("Receiving employee ID cannot be empty.", nameof(receivedByEmployeeId));
-        ArgumentException.ThrowIfNullOrWhiteSpace(receivedByEmployeeName);
 
         ReturnDate = returnDate;
         ReceivedByEmployeeId = receivedByEmployeeId;
-        ReceivedByEmployeeName = receivedByEmployeeName;
         ReturnRemarks = returnRemarks;
         Status = PARStatus.Returned;
     }

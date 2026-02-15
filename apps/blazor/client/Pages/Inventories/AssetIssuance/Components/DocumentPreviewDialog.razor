@@ -11,14 +11,14 @@
             @if (IssuanceData != null)
             {
                 <MudTabs Elevation="2" Rounded="true">
-                    <!-- PAR/ICS Document Tab -->
-                    <MudTabPanel Text="Document" Icon="@Icons.Material.Filled.DocumentScanner">
+                    <!-- ICS Document Tab -->
+                    <MudTabPanel Text="@GetDocTypeLabel(IssuanceData.Type)" Icon="@Icons.Material.Filled.DocumentScanner">
                         <div class="pa-6" Style="background-color: white; border: 1px solid #ddd; min-height: 600px;">
                             <DocumentPreviewInline 
                                 Custodian="@IssuanceData.Employee"
                                 Items="@ConvertToPreviewItems()"
                                 TotalAmount="@Convert.ToDecimal(IssuanceData.TotalAmount)"
-                                DocumentType="PAR" />
+                                DocumentType="@GetDocTypeAbbrev(IssuanceData.Type)" />
                         </div>
                     </MudTabPanel>
 

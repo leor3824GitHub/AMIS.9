@@ -30,7 +30,7 @@ public partial class Inspections
     [Inject]
     private ISnackbar? Snackbar { get; set; }
     private InspectionResponse _currentDto = new();
-    private List<InspectionRequestResponse> _inspectionrequests = new List<InspectionRequestResponse>();
+    private List<InspectionResponse> _inspectionrequests = new List<InspectionResponse>();
     private List<EmployeeResponse> _employees = new List<EmployeeResponse>();
     private List<PurchaseResponse> _purchases = new List<PurchaseResponse>();
 
@@ -67,7 +67,7 @@ public partial class Inspections
     {
         if (_inspectionrequests.Count == 0)
         {
-            var response = await inspectionclient.SearchInspectionRequestsEndpointAsync("1", new SearchInspectionRequestsCommand());
+            var response = await inspectionclient.SearchInspectionsEndpointAsync("1", new SearchInspectionsCommand());
             if (response?.Items != null)
             {
                 _inspectionrequests = response.Items.ToList();
@@ -174,7 +174,7 @@ public partial class Inspections
         return new GridData<InspectionResponse> { TotalItems = _totalItems, Items = _entityList };
     }
 
-    private async Task ShowEditFormDialog(string title, UpdateInspectionCommand command, bool IsCreate, List<InspectionRequestResponse> inspectionrequests, bool isReadOnly = false)
+    private async Task ShowEditFormDialog(string title, UpdateInspectionCommand command, bool IsCreate, List<InspectionResponse> inspectionrequests, bool isReadOnly = false)
     {
         var parameters = new DialogParameters
         {

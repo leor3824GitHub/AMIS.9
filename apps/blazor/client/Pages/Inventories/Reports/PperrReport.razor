@@ -267,20 +267,14 @@
                 <MudTable Items="FilteredPhysicalAssets" Dense="true" Hover="true">
                     <HeaderContent>
                         <MudTh>Property Code</MudTh>
-                        <MudTh>Description</MudTh>
                         <MudTh>Qty</MudTh>
-                        <MudTh>Unit</MudTh>
                         <MudTh align="right">Unit Cost</MudTh>
-                        <MudTh>Location</MudTh>
                         <MudTh></MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd DataLabel="Property Code">@context.PropertyCode</MudTd>
-                        <MudTd DataLabel="Description">@context.Description</MudTd>
                         <MudTd DataLabel="Qty">@context.Quantity</MudTd>
-                        <MudTd DataLabel="Unit">@context.UnitOfMeasure</MudTd>
                         <MudTd DataLabel="Unit Cost" align="right">@(context.AcquisitionCost).ToString("C2")</MudTd>
-                        <MudTd DataLabel="Location">@context.Location</MudTd>
                         <MudTd align="right">
                             <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
                                 OnClick="() => SelectPhysicalAsset(context)" StartIcon="@Icons.Material.Filled.Add">Add

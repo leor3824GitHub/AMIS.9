@@ -27,10 +27,7 @@
                         </MudText>
                         <MudText Typo="Typo.body2"><strong>Property Code:</strong> @_asset.PropertyCode</MudText>
                         <MudText Typo="Typo.body2"><strong>Serial Number:</strong> @(_asset.SerialNumber ?? "N/A")</MudText>
-                        @if (_asset.CurrentCustodianId.HasValue)
-                        {
-                            <MudText Typo="Typo.body2"><strong>Current Custodian:</strong> @_asset.CurrentCustodianId.Value.ToString().Substring(0, 8)</MudText>
-                        }
+
                     </MudCard>
 
                     <!-- Return Details -->

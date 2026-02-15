@@ -70,7 +70,7 @@
                                 </MudItem>
                                 <MudItem xs="12">
                                     <MudAutocomplete T="PhysicalAssetResponse" Label="Parent Asset" @bind-Value="_selectedParentAsset"
-                                        SearchFunc="@SearchParentAssets" ToStringFunc="@(p => p == null ? string.Empty : $"{p.PropertyCode} - {p.Description}")"
+                                        SearchFunc="@SearchParentAssets" ToStringFunc="@(p => p == null ? string.Empty : p.PropertyCode)"
                                         Clearable="true" ResetValueOnEmptyText="true" Variant="Variant.Outlined"
                                         Dense="false" Style="width: 100%;" />
                                 </MudItem>
@@ -266,8 +266,7 @@
             }
 
             var filteredItems = result.Items
-                .Where(a => a.PropertyCode.Contains(value, StringComparison.OrdinalIgnoreCase) ||
-                            a.Description.Contains(value, StringComparison.OrdinalIgnoreCase))
+                .Where(a => a.PropertyCode.Contains(value, StringComparison.OrdinalIgnoreCase))
                 .ToList();
             return filteredItems;
         }

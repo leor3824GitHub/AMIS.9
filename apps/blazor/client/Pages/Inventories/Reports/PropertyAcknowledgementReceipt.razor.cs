@@ -205,10 +205,7 @@ public partial class PropertyAcknowledgementReceipt
                 {
                     Id = _reportId.Value,
                     EmployeeId = _model.EmployeeId,
-                    EmployeeName = _model.EmployeeName,
-                    Department = _model.Department,
                     IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
-                    Position = _model.Position,
                     IssuancePurpose = _model.IssuancePurpose,
                     IssuanceLocation = _model.IssuanceLocation,
                     Notes = _model.Notes,
@@ -234,10 +231,7 @@ public partial class PropertyAcknowledgementReceipt
                 {
                     ParNumber = _model.PARNumber,
                     EmployeeId = _model.EmployeeId,
-                    EmployeeName = _model.EmployeeName,
-                    Department = _model.Department,
                     IssuanceDate = _model.IssuanceDate ?? DateTime.Today,
-                    Position = _model.Position,
                     IssuancePurpose = _model.IssuancePurpose,
                     IssuanceLocation = _model.IssuanceLocation,
                     Notes = _model.Notes,

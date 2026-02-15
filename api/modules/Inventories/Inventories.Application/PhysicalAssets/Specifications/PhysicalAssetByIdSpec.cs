@@ -4,17 +4,17 @@ using AMIS.WebApi.Inventories.Domain;
 namespace AMIS.WebApi.Inventories.Application.PhysicalAssets.Specifications;
 
 /// <summary>
-/// Specification for fetching a PhysicalAsset by ID with all necessary navigation properties
-/// for write operations (Issue, Return, Transfer, etc.)
+/// Specification for fetching a PhysicalAsset by ID for write operations.
+/// NOTE: Does NOT include AssignmentHistory or Product to avoid change tracking issues.
+/// These are loaded separately only when needed for read operations.
 /// </summary>
 public sealed class PhysicalAssetByIdSpec : Specification<PhysicalAsset>
 {
     public PhysicalAssetByIdSpec(Guid id)
     {
         Query
-            .Where(p => p.Id == id)
-            .Include(p => p.AssignmentHistory)
-            .Include(p => p.Product)
-            .AsSplitQuery(); // Use split query to avoid cartesian explosion and tracking issues
+            .Where(p => p.Id == id);
+            // Intentionally NOT including AssignmentHistory or Product
+            // to prevent change tracking conflicts during SaveChangesAsync
     }
 }

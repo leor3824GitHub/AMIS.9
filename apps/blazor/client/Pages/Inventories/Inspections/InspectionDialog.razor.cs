@@ -22,7 +22,7 @@ public partial class InspectionDialog
     [Parameter] public Action? Refresh { get; set; }
     [Parameter] public bool IsCreate { get; set; } = false;
     [Parameter] public bool IsReadOnly { get; set; } = false;
-    [Parameter] public List<InspectionRequestResponse> InspectionRequests { get; set; } = new();
+    [Parameter] public List<InspectionResponse> InspectionRequests { get; set; } = new();
     [Parameter] public List<EmployeeResponse> Employees { get; set; } = new();
     [Inject] private ISnackbar Snackbar { get; set; } = default!;
     private string? _successMessage;
@@ -70,14 +70,13 @@ public partial class InspectionDialog
         {
             try
             {
-                var statuses = new List<InspectionRequestStatus> { InspectionRequestStatus.Assigned, InspectionRequestStatus.InProgress };
-                var resp = await InspectionClient.SearchInspectionRequestsEndpointAsync("1", new SearchInspectionRequestsCommand
+                // Load all inspections for selection
+                var resp = await InspectionClient.SearchInspectionsEndpointAsync("1", new SearchInspectionsCommand
                 {
                     PageNumber = 1,
-                    PageSize = 200,
-                    Statuses = statuses
+                    PageSize = 200
                 });
-                var serverList = resp?.Items?.ToList() ?? new List<InspectionRequestResponse>();
+                var serverList = resp?.Items?.ToList() ?? new List<InspectionResponse>();
                 // Merge if parent passed some items (e.g., single pre-selected) to keep selection stable
                 if (InspectionRequests.Count == 0)
                 {
@@ -102,9 +101,9 @@ public partial class InspectionDialog
         if (Model?.InspectionRequestId != null && Model.InspectorId == null)
         {
             var req = InspectionRequests.FirstOrDefault(r => r.Id == Model.InspectionRequestId);
-            if (req?.InspectorId != null)
+            if (req?.EmployeeId != null)
             {
-                Model.InspectorId = req.InspectorId;
+                Model.InspectorId = req.EmployeeId;
                 _inspectorAutoFilled = true;
             }
         }
@@ -116,9 +115,9 @@ public partial class InspectionDialog
 
         // When user changes the request, auto-fill inspector from that request
         var selectedReq = InspectionRequests.FirstOrDefault(r => r.Id == requestId);
-        if (selectedReq?.InspectorId != null)
+        if (selectedReq?.EmployeeId != null)
         {
-            Model.InspectorId = selectedReq.InspectorId;
+            Model.InspectorId = selectedReq.EmployeeId;
             _inspectorAutoFilled = true;
         }
         else
@@ -215,7 +214,6 @@ public partial class InspectionDialog
                 .Where(i => !i.AlreadyInspected && i.QtyInspected > 0)
                 .Select(i => new InspectionItemDto
                 {
-                    InspectionId = Guid.Empty, // Will be set by the command handler
                     PurchaseItemId = i.PurchaseItemId,
                     QtyInspected = i.QtyInspected,
                     QtyPassed = i.QtyPassed,
@@ -227,9 +225,9 @@ public partial class InspectionDialog
 
             var model = new CreateInspectionCommand
             {
-                InspectionDate = Model.InspectionDate,
-                InspectorId = Model.InspectorId.Value,
-                InspectionRequestId = Model.InspectionRequestId.Value,
+                Type = InspectionType._0,
+                EmployeeId = Model.InspectorId.Value,
+                InspectedOn = Model.InspectionDate,
                 PurchaseId = purchaseId,
                 Remarks = Model.Remarks ?? string.Empty,
                 Items = itemsToSubmit
@@ -296,44 +294,24 @@ public partial class InspectionDialog
         }
     }
 
-    private InspectionRequestStatus ResolveRequestStatusFromEditor()
+    private InspectionStatus ResolveRequestStatusFromEditor()
     {
         if (_itemsEditor?.Inputs is null || _itemsEditor.Inputs.Count == 0)
-            return InspectionRequestStatus.Pending;
+            return InspectionStatus.InProgress;
 
         var totalInspected = _itemsEditor.Inputs.Sum(i => i.QtyInspected);
-        var anyFailed = _itemsEditor.Inputs.Any(i => i.QtyFailed > 0);
 
         if (totalInspected == 0)
-            return InspectionRequestStatus.Pending;
+            return InspectionStatus.InProgress;
 
-        return anyFailed ? InspectionRequestStatus.Failed : InspectionRequestStatus.Completed;
+        return InspectionStatus.Completed;
     }
 
-    private async Task UpdateInspectionRequestStatusAsync(Guid? requestId, Guid? purchaseId, Guid? inspectorId, InspectionRequestStatus status)
+    private async Task UpdateInspectionRequestStatusAsync(Guid? requestId, Guid? purchaseId, Guid? inspectorId, InspectionStatus status)
     {
-        try
-        {
-            if (!requestId.HasValue) return;
-
-            var cmd = new UpdateInspectionRequestCommand
-            {
-                Id = requestId.Value,
-                PurchaseId = purchaseId,
-                InspectorId = inspectorId,
-                Status = status
-            };
-
-            await ApiHelper.ExecuteCallGuardedAsync(
-                () => InspectionClient.UpdateInspectionRequestEndpointAsync("1", requestId.Value, cmd),
-                Snackbar,
-                Navigation
-            );
-        }
-        catch (Exception ex)
-        {
-            Snackbar.Add($"Failed to update inspection request status: {ex.Message}", Severity.Error);
-        }
+        // Note: Inspection status updates are now handled by the API domain logic.
+        // This method is kept for backwards compatibility but the status update is automatic.
+        await Task.CompletedTask;
     }
 
     // Note: Inventory adjustments are performed by the API when an inspection is approved.

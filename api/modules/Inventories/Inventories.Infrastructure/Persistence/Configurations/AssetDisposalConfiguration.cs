@@ -64,9 +64,9 @@ internal sealed class AssetDisposalConfiguration : IEntityTypeConfiguration<Asse
         builder.Property(x => x.CancelledBy);
         builder.Property(x => x.CancellationReason).HasMaxLength(500);
 
-        // Relationships
+        // Relationships - One-way relationship, PhysicalAsset no longer has Disposals collection
         builder.HasOne(x => x.Asset)
-            .WithMany(x => x.Disposals)
+            .WithMany()
             .HasForeignKey(x => x.PhysicalAssetId)
             .OnDelete(DeleteBehavior.Restrict);
 

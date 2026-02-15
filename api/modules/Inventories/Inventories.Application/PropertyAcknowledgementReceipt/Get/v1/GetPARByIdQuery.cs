@@ -19,9 +19,6 @@ public sealed record GetPARByIdResponse
     public Guid Id { get; init; }
     public string PARNumber { get; init; } = default!;
     public Guid EmployeeId { get; init; }
-    public string EmployeeName { get; init; } = default!;
-    public string Department { get; init; } = default!;
-    public string? Position { get; init; }
     public DateTime IssuanceDate { get; init; }
     public string? IssuancePurpose { get; init; }
     public string? IssuanceLocation { get; init; }
@@ -30,7 +27,6 @@ public sealed record GetPARByIdResponse
     public DateTime? ReturnDate { get; init; }
     public string? ReturnRemarks { get; init; }
     public Guid? ReceivedByEmployeeId { get; init; }
-    public string? ReceivedByEmployeeName { get; init; }
     public string? IssuedByName { get; init; }
     public DateTime? IssuedByDate { get; init; }
     public string? ReceivedByName { get; init; }

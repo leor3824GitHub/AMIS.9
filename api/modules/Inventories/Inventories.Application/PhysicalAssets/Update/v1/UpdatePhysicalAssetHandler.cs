@@ -40,7 +40,7 @@ public sealed class UpdatePhysicalAssetHandler(
 
         return new UpdatePhysicalAssetResponse(
             physicalAsset.Id,
-            physicalAsset.CurrentAssignment?.Location,
+            null, // Location - CurrentAssignment navigation removed
             physicalAsset.Condition);
     }
 }

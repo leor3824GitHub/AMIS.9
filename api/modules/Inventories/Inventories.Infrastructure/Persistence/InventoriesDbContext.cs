@@ -42,7 +42,6 @@ public sealed class InventoriesDbContext : FshDbContext
 
     // Unified Physical Asset with Dynamic Classification
     public DbSet<PhysicalAsset> PhysicalAssets { get; set; } = null!;
-    public DbSet<AssetAssignmentHistory> AssetAssignmentHistories { get; set; } = null!;
     public DbSet<AssetClassificationRule> AssetClassificationRules { get; set; } = null!;
     public DbSet<RcaAccountCodeDefinition> RcaAccountCodes { get; set; } = null!;
     public DbSet<PPETypeAccountMapping> PPETypeAccountMappings { get; set; } = null!;
@@ -87,6 +86,9 @@ public sealed class InventoriesDbContext : FshDbContext
 
     // Property Accountability Receipt (PAR)
     public DbSet<PropertyAcknowledgementReceipt> PropertyAcknowledgementReceipts { get; set; } = null!;
+
+    // Inventory Custodian Slip (ICS)
+    public DbSet<InventoryCustodianSlip> InventoryCustodianSlips { get; set; } = null!;
 
     // Inventory Registry & Audit
     public DbSet<InventoryRegistry> InventoryRegistries { get; set; } = null!;

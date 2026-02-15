@@ -16,7 +16,7 @@
     {
         <MudStack Row="true" Spacing="2" Class="mb-4">
             <MudTextField @bind-Value="_searchString"
-                Placeholder="Search by property code, description, unit, or location..." Adornment="Adornment.Start"
+                Placeholder="Search by property code, serial number, or model..." Adornment="Adornment.Start"
                 AdornmentIcon="@Icons.Material.Filled.Search" Immediate="true" DebounceInterval="300"
                 OnKeyUp="@(async _ => await OnSearch(_searchString))" Variant="Variant.Outlined" />
             <MudSpacer />
@@ -33,7 +33,6 @@
             Hover="true" Bordered="true" Striped="true">
             <Columns>
                 <PropertyColumn Property="x => x.PropertyCode" Title="Property Code" />
-                <PropertyColumn Property="x => x.ProductName" Title="Product Name" />
                 <TemplateColumn Title="Classification" Sortable="false">
                     <CellTemplate>
                         <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined">
@@ -52,35 +51,6 @@
                     </CellTemplate>
                 </TemplateColumn>
                 <PropertyColumn Property="x => x.Quantity" Title="Qty" />
-                <TemplateColumn Title="Parent Asset" Sortable="false">
-                    <CellTemplate>
-                        @if (context.Item.ParentAssetId.HasValue)
-                        {
-                            <MudStack Spacing="0">
-                                <MudText Typo="Typo.caption" Class="font-weight-bold">@(context.Item.ParentAssetProductName ?? "Parent Asset")</MudText>
-                                <MudText Typo="Typo.caption" Color="Color.Secondary">@context.Item.ParentAssetPropertyCode</MudText>
-                            </MudStack>
-                        }
-                        else
-                        {
-                            <MudText Typo="Typo.caption" Color="Color.Secondary">None</MudText>
-                        }
-                    </CellTemplate>
-                </TemplateColumn>
-                <TemplateColumn Title="Custodian" Sortable="false">
-                    <CellTemplate>
-                        @if (!string.IsNullOrEmpty(context.Item.CurrentCustodianName))
-                        {
-                            <MudChip T="string" Size="Size.Small" Variant="Variant.Text" Color="Color.Info">
-                                @context.Item.CurrentCustodianName
-                            </MudChip>
-                        }
-                        else
-                        {
-                            <MudText Typo="Typo.caption" Color="Color.Secondary">Unassigned</MudText>
-                        }
-                    </CellTemplate>
-                </TemplateColumn>
                 <TemplateColumn Title="Actions" Sortable="false" Style="width: 350px">
                     <CellTemplate>
                         @if (_canEdit)
@@ -93,7 +63,7 @@
                         
                         <!-- Issue Menu: ICS or PAR based on classification -->
                         <MudMenu Icon="@Icons.Material.Filled.Assignment" Size="Size.Small" Color="Color.Success"
-                            AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter">
+                            AnchorOrigin="Origin.BottomCenter" TransformOrigin="Origin.TopCenter" Disabled="@_isReloading">
                             @if ((int)context.Item.Classification == 3)  @* PropertyPlantEquipment (PPE) *@
                             {
                                 <MudMenuItem OnClick="@(() => OpenIssuePARDialog(context.Item.Id))">

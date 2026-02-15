@@ -16,13 +16,7 @@ public sealed class ExportPhysicalAssetsHandler(
         var spec = new ExportPhysicalAssetsSpec(request);
         var assets = await repository.ListAsync(spec, cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(request.Location))
-        {
-            assets = assets
-                .Where(a => !string.IsNullOrWhiteSpace(a.CurrentAssignment?.Location) &&
-                            a.CurrentAssignment!.Location!.Contains(request.Location, StringComparison.OrdinalIgnoreCase))
-                .ToList();
-        }
+        // Location filtering removed - CurrentAssignment navigation no longer available
 
         var csv = GenerateCsv(assets);
         var fileName = $"PhysicalAssets_{DateTime.UtcNow:yyyyMMdd_HHmmss}.csv";
@@ -33,11 +27,11 @@ public sealed class ExportPhysicalAssetsHandler(
     private static byte[] GenerateCsv(IEnumerable<PhysicalAsset> assets)
     {
         var sb = new StringBuilder();
-        sb.AppendLine("PropertyCode,Classification,AcquisitionCost,AcquisitionDate,Location,Condition,Quantity,BookValue,IsDisposed,CurrentCustodianId");
+        sb.AppendLine("PropertyCode,Classification,AcquisitionCost,AcquisitionDate,Condition,Quantity,BookValue,IsDisposed");
 
         foreach (var asset in assets)
         {
-            sb.AppendLine($"{asset.PropertyCode},{asset.CurrentClassification},{asset.AcquisitionCost},{asset.AcquisitionDate:yyyy-MM-dd},{EscapeCsv(asset.CurrentAssignment?.Location)},{asset.Condition},{asset.Quantity},{asset.BookValue},{asset.IsDisposed},{asset.CurrentCustodianId}");
+            sb.AppendLine($"{asset.PropertyCode},{asset.CurrentClassification},{asset.AcquisitionCost},{asset.AcquisitionDate:yyyy-MM-dd},{asset.Condition},{asset.Quantity},{asset.BookValue},{asset.IsDisposed}");
         }
 
         return Encoding.UTF8.GetBytes(sb.ToString());

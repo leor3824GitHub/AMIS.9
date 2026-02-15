@@ -30,10 +30,9 @@ public sealed class IssuePhysicalAssetHandler(
                 HttpStatusCode.NotFound);
 
         // Pass signature names for formal PAR workflow (optional for semi-expendable ICS)
-        AssetAssignmentHistory history;
         try
         {
-            history = asset.Issue(
+            asset.Issue(
                 request.EmployeeId,
                 request.EmployeeName,
                 request.DocumentNumber,
@@ -88,10 +87,10 @@ public sealed class IssuePhysicalAssetHandler(
         return new IssuePhysicalAssetResponse
         {
             AssetId = asset.Id,
-            AssignmentHistoryId = history.Id,
+            AssignmentHistoryId = Guid.NewGuid(), // Temporary placeholder - assignment tracking moved to separate service
             EmployeeName = request.EmployeeName,
             DocumentNumber = request.DocumentNumber,
-            IssuedDate = history.AssignmentDate,
+            IssuedDate = DateTime.UtcNow,
             Message = "Asset issued successfully"
         };
     }

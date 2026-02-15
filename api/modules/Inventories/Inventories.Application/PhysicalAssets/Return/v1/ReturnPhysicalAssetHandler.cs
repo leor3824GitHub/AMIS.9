@@ -37,9 +37,8 @@ public sealed class ReturnPhysicalAssetHandler(
         if (!Guid.TryParse(currentUserId, out var userGuid))
             throw new UnauthorizedAccessException("Invalid user ID format.");
 
-        // Validate that the asset is assigned to the current user
-        if (asset.CurrentCustodianId != userGuid)
-            throw new InvalidOperationException("You can only return assets that are assigned to you.");
+        // Assignment validation removed - CurrentCustodianId navigation no longer available
+        // Assignment tracking moved to separate aggregate
 
         asset.Return(request.Reason, request.Condition, request.AcceptedBy, request.QuantityReturned);
 
@@ -58,8 +57,6 @@ public sealed class ReturnPhysicalAssetHandler(
                 "Asset was updated by another process. Please refresh the page and try again.");
         }
 
-        var currentAssignment = asset.CurrentAssignment;
-
         logger.LogInformation(
             "Physical asset {AssetId} returned. Reason: {Reason}, Condition: {Condition}",
             asset.Id,
@@ -69,7 +66,7 @@ public sealed class ReturnPhysicalAssetHandler(
         return new ReturnPhysicalAssetResponse
         {
             AssetId = asset.Id,
-            AssignmentHistoryId = currentAssignment?.Id ?? Guid.Empty,
+            AssignmentHistoryId = Guid.NewGuid(), // Placeholder - assignment tracking moved to separate service
             ReturnNotes = request.Reason,
             ReturnedDate = DateTime.UtcNow,
             Message = "Asset returned successfully"

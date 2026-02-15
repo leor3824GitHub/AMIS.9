@@ -13,17 +13,11 @@ public sealed record CreatePARLineItemRequest(
 public sealed record CreatePARCommand(
     string PARNumber,
     Guid EmployeeId,
-    string EmployeeName,
-    string Department,
     DateTime IssuanceDate,
     IReadOnlyList<CreatePARLineItemRequest> LineItems,
-    string? Position = null,
     string? IssuancePurpose = null,
     string? IssuanceLocation = null,
-    string? Notes = null,
-    string? IssuedByName = null,
-    string? ReceivedByName = null,
-    string? ApprovedByName = null) : IRequest<CreatePARResponse>;
+    string? Notes = null) : IRequest<CreatePARResponse>;
 
 public sealed record CreatePARResponse(
     Guid Id,

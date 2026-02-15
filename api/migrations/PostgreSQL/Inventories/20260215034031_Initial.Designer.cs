@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
 {
     [DbContext(typeof(InventoriesDbContext))]
-    [Migration("20260211080215_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260215034031_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -349,18 +349,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.Property<string>("ApprovedByName")
                         .HasColumnType("text");
 
-                    b.Property<int>("AssetClassification")
-                        .HasColumnType("integer");
-
                     b.Property<Guid>("AssetId")
                         .HasColumnType("uuid");
-
-                    b.Property<string>("AssetNumber")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("AssignmentDate")
-                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("AssignmentType")
                         .IsRequired()
@@ -411,37 +401,24 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.Property<int>("Quantity")
                         .HasColumnType("integer");
 
-                    b.Property<string>("Reason")
-                        .HasColumnType("text");
-
                     b.Property<string>("ReceivedByName")
                         .HasColumnType("text");
 
                     b.Property<string>("Remarks")
                         .HasColumnType("text");
 
-                    b.Property<DateTime?>("ReturnDate")
-                        .HasColumnType("timestamp with time zone");
-
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<string>("TransferredToDocumentNumber")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("TransferredToEmployeeId")
-                        .HasColumnType("uuid");
+                    b.Property<DateTime>("TransDate")
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AcceptedBy");
 
                     b.HasIndex("AssetId");
 
                     b.HasIndex("EmployeeId");
-
-                    b.HasIndex("TransferredToEmployeeId");
 
                     b.ToTable("AssetAssignmentHistories", "inventories");
                 });
@@ -2825,10 +2802,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                     b.HasKey("Id");
 
                     b.HasIndex("DisposalDate");
-
-                    b.HasIndex("ParentAssetId");
-
-                    b.HasIndex("ProductId");
 
                     b.HasIndex("PropertyCode")
                         .IsUnique();
@@ -6741,13 +6714,8 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
 
             modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.AssetAssignmentHistory", b =>
                 {
-                    b.HasOne("AMIS.WebApi.Inventories.Domain.Employee", "AcceptedByEmployee")
-                        .WithMany()
-                        .HasForeignKey("AcceptedBy")
-                        .OnDelete(DeleteBehavior.Restrict);
-
                     b.HasOne("AMIS.WebApi.Inventories.Domain.PhysicalAsset", "Asset")
-                        .WithMany("AssignmentHistory")
+                        .WithMany()
                         .HasForeignKey("AssetId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -6758,18 +6726,9 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("AMIS.WebApi.Inventories.Domain.Employee", "TransferredToEmployee")
-                        .WithMany()
-                        .HasForeignKey("TransferredToEmployeeId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("AcceptedByEmployee");
-
                     b.Navigation("Asset");
 
                     b.Navigation("Employee");
-
-                    b.Navigation("TransferredToEmployee");
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.AssetDisposal", b =>
@@ -6790,7 +6749,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("AMIS.WebApi.Inventories.Domain.PhysicalAsset", "Asset")
-                        .WithMany("Disposals")
+                        .WithMany()
                         .HasForeignKey("PhysicalAssetId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -6830,7 +6789,7 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("AMIS.WebApi.Inventories.Domain.PhysicalAsset", "Asset")
-                        .WithMany("MaintenanceHistory")
+                        .WithMany()
                         .HasForeignKey("PhysicalAssetId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -7167,24 +7126,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
                         .HasForeignKey("PPERRId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.PhysicalAsset", b =>
-                {
-                    b.HasOne("AMIS.WebApi.Inventories.Domain.PhysicalAsset", "ParentAsset")
-                        .WithMany("SubAssets")
-                        .HasForeignKey("ParentAssetId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("AMIS.WebApi.Inventories.Domain.Product", "Product")
-                        .WithMany()
-                        .HasForeignKey("ProductId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("ParentAsset");
-
-                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.PpeTypeCode", b =>
@@ -7676,17 +7617,6 @@ namespace AMIS.WebApi.Migrations.PostgreSQL.Inventories
             modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.PPERR", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.PhysicalAsset", b =>
-                {
-                    b.Navigation("AssignmentHistory");
-
-                    b.Navigation("Disposals");
-
-                    b.Navigation("MaintenanceHistory");
-
-                    b.Navigation("SubAssets");
                 });
 
             modelBuilder.Entity("AMIS.WebApi.Inventories.Domain.PpeCategoryCode", b =>

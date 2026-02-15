@@ -59,9 +59,9 @@ internal sealed class AssetMaintenanceConfiguration : IEntityTypeConfiguration<A
         builder.Property(x => x.CancelledBy);
         builder.Property(x => x.CancellationReason).HasMaxLength(500);
 
-        // Relationships
+        // Relationships - One-way relationship, PhysicalAsset no longer has MaintenanceHistory collection
         builder.HasOne(x => x.Asset)
-            .WithMany(x => x.MaintenanceHistory)
+            .WithMany()
             .HasForeignKey(x => x.PhysicalAssetId)
             .OnDelete(DeleteBehavior.Restrict);
 

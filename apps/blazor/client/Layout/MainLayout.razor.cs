@@ -97,9 +97,6 @@ public partial class MainLayout
             var purchases = await Api.SearchPurchasesEndpointAsync("1", new SearchPurchasesCommand { PageNumber = 1, PageSize = 1 });
             _purchaseCount = purchases?.TotalCount ?? 0;
 
-            var requests = await Api.SearchInspectionRequestsEndpointAsync("1", new SearchInspectionRequestsCommand { PageNumber = 1, PageSize = 1 });
-            _inspectionRequestCount = requests?.TotalCount ?? 0;
-
             var inspections = await Api.SearchInspectionsEndpointAsync("1", new SearchInspectionsCommand { PageNumber = 1, PageSize = 1 });
             _inspectionsCount = inspections?.TotalCount ?? 0;
 
